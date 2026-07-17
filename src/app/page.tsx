@@ -1,13 +1,10 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+import { getSessionContext } from "@/modules/tenancy/context";
 
-export default function Home() {
-  const t = useTranslations("common");
-
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4">
-      <h1 className="text-2xl font-semibold">{t("appName")}</h1>
-      <Button>{t("save")}</Button>
-    </main>
-  );
+// Root router: send each user to where they belong based on their session.
+export default async function Home() {
+  const ctx = await getSessionContext();
+  if (!ctx) redirect("/login");
+  if (ctx.isSuperadmin) redirect("/superadmin");
+  redirect("/app");
 }

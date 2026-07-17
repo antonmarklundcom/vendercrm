@@ -10,6 +10,7 @@ env:
   APP_ENCRYPTION_KEY: aa1188c9c4f0d2e6b7a35f0091c2d8e4b6a7c1f3d9e0a2b4c6d8e0f2a4b6c8d0
   CRON_SECRET: ci-dummy-secret
   APP_URL: http://localhost:3000
+  BETTER_AUTH_SECRET: ci-dummy-better-auth-secret-0123456789
 
 jobs:
   lint-typecheck-build:

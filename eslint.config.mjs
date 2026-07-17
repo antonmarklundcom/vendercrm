@@ -45,6 +45,15 @@ const eslintConfig = defineConfig([
       "src/worker/**/*.{ts,tsx}",
       "src/lib/queue/**/*.{ts,tsx}",
       "src/modules/tenancy/**/*.{ts,tsx}",
+      // Auth operates on platform-level, intentionally un-scoped auth tables
+      // (login resolves a user by email across all tenants) — PLAN.md §3.3.
+      "src/modules/auth/**/*.{ts,tsx}",
+      // Audit writes only its own platform-level table, keyed by an explicit
+      // tenantId argument — it never reads tenant data (PLAN.md §3.3).
+      "src/modules/audit/**/*.{ts,tsx}",
+      // Billing (plans/subscriptions/payments) is superadmin-managed and
+      // platform-level, not tenant-scoped operational data (PLAN.md §3.1).
+      "src/modules/billing/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",
