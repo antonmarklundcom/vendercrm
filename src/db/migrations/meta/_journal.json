@@ -29,6 +29,13 @@
       "when": 1784362650134,
       "tag": "0003_striped_lockjaw",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1784374805347,
+      "tag": "0004_futuristic_stone_men",
+      "breakpoints": true
     }
   ]
 }

@@ -69,6 +69,12 @@ export default async function AppLayout({
             <Link href="/app/forms" className="text-muted-foreground hover:text-foreground">
               {t("forms")}
             </Link>
+            <Link href="/app/quotes" className="text-muted-foreground hover:text-foreground">
+              {t("quotes")}
+            </Link>
+            <span className="cursor-not-allowed text-muted-foreground/50" title={t("invoicingComingSoon")}>
+              {t("invoicingComingSoon")}
+            </span>
             {ctx.role === "admin" && (
               <Link href="/app/settings" className="text-muted-foreground hover:text-foreground">
                 {t("settings")}

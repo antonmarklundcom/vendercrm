@@ -58,6 +58,10 @@ const eslintConfig = defineConfig([
       // tenant context (it's the entry point), and the raw event log is
       // platform-level (PLAN.md §6.3). Only this file bypasses tenantDb.
       "src/modules/whatsapp/platform.ts",
+      // Public quote view (/q/[token]) resolves a quote by its bearer token
+      // with no tenant context, same pattern as the webhook router above
+      // (PLAN.md §8). Only the public-token lookup in this file uses raw db.
+      "src/modules/quotes/service.ts",
     ],
     rules: {
       "no-restricted-imports": "off",

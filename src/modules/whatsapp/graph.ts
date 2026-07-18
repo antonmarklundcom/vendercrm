@@ -73,6 +73,57 @@ export async function sendText(
   return { messageId };
 }
 
+// Uploads bytes to Meta and returns a media id, so documents (e.g. quote
+// PDFs) can be sent without needing a publicly reachable URL — required since
+// the local storage driver's URLs aren't internet-accessible in dev/Hostinger
+// bootstrap (PLAN.md §2.1, §8).
+export async function uploadMedia(
+  account: WaAccount,
+  bytes: Buffer,
+  filename: string,
+  mimeType: string,
+): Promise<string> {
+  const token = tokenOrThrow(account);
+  const form = new FormData();
+  form.append("messaging_product", "whatsapp");
+  form.append(
+    "file",
+    new Blob([new Uint8Array(bytes)], { type: mimeType }),
+    filename,
+  );
+  const res = await fetchImpl(
+    `${BASE}/${env.META_GRAPH_VERSION}/${account.phoneNumberId}/media`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    },
+  );
+  const raw = (await res.json().catch(() => ({}))) as { id?: string };
+  if (!res.ok || !raw.id) {
+    throw new GraphError(res.status, "Graph media upload failed", raw);
+  }
+  return raw.id;
+}
+
+export async function sendDocument(
+  account: WaAccount,
+  to: string,
+  input: { mediaId: string; filename: string; caption?: string },
+): Promise<{ messageId?: string }> {
+  const { messageId } = await graphPost(account, `${account.phoneNumberId}/messages`, {
+    messaging_product: "whatsapp",
+    to,
+    type: "document",
+    document: {
+      id: input.mediaId,
+      filename: input.filename,
+      ...(input.caption ? { caption: input.caption } : {}),
+    },
+  });
+  return { messageId };
+}
+
 export async function sendTemplate(
   account: WaAccount,
   to: string,

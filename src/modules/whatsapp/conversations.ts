@@ -1,5 +1,5 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import { conversations, messages } from "@/db/schema";
+import { conversations, messages, waAccounts } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import { tenantDb } from "@/modules/tenancy/db";
 import type { TenantContext } from "@/modules/tenancy/types";
@@ -31,6 +31,18 @@ export async function upsertConversation(
     status: "open",
   });
   return id;
+}
+
+// Used by other modules (quotes) that need to send a contact a WhatsApp
+// message without the caller managing account/conversation plumbing. Uses the
+// tenant's (single, Phase 1) connected account.
+export async function getOrCreateConversationForContact(
+  ctx: TenantContext,
+  contactId: string,
+): Promise<string> {
+  const [account] = await tenantDb(ctx).select(waAccounts);
+  if (!account) throw new Error("La empresa no tiene WhatsApp conectado");
+  return upsertConversation(ctx, { waAccountId: account.id, contactId });
 }
 
 export async function getConversation(ctx: TenantContext, id: string) {

@@ -1,7 +1,11 @@
 import { and, eq, type SQL, type InferInsertModel } from "drizzle-orm";
 import { MySqlTable, type MySqlColumn } from "drizzle-orm/mysql-core";
+import type { MySql2Database } from "drizzle-orm/mysql2";
 import { db } from "@/db/client";
+import type * as schema from "@/db/schema";
 import type { TenantContext } from "./types";
+
+type DbClient = MySql2Database<typeof schema>;
 
 // A table that participates in tenant isolation: it must expose a `tenantId`
 // column. The generic constraint means passing a non-tenant table to tenantDb
@@ -23,7 +27,10 @@ type WithoutTenantId<T extends TenantScopedTable> = {
 // Raw `db` is lint-banned outside src/db|worker|lib/queue|modules/{tenancy,auth},
 // so tenant modules physically cannot bypass this layer.
 export class TenantDb {
-  constructor(private readonly ctx: TenantContext) {}
+  constructor(
+    private readonly ctx: TenantContext,
+    private readonly client: DbClient = db,
+  ) {}
 
   get tenantId(): string {
     return this.ctx.tenantId;
@@ -33,9 +40,17 @@ export class TenantDb {
     return eq(table.tenantId, this.ctx.tenantId);
   }
 
+  // Runs the callback inside a MySQL transaction, passing a TenantDb bound to
+  // the transaction's client — every select/insert/update/delete inside stays
+  // tenant-scoped exactly like the top-level TenantDb. Needed for atomic
+  // multi-step writes (e.g. quote numbering + line items, PLAN.md §8).
+  async transaction<R>(fn: (tdb: TenantDb) => Promise<R>): Promise<R> {
+    return this.client.transaction((tx) => fn(new TenantDb(this.ctx, tx)));
+  }
+
   select<T extends TenantScopedTable>(table: T, where?: SQL) {
     const scope = this.scope(table);
-    return db
+    return this.client
       .select()
       .from(table)
       .where(where ? and(scope, where) : scope);
@@ -58,7 +73,7 @@ export class TenantDb {
       ...v,
       tenantId: this.ctx.tenantId,
     })) as InferInsertModel<T>[];
-    return db.insert(table).values(rows);
+    return this.client.insert(table).values(rows);
   }
 
   update<T extends TenantScopedTable>(
@@ -70,7 +85,7 @@ export class TenantDb {
     // Guard against a caller trying to move a row into another tenant.
     const { tenantId: _dropped, ...safeSet } = set as Record<string, unknown>;
     void _dropped;
-    return db
+    return this.client
       .update(table)
       .set(safeSet as Partial<InferInsertModel<T>>)
       .where(where ? and(scope, where) : scope);
@@ -78,7 +93,7 @@ export class TenantDb {
 
   delete<T extends TenantScopedTable>(table: T, where?: SQL) {
     const scope = this.scope(table);
-    return db.delete(table).where(where ? and(scope, where) : scope);
+    return this.client.delete(table).where(where ? and(scope, where) : scope);
   }
 }
 

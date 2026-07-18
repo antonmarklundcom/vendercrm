@@ -6,6 +6,7 @@ import "./handlers";
 // Module job handlers self-register on import — pull them in so they're live
 // before the worker claims any job.
 import "@/modules/whatsapp/jobs";
+import "@/modules/quotes/jobs";
 
 const TICK_MS = 2000;
 

@@ -5,8 +5,21 @@ import { tenantDb } from "@/modules/tenancy/db";
 import { tenantContextFromJob } from "@/modules/tenancy/context";
 import type { TenantContext } from "@/modules/tenancy/types";
 import { enqueue } from "@/lib/queue";
+import { storage } from "@/lib/storage";
 import { isWithinFreeformWindow, touchConversationOutbound } from "./conversations";
-import { sendText, sendTemplate, fetchTemplates, GraphError } from "./graph";
+import {
+  sendText,
+  sendTemplate,
+  sendDocument,
+  uploadMedia,
+  fetchTemplates,
+  GraphError,
+} from "./graph";
+
+// Opaque follow-up job to enqueue once a send is confirmed delivered — lets
+// other modules (e.g. quotes) react to delivery without whatsapp/send.ts
+// importing them and creating a module cycle (PLAN.md §8).
+export type OnDelivered = { jobType: string; payload: unknown };
 
 export const WHATSAPP_SEND = "whatsapp.send";
 
@@ -34,6 +47,15 @@ export async function sendMessage(
         templateLanguage: string;
         components?: unknown[];
         sentByUserId?: string;
+      }
+    | {
+        conversationId: string;
+        kind: "document";
+        storageKey: string;
+        filename: string;
+        caption?: string;
+        sentByUserId?: string;
+        onDelivered?: OnDelivered;
       },
 ): Promise<string> {
   const tdb = tenantDb(ctx);
@@ -43,9 +65,9 @@ export async function sendMessage(
   );
   if (!conversation) throw new Error("Conversación no encontrada");
 
-  // Free-form text is only allowed inside the 24h window; otherwise the caller
-  // must send an approved template.
-  if (input.kind === "text" && !isWithinFreeformWindow(conversation)) {
+  // Free-form messages (text or document) are only allowed inside the 24h
+  // window; outside it, only approved templates go out (PLAN.md §6.4).
+  if (input.kind !== "template" && !isWithinFreeformWindow(conversation)) {
     throw new WindowClosedError();
   }
 
@@ -54,11 +76,13 @@ export async function sendMessage(
     id: messageId,
     conversationId: input.conversationId,
     direction: "out",
-    type: input.kind === "text" ? "text" : "template",
+    type: input.kind,
     body:
       input.kind === "text"
         ? input.body
-        : `[plantilla: ${input.templateName}]`,
+        : input.kind === "template"
+          ? `[plantilla: ${input.templateName}]`
+          : `[documento: ${input.filename}]`,
     status: "queued",
     sentByUserId: input.sentByUserId ?? ctx.userId ?? null,
   });
@@ -69,12 +93,20 @@ export async function sendMessage(
       messageId,
       ...(input.kind === "text"
         ? { kind: "text", body: input.body }
-        : {
-            kind: "template",
-            templateName: input.templateName,
-            templateLanguage: input.templateLanguage,
-            components: input.components,
-          }),
+        : input.kind === "template"
+          ? {
+              kind: "template",
+              templateName: input.templateName,
+              templateLanguage: input.templateLanguage,
+              components: input.components,
+            }
+          : {
+              kind: "document",
+              storageKey: input.storageKey,
+              filename: input.filename,
+              caption: input.caption,
+              onDelivered: input.onDelivered,
+            }),
     },
     { tenantId: ctx.tenantId },
   );
@@ -98,6 +130,14 @@ export async function deliverSendJob(
         templateName: string;
         templateLanguage: string;
         components?: unknown[];
+      }
+    | {
+        messageId: string;
+        kind: "document";
+        storageKey: string;
+        filename: string;
+        caption?: string;
+        onDelivered?: OnDelivered;
       };
 
   const ctx = tenantContextFromJob({ tenantId });
@@ -135,11 +175,26 @@ export async function deliverSendJob(
     const result =
       p.kind === "text"
         ? await sendText(account, to, p.body)
-        : await sendTemplate(account, to, {
-            name: p.templateName,
-            language: p.templateLanguage,
-            components: p.components,
-          });
+        : p.kind === "template"
+          ? await sendTemplate(account, to, {
+              name: p.templateName,
+              language: p.templateLanguage,
+              components: p.components,
+            })
+          : await (async () => {
+              const bytes = await storage.get(p.storageKey);
+              const mediaId = await uploadMedia(
+                account,
+                bytes,
+                p.filename,
+                "application/pdf",
+              );
+              return sendDocument(account, to, {
+                mediaId,
+                filename: p.filename,
+                caption: p.caption,
+              });
+            })();
 
     await tdb.update(
       messages,
@@ -147,6 +202,12 @@ export async function deliverSendJob(
       eq(messages.id, p.messageId),
     );
     await touchConversationOutbound(ctx, message.conversationId, new Date());
+
+    if (p.kind === "document" && p.onDelivered) {
+      await enqueue(p.onDelivered.jobType, p.onDelivered.payload, {
+        tenantId,
+      });
+    }
   } catch (err) {
     if (err instanceof GraphError && err.retryable) {
       throw err; // queue retries with backoff

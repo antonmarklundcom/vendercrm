@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { getContact } from "@/modules/crm/contacts";
@@ -53,12 +54,19 @@ export default async function ContactDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="text-xl font-semibold">{contact.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          {contact.phone ?? "—"} · {contact.email ?? "—"} ·{" "}
-          {contact.source ?? "—"}
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">{contact.name}</h1>
+          <p className="text-sm text-muted-foreground">
+            {contact.phone ?? "—"} · {contact.email ?? "—"} ·{" "}
+            {contact.source ?? "—"}
+          </p>
+        </div>
+        <Link href={`/app/quotes/new?contactId=${contactId}`}>
+          <Button type="button" variant="outline" size="sm">
+            {t("newQuote")}
+          </Button>
+        </Link>
       </header>
 
       <div className="grid gap-8 md:grid-cols-2">
