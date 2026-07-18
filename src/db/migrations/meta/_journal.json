@@ -22,6 +22,20 @@
       "when": 1784318380588,
       "tag": "0002_flat_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1784372608163,
+      "tag": "0003_flowery_hawkeye",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1784373043200,
+      "tag": "0004_grey_payback",
+      "breakpoints": true
     }
   ]
 }

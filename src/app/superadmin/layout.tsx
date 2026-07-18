@@ -24,6 +24,9 @@ export default async function SuperadminLayout({
           <Link href="/superadmin/plans" className="hover:underline">
             Planes
           </Link>
+          <Link href="/superadmin/whatsapp" className="hover:underline">
+            WhatsApp
+          </Link>
         </nav>
       </header>
       <main className="flex flex-1 flex-col p-6">{children}</main>

@@ -1,0 +1,1 @@
+ALTER TABLE `messages` ADD `media_mime_type` varchar(100);

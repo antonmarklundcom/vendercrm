@@ -10,6 +10,10 @@ async function findTenantById(id: string) {
   return tenant ?? null;
 }
 
+async function findTenantUsers(tenantId: string) {
+  return db.select().from(user).where(eq(user.tenantId, tenantId));
+}
+
 export async function listTenants() {
   await getSuperadminContext();
   return db.select().from(tenants).orderBy(desc(tenants.createdAt));
@@ -22,10 +26,15 @@ export async function getTenantById(id: string) {
 
 export async function listTenantUsers(tenantId: string) {
   await getSuperadminContext();
-  return db.select().from(user).where(eq(user.tenantId, tenantId));
+  return findTenantUsers(tenantId);
 }
 
 /** Self-service lookup for a tenant user's own tenant — no superadmin guard. */
 export async function getMyTenant(ctx: TenantContext) {
   return findTenantById(ctx.tenantId);
+}
+
+/** Self-service lookup for a tenant user's own teammates — no superadmin guard. */
+export async function listMyTenantUsers(ctx: TenantContext) {
+  return findTenantUsers(ctx.tenantId);
 }

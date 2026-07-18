@@ -13,6 +13,8 @@ jobs:
       APP_ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
       APP_BASE_URL: http://localhost:3000
       BETTER_AUTH_SECRET: "ci-only-secret-not-for-production-use-0000000000"
+      WHATSAPP_APP_SECRET: "ci-only-app-secret"
+      WHATSAPP_VERIFY_TOKEN: "ci-only-verify-token"
 
     services:
       mysql:

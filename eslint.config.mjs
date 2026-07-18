@@ -25,6 +25,9 @@ const eslintConfig = [
       "src/modules/audit/**",
       "src/modules/billing/**",
       "src/modules/forms/public.ts",
+      "src/modules/whatsapp/webhook-ingest.ts",
+      "src/modules/whatsapp/webhook-process.ts",
+      "src/modules/whatsapp/admin-queries.ts",
     ],
     rules: {
       "no-restricted-imports": [

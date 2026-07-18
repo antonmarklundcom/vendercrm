@@ -11,6 +11,10 @@ const envSchema = z.object({
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   STORAGE_LOCAL_PATH: z.string().default("./.storage"),
   QUEUE_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(2000),
+  // Platform-level Meta app (one app for the whole platform, per PLAN.md
+  // §6.1) — per-tenant WhatsApp access tokens live in wa_accounts, encrypted.
+  WHATSAPP_APP_SECRET: z.string().min(1, "WHATSAPP_APP_SECRET is required"),
+  WHATSAPP_VERIFY_TOKEN: z.string().min(1, "WHATSAPP_VERIFY_TOKEN is required"),
 });
 
 export type Env = z.infer<typeof envSchema>;

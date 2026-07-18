@@ -63,6 +63,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Link href="/pipeline" className="hover:underline">
             Pipeline
           </Link>
+          <Link href="/inbox" className="hover:underline">
+            WhatsApp
+          </Link>
           <Link href="/forms" className="hover:underline">
             Formularios
           </Link>
