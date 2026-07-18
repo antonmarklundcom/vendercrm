@@ -23,6 +23,14 @@ export type DomainEvents = {
     contactId: string;
   };
   "tag.added": { tenantId: string; contactId: string; tagId: string };
+  "wa.message_received": {
+    tenantId: string;
+    waAccountId: string;
+    conversationId: string;
+    contactId: string;
+    messageId: string;
+    text: string | null;
+  };
 };
 
 export type DomainEventName = keyof DomainEvents;

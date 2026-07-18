@@ -54,6 +54,10 @@ const eslintConfig = defineConfig([
       // Billing (plans/subscriptions/payments) is superadmin-managed and
       // platform-level, not tenant-scoped operational data (PLAN.md §3.1).
       "src/modules/billing/**/*.{ts,tsx}",
+      // WhatsApp webhook routing resolves phone_number_id → tenant WITHOUT a
+      // tenant context (it's the entry point), and the raw event log is
+      // platform-level (PLAN.md §6.3). Only this file bypasses tenantDb.
+      "src/modules/whatsapp/platform.ts",
     ],
     rules: {
       "no-restricted-imports": "off",

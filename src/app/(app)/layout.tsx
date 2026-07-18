@@ -63,6 +63,9 @@ export default async function AppLayout({
             <Link href="/app/pipeline" className="text-muted-foreground hover:text-foreground">
               {t("pipeline")}
             </Link>
+            <Link href="/app/inbox" className="text-muted-foreground hover:text-foreground">
+              {t("inbox")}
+            </Link>
             <Link href="/app/forms" className="text-muted-foreground hover:text-foreground">
               {t("forms")}
             </Link>

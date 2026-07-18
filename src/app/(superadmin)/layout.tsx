@@ -27,6 +27,9 @@ export default async function SuperadminLayout({
             <Link href="/superadmin/plans" className="text-muted-foreground hover:text-foreground">
               {t("plans")}
             </Link>
+            <Link href="/superadmin/whatsapp" className="text-muted-foreground hover:text-foreground">
+              WhatsApp
+            </Link>
           </nav>
           <form action={signOutAction}>
             <Button type="submit" variant="ghost" size="sm">

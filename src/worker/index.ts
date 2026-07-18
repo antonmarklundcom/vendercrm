@@ -3,6 +3,9 @@ import { db } from "@/db/client";
 import { claimNextJob } from "./claim";
 import { processJob } from "./process-job";
 import "./handlers";
+// Module job handlers self-register on import — pull them in so they're live
+// before the worker claims any job.
+import "@/modules/whatsapp/jobs";
 
 const TICK_MS = 2000;
 

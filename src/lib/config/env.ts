@@ -13,6 +13,12 @@ const envSchema = z.object({
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   STORAGE_LOCAL_PATH: z.string().default("./.storage"),
   CRON_SECRET: z.string().min(1, "CRON_SECRET is required"),
+
+  // WhatsApp / Meta Cloud API. Optional so the app boots without WhatsApp
+  // configured (dev); the webhook route fails closed if the secret is missing.
+  META_APP_SECRET: z.string().optional(),
+  META_WEBHOOK_VERIFY_TOKEN: z.string().optional(),
+  META_GRAPH_VERSION: z.string().default("v21.0"),
 });
 
 export type Env = z.infer<typeof envSchema>;
