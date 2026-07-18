@@ -158,8 +158,9 @@ export async function submitPublicForm(input: {
     await addTagToContact(ctx, contactId, tagId);
   }
 
+  let dealId: string | null = null;
   if (settings?.targetPipelineId && settings?.targetStageId) {
-    await createDeal(ctx, {
+    dealId = await createDeal(ctx, {
       contactId,
       pipelineId: settings.targetPipelineId,
       stageId: settings.targetStageId,
@@ -189,6 +190,7 @@ export async function submitPublicForm(input: {
     formId: form.formId,
     submissionId,
     contactId,
+    dealId,
   });
 
   return { ok: true, redirectUrl: settings?.redirectUrl };

@@ -66,7 +66,12 @@ describe.skipIf(!hasDb)("cross-tenant isolation", () => {
 
   afterAll(async () => {
     if (!db) return;
-    await (db as unknown as { $client: { end: () => Promise<void> } }).$client.end();
+    // Deliberately NOT closing the pool here: db/client.ts is a
+    // module-level singleton, and depending on vitest's isolation/pool
+    // settings it can be shared across test files run in the same
+    // process — closing it here raced with other files still using it
+    // (their queries would see a closed pool). The process exits when
+    // the whole suite finishes, which reclaims the connection anyway.
   });
 
   it("tenantDb.select returns only the caller's tenant rows", async () => {

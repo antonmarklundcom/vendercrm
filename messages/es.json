@@ -140,6 +140,13 @@
     "viewPdf": "Ver PDF",
     "sendWhatsApp": "Enviar por WhatsApp",
     "publicView": "Vista pública",
-    "invoicingComingSoon": "Factura electrónica — Próximamente"
+    "invoicingComingSoon": "Factura electrónica — Próximamente",
+    "automations": "Automatizaciones",
+    "newAutomation": "Nueva automatización",
+    "noAutomations": "Sin automatizaciones todavía",
+    "automationTrigger": "Disparador",
+    "runs": "Ejecuciones",
+    "pause": "Pausar",
+    "cancel": "Cancelar"
   }
 }

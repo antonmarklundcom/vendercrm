@@ -72,6 +72,9 @@ export default async function AppLayout({
             <Link href="/app/quotes" className="text-muted-foreground hover:text-foreground">
               {t("quotes")}
             </Link>
+            <Link href="/app/automations" className="text-muted-foreground hover:text-foreground">
+              {t("automations")}
+            </Link>
             <span className="cursor-not-allowed text-muted-foreground/50" title={t("invoicingComingSoon")}>
               {t("invoicingComingSoon")}
             </span>

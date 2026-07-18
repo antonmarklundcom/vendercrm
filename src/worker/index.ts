@@ -7,6 +7,7 @@ import "./handlers";
 // before the worker claims any job.
 import "@/modules/whatsapp/jobs";
 import "@/modules/quotes/jobs";
+import "@/modules/automations/jobs";
 
 const TICK_MS = 2000;
 

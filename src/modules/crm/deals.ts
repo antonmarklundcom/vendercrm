@@ -88,6 +88,7 @@ export async function moveDeal(
       tenantId: ctx.tenantId,
       dealId: deal.id,
       contactId: deal.contactId,
+      pipelineId: deal.pipelineId,
       fromStageId,
       toStageId,
       userId: ctx.userId ?? null,

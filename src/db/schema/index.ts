@@ -6,4 +6,5 @@ export * from "./crm";
 export * from "./forms";
 export * from "./whatsapp";
 export * from "./quotes";
+export * from "./automations";
 export * from "./infra";

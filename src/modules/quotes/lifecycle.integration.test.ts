@@ -59,7 +59,12 @@ describe.skipIf(!hasDb)("quote lifecycle", () => {
   afterAll(async () => {
     wa.resetGraphFetch();
     if (!db) return;
-    await (db as unknown as { $client: { end: () => Promise<void> } }).$client.end();
+    // Deliberately NOT closing the pool here: db/client.ts is a
+    // module-level singleton, and depending on vitest's isolation/pool
+    // settings it can be shared across test files run in the same
+    // process — closing it here raced with other files still using it
+    // (their queries would see a closed pool). The process exits when
+    // the whole suite finishes, which reclaims the connection anyway.
   });
 
   it("runs quote → PDF → public link → WhatsApp send → sent status + activity", async () => {
@@ -120,8 +125,11 @@ describe.skipIf(!hasDb)("quote lifecycle", () => {
 
     await quotesModule.sendQuoteViaWhatsApp(ctx, quoteId);
 
-    // Drain: the document send job, then the onDelivered mark-sent job.
-    for (let i = 0; i < 6; i++) {
+    // Drain: the document send job, then the onDelivered mark-sent job. The
+    // jobs table is shared across the whole test run, so budget generously
+    // enough to also clear other tests' interleaved jobs (e.g. automation
+    // triggers now enqueued on every contact/tag/deal event).
+    for (let i = 0; i < 200; i++) {
       const did = await worker.tick("test");
       if (!did) break;
     }

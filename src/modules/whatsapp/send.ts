@@ -39,7 +39,13 @@ export class WindowClosedError extends Error {
 export async function sendMessage(
   ctx: TenantContext,
   input:
-    | { conversationId: string; kind: "text"; body: string; sentByUserId?: string }
+    | {
+        conversationId: string;
+        kind: "text";
+        body: string;
+        sentByUserId?: string;
+        automationRunId?: string;
+      }
     | {
         conversationId: string;
         kind: "template";
@@ -47,6 +53,7 @@ export async function sendMessage(
         templateLanguage: string;
         components?: unknown[];
         sentByUserId?: string;
+        automationRunId?: string;
       }
     | {
         conversationId: string;
@@ -55,6 +62,7 @@ export async function sendMessage(
         filename: string;
         caption?: string;
         sentByUserId?: string;
+        automationRunId?: string;
         onDelivered?: OnDelivered;
       },
 ): Promise<string> {
@@ -85,6 +93,7 @@ export async function sendMessage(
           : `[documento: ${input.filename}]`,
     status: "queued",
     sentByUserId: input.sentByUserId ?? ctx.userId ?? null,
+    automationRunId: input.automationRunId ?? null,
   });
 
   await enqueue(

@@ -12,6 +12,7 @@ export type DomainEvents = {
     tenantId: string;
     dealId: string;
     contactId: string;
+    pipelineId: string;
     fromStageId: string | null;
     toStageId: string;
     userId: string | null;
@@ -21,6 +22,7 @@ export type DomainEvents = {
     formId: string;
     submissionId: string;
     contactId: string;
+    dealId: string | null;
   };
   "tag.added": { tenantId: string; contactId: string; tagId: string };
   "wa.message_received": {

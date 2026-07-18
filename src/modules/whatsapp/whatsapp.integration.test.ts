@@ -95,7 +95,12 @@ describe.skipIf(!hasDb)("WhatsApp ingestion + sending", () => {
   afterAll(async () => {
     graph.resetGraphFetch();
     if (!db) return;
-    await (db as unknown as { $client: { end: () => Promise<void> } }).$client.end();
+    // Deliberately NOT closing the pool here: db/client.ts is a
+    // module-level singleton, and depending on vitest's isolation/pool
+    // settings it can be shared across test files run in the same
+    // process — closing it here raced with other files still using it
+    // (their queries would see a closed pool). The process exits when
+    // the whole suite finishes, which reclaims the connection anyway.
   });
 
   it("stores an inbound message and opens a conversation", async () => {
@@ -146,7 +151,10 @@ describe.skipIf(!hasDb)("WhatsApp ingestion + sending", () => {
     await queue.enqueue("whatsapp.process_webhook", { webhookEventId: eventId });
 
     // Drain the queue like the running worker would.
-    for (let i = 0; i < 5; i++) if (!(await worker.tick("test"))) break;
+    // The jobs table is shared across the whole test run, so budget
+    // generously enough to also clear other tests' interleaved jobs (e.g.
+    // automation triggers now enqueued on every contact/message event).
+    for (let i = 0; i < 200; i++) if (!(await worker.tick("test"))) break;
 
     const [event] = await db
       .select()
@@ -179,7 +187,10 @@ describe.skipIf(!hasDb)("WhatsApp ingestion + sending", () => {
     });
 
     // Deliver the queued send.
-    for (let i = 0; i < 5; i++) if (!(await worker.tick("test"))) break;
+    // The jobs table is shared across the whole test run, so budget
+    // generously enough to also clear other tests' interleaved jobs (e.g.
+    // automation triggers now enqueued on every contact/message event).
+    for (let i = 0; i < 200; i++) if (!(await worker.tick("test"))) break;
 
     const [sent] = await db
       .select()
