@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "37f14db7-338a-442c-9488-a1916662e54e",
+  "id": "fbcbf95f-6e59-4283-b2d5-2f1365b8053b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "jobs": {
@@ -44,7 +44,7 @@
         },
         "status": {
           "name": "status",
-          "type": "varchar(20)",
+          "type": "enum('pending','running','done','failed','dead')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -75,7 +75,7 @@
         },
         "locked_by": {
           "name": "locked_by",
-          "type": "varchar(100)",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -113,10 +113,10 @@
           ],
           "isUnique": false
         },
-        "jobs_type_idx": {
-          "name": "jobs_type_idx",
+        "jobs_tenant_id_idx": {
+          "name": "jobs_tenant_id_idx",
           "columns": [
-            "type"
+            "tenant_id"
           ],
           "isUnique": false
         }

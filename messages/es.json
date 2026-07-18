@@ -1,8 +1,6 @@
 {
-  "common": {
-    "appName": "VenderCRM",
-    "loading": "Cargando…",
-    "save": "Guardar",
-    "cancel": "Cancelar"
+  "Home": {
+    "title": "VenderCRM",
+    "subtitle": "CRM de ventas para Paraguay, WhatsApp primero."
   }
 }

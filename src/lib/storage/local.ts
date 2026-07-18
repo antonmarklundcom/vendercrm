@@ -1,67 +1,64 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, normalize, resolve } from "node:path";
+import { createHmac, timingSafeEqual } from "crypto";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
+import { dirname, join, normalize, resolve, sep } from "path";
 import { env } from "@/lib/config/env";
-import type { StorageAdapter } from "./types";
+import type { StorageDriver } from "./types";
 
-// Bootstrap driver — Hostinger disk is non-durable, so this is meant to be
-// swapped for the S3-compatible driver before onboarding external tenants
-// (PLAN.md §2.1). Signed URLs are HMAC query tokens verified by whichever
-// route serves the file (added alongside the module that needs it, e.g. 1D
-// WhatsApp media) — this adapter only issues/validates the token.
+const rootDir = resolve(env.STORAGE_LOCAL_PATH);
 
-const root = resolve(env.STORAGE_LOCAL_PATH);
+function resolveSafePath(key: string): string {
+  const target = normalize(join(rootDir, key));
 
-function resolveKeyPath(key: string): string {
-  const path = normalize(join(root, key));
-  if (!path.startsWith(root)) {
-    throw new Error(`Storage key escapes root: ${key}`);
+  if (target !== rootDir && !target.startsWith(rootDir + sep)) {
+    throw new Error(`Storage key escapes storage root: ${key}`);
   }
-  return path;
+
+  return target;
 }
 
-export function signLocalKey(key: string, expiresAt: number): string {
-  return createHmac("sha256", env.APP_ENCRYPTION_KEY)
+function sign(key: string, expiresAt: number): string {
+  return createHmac("sha256", Buffer.from(env.APP_ENCRYPTION_KEY, "hex"))
     .update(`${key}:${expiresAt}`)
-    .digest("hex");
+    .digest("base64url");
 }
 
-export function verifyLocalSignature(
+export function verifySignedKey(
   key: string,
   expiresAt: number,
   signature: string,
 ): boolean {
   if (Date.now() > expiresAt) return false;
-  const expected = Buffer.from(signLocalKey(key, expiresAt));
-  const actual = Buffer.from(signature);
-  return (
-    expected.length === actual.length && timingSafeEqual(expected, actual)
-  );
+
+  const expected = sign(key, expiresAt);
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export const localStorage: StorageAdapter = {
+export const localStorageDriver: StorageDriver = {
   async put(key, data) {
-    const path = resolveKeyPath(key);
+    const path = resolveSafePath(key);
     await mkdir(dirname(path), { recursive: true });
     await writeFile(path, data);
   },
 
   async get(key) {
-    return readFile(resolveKeyPath(key));
+    return readFile(resolveSafePath(key));
   },
 
   async getSignedUrl(key, expiresInSeconds = 3600) {
     const expiresAt = Date.now() + expiresInSeconds * 1000;
-    const signature = signLocalKey(key, expiresAt);
+    const signature = sign(key, expiresAt);
     const params = new URLSearchParams({
-      key,
-      expires: String(expiresAt),
+      exp: String(expiresAt),
       sig: signature,
     });
-    return `/api/storage?${params.toString()}`;
+
+    return `${env.APP_BASE_URL}/api/storage/${encodeURIComponent(key)}?${params.toString()}`;
   },
 
   async delete(key) {
-    await rm(resolveKeyPath(key), { force: true });
+    await rm(resolveSafePath(key), { force: true });
   },
 };

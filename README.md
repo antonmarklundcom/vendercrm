@@ -1,32 +1,40 @@
 # VenderCRM
 
-WhatsApp-first multi-tenant sales CRM for Paraguay. See `PLAN.md` for the
-full architecture and build plan.
+WhatsApp-first sales CRM for Paraguay. See [`PLAN.md`](./PLAN.md) for the full
+architecture and build plan.
 
-## Getting started
+## Stack
 
-```bash
-cp .env.example .env   # fill in DATABASE_URL, APP_ENCRYPTION_KEY, CRON_SECRET
-npm install
-npm run db:migrate
-npm run dev
-```
+Next.js 15, Drizzle ORM, MySQL, Tailwind + shadcn/ui, next-intl (`es`).
 
-The job queue worker starts in-process automatically (via
-`src/instrumentation.ts`). To run it standalone: `npm run worker`.
+## Local setup
+
+1. Copy `.env.example` to `.env` and fill in:
+   - `DATABASE_URL` — MySQL connection string.
+   - `APP_ENCRYPTION_KEY` — 32-byte hex key, generate with `openssl rand -hex 32`.
+   - `BETTER_AUTH_SECRET` — random secret, generate with `openssl rand -hex 32`.
+2. Install dependencies: `npm install`.
+3. Apply database migrations: `npm run db:migrate`.
+4. Start the dev server: `npm run dev`.
+
+No public sign-up page exists. Create the first superadmin directly against the
+database, e.g. with a one-off script calling `auth.api.createUser({ body: {
+email, password, name, role: "superadmin" } })` (no `headers` — see
+`src/lib/auth.ts` for why that's a trusted internal call).
+
+The job queue worker starts automatically in-process via `instrumentation.ts`
+whenever the Next.js server boots (dev or production) — no separate process to
+run locally.
 
 ## Scripts
 
-| Script | Purpose |
+| Command | Purpose |
 |---|---|
-| `npm run dev` / `build` / `start` | Next.js app |
-| `npm run lint` / `typecheck` / `test` | CI checks |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:generate` | Generate a Drizzle migration from schema changes |
-| `npm run db:migrate` | Apply migrations |
-| `npm run db:studio` | Drizzle Studio |
-| `npm run worker` | Run the job queue worker as a standalone process |
-
-## Deploy on Vercel
-
-Not applicable — this project targets Hostinger managed Node.js hosting per
-`PLAN.md` §2.1.
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run db:studio` | Open Drizzle Studio against the configured database |
+| `npm run test` | Run the test suite (vitest) |

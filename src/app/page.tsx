@@ -1,13 +1,11 @@
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
-  const t = useTranslations("common");
+export default async function Home() {
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4">
-      <h1 className="text-2xl font-semibold">{t("appName")}</h1>
-      <Button>{t("save")}</Button>
-    </main>
-  );
+  if (!session) redirect("/login");
+  if (session.user.role === "superadmin") redirect("/superadmin/tenants");
+  redirect("/dashboard");
 }

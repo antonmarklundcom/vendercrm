@@ -1,18 +1,17 @@
 import { env } from "@/lib/config/env";
-import { localStorage } from "./local";
-import type { StorageAdapter } from "./types";
+import { localStorageDriver } from "./local";
+import type { StorageDriver } from "./types";
 
-export type { StorageAdapter } from "./types";
-
-function resolveStorage(): StorageAdapter {
+function resolveDriver(): StorageDriver {
   switch (env.STORAGE_DRIVER) {
     case "local":
-      return localStorage;
+      return localStorageDriver;
     case "s3":
       throw new Error(
-        "S3 storage driver not yet implemented — see PLAN.md §2.1",
+        "S3 storage driver is not implemented yet — set STORAGE_DRIVER=local",
       );
   }
 }
 
-export const storage: StorageAdapter = resolveStorage();
+export const storage = resolveDriver();
+export type { StorageDriver } from "./types";

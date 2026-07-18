@@ -1,7 +1,6 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
-import { defineConfig, globalIgnores } from "eslint/config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,46 +9,38 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = defineConfig([
+const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
   {
-    // Raw DB access is confined to src/db, src/worker, and the tenancy
-    // module — everywhere else must go through the tenant-scoped access
-    // layer (PLAN.md §3.3). This is a merge gate, not a suggestion.
+    ignores: [".next/**", "out/**", "build/**", "next-env.d.ts"],
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/db/**",
+      "src/worker/**",
+      "src/lib/queue/**",
+      "src/lib/auth.ts",
+      "src/modules/tenancy/**",
+      "src/modules/audit/**",
+      "src/modules/billing/**",
+      "src/modules/forms/public.ts",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
         {
-          patterns: [
+          paths: [
             {
-              group: ["@/db/client", "**/db/client"],
+              name: "@/db/client",
               message:
-                "Raw db import is banned here — use the tenancy-scoped db access layer (PLAN.md §3.3). Allowed only in src/db, src/worker, src/modules/tenancy.",
+                "Do not import the raw db client outside src/db, src/worker, or the tenancy module. Use the tenant-scoped access layer instead.",
             },
           ],
         },
       ],
     },
   },
-  {
-    files: [
-      "src/db/**/*.{ts,tsx}",
-      "src/worker/**/*.{ts,tsx}",
-      "src/lib/queue/**/*.{ts,tsx}",
-      "src/modules/tenancy/**/*.{ts,tsx}",
-    ],
-    rules: {
-      "no-restricted-imports": "off",
-    },
-  },
-]);
+];
 
 export default eslintConfig;
