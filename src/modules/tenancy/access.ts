@@ -17,6 +17,20 @@ export type TenantAccess = {
   writable: boolean;
 };
 
+export class ReadOnlyError extends Error {
+  constructor() {
+    super("La cuenta está en modo de solo lectura");
+    this.name = "ReadOnlyError";
+  }
+}
+
+// Throws in grace/expired/suspended states — used by write server actions so a
+// past-due tenant can read but not mutate (PLAN.md §1B).
+export async function assertWritable(tenantId: string): Promise<void> {
+  const access = await getTenantAccess(tenantId);
+  if (!access.writable) throw new ReadOnlyError();
+}
+
 // A tenant with no subscription yet (fresh/trial) is treated as active —
 // billing is only enforced once a subscription exists. A suspended tenant is
 // locked regardless of billing.

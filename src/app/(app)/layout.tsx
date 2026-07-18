@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { requireTenantPage } from "@/modules/tenancy/guard";
 import { getTenantAccess } from "@/modules/tenancy/access";
@@ -52,7 +53,25 @@ export default async function AppLayout({
       )}
       <header className="border-b">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3">
-          <span className="font-semibold">{t("dashboard")}</span>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/app" className="font-semibold">
+              {t("dashboard")}
+            </Link>
+            <Link href="/app/contacts" className="text-muted-foreground hover:text-foreground">
+              {t("contacts")}
+            </Link>
+            <Link href="/app/pipeline" className="text-muted-foreground hover:text-foreground">
+              {t("pipeline")}
+            </Link>
+            <Link href="/app/forms" className="text-muted-foreground hover:text-foreground">
+              {t("forms")}
+            </Link>
+            {ctx.role === "admin" && (
+              <Link href="/app/settings" className="text-muted-foreground hover:text-foreground">
+                {t("settings")}
+              </Link>
+            )}
+          </nav>
           {!impersonating && (
             <form action={signOutAction}>
               <Button type="submit" variant="ghost" size="sm">

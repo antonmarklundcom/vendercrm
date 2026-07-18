@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { user, account, tenants, invitations } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import { auth } from "@/modules/auth/server";
+import { seedDefaultPipeline } from "@/modules/crm/pipelines";
 import type { TenantContext, TenantRole } from "./types";
 import { tenantDb } from "./db";
 
@@ -87,6 +88,9 @@ export async function createTenant(input: {
     tenantRole: "admin",
   });
 
+  // Every tenant starts with a default "Ventas" pipeline (PLAN.md §5).
+  await seedDefaultPipeline(tenantId);
+
   return { tenantId, adminUserId };
 }
 
@@ -105,11 +109,42 @@ export async function getTenant(tenantId: string) {
   return row ?? null;
 }
 
+// Public form pages resolve a tenant by its slug (unauthenticated). Platform-
+// level lookup, so it lives here in tenancy, not behind tenantDb.
+export async function getTenantBySlug(slug: string) {
+  const [row] = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.slug, slug.toLowerCase()))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function setTenantStatus(
   tenantId: string,
   status: "active" | "suspended" | "trial",
 ): Promise<void> {
   await db.update(tenants).set({ status }).where(eq(tenants.id, tenantId));
+}
+
+export type TenantSettings = {
+  brandColor?: string;
+  logoUrl?: string;
+  businessHoursStart?: string; // "08:00"
+  businessHoursEnd?: string; // "18:00"
+};
+
+// A tenant admin edits their own settings — scoped by the tenantId from the
+// caller's context, never a client-supplied one.
+export async function updateTenantSettings(
+  ctx: TenantContext,
+  input: { timezone?: string; settings?: TenantSettings },
+): Promise<void> {
+  const set: Record<string, unknown> = {};
+  if (input.timezone !== undefined) set.timezone = input.timezone;
+  if (input.settings !== undefined) set.settings = input.settings;
+  if (Object.keys(set).length === 0) return;
+  await db.update(tenants).set(set).where(eq(tenants.id, ctx.tenantId));
 }
 
 // --- Invitations (tenant-scoped) ---------------------------------------------
