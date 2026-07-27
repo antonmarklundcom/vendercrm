@@ -1,0 +1,16 @@
+<!-- Minimal form for a static site. The honeypot field must stay
+     invisible to humans and must NOT be display:none — some bots skip
+     those. Positioning it off-screen is the reliable trick. -->
+<form method="post" action="/lead.php">
+  <input type="text" name="_hp" tabindex="-1" autocomplete="off"
+         aria-hidden="true" style="position:absolute;left:-9999px">
+
+  <label>Nombre <input name="name" required></label>
+  <label>Teléfono <input name="phone" type="tel" required></label>
+  <label>Correo <input name="email" type="email"></label>
+  <label>Mensaje <textarea name="message"></textarea></label>
+
+  <button type="submit">Enviar consulta</button>
+</form>
+
+<script src="https://TU-CRM/vc-attribution.js" defer></script>
