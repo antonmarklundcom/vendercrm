@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireTenantContext } from "@/modules/tenancy/context";
+import { requireTenantOperator } from "@/modules/tenancy/context";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
 import { markConversationRead } from "@/modules/whatsapp/inbox";
 
@@ -12,7 +12,7 @@ const sendTextSchema = z.object({
 });
 
 export async function sendTextAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const input = sendTextSchema.parse({
     conversationId: formData.get("conversationId"),
     body: formData.get("body"),
@@ -31,7 +31,7 @@ const sendTemplateSchema = z.object({
 });
 
 export async function sendTemplateAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const input = sendTemplateSchema.parse({
     conversationId: formData.get("conversationId"),
     template: formData.get("template"),
@@ -47,7 +47,7 @@ export async function sendTemplateAction(formData: FormData) {
 }
 
 export async function markReadAction(conversationId: string) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   await markConversationRead(ctx, conversationId);
   revalidatePath("/inbox");
 }

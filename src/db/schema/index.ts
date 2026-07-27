@@ -4,6 +4,7 @@ export * from "./auth";
 export * from "./crm";
 export * from "./forms";
 export * from "./sites";
+export * from "./access";
 export * from "./quotes";
 export * from "./automations";
 export * from "./whatsapp";

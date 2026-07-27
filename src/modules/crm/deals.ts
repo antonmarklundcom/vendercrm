@@ -3,6 +3,7 @@ import { deals } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { filterBySiteScope, siteInScope } from "@/modules/access/scope";
 import { getStage } from "./pipelines";
 import { createActivity } from "./activities";
 import { crmEvents } from "./events";
@@ -19,6 +20,8 @@ export type CreateDealInput = {
   currency?: string;
   assignedUserId?: string;
   position?: number;
+  /** Set by lead ingest so the pipeline can be filtered per site (§5.2). */
+  siteId?: string;
 };
 
 export async function createDeal(ctx: TenantContext, input: CreateDealInput) {
@@ -35,23 +38,28 @@ export async function createDeal(ctx: TenantContext, input: CreateDealInput) {
       currency: input.currency ?? "PYG",
       assignedUserId: input.assignedUserId,
       position: input.position ?? 0,
+      siteId: input.siteId,
     });
   return getDeal(ctx, id);
 }
 
 export async function getDeal(ctx: TenantContext, id: string) {
   const [row] = await tenantDb(ctx).select(deals, eq(deals.id, id));
-  return row ?? null;
+  if (!row) return null;
+  if (!siteInScope(ctx, row.siteId)) return null;
+  return row;
 }
 
 export async function listDealsForPipeline(ctx: TenantContext, pipelineId: string) {
   const rows = await tenantDb(ctx).select(deals, eq(deals.pipelineId, pipelineId));
-  return rows.sort((a, b) => a.position - b.position);
+  return filterBySiteScope(ctx, rows, (row) => row.siteId).sort((a, b) => a.position - b.position);
 }
 
 export async function listDealsForContact(ctx: TenantContext, contactId: string) {
   const rows = await tenantDb(ctx).select(deals, eq(deals.contactId, contactId));
-  return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return filterBySiteScope(ctx, rows, (row) => row.siteId).sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  );
 }
 
 export type UpdateDealInput = Partial<

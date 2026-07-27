@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireTenantContext } from "@/modules/tenancy/context";
+import { requireTenantOperator } from "@/modules/tenancy/context";
 import { createProduct, updateProduct } from "@/modules/quotes/products";
 
 const createProductSchema = z.object({
@@ -13,7 +13,7 @@ const createProductSchema = z.object({
 });
 
 export async function createProductAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const input = createProductSchema.parse({
     name: formData.get("name"),
     description: formData.get("description") || undefined,
@@ -28,7 +28,7 @@ export async function createProductAction(formData: FormData) {
 }
 
 export async function toggleProductAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const id = z.string().min(1).parse(formData.get("productId"));
   const isActive = formData.get("isActive") === "true";
   await updateProduct(ctx, id, { isActive });

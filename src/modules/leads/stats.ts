@@ -1,6 +1,7 @@
 import { leadSubmissions } from "@/db/schema";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { filterBySiteScope } from "@/modules/access/scope";
 
 // Per-site lead reporting (PLAN.md §5.1, 1E exit criteria: "leads filterable
 // by site and campaign"). Deliberately small: traffic analytics is not built
@@ -16,7 +17,11 @@ export type LeadStatsFilters = {
 type Utm = { source?: string; campaign?: string };
 
 export async function listLeadSubmissions(ctx: TenantContext, filters: LeadStatsFilters = {}) {
-  const rows = await tenantDb(ctx).select(leadSubmissions);
+  const rows = filterBySiteScope(
+    ctx,
+    await tenantDb(ctx).select(leadSubmissions),
+    (row) => row.siteId,
+  );
 
   return rows
     .filter((row) => {

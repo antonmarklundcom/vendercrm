@@ -3,6 +3,7 @@ import { sites } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { filterBySiteScope, siteInScope } from "@/modules/access/scope";
 import { generateApiKey } from "./keys";
 
 // Sites CRUD (PLAN.md §5.1). One tenant owns many sites — connecting a new
@@ -74,13 +75,19 @@ export async function rotateApiKey(ctx: TenantContext, id: string): Promise<stri
 
 export async function getSite(ctx: TenantContext, id: string) {
   const [row] = await tenantDb(ctx).select(sites, eq(sites.id, id));
-  return row ?? null;
+  if (!row) return null;
+  if (!siteInScope(ctx, row.id)) return null;
+  return row;
 }
 
 export function listSites(ctx: TenantContext) {
   return tenantDb(ctx)
     .select(sites)
-    .then((rows) => rows.sort((a, b) => a.name.localeCompare(b.name)));
+    .then((rows) =>
+      filterBySiteScope(ctx, rows, (row) => row.id).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    );
 }
 
 export async function deleteSite(ctx: TenantContext, id: string) {

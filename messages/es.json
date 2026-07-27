@@ -49,7 +49,8 @@
       "quotes": "Presupuestos",
       "products": "Productos",
       "facturaElectronica": "Factura electrónica — Próximamente",
-      "automations": "Automatizaciones"
+      "automations": "Automatizaciones",
+      "team": "Equipo"
     },
     "contacts": {
       "title": "Contactos",
@@ -258,7 +259,30 @@
         "failed": "Falló",
         "cancelled": "Cancelado"
       }
-    }
+    },
+    "team": {
+      "title": "Equipo y clientes",
+      "adminOnly": "Solo los administradores pueden ver esta página",
+      "intro": "Los administradores ven todo. A un empleado o cliente le asignás sitios: solo ve los leads de esos sitios.",
+      "role": "Rol",
+      "saveRole": "Guardar rol",
+      "siteAccess": "Acceso a sitios",
+      "saveSites": "Guardar acceso",
+      "allSites": "Acceso a todos los sitios",
+      "nSites": "{count} sitio(s)",
+      "noSites": "Todavía no hay sitios",
+      "inviteTitle": "Invitar",
+      "invite": "Enviar invitación",
+      "email": "Correo",
+      "inviteHelp": "Se crea una invitación con enlace. Después de que acepte, asignale sus sitios acá.",
+      "pendingTitle": "Invitaciones pendientes",
+      "roles": {
+        "admin": "Administrador (ve todo)",
+        "agent": "Empleado",
+        "client": "Cliente (solo sus sitios)"
+      }
+    },
+    "clientPortalOnly": "Tu cuenta solo tiene acceso a los leads de tus sitios."
   },
   "superadmin": {
     "nav": {

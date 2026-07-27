@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireTenantContext } from "@/modules/tenancy/context";
+import { requireTenantOperator } from "@/modules/tenancy/context";
 import { createForm } from "@/modules/forms/forms";
 import type { FormField } from "@/modules/forms/forms";
 
@@ -29,7 +29,7 @@ const createFormSchema = z.object({
 });
 
 export async function createFormAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const input = createFormSchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),

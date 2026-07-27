@@ -91,7 +91,10 @@ export async function recordLeadSubmission(
   const defaults = input.defaults ?? {};
   const utm = input.utm ?? {};
 
-  let contact = await getContactByPhone(ctx, input.phone);
+  // Explicitly nullable: getContact is site-scoped now and may return null,
+  // and the null case is handled below.
+  let contact: Awaited<ReturnType<typeof getContactByPhone>> | null =
+    await getContactByPhone(ctx, input.phone);
   if (!contact) {
     contact = await createContact(ctx, {
       name: input.name || input.phone,
@@ -122,6 +125,7 @@ export async function recordLeadSubmission(
       stageId: defaults.stageId,
       title: defaults.dealTitle || `Lead — ${contact.name}`,
       assignedUserId: defaults.ownerUserId ?? undefined,
+      siteId: input.siteId,
     });
     dealId = deal?.id ?? null;
   }

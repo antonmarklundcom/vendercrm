@@ -3,6 +3,7 @@ import { contactTags, contacts, tags } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { filterBySiteScope, siteInScope } from "@/modules/access/scope";
 import { crmEvents } from "./events";
 
 // Contacts (PLAN.md §4 "crm", §5): phone (E.164) is the primary identity
@@ -80,9 +81,16 @@ export async function updateContact(
 
 export async function getContact(ctx: TenantContext, id: string) {
   const [row] = await tenantDb(ctx).select(contacts, eq(contacts.id, id));
-  return row ?? null;
+  if (!row) return null;
+  // A site-restricted user must not be able to read a contact by guessing
+  // its id any more than they can list it (PLAN.md §5.2).
+  if (!siteInScope(ctx, row.firstSiteId)) return null;
+  return row;
 }
 
+/** Ingest-side lookup: deliberately NOT site-scoped, because a returning
+ * lead must be matched to its existing contact regardless of which site it
+ * arrives from. Only ever called with a system context. */
 export async function getContactByPhone(ctx: TenantContext, phone: string) {
   const [row] = await tenantDb(ctx).select(contacts, eq(contacts.phone, normalizePhone(phone)));
   return row ?? null;
@@ -120,7 +128,11 @@ export async function listContacts(ctx: TenantContext, filters: ListContactsFilt
     // No tenantDb "IN" helper — filter in memory over the (already
     // tenant-scoped) base query rather than reaching for raw SQL.
     const base = conditions.length > 0 ? and(...conditions) : undefined;
-    const rows = await tenantDb(ctx).select(contacts, base);
+    const rows = filterBySiteScope(
+      ctx,
+      await tenantDb(ctx).select(contacts, base),
+      (row) => row.firstSiteId,
+    );
     return rows
       .filter((row) => contactIds.has(row.id))
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -129,7 +141,11 @@ export async function listContacts(ctx: TenantContext, filters: ListContactsFilt
   const where = conditions.length > 0 ? and(...conditions) : undefined;
   return tenantDb(ctx)
     .select(contacts, where)
-    .then((rows) => rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+    .then((rows) =>
+      filterBySiteScope(ctx, rows, (row) => row.firstSiteId).sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      ),
+    );
 }
 
 export type CreateTagInput = { name: string; color?: string };

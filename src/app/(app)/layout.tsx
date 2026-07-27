@@ -44,11 +44,16 @@ export default async function AppLayout({
         <Link href="/dashboard">{t("dashboard")}</Link>
         <Link href="/contacts">{t("contacts")}</Link>
         <Link href="/pipeline">{t("pipeline")}</Link>
-        <Link href="/inbox">{t("inbox")}</Link>
-        <Link href="/quotes">{t("quotes")}</Link>
-        <Link href="/products">{t("products")}</Link>
-        <Link href="/automations">{t("automations")}</Link>
-        <Link href="/forms">{t("forms")}</Link>
+        {/* A client is a lead viewer, not a CRM operator: they get contacts
+            and their pipeline (both site-scoped) and nothing that would let
+            them work the owner's inbox, send from their number, or edit
+            automations. */}
+        {ctx.role !== "client" && <Link href="/inbox">{t("inbox")}</Link>}
+        {ctx.role !== "client" && <Link href="/quotes">{t("quotes")}</Link>}
+        {ctx.role !== "client" && <Link href="/products">{t("products")}</Link>}
+        {ctx.role !== "client" && <Link href="/automations">{t("automations")}</Link>}
+        {ctx.role !== "client" && <Link href="/forms">{t("forms")}</Link>}
+        {ctx.role === "admin" && <Link href="/team">{t("team")}</Link>}
         {ctx.role === "admin" && <Link href="/sites">{t("sites")}</Link>}
         {ctx.role === "admin" && <Link href="/whatsapp">{t("whatsapp")}</Link>}
         {ctx.role === "admin" && <Link href="/settings">{t("settings")}</Link>}

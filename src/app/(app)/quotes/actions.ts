@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireTenantContext } from "@/modules/tenancy/context";
+import { requireTenantOperator } from "@/modules/tenancy/context";
 import { createQuote, setQuoteStatus } from "@/modules/quotes/quotes";
 import { sendQuote } from "@/modules/quotes/delivery";
 
@@ -24,7 +24,7 @@ const createQuoteSchema = z.object({
 });
 
 export async function createQuoteAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
 
   // The builder posts parallel arrays, one entry per line.
   const descriptions = formData.getAll("description").map(String);
@@ -65,14 +65,14 @@ export async function createQuoteAction(formData: FormData) {
 }
 
 export async function sendQuoteAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const quoteId = z.string().min(1).parse(formData.get("quoteId"));
   await sendQuote(ctx, quoteId);
   revalidatePath(`/quotes/${quoteId}`);
 }
 
 export async function setQuoteStatusAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const quoteId = z.string().min(1).parse(formData.get("quoteId"));
   const status = z
     .enum(["draft", "sent", "accepted", "rejected", "expired"])

@@ -15,7 +15,7 @@ import { tenantDb } from "./db";
 export async function assignUserToTenant(
   userId: string,
   tenantId: string,
-  role: "admin" | "agent",
+  role: "admin" | "agent" | "client",
 ) {
   await db.update(users).set({ tenantId, role }).where(eq(users.id, userId));
 }

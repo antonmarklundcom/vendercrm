@@ -82,6 +82,7 @@ describe.skipIf(!hasDb)("tenancy isolation", () => {
       role: "admin",
       impersonatorUserId: null,
       accessStatus: "active",
+      siteScope: null,
     };
     ctxB = {
       tenantId: tenantBId,
@@ -89,6 +90,7 @@ describe.skipIf(!hasDb)("tenancy isolation", () => {
       role: "admin",
       impersonatorUserId: null,
       accessStatus: "active",
+      siteScope: null,
     };
   });
 

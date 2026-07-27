@@ -42,7 +42,7 @@ export async function acceptInvitation(
   await assignUserToTenant(
     userId,
     invitation.tenantId,
-    invitation.role as "admin" | "agent",
+    invitation.role as "admin" | "agent" | "client",
   );
   await markInvitationAccepted(invitation.id);
 

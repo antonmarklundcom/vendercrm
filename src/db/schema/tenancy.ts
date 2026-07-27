@@ -60,7 +60,7 @@ export const users = mysqlTable(
     // defense-in-depth for its own /api/auth/admin/* endpoints — the app's own
     // authorization never trusts this field alone, only `isSuperadmin` below
     // (resolved via getTenantContext/getSuperadminContext, PLAN.md §3.3).
-    role: varchar("role", { length: 20, enum: ["admin", "agent", "superadmin"] }),
+    role: varchar("role", { length: 20, enum: ["admin", "agent", "client", "superadmin"] }),
     isSuperadmin: boolean("is_superadmin").notNull().default(false),
     // Better Auth admin plugin ban fields.
     banned: boolean("banned").notNull().default(false),
@@ -85,7 +85,7 @@ export const invitations = mysqlTable(
     id: char("id", { length: 26 }).primaryKey(),
     tenantId: char("tenant_id", { length: 26 }).notNull(),
     email: varchar("email", { length: 320 }).notNull(),
-    role: varchar("role", { length: 20, enum: ["admin", "agent"] }).notNull(),
+    role: varchar("role", { length: 20, enum: ["admin", "agent", "client"] }).notNull(),
     token: varchar("token", { length: 64 }).notNull(),
     invitedBy: char("invited_by", { length: 26 }).notNull(),
     acceptedAt: datetime("accepted_at"),

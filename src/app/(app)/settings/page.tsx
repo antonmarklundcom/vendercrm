@@ -9,6 +9,12 @@ const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
 export default async function SettingsPage() {
   const ctx = await requireTenantContext();
+
+  // Hiding the nav link is not access control — a client must be refused
+  // here too, or the URL alone would be enough (PLAN.md §5.2).
+  if (ctx.role === "client") {
+    return <p className="text-muted-foreground">{(await getTranslations("app"))("clientPortalOnly")}</p>;
+  }
   const t = await getTranslations("app.settings");
   const tc = await getTranslations("common");
 

@@ -64,6 +64,13 @@
       "when": 1785143345666,
       "tag": "0008_add_automations",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1785165364718,
+      "tag": "0009_add_user_site_access",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,12 @@ import { connectAccountAction, syncTemplatesAction } from "./actions";
 
 export default async function WhatsappPage() {
   const ctx = await requireTenantContext();
+
+  // Hiding the nav link is not access control — a client must be refused
+  // here too, or the URL alone would be enough (PLAN.md §5.2).
+  if (ctx.role === "client") {
+    return <p className="text-muted-foreground">{(await getTranslations("app"))("clientPortalOnly")}</p>;
+  }
   const t = await getTranslations("app.whatsapp");
 
   if (ctx.role !== "admin") {

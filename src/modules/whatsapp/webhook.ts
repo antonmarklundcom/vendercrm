@@ -152,7 +152,8 @@ async function ingestInboundMessage(
   const phone = message.from.startsWith("+") ? message.from : `+${message.from}`;
   const name = contactsMeta?.find((c) => c.wa_id === message.from)?.profile?.name;
 
-  let contact = await getContactByPhone(ctx, phone);
+  let contact: Awaited<ReturnType<typeof getContactByPhone>> | null =
+    await getContactByPhone(ctx, phone);
   if (!contact) {
     contact = await createContact(ctx, { name: name || phone, phone, source: "whatsapp" });
   }

@@ -16,7 +16,7 @@ const INVITE_TTL_DAYS = 7;
 
 export type CreateInvitationInput = {
   email: string;
-  role: "admin" | "agent";
+  role: "admin" | "agent" | "client";
 };
 
 export async function createInvitation(

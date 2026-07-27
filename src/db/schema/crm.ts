@@ -144,6 +144,11 @@ export const deals = mysqlTable(
     value: bigint("value", { mode: "number" }).notNull().default(0),
     currency: char("currency", { length: 3 }).notNull().default("PYG"),
     assignedUserId: char("assigned_user_id", { length: 26 }),
+    // Which site produced this deal. Null for deals created by hand in the
+    // CRM. This is the column per-user site scoping filters the pipeline on
+    // (PLAN.md §5.2) — without it a site-restricted user could not be shown
+    // a correct kanban at all.
+    siteId: char("site_id", { length: 26 }),
     // Kanban order within its stage — dragged deals get renumbered on drop.
     position: int("position").notNull().default(0),
     stageEnteredAt: datetime("stage_entered_at")
@@ -162,6 +167,7 @@ export const deals = mysqlTable(
     index("deals_tenant_stage_idx").on(table.tenantId, table.stageId),
     index("deals_tenant_contact_idx").on(table.tenantId, table.contactId),
     index("deals_tenant_assigned_idx").on(table.tenantId, table.assignedUserId),
+    index("deals_tenant_site_idx").on(table.tenantId, table.siteId),
   ],
 );
 

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireTenantContext } from "@/modules/tenancy/context";
+import { requireTenantOperator } from "@/modules/tenancy/context";
 import { moveDeal, createDeal } from "@/modules/crm/deals";
 
 const moveDealSchema = z.object({
@@ -16,7 +16,7 @@ export async function moveDealAction(input: {
   toStageId: string;
   toPosition: number;
 }) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const parsed = moveDealSchema.parse(input);
   await moveDeal(ctx, parsed.dealId, { toStageId: parsed.toStageId, toPosition: parsed.toPosition });
   revalidatePath("/pipeline");
@@ -31,7 +31,7 @@ const createDealSchema = z.object({
 });
 
 export async function createDealAction(formData: FormData) {
-  const ctx = await requireTenantContext();
+  const ctx = await requireTenantOperator();
   const input = createDealSchema.parse({
     contactId: formData.get("contactId"),
     pipelineId: formData.get("pipelineId"),
