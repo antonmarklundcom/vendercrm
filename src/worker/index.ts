@@ -27,6 +27,12 @@ export async function tick(workerId: string): Promise<boolean> {
 
 export function startWorker(): () => void {
   const workerId = `${process.pid}-${randomUUID()}`;
+
+  // Seed the recurring maintenance chain. schedulePrune is a no-op when one
+  // is already queued, so restarts don't stack up duplicate chains.
+  void import("@/modules/whatsapp/pruning").then(({ schedulePrune }) =>
+    schedulePrune().catch((err) => console.error("[worker] prune scheduling failed", err)),
+  );
   let stopped = false;
 
   const loop = async () => {

@@ -23,6 +23,14 @@ import { saveDraftAction, publishFlowAction } from "../actions";
 
 export type EditorLabels = Record<string, string>;
 
+export type PickerOption = { id: string; label: string };
+export type EditorOptions = {
+  tags: PickerOption[];
+  stages: PickerOption[];
+  users: PickerOption[];
+  templates: PickerOption[];
+};
+
 type NodeData = { label: string; kind?: string; config: Record<string, unknown> };
 
 const PALETTE: Array<{ type: "condition" | "action" | "delay"; kind: string; label: string }> = [
@@ -45,10 +53,12 @@ export function FlowEditor({
   flowId,
   triggerType,
   initialGraph,
+  options,
 }: {
   flowId: string;
   triggerType: TriggerType;
   initialGraph: FlowGraph | null;
+  options: EditorOptions;
 }) {
   const seeded = initialGraph ?? {
     nodes: [{ id: "t1", type: "trigger" as const, config: { triggerType } }],
@@ -208,6 +218,7 @@ export function FlowEditor({
 
       {selectedNode && (
         <NodeConfigPanel
+          options={options}
           node={selectedNode}
           onChange={(config) =>
             setNodes((nds) =>
@@ -263,14 +274,46 @@ function labelFor(type: string, kind?: string): string {
 /** Per-node fields. Deliberately plain inputs — ids are pasted from the
  * relevant CRM page rather than fetched into a picker, which keeps the
  * first version of the editor small. */
+function Picker({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: PickerOption[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border px-2 py-1"
+      >
+        <option value="">—</option>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function NodeConfigPanel({
   node,
   onChange,
   onDelete,
+  options,
 }: {
   node: Node<NodeData>;
   onChange: (config: Record<string, unknown>) => void;
   onDelete: () => void;
+  options: EditorOptions;
 }) {
   const config = node.data.config;
   const kind = node.data.kind;
@@ -296,57 +339,50 @@ function NodeConfigPanel({
       )}
 
       {kind === "send_template" && (
-        <>
-          <label className="flex flex-col gap-1">
-            Plantilla
-            <input
-              value={String(config.templateName ?? "")}
-              onChange={(e) => set("templateName", e.target.value)}
-              className="rounded-md border px-2 py-1"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            Idioma
-            <input
-              value={String(config.language ?? "es")}
-              onChange={(e) => set("language", e.target.value)}
-              className="w-20 rounded-md border px-2 py-1"
-            />
-          </label>
-        </>
+        <Picker
+          label="Plantilla aprobada"
+          value={
+            config.templateName ? `${config.templateName}|${config.language ?? "es"}` : ""
+          }
+          options={options.templates}
+          onChange={(value) => {
+            // The picker carries name|language as one value because a send
+            // needs both (§6.4); split it back apart on the way in.
+            const separator = value.lastIndexOf("|");
+            onChange({
+              ...config,
+              templateName: separator > 0 ? value.slice(0, separator) : "",
+              language: separator > 0 ? value.slice(separator + 1) : "es",
+            });
+          }}
+        />
       )}
 
       {(kind === "add_tag" || kind === "remove_tag" || kind === "has_tag") && (
-        <label className="flex flex-col gap-1">
-          ID de etiqueta
-          <input
-            value={String(config.tagId ?? "")}
-            onChange={(e) => set("tagId", e.target.value)}
-            className="rounded-md border px-2 py-1"
-          />
-        </label>
+        <Picker
+          label="Etiqueta"
+          value={String(config.tagId ?? "")}
+          options={options.tags}
+          onChange={(value) => set("tagId", value)}
+        />
       )}
 
       {(kind === "move_deal_stage" || kind === "deal_in_stage") && (
-        <label className="flex flex-col gap-1">
-          ID de etapa
-          <input
-            value={String(config.stageId ?? "")}
-            onChange={(e) => set("stageId", e.target.value)}
-            className="rounded-md border px-2 py-1"
-          />
-        </label>
+        <Picker
+          label="Etapa"
+          value={String(config.stageId ?? "")}
+          options={options.stages}
+          onChange={(value) => set("stageId", value)}
+        />
       )}
 
       {kind === "assign_user" && (
-        <label className="flex flex-col gap-1">
-          ID de usuario
-          <input
-            value={String(config.userId ?? "")}
-            onChange={(e) => set("userId", e.target.value)}
-            className="rounded-md border px-2 py-1"
-          />
-        </label>
+        <Picker
+          label="Usuario"
+          value={String(config.userId ?? "")}
+          options={options.users}
+          onChange={(value) => set("userId", value)}
+        />
       )}
 
       {(kind === "wait_duration" || kind === "wait_for_reply" || kind === "has_replied_since") && (

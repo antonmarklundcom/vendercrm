@@ -2,8 +2,13 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { getFlow, getDraftVersion, getVersion } from "@/modules/automations/flows";
-import { listRunsForFlow } from "@/modules/automations/engine";
+import { listRunsForFlow, listRunSteps } from "@/modules/automations/engine";
 import { flowGraphSchema, type FlowGraph, type TriggerType } from "@/modules/automations/graph";
+import { listTags } from "@/modules/crm/contacts";
+import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
+import { listTenantUsers } from "@/modules/tenancy/users";
+import { listAccountsForTenant } from "@/modules/whatsapp/accounts";
+import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { Button } from "@/components/ui/button";
 import { FlowEditor } from "./FlowEditor";
 import { setFlowStatusAction, cancelRunAction } from "../actions";
@@ -26,6 +31,38 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
   const graph: FlowGraph | null = parsed?.success ? parsed.data : null;
 
   const runs = await listRunsForFlow(ctx, flow.id);
+  // Step history for the most recent runs only — the full table would be
+  // unbounded, and older runs are rarely what you're debugging.
+  const stepsByRun = new Map(
+    await Promise.all(
+      runs.slice(0, 10).map(async (run) => [run.id, await listRunSteps(ctx, run.id)] as const),
+    ),
+  );
+
+  // Options for the node config panel. Pasting raw ULIDs was the last rough
+  // edge in the editor — every id the palette needs is pickable now.
+  const [tags, pipelines, users, waAccounts] = await Promise.all([
+    listTags(ctx),
+    listPipelines(ctx),
+    listTenantUsers(ctx),
+    listAccountsForTenant(ctx),
+  ]);
+  const stageOptions = (
+    await Promise.all(
+      pipelines.map(async (pipeline) =>
+        (await listStagesForPipeline(ctx, pipeline.id)).map((stage) => ({
+          id: stage.id,
+          label: `${pipeline.name} › ${stage.name}`,
+        })),
+      ),
+    )
+  ).flat();
+  const templates = waAccounts[0]
+    ? (await listApprovedTemplates(ctx, waAccounts[0].id)).map((tpl) => ({
+        id: `${tpl.name}|${tpl.language}`,
+        label: `${tpl.name} (${tpl.language})`,
+      }))
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,6 +87,12 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
         flowId={flow.id}
         triggerType={flow.triggerType as TriggerType}
         initialGraph={graph}
+        options={{
+          tags: tags.map((tag) => ({ id: tag.id, label: tag.name })),
+          stages: stageOptions,
+          users: users.map((user) => ({ id: user.id, label: user.name })),
+          templates,
+        }}
       />
 
       <section>
@@ -73,7 +116,18 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
                   )}
                 </td>
                 <td className="py-2">{run.currentNodeId ?? "—"}</td>
-                <td className="py-2">{run.createdAt.toLocaleString("es-PY")}</td>
+                <td className="py-2">
+                  {run.createdAt.toLocaleString("es-PY")}
+                  {(stepsByRun.get(run.id)?.length ?? 0) > 0 && (
+                    <ol className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                      {stepsByRun.get(run.id)!.map((step) => (
+                        <li key={step.id}>
+                          {step.nodeType}:{step.nodeId} — {step.status}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </td>
                 <td className="py-2 text-right">
                   {(run.status === "running" || run.status === "waiting") && (
                     <form action={cancelRunAction}>

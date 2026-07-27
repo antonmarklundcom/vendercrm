@@ -4,6 +4,7 @@ import { processWebhookEvent } from "./webhook";
 import { deliverQueuedMessage } from "./send";
 import { syncTemplates } from "./templates";
 import { scheduleTemplateSync, SYNC_INTERVAL_MS } from "./sync-schedule";
+import { pruneWebhookEvents, schedulePrune, PRUNE_INTERVAL_MS } from "./pruning";
 
 // Job handlers for the WhatsApp pipeline (PLAN.md §6.3, §6.4). Imported for
 // its registration side effect from worker/handlers.ts, same pattern as
@@ -35,4 +36,12 @@ registerHandler("whatsapp.sync_templates", async (payload, tenantId) => {
 
   await syncTemplates(ctx, accountId);
   await scheduleTemplateSync(ctx, accountId, SYNC_INTERVAL_MS);
+});
+
+// Daily pruning of webhook_events. Unlike the template sync this has no
+// tenant, so it re-enqueues itself unconditionally — there is no per-tenant
+// token that could break the chain.
+registerHandler("whatsapp.prune_events", async () => {
+  await pruneWebhookEvents();
+  await schedulePrune(PRUNE_INTERVAL_MS);
 });

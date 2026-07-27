@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { listConversations } from "@/modules/whatsapp/inbox";
 import { getContact } from "@/modules/crm/contacts";
+import { AutoRefresh } from "./AutoRefresh";
 
 export default async function InboxPage() {
   const ctx = await requireTenantContext();
@@ -24,6 +25,7 @@ export default async function InboxPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <AutoRefresh />
       <h1 className="text-xl font-semibold">{t("title")}</h1>
       <ul className="flex flex-col gap-2 text-sm">
         {withContacts.map(({ conversation, contact }) => (

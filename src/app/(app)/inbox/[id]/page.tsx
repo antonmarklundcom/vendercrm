@@ -8,13 +8,14 @@ import {
   isWithinFreeFormWindow,
 } from "@/modules/whatsapp/inbox";
 import { getContact } from "@/modules/crm/contacts";
+import { AutoRefresh } from "../AutoRefresh";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { Button } from "@/components/ui/button";
 import { sendTextAction, sendTemplateAction } from "../actions";
 
-// Window countdown (§6.5). Rendered server-side, so it's accurate as of
-// page load rather than ticking — the inbox is a server component and
-// there's no polling layer yet (deferred with the rest of §6.5's realtime).
+// Window countdown (§6.5). Rendered server-side, so it steps rather than
+// ticks — AutoRefresh re-renders the page every 5s, which is close enough
+// for a 24-hour countdown.
 function formatRemaining(lastInboundAt: Date | null): string {
   if (!lastInboundAt) return "";
   const msLeft = lastInboundAt.getTime() + 24 * 60 * 60 * 1000 - Date.now();
@@ -51,6 +52,7 @@ export default async function ConversationPage({
 
   return (
     <div className="flex flex-col gap-4">
+      <AutoRefresh />
       <h1 className="text-xl font-semibold">{contact?.name ?? conversation.contactId}</h1>
       <p className="text-sm text-muted-foreground">{contact?.phone}</p>
 

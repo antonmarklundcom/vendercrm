@@ -73,6 +73,12 @@ export async function listRunsForFlow(ctx: TenantContext, flowId: string) {
   return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
+/** Per-step audit trail for the runs monitor (§7.2 "audit/debug trail"). */
+export async function listRunSteps(ctx: TenantContext, runId: string) {
+  const rows = await tenantDb(ctx).select(flowRunSteps, eq(flowRunSteps.runId, runId));
+  return rows.sort((a, b) => a.executedAt.getTime() - b.executedAt.getTime());
+}
+
 export async function cancelRun(ctx: TenantContext, runId: string) {
   await tenantDb(ctx)
     .update(flowRuns)
