@@ -588,6 +588,33 @@ Hostinger (env, migrations, process restart), smoke-test checklist, pass through
 for Spanish copy consistency.
 **Exit**: production deploy on Hostinger; owner's team onboarded.
 
+### Build status (updated 2026-07-29)
+
+**1A–1H are built and merged to `main`.** CI is green on the full suite: 11 files /
+70 tests, run against a real MySQL 8 service with migrations applied — the §3.3 layer-3
+cross-tenant isolation merge gate passes, as do the WhatsApp webhook, lead ingest,
+quote-numbering, automation-engine and worker integration suites. `lint`, `typecheck`
+and `next build` pass.
+
+All *code* for Phase 1 is done. 1H's exit criteria are **not** met yet, because both
+remaining items are owner actions, not build work:
+
+- **Production deploy on Hostinger** — runbook is `docs/DEPLOY.md`; needs the env vars
+  in §1 of that doc, a Meta webhook pointed at `/api/webhooks/whatsapp` (§4), and the
+  cron pinger (§5).
+- **Owner's team onboarded** — needs a superadmin (`scripts/create-superadmin.ts`) and
+  the real tenant seeded (`scripts/seed-tenant.ts`).
+
+Known gaps deliberately left in place, none blocking launch:
+
+- `deals.assigned_user_id` and `conversations.assigned_user_id` exist in the schema and
+  are read/written by `modules/crm/deals.ts` and `modules/whatsapp/inbox.ts`, and the
+  `assign_user` automation action sets them — but **no UI assigns them by hand**. A rep
+  can't be given a lead from the pipeline screen yet; only a flow can assign.
+- The `s3` storage driver throws at boot (`src/lib/storage/index.ts`); `local` is the
+  only working driver. Fine for one tenant, must be written before external ones.
+- Round-robin assignment is specified in §7.1 but only "specific user" is implemented.
+
 ### Session estimate
 
 | Milestone | Sessions (cumulative) |
@@ -649,3 +676,124 @@ is planned, not discovered:
    Without it the honeypot alone carries spam defense.
 9. **Email**: is any current GHL email flow load-bearing for the Paraguay sites? If yes,
    §11's email gap needs scheduling; if it's WhatsApp-only follow-up, it doesn't.
+
+*Answered 2026-07-29 (from the built code, not a decision):*
+
+4. **Object storage** — **not needed to launch.** The `s3` driver isn't written; it
+   throws at boot, so selecting it would take the app down (`src/lib/storage/index.ts`).
+   `local`'s only cost today is that stored quote PDFs don't survive a redeploy, and the
+   public quote route re-renders them on demand, so nothing is lost. The question becomes
+   live when the S3 driver is written, i.e. before external tenants.
+8. **Turnstile** — still open, and still *site-side*: §5.1 puts it on each connected
+   site's own form handler, not in this app. No VenderCRM env var, no credential here.
+
+---
+
+## 13. Post-Phase-1 owner requests (raised 2026-07-29) — **pending Fable spec**
+
+Recorded here so they aren't lost, and deliberately **not specced as architecture** —
+per the header rule, a build model flags gaps rather than improvising the design. Each
+item below states what exists today, what's genuinely missing, and the shape of the
+decision Fable needs to make. Sizes are rough and assume the existing module/job
+patterns are reused.
+
+**None of these are Phase 2 (SIFEN).** If they're wanted first, they form a *Phase 1.5*
+that delays SIFEN — that ordering is the owner's call, not a technical constraint.
+
+### 13.1 WhatsApp auto-reply — **already built, no work needed**
+
+Worth stating plainly because it was asked as if missing: the 1G flow builder already
+does this. Trigger `wa_message_received` (with optional keyword match) → action
+`send_whatsapp`. Build the flow in `/automations`, publish it, done. The engine's guards
+(§7.2) already cover the things that make naive autoresponders dangerous: one run per
+contact per flow, `optout` tag honored on every send (auto-applied on inbound
+*BAJA*/*STOP*), and the 24-hour-window rule — outside the window only approved templates
+can be sent, which the send action enforces rather than silently failing.
+
+### 13.2 AI-generated WhatsApp replies — **new, needs a spec**
+
+Not built, and the interesting problems are policy, not plumbing. The mechanical part is
+small: one new action node (`ai_reply`) calling an LLM with conversation history, reusing
+the existing job/retry infrastructure. What Fable needs to rule on:
+
+- **Autonomy.** Fully automatic sends, or draft-for-approval in the inbox? Draft-first is
+  strongly the safer default for a Paraguayan sales team whose WhatsApp number is their
+  business — a hallucinated price or commitment is a real liability, and WhatsApp numbers
+  get quality-rated and can be restricted by Meta on user blocks/reports.
+- **Grounding.** Which tenant data is in scope (products/catalog, business hours, quote
+  totals) and how it's fetched. Ungrounded replies about price or availability are the
+  main failure mode.
+- **Per-tenant config + cost.** Prompt/persona per tenant, spend caps, and whether the
+  platform holds one API key or each tenant supplies theirs. This is the first
+  *usage-metered* cost in a prepay-only billing model (§1.2) — plans currently have no
+  concept of variable cost per tenant, so this touches billing.
+- **Secrets.** Per-tenant keys go through §3.4 (AES-256-GCM), same as WhatsApp tokens.
+
+Size: ~1 session for a draft-only version reusing 1G; more if autonomous sending, spend
+metering, and billing changes are in scope.
+
+### 13.3 Embeddable chat widget (the GHL-style snippet) — **new, needs a spec**
+
+Not built, and it collides with a locked decision, so it needs an explicit ruling rather
+than a build. §1.2 locks lead ingest to **server-to-server only, never from the browser**,
+and §5.1 states the UTM snippet is "the only client-side code this project ships." A chat
+widget is by definition browser-side and unauthenticated, so it is exactly the shape that
+decision excluded.
+
+That doesn't make it wrong to build — it makes it a decision to reopen deliberately. What
+it would need beyond the widget itself: a public write endpoint that can't be used to
+enumerate or spam a tenant (the current `checkRateLimit` is process-local in-memory, sound
+only because Hostinger runs one process — a public chat endpoint is the point where that
+becomes insufficient and needs to move to MySQL), an origin allowlist per site, a
+visitor→contact identity model for people who haven't given a phone number yet (today
+`contacts.phone` *is* identity, §5), and live agent delivery without websockets (§11
+defers realtime; polling is the honest Phase 1 answer).
+
+Note this is a genuinely different product surface from WhatsApp — a website visitor
+chatting anonymously is not a WhatsApp contact, and merging the two inboxes is most of
+the work.
+
+Size: ~2–3 sessions, and it should not be started before the rate-limiter move.
+
+### 13.4 Email — **new, needs a spec; explicitly not MVP**
+
+§11 already flags this as a known GHL capability this repo doesn't replace, with Resend or
+Postmark as the cheapest path. Two things the owner asked that are worth settling now:
+
+- **A Google Workspace account is not a substitute.** Workspace is for humans reading and
+  writing mail. Sending application email through it hits low sending limits, poor
+  deliverability for bulk/transactional traffic, and no webhooks for bounces/opens. Use a
+  transactional provider (Resend/Postmark) for app-sent mail; Workspace can stay as the
+  team's own mailbox and receive replies.
+- **Yes, it costs money, but not much at this scale.** Both have free/low tiers that
+  comfortably cover transactional volume; the real cost is a domain plus the discipline of
+  SPF/DKIM/DMARC and warmup. Deliverability becomes the owner's responsibility, which is
+  the actual reason §11 called this out — it's ongoing operational work, not a one-off
+  integration.
+
+Size: ~1 session for transactional send (invites, quote delivery) behind an adapter, in
+the same shape as `lib/storage`. Marketing/bulk email is a different, larger scope and
+should not be bundled in.
+
+### 13.5 Per-user access to specific leads — **collides with a locked decision**
+
+Asked as part of "use it as SaaS and give access to specific accounts/leads." Two
+different things are bundled there, and only one exists:
+
+- **Superadmin controls tenants, tenants are fully isolated** — built (1B), and this is
+  the SaaS control plane. `/tenants` creates/suspends, plans and payments are recorded,
+  "ver como" impersonates, every impersonated action lands in `audit_log`.
+- **Restricting a *user* to only certain contacts/leads inside one tenant** — **not
+  built, and locked against.** §1.2: "all tenant users see all contacts/deals; deals &
+  conversations assignable to a rep." Assignment is about *ownership*, not *visibility*.
+
+If the owner wants true per-rep visibility limits, that reopens a locked decision and
+changes the isolation story: §3.3's `tenantDb(ctx)` injects `tenant_id` only, so a second
+scoping dimension has to be added at the same layer to be trustworthy, and the layer-3
+isolation suite needs a matching set of per-user cases. This is a load-bearing change —
+Opus work with a Fable review gate, not an incremental feature.
+
+Cheaper interim step that doesn't touch the isolation layer: build the **missing
+assignment UI** (see §10 build status) plus "assigned to me" filters on the pipeline and
+inbox. That delivers most of the day-to-day benefit — reps working their own leads —
+without weakening the guarantee that `tenant_id` is the one and only scope.
