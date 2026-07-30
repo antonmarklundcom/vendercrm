@@ -21,7 +21,12 @@ Nothing is seeded automatically and there is no default password. Public sign-up
 closed — Better Auth's `/sign-up/email` only accepts invited addresses — so the first
 two accounts have to be created from a shell that can reach the database. Run these
 from a **local machine** against the database (for production, via Hostinger's Remote
-MySQL host — see `docs/DEPLOY.md` §2–3; not Hostinger SSH):
+MySQL host — see `docs/DEPLOY.md` §2–3; not Hostinger SSH).
+
+Both scripts read `.env` (as does `db:migrate`), so fill that in first rather than
+exporting variables by hand. They import the app's validated config, so **every**
+mandatory var in `.env.example` must be present — not just `DATABASE_URL` — or they
+exit before touching the database.
 
 ```bash
 # Platform superadmin — no tenant, manages all tenants

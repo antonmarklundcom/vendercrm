@@ -1,3 +1,7 @@
+// Must be the first import: it populates process.env before the module graph
+// below reaches lib/config/env, which validates it at load time. Same pattern
+// as drizzle.config.ts — tsx doesn't read .env on its own.
+import "dotenv/config";
 import { createTenant, getTenantBySlug } from "@/modules/tenancy/tenants";
 import {
   createTenantAdminUser,
