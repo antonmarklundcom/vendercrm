@@ -893,26 +893,114 @@ Ordered by what actually blocks the run, not by size:
    three pipelines with different stages, and today only the first is
    reachable. Selection belongs in the URL (`?pipeline=<id>`), not component
    state, so it survives refresh and can be shared. Listed under 1L as a
-   nicety; this use case promotes it.
+   nicety; this use case promotes it. — ✅ done.
+
+   **As built.** Both pages read `?pipeline=<id>` and fall back to
+   `pipelines[0]` only when the param is absent or stale — the URL is the
+   source of truth whenever it names a real pipeline. `pipeline/page.tsx`
+   renders the other pipelines as links that set the param; `forms/page.tsx`
+   uses a `method="get"` select, since its "target pipeline" choice belongs
+   to the create-form section rather than the whole page. **Delta from the
+   spec**: nothing in the app could create a second pipeline, so the
+   switcher would have had nothing to switch between — added
+   `createPipelineWithDefaultStages` and a minimal "nueva pipeline" form on
+   the pipeline page to close that gap. Verified live: created 3 pipelines,
+   confirmed the switcher persists across reload.
 2. **Notas de venta UI** — the Sonnet half of 1Q. The engine is built,
    tested and callable; nothing renders it. List, draft builder, detail with
    the payment ledger, issue/void/send actions, "convertir presupuesto" on a
    quote, nav entry, i18n. The UI must mirror the engine's rules (no editing
    an issued document, no payments on a draft, no voiding with payments) so
-   users meet a disabled control rather than a 500.
+   users meet a disabled control rather than a 500. — ✅ done.
+
+   **As built** (`src/app/(app)/documents/`). List, `DocumentBuilder.tsx`
+   (shared between create and edit-draft), a detail page with the payment
+   ledger, and issue/void/send actions — all wired through
+   `src/app/(app)/documents/actions.ts`. The UI enforces the engine's
+   invariants by disabling rather than hiding: the draft builder is only
+   reachable while `status = draft`, the record-payment form only renders
+   once issued, and void is unavailable while `document_payments` has any
+   row — a user meets a disabled control, never a 500 from the service
+   layer's own guard. "Convertir presupuesto" was added to the quote detail
+   page (`quotes/[id]/page.tsx`) rather than the quote list, since converting
+   is a decision made while looking at one quote. Nav entry and every string
+   in `messages/es.json`; the "Documento no fiscal… no tiene validez
+   tributaria" notice from §10 1Q appears on every screen, not just the PDF
+   and public page. Verified live against a seeded tenant: created, edited,
+   issued and paid a document, confirmed void is blocked with payments
+   recorded, and converted a quote into a document end-to-end.
 3. **Inbox 5s polling** (§6.5, deferred since 1D). The inbox is load-once,
    and this is where a rep spends the day. Must not clobber a half-typed
-   reply or reset scroll on refresh — that is the whole risk.
+   reply or reset scroll on refresh — that is the whole risk. — ✅ done.
+
+   **As built.** Two new session-authenticated JSON routes,
+   `/api/inbox/conversations` and `/api/inbox/[id]`, with the inbox list and
+   conversation thread converted from load-once server components to client
+   components polling them via SWR every 5s. The stated risk is handled at
+   the source rather than patched around: the reply textarea's value lives
+   in its own React state and is never overwritten by fetched data, and the
+   message list only auto-scrolls to the bottom when the rep was already
+   there before new messages landed — a rep scrolled up to reread history
+   doesn't get yanked back down. Send, template-send, AI-draft
+   approve/discard and the AI kill switch all call the existing server
+   actions through `useTransition` and force an immediate SWR revalidation
+   afterward, so a rep's own action shows up without waiting for the next
+   tick. Verified live: typed into the reply box, waited through a full poll
+   cycle, confirmed the text survived untouched; toggled the AI kill switch
+   and confirmed the round trip.
 4. **Phone normalization is hardcoded to Paraguay.** `normalizePhone` maps a
    leading `0` to `+595`, so a Swedish `070-123 45 67` silently becomes a
    Paraguayan number. Harmless while the network is Paraguay-only, and
    corrupting on the first Swedish tenant. Needs a per-site/per-tenant
    default country. Found while writing the client integration guide.
+   — ✅ done.
+
+   **As built.** `normalizePhone` moved out to `src/lib/phone.ts` — pure,
+   unit-tested without a configured environment, same pattern as
+   `lib/money.ts` — and takes a `country` parameter against a small dial-code
+   table (PY, AR, BR, SE, US). A number already carrying `+` or `00` is
+   unambiguous and unaffected either way; only bare local numbers change
+   behavior, and only for a tenant that sets something other than PY.
+   `TenantSettings.defaultCountry` (settings JSON, no migration — same
+   pattern as the AI and export settings already there) gets a "País por
+   defecto" field on `/settings`, threaded through the three places a phone
+   number actually gets typed by a human or posted by a site: manual contact
+   creation, hosted form submissions, and site lead ingest. Unset behaves
+   exactly as before (defaults to PY), so this is additive for every
+   existing tenant. **Delta from the spec**: browser-testing this turned up
+   an unrelated crash — `/contacts` failed on every render with next-intl's
+   `FORMATTING_ERROR` because `t("bulk.selectedCount")` was called without
+   the `count` its ICU template requires; the label is meant to be an
+   unformatted string the client substitutes into as selection changes, so
+   it was swapped to `t.raw(...)`. Fixed in the same PR since it blocked
+   verifying this item at all. Verified: unit tests for `normalizePhone`
+   (PY default preserved, SE/other countries correct, no double-prefixing),
+   and live — set a tenant's default country to Suecia, created a contact
+   with a Swedish local-format number, confirmed it stored as `+46…`.
 5. **GBP review requests** (1P's first half — build it here). An automation
    action that sends a Google review link over WhatsApp when a deal hits a
    won stage. No Google API, no OAuth, no approval gate: it is a link. Most
    of 1P's value for none of its lead time, and a real differentiator when
-   selling to dentists and plumbers.
+   selling to dentists and plumbers. — ✅ done.
+
+   **As built.** A new `send_review_request` flow action node
+   (`modules/automations/actions.ts`, `graph.ts`). A tenant already builds
+   "when deal hits stage X" from the existing `deal_stage_changed` trigger
+   plus a `deal_in_stage` condition (§7.1); this adds the one missing action
+   rather than a new trigger/condition pair. It deliberately reuses every
+   guard `send_whatsapp` already has — opt-out check, 24h window, and
+   skip-not-fail behavior — instead of a parallel implementation, so a
+   review request obeys the same rules as any other send. Config is a text
+   field supporting `{{contact.name}}` and `{{review_link}}` merge tags, with
+   a sensible Spanish default message when left blank.
+   `TenantSettings.reviewLink` (settings JSON, no migration, same pattern as
+   #4's `defaultCountry`) gets an "Enlace de reseña de Google" field on
+   `/settings`. An unconfigured link is a skip, not a failed run — the rest
+   of the flow still executes. Verified: an engine test confirms a
+   `send_review_request` step completes even with no review link configured,
+   and a live pass — set a review link, added the node to a flow on
+   `deal_stage_changed`, confirmed the config panel and default-text
+   placeholder render with no console errors.
 6. **1L leftovers**: `useActionState` inline validation on the older forms
    (contacts, deals, quotes, products, forms, automations, WhatsApp connect,
    settings — the 1M forms are the pattern), and superadmin console polish.
