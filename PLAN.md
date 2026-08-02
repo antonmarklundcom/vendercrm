@@ -669,7 +669,7 @@ media at it.
 **Exit**: driver switchable by env; local disk still works unmodified. Met,
 pending the live-bucket smoke test above.
 
-### 1L — Feedback & polish *(partially done — see below)*
+### 1L — Feedback & polish — ✅ done
 Landed as a side effect of 1J: the contacts table and bulk-action bar use
 `useTransition`/pending states natively (no full-page reload on filter or bulk
 action), and the two new 1M forms (forgot/reset password, invite) use
@@ -682,10 +682,11 @@ action), and the two new 1M forms (forgot/reset password, invite) use
 - ~~Superadmin console visual polish~~ — `/tenants` and `/plans` now use the
   same `PageHeader` shell as the tenant app.
 
-**Not done** — deferred, still open for whoever picks up next:
-- Inbox 5s revalidation (§6.5) — the inbox is still load-once, no polling.
-- Pipeline switcher for tenants with more than one pipeline (the page still
-  hard-picks `pipelines[0]`).
+**Closed out by 1R #1 and #3**:
+- ~~Inbox 5s revalidation (§6.5) — the inbox is still load-once, no
+  polling~~ — done; see 1R #3.
+- ~~Pipeline switcher for tenants with more than one pipeline (the page
+  still hard-picks `pipelines[0]`)~~ — done; see 1R #1.
 
 ### 1M — Transactional email — ✅ done
 Added `resend` + `src/lib/email` (transport, no-ops with a console warning
@@ -809,7 +810,7 @@ metered, guaraníes are not — needs per-model pricing that changes under us);
 no streaming; no RAG over the tenant's own documents; no AI drafting in the
 inbox on demand, only via a flow node.
 
-### 1Q — Non-fiscal documents: notas de venta *(owner request)* — 🟡 engine done & merged; UI is 1R #2
+### 1Q — Non-fiscal documents: notas de venta *(owner request)* — ✅ done, UI shipped in 1R #2
 
 Quotes (1F) stop at "here's what it would cost". Nothing in the app records
 that a sale *happened* or that money came in, so the owner's team tracked
@@ -871,12 +872,12 @@ This is the rule that stops Phase 2 being retrofitted into 1Q's schema.
 public-link delivery, public view `/d/[token]` (+ `/pdf`), unit tests and the
 §3.3 cross-tenant isolation suite for the three new tables.
 
-**Not done — the Sonnet half**: the in-app UI (documents list, builder,
+**The Sonnet half — done in 1R #2**: the in-app UI (documents list, builder,
 detail with the payment ledger, "convertir presupuesto", nav entry, i18n
-strings). The engine is callable and tested; nothing renders it inside the
-app yet.
+strings). See §10 1R #2 for what shipped and how it mirrors the engine's
+rules.
 
-### 1R — Daily-driver readiness *(Sonnet; the owner's own dogfooding run)* — ⏭ next
+### 1R — Daily-driver readiness *(Sonnet; the owner's own dogfooding run)* — 🟡 all six build items done; operator tasks + the owner's dogfooding day still open
 
 The decision driving this phase: **the owner runs his own Paraguayan lead-gen
 network (dentista.com.py, tasacion.com.py, pozo.com.py) on VenderCRM before
@@ -1076,9 +1077,14 @@ Ordered by what actually blocks the run, not by size:
 
    Actions reachable only from a hidden id (issue/send/suspend/toggle) were
    converted to `safeParse` + silent return rather than given form state:
-   there is no user-fillable field for an error to sit under. Forms outside
-   this pass still throw — `(superadmin)/tenants/[id]` (subscription,
-   payment, impersonate), `users`, `inbox`, and the quote status actions.
+   there is no user-fillable field for an error to sit under. **Closed by
+   1R #6's follow-up PR** (`createSubscriptionAction`, `recordPaymentAction`,
+   `impersonateAction` on `(superadmin)/tenants/[id]`, and
+   `revokeInvitationAction` on `users`) — see that entry above. Forms outside
+   this pass still throw — `inbox` (`sendTextAction`'s reply body is a real
+   user-fillable field with no inline error path) and the quote status
+   actions (`sendQuoteAction`, `setQuoteStatusAction`,
+   `convertQuoteToDocumentAction` still use `.parse`, not `safeParse`).
 
 **Operator tasks, not code** — these gate putting real client leads in, and
 none of them are done:
@@ -1124,12 +1130,12 @@ treats Meta verification.
 | Operable without SSH (1I) | **~27** — ✅ done |
 | CRM surface parity (1J) | **~31** — ✅ done |
 | Durable storage (1K) | — ✅ done |
-| Feedback & polish (1L) | — partial, see §10 1L |
+| Feedback & polish (1L) | — ✅ done |
 | Transactional email (1M) | — ✅ done |
 | Sellable as SaaS (through 1N) | **~37** — 1N still blocked on Meta approval |
 | AI auto-reply (1O) | **~40** — ✅ done, merged |
-| Notas de venta engine (1Q) | — ✅ engine done, merged; UI is 1R |
-| Daily-driver readiness (1R) | ⏭ **next up, Sonnet** — the owner's dogfooding run |
+| Notas de venta (1Q) | — ✅ done, engine + UI merged |
+| Daily-driver readiness (1R) | 🟡 **items #1-#6 done** — operator tasks (§10 1R) and the owner's dogfooding day still open |
 | Google Business Profile (1P) | unscheduled |
 
 Estimates assume focused build sessions against this spec; Fable review gates (after
