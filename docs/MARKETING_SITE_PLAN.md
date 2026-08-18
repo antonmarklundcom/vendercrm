@@ -24,7 +24,7 @@ Built inside this same Next.js repo, replacing the current placeholder in
 
 | Decision | Value |
 |---|---|
-| Brand | clientes.com.py = growth-partner service brand. VenderCRM named at most once on the site (as "nuestra plataforma", on /metodo or /nosotros). The word "CRM" never appears above the fold. |
+| Brand | clientes.com.py = growth-partner service brand. **The CRM product name is never used on the public site — owner decision, 2026-08-18.** It is referred to only as "la plataforma" / "nuestra plataforma". The word "CRM" never appears above the fold. (The name still exists inside the logged-in app and in this repo; renaming that is a separate decision.) |
 | Audience | **Established** Paraguayan SMBs with validated offers: clínicas, constructoras, inmobiliarias, servicios profesionales, empresas B2B. Not early-stage entrepreneurs. |
 | Conversion goal | Booked diagnostic conversation. Every page's CTA pair = short qualifying form + WhatsApp deep link (`wa.me`). |
 | Lead capture | Contact form posts to this app's own `POST /api/v1/leads` (tenant-scoped, `X-Api-Key`, server-to-server per PLAN.md §5.1) — the brand's own leads land in the owner's VenderCRM pipeline. |
@@ -75,8 +75,8 @@ Three layers, strictly ordered:
 2. **Method (body copy):** diagnosis → capture (presence, forms, WhatsApp) →
    follow-up system → measurement. The method is the product.
 3. **Tools (last, generic):** "incluye la plataforma donde tu equipo ve cada consulta
-   y cada seguimiento". VenderCRM named at most once, as evidence the platform is
-   first-party — not as the pitch.
+   y cada seguimiento". Referred to only as "la plataforma", never by product
+   name, and only as evidence the platform is first-party — not as the pitch.
 
 ---
 
