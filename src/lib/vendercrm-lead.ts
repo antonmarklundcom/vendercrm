@@ -73,7 +73,7 @@ export type SendLeadResult = { ok: boolean; status: number };
 export async function sendLead(lead: Lead): Promise<SendLeadResult> {
   const apiKey = process.env.VENDERCRM_API_KEY;
   if (!apiKey) {
-    console.error("VenderCRM lead skipped: VENDERCRM_API_KEY is not set");
+    console.error("Lead skipped: VENDERCRM_API_KEY is not set");
     return { ok: false, status: 0 };
   }
 
@@ -100,11 +100,11 @@ export async function sendLead(lead: Lead): Promise<SendLeadResult> {
     if (!response.ok) {
       // The response body names the failing field — logging only the status
       // turns a one-line fix into an afternoon.
-      console.error("VenderCRM lead failed", response.status, await response.text());
+      console.error("CRM lead failed", response.status, await response.text());
     }
     return { ok: response.ok, status: response.status };
   } catch (error) {
-    console.error("VenderCRM unreachable", error);
+    console.error("CRM unreachable", error);
     return { ok: false, status: 0 };
   }
 }

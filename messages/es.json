@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "VenderCRM",
+    "appName": "Clientes",
     "loading": "Cargando…",
     "save": "Guardar",
     "saved": "Cambios guardados",
@@ -508,7 +508,7 @@
           },
           "handler": {
             "title": "Pegá el handler en tu servidor",
-            "body": "Elegí tu tecnología abajo y copiá el código. El formulario apunta a tu propio endpoint y ese endpoint es el que llama a VenderCRM."
+            "body": "Elegí tu tecnología abajo y copiá el código. El formulario apunta a tu propio endpoint y ese endpoint es el que llama a la plataforma."
           },
           "verify": {
             "title": "Probá con un envío real",
@@ -524,7 +524,7 @@
           "idempotency": "Mandá siempre idempotency_key. Con la misma clave, un reintento o un doble clic no crea un contacto duplicado.",
           "phone": "El teléfono es obligatorio y es la identidad del contacto. Aceptamos formato local paraguayo (0981 123 456) y lo normalizamos a +595.",
           "spam": "Poné el honeypot y, si podés, Cloudflare Turnstile. El spam se frena en tu sitio, no adentro del CRM.",
-          "nonBlocking": "Si VenderCRM no responde, igual mostrale la página de gracias al visitante y registrá el error en tu log. Nunca pierdas el lead por un timeout."
+          "nonBlocking": "Si la plataforma no responde, igual mostrale la página de gracias al visitante y registrá el error en tu log. Nunca pierdas el lead por un timeout."
         }
       },
       "turnstile": {
@@ -921,7 +921,7 @@
     },
     "tenants": {
       "title": "Empresas",
-      "intro": "Todas las empresas que usan VenderCRM: creá una nueva, suspendé el acceso o entrá como ella para dar soporte.",
+      "intro": "Todas las empresas que usan la plataforma: creá una nueva, suspendé el acceso o entrá como ella para dar soporte.",
       "createTitle": "Nueva empresa",
       "name": "Nombre",
       "slug": "Slug",

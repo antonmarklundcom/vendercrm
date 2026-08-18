@@ -78,7 +78,7 @@ export function SiteGuide({
       id: "html",
       label: "HTML",
       language: "html",
-      code: `<!-- The form posts to YOUR server, never to VenderCRM directly. -->
+      code: `<!-- The form posts to YOUR server, never to the CRM directly. -->
 <form action="/contacto.php" method="POST">
   <input name="nombre" required>
   <input name="telefono" type="tel" required placeholder="0981 123 456">
@@ -145,7 +145,7 @@ curl_close($ch);
 
 // 4. Never block the visitor on the CRM. Log and thank them either way.
 if ($status !== 201 && $status !== 200) {
-  error_log("VenderCRM lead failed ($status): $response");
+  error_log("CRM lead failed ($status): $response");
 }
 
 header('Location: /gracias.html');
@@ -201,11 +201,11 @@ app.post("/api/contacto", async (req, res) => {
     });
 
     if (!response.ok) {
-      console.error("VenderCRM lead failed", response.status, await response.text());
+      console.error("CRM lead failed", response.status, await response.text());
     }
   } catch (err) {
     // 4. Never block the visitor on the CRM being reachable.
-    console.error("VenderCRM unreachable", err);
+    console.error("CRM unreachable", err);
   }
 
   res.redirect("/gracias");
@@ -217,7 +217,7 @@ app.post("/api/contacto", async (req, res) => {
       language: "html",
       code: `<!-- No server to run code on? Point the form straight at the hosted
      page instead — same result, no API key to manage. -->
-<a href="${formEndpointExample}">Formulario alojado en VenderCRM</a>
+<a href="${formEndpointExample}">Formulario alojado</a>
 
 <!-- Or embed it: -->
 <iframe src="${formEndpointExample}" style="width:100%;height:600px;border:0"></iframe>`,

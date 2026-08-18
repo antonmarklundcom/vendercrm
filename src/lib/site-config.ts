@@ -10,6 +10,18 @@
  * number nobody owns. Filling them in is a one-file edit.
  */
 
+/**
+ * What the platform is called anywhere a person can read it — the app shell,
+ * the login page, transactional emails.
+ *
+ * The product name this repo is named after is deliberately not used: it is a
+ * working name that was never going to be customer-facing (owner decision,
+ * 2026-08-18). The platform is part of the clientes.com.py service, not a
+ * separate product a customer bought, so it carries the same name. Change it
+ * here and every surface follows.
+ */
+export const APP_NAME = "Clientes";
+
 export const APEX_HOST = "clientes.com.py";
 export const APP_HOST = `crm.${APEX_HOST}`;
 

@@ -1,4 +1,5 @@
 import { GRACE_PERIOD_DAYS } from "@/modules/tenancy/subscriptions";
+import { APP_NAME } from "@/lib/site-config";
 
 // Minimal inline-styled HTML — no build step, no MJML, and email clients
 // strip most CSS anyway. Kept deliberately plain (one accent color, system
@@ -12,7 +13,7 @@ function layout(bodyHtml: string): string {
   <body style="margin:0;padding:24px;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#18181b;">
     <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;">
       ${bodyHtml}
-      <p style="margin-top:32px;font-size:12px;color:#71717a;">VenderCRM</p>
+      <p style="margin-top:32px;font-size:12px;color:#71717a;">${APP_NAME}</p>
     </div>
   </body>
 </html>`;
@@ -28,11 +29,11 @@ export function invitationEmail(input: {
   acceptUrl: string;
 }): { subject: string; html: string } {
   return {
-    subject: `${input.inviterName} te invitó a ${input.tenantName} en VenderCRM`,
+    subject: `${input.inviterName} te invitó a ${input.tenantName} en ${APP_NAME}`,
     html: layout(`
       <h1 style="font-size:18px;margin:0 0 8px;">Te invitaron a ${input.tenantName}</h1>
       <p style="font-size:14px;line-height:1.5;color:#3f3f46;">
-        ${input.inviterName} te invitó a sumarte al equipo en VenderCRM. El enlace vence en 7 días.
+        ${input.inviterName} te invitó a sumarte al equipo en ${APP_NAME}. El enlace vence en 7 días.
       </p>
       ${button(input.acceptUrl, "Aceptar invitación")}
     `),
@@ -44,7 +45,7 @@ export function passwordResetEmail(input: { resetUrl: string }): {
   html: string;
 } {
   return {
-    subject: "Restablecer tu contraseña — VenderCRM",
+    subject: `Restablecer tu contraseña — ${APP_NAME}`,
     html: layout(`
       <h1 style="font-size:18px;margin:0 0 8px;">Restablecé tu contraseña</h1>
       <p style="font-size:14px;line-height:1.5;color:#3f3f46;">
@@ -64,7 +65,7 @@ export function subscriptionExpiryWarningEmail(input: {
     input.expiresAt,
   );
   return {
-    subject: `Tu suscripción a VenderCRM vence en ${input.daysRemaining} días`,
+    subject: `Tu suscripción a ${APP_NAME} vence en ${input.daysRemaining} días`,
     html: layout(`
       <h1 style="font-size:18px;margin:0 0 8px;">Tu suscripción vence pronto</h1>
       <p style="font-size:14px;line-height:1.5;color:#3f3f46;">
