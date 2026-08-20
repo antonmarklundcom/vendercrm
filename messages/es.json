@@ -554,6 +554,10 @@
       "aiDiscard": "Descartar",
       "aiTokens": "{tokens} tokens",
       "aiDraftWindowClosed": "No se puede enviar: la ventana de 24 horas está cerrada.",
+      "assignedTo": "Asignada a",
+      "assignedToName": "Asignada a {name}",
+      "assignUnassigned": "Sin asignar",
+      "assignFailed": "No se pudo asignar la conversación",
       "errors": {
         "bodyRequired": "Escribí un mensaje antes de enviar.",
         "bodyTooLong": "El mensaje es demasiado largo: el máximo son 4096 caracteres.",

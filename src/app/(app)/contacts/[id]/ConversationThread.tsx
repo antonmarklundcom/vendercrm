@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import { formatDateTime } from "@/lib/i18n/format";
 import { Select, Textarea } from "@/components/ui/form-fields";
+import { AssigneePicker, type AssignableUser } from "@/app/(app)/inbox/AssigneePicker";
 
 // The WhatsApp thread rendered inside the contact record. Same 24h-window
 // rules the inbox enforces (§6.5): inside the window, free-form text; once it
@@ -36,6 +37,8 @@ export type ThreadLabels = {
 
 export function ConversationThread({
   conversationId,
+  assignedUserId,
+  assignableUsers,
   messages,
   windowOpen,
   remaining,
@@ -45,6 +48,8 @@ export function ConversationThread({
   sendTemplate,
 }: {
   conversationId: string | null;
+  assignedUserId: string | null;
+  assignableUsers: AssignableUser[];
   messages: ThreadMessage[];
   windowOpen: boolean;
   remaining: string;
@@ -68,6 +73,15 @@ export function ConversationThread({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* The same picker the inbox thread uses, imported rather than
+          reimplemented: a rep working from the contact record is making the
+          identical decision and must not meet a different control for it. */}
+      <AssigneePicker
+        conversationId={conversationId}
+        assignedUserId={assignedUserId}
+        users={assignableUsers}
+      />
+
       <p className="text-sm text-muted-foreground">
         {windowOpen ? `${labels.windowOpen} ${remaining}` : labels.windowClosed}
       </p>

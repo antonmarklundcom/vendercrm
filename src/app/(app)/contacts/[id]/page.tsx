@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatDateTime, formatMoney } from "@/lib/i18n/format";
 import { requireTenantContext } from "@/modules/tenancy/context";
+import { listTenantUsers } from "@/modules/tenancy/users";
 import { getContact, listTags, listTagsForContact } from "@/modules/crm/contacts";
 import { getContactTimeline, type TimelineEntry } from "@/modules/crm/timeline";
 import { listDealsForContact } from "@/modules/crm/deals";
@@ -79,7 +80,7 @@ export default async function ContactDetailPage({
 
   const tab: Tab = TABS.includes(rawTab as Tab) ? (rawTab as Tab) : "conversacion";
 
-  const [timeline, deals, contactTags, allTags, conversations, tasks, deleteBlockers] =
+  const [timeline, deals, contactTags, allTags, conversations, tasks, users, deleteBlockers] =
     await Promise.all([
       getContactTimeline(ctx, id),
       listDealsForContact(ctx, id),
@@ -87,11 +88,18 @@ export default async function ContactDetailPage({
       listTags(ctx),
       listConversationsForContact(ctx, id),
       listTasksForContact(ctx, id),
+      // For the conversation tab's owner picker — same decision as the
+      // inbox's, offered in the place a rep is actually looking.
+      listTenantUsers(ctx),
       // Only an admin can delete, so only an admin pays for the scan.
       ctx.role === "admin"
         ? findContactDeleteBlockers(ctx, id)
         : Promise.resolve<ContactBlocker[]>([]),
     ]);
+
+  const assignableUsers = users
+    .filter((user) => !user.banned)
+    .map((user) => ({ id: user.id, name: user.name }));
 
   // One contact can in principle have a conversation per connected number;
   // the most recent is the one worth showing inline.
@@ -212,6 +220,8 @@ export default async function ContactDetailPage({
       {tab === "conversacion" && (
         <ConversationThread
           conversationId={conversation?.id ?? null}
+          assignedUserId={conversation?.assignedUserId ?? null}
+          assignableUsers={assignableUsers}
           messages={messages.map((message) => ({
             id: message.id,
             direction: message.direction,

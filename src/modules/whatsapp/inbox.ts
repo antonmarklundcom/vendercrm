@@ -3,6 +3,7 @@ import { conversations, messages } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { getActiveTenantUser } from "@/modules/tenancy/users";
 
 // Unified inbox read paths (PLAN.md §6.5). Sending goes through ./send.ts;
 // this file is read-only (conversation list, message thread, mark-read).
@@ -38,7 +39,36 @@ export async function listMessagesForConversation(ctx: TenantContext, conversati
   return rows.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 }
 
-export async function assignConversation(ctx: TenantContext, id: string, userId: string | null) {
+/** Raised rather than silently ignored: an assignment that names a user who
+ * cannot own the conversation is a tampered form, and writing it would leave
+ * a row pointing at someone the rest of the app will never resolve. */
+export class ConversationAssignError extends Error {
+  constructor(readonly code: "userNotFound") {
+    super(code);
+  }
+}
+
+/**
+ * Gives a conversation an owner, or clears it (`null` = sin asignar).
+ *
+ * The membership check is the point: `conversations.assignedUserId` has no
+ * foreign key (§4 has none anywhere), and `tenantDb` scopes the *conversation*
+ * row without saying anything about the user id in the payload. Without this,
+ * a hand-crafted POST could park another tenant's conversation on one of our
+ * reps, or assign work to a salesperson who was deactivated this morning —
+ * whose queue nobody is reading. `getActiveTenantUser` answers both questions
+ * at once, since it is the same check `getTenantContext` runs per request.
+ */
+export async function assignConversation(
+  ctx: TenantContext,
+  id: string,
+  userId: string | null,
+) {
+  if (userId) {
+    const user = await getActiveTenantUser(userId, ctx.tenantId);
+    if (!user) throw new ConversationAssignError("userNotFound");
+  }
+
   await tenantDb(ctx).update(conversations).set({ assignedUserId: userId }).where(eq(conversations.id, id));
 }
 

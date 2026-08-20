@@ -457,6 +457,10 @@
       "aiDiscard": "Kasta",
       "aiTokens": "{tokens} tokens",
       "aiDraftWindowClosed": "Går inte att skicka: 24-timmarsfönstret är stängt.",
+      "assignedTo": "Tilldelad",
+      "assignedToName": "Tilldelad {name}",
+      "assignUnassigned": "Ej tilldelad",
+      "assignFailed": "Kunde inte tilldela konversationen",
       "errors": {
         "bodyRequired": "Skriv ett meddelande innan du skickar.",
         "bodyTooLong": "Meddelandet är för långt: max är 4096 tecken.",

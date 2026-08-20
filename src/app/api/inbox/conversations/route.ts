@@ -35,6 +35,10 @@ export async function GET() {
       contactName: contact?.name ?? conversation.contactId,
       contactPhone: contact?.phone ?? "",
       unreadCount: conversation.unreadCount,
+      // Just the id: the tenant's user list is passed once from the page and
+      // does not change between polls, so resolving names here would add a
+      // second query to the most repeated request in the product.
+      assignedUserId: conversation.assignedUserId,
       lastMessageAt: conversation.lastMessageAt,
     };
   });

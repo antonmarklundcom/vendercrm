@@ -9,6 +9,7 @@ import {
 import { getContact } from "@/modules/crm/contacts";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { listPendingDrafts } from "@/modules/ai/replies";
+import { listTenantUsers } from "@/modules/tenancy/users";
 import { ConversationView, type ConversationData } from "./ConversationView";
 
 export default async function ConversationPage({
@@ -22,11 +23,12 @@ export default async function ConversationPage({
   const conversation = await getConversation(ctx, id);
   if (!conversation) notFound();
 
-  const [contact, messages, templates, aiDrafts] = await Promise.all([
+  const [contact, messages, templates, aiDrafts, users] = await Promise.all([
     getContact(ctx, conversation.contactId),
     listMessagesForConversation(ctx, id),
     listApprovedTemplates(ctx, conversation.waAccountId),
     listPendingDrafts(ctx, id),
+    listTenantUsers(ctx),
   ]);
 
   if (conversation.unreadCount > 0) {
@@ -39,6 +41,7 @@ export default async function ConversationPage({
       id: conversation.id,
       lastInboundAt: conversation.lastInboundAt ? conversation.lastInboundAt.toISOString() : null,
       aiDisabledAt: conversation.aiDisabledAt ? conversation.aiDisabledAt.toISOString() : null,
+      assignedUserId: conversation.assignedUserId,
     },
     messages: messages.map((m) => ({
       id: m.id,
@@ -59,5 +62,13 @@ export default async function ConversationPage({
     windowOpen: isWithinFreeFormWindow(conversation.lastInboundAt),
   };
 
-  return <ConversationView conversationId={id} initial={initial} />;
+  // The user list is a prop rather than part of `initial`: it is the one
+  // piece here that the 5s poll has no reason to re-fetch (§6.5).
+  return (
+    <ConversationView
+      conversationId={id}
+      initial={initial}
+      users={users.filter((user) => !user.banned).map((user) => ({ id: user.id, name: user.name }))}
+    />
+  );
 }

@@ -18,10 +18,16 @@ import {
 } from "../actions";
 import { formatDateTime } from "@/lib/i18n/format";
 import { Input, Select } from "@/components/ui/form-fields";
+import { AssigneePicker, type AssignableUser } from "../AssigneePicker";
 
 export type ConversationData = {
   contact: { name: string; phone: string } | null;
-  conversation: { id: string; lastInboundAt: string | null; aiDisabledAt: string | null };
+  conversation: {
+    id: string;
+    lastInboundAt: string | null;
+    aiDisabledAt: string | null;
+    assignedUserId: string | null;
+  };
   messages: Array<{
     id: string;
     direction: "in" | "out";
@@ -73,9 +79,13 @@ function formatRemaining(lastInboundAt: string | null): string {
 export function ConversationView({
   conversationId,
   initial,
+  users,
 }: {
   conversationId: string;
   initial: ConversationData;
+  /** Active members of the tenant, passed once from the page: the one part
+   *  of this screen the 5s poll has no reason to re-fetch. */
+  users: AssignableUser[];
 }) {
   const t = useTranslations("app.inbox");
   const locale = useLocale();
@@ -156,6 +166,12 @@ export function ConversationView({
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold">{d.contact?.name ?? d.conversation.id}</h1>
       <p className="text-sm text-muted-foreground">{d.contact?.phone}</p>
+
+      <AssigneePicker
+        conversationId={conversationId}
+        assignedUserId={d.conversation.assignedUserId}
+        users={users}
+      />
 
       <div className="flex items-center gap-2 text-sm">
         <span className={aiDisabled ? "text-muted-foreground" : "text-green-700"}>

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { listConversations } from "@/modules/whatsapp/inbox";
 import { listAccountsForTenant } from "@/modules/whatsapp/accounts";
+import { listTenantUsers } from "@/modules/tenancy/users";
 import { getContact } from "@/modules/crm/contacts";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
@@ -12,10 +13,17 @@ export default async function InboxPage() {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.inbox");
 
-  const [conversations, accounts] = await Promise.all([
+  const [conversations, accounts, users] = await Promise.all([
     listConversations(ctx),
     listAccountsForTenant(ctx),
+    listTenantUsers(ctx),
   ]);
+
+  // Deactivated users included on purpose: a conversation assigned to
+  // someone before they left must keep showing their name, or it reads as
+  // unassigned and nobody picks it up. The picker (in the thread) offers
+  // only active users; this map is for display.
+  const userNames = Object.fromEntries(users.map((user) => [user.id, user.name]));
   const withContacts = await Promise.all(
     conversations.map(async (conversation) => ({
       conversation,
@@ -57,7 +65,9 @@ export default async function InboxPage() {
             contactName: contact?.name ?? conversation.contactId,
             contactPhone: contact?.phone ?? "",
             unreadCount: conversation.unreadCount,
+            assignedUserId: conversation.assignedUserId,
           }))}
+          userNames={userNames}
         />
       )}
     </div>

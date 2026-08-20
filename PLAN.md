@@ -1603,6 +1603,46 @@ ip_address`) and what each wrong answer looks like. `"unknown"` stays a single
 shared bucket rather than a bypass: an address the app cannot determine must
 not be the way around a limit.
 
+### 1U — Who owns this conversation *(added after 1T)* — ✅ done
+
+`assignConversation` had existed since 1D with zero callers, so
+`conversations.assignedUserId` was a column nothing wrote. In a one-rep
+tenant that costs nothing; in the two-rep tenant the owner is hiring for, it
+means both reps answer the same customer and neither can tell, which is the
+failure the unified inbox was supposed to remove.
+
+**As built.** The service keeps its shape and gains the check it was missing:
+the target must be an *active member of the caller's own tenant*, verified
+through `getActiveTenantUser` — the same lookup `getTenantContext` runs per
+request — and refused with a `ConversationAssignError` otherwise. That guard
+is not optional decoration: §4 has no foreign keys, and `tenantDb` scopes the
+conversation row without looking at the user id in the payload, so without it
+a hand-crafted POST could park a conversation on another tenant's user, or on
+a salesperson deactivated that morning whose queue nobody reads.
+
+One `AssigneePicker` client component serves both places the decision is made
+— the inbox thread and the contact record's conversation tab — rather than
+two implementations that could drift. The inbox *list* shows the owner per
+row without a picker: triage is reading, and the decision belongs on the
+conversation. Deactivated users are excluded from the picker but still
+resolved for display, so a conversation assigned before someone left keeps
+showing their name instead of reading as unassigned.
+
+**Delta from the spec**: the action is agent-accessible, not
+`requireTenantAdmin()`. §13 H1 reserves *configuration* for admins; deciding
+which rep answers a customer is selling work, and `assignDeal` — the same
+decision one object over — has always been agent-accessible. Nothing is
+destroyed either, so it is not an audit-log case: reassignment is undone by
+reassigning back.
+
+On the 5s poll (§10 1R #3): the picker submits on change, so there is no
+unsaved state for a refresh to clobber. The `<select>` is uncontrolled and
+keyed on the stored value, which means a poll tick that changes nothing
+leaves an open dropdown alone, while a colleague taking the conversation
+shows up immediately. The user list is passed once from the page rather than
+returned by the polling route — it does not change between ticks, and the
+conversations route is the most repeated query in the product.
+
 ### 1P — Google Business Profile *(idea; not scheduled)*
 
 GBP is where the owner's local-SEO work and this CRM meet: reviews, questions,

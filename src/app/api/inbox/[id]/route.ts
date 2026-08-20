@@ -43,6 +43,10 @@ export async function GET(
         id: conversation.id,
         lastInboundAt: conversation.lastInboundAt,
         aiDisabledAt: conversation.aiDisabledAt,
+        // So a rep sees a colleague taking the conversation without a reload.
+        // The names come from the page's props, not from here — see the
+        // conversations route for why.
+        assignedUserId: conversation.assignedUserId,
       },
       contact: contact ? { name: contact.name, phone: contact.phone } : null,
       messages: messages.map((m) => ({

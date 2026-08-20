@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
-import { markConversationRead } from "@/modules/whatsapp/inbox";
+import { assignConversation, markConversationRead } from "@/modules/whatsapp/inbox";
 import { deliverReply, type AiReplyOutcome } from "@/modules/ai/reply";
 import { markReplyDiscarded, setConversationAiEnabled } from "@/modules/ai/replies";
 
@@ -205,5 +205,42 @@ export async function setConversationAiAction(formData: FormData) {
 export async function markReadAction(conversationId: string) {
   const ctx = await requireTenantContext();
   await markConversationRead(ctx, conversationId);
+  revalidatePath("/inbox");
+}
+
+// --- Ownership (PLAN.md §6.5) --------------------------------------------
+//
+// Agent-accessible, deliberately. §13 H1 reserves *configuration* for admins;
+// deciding which rep answers a customer is selling work, and `assignDeal` —
+// the same decision one object over — has always been agent-accessible. A
+// tenant where only the admin can hand a conversation to a colleague is a
+// tenant where conversations don't get handed over.
+//
+// Nothing destructive happens here either, so this is not a
+// requireTenantAdmin + auditLog case (§13 H1's rule): reassignment loses no
+// data and is undone by reassigning back.
+const assignSchema = z.object({
+  conversationId: z.string().min(1),
+  // The empty option is "sin asignar", so an empty string is a real choice
+  // and not a missing field.
+  userId: z.string().min(1).nullable(),
+});
+
+export async function assignConversationAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+
+  const raw = String(formData.get("userId") ?? "");
+  const parsed = assignSchema.safeParse({
+    conversationId: formData.get("conversationId"),
+    userId: raw === "" ? null : raw,
+  });
+  if (!parsed.success) return;
+
+  // Throws on a user who isn't an active member of this tenant. Left to
+  // propagate: the picker reports it as a toast, and swallowing it would
+  // leave the rep looking at a name that was never saved.
+  await assignConversation(ctx, parsed.data.conversationId, parsed.data.userId);
+
+  revalidatePath(`/inbox/${parsed.data.conversationId}`);
   revalidatePath("/inbox");
 }
