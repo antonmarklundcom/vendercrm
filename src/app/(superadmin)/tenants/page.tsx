@@ -3,9 +3,16 @@ import { getTranslations } from "next-intl/server";
 import { requireSuperadminContext } from "@/modules/tenancy/context";
 import { listTenants } from "@/modules/tenancy/tenants";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/page-header";
 import { suspendTenantAction, activateTenantAction } from "./actions";
 import { CreateTenantForm } from "./CreateTenantForm";
+
+const STATUS_TONE = {
+  active: "success",
+  trial: "info",
+  suspended: "destructive",
+} as const;
 
 // Defense in depth (§3.3): the (superadmin) layout already redirects a
 // non-superadmin, but a layout is not an authorization boundary — this page
@@ -40,7 +47,9 @@ export default async function TenantsPage() {
                   </td>
                   <td className="py-2">{tenant.slug}</td>
                   <td className="py-2">
-                    {t(`statusValues.${tenant.status}` as "statusValues.active")}
+                    <Badge tone={STATUS_TONE[tenant.status]}>
+                      {t(`statusValues.${tenant.status}` as "statusValues.active")}
+                    </Badge>
                   </td>
                   <td className="py-2">
                     {tenant.status === "suspended" ? (

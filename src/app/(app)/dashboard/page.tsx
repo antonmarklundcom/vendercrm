@@ -32,27 +32,46 @@ import { listSites } from "@/modules/sites/sites";
 // what to do first (the checklist). Every number comes from the tenant-scoped
 // read model in modules/dashboard — no raw db, no cross-tenant reads.
 
+// tone reads the same number two different ways depending on what it means
+// for the business: 8 open deals is just a fact, but 0 unread messages is
+// good news and 3 pending quotes is a nudge to act. Plain neutral tiles (the
+// prior version) gave all four numbers equal weight regardless of which one
+// actually needs attention today.
 function StatCard({
   icon: Icon,
   label,
   value,
   hint,
   href,
+  tone = "neutral",
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
   hint: string;
   href: string;
+  tone?: "neutral" | "success" | "warning";
 }) {
+  const valueClass = tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : "";
   return (
     <Card className="gap-3 transition-colors hover:bg-accent/40">
       <Link href={href} className="flex flex-col gap-3">
-        <span className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Icon className="size-4" aria-hidden="true" />
-          {label}
+        <span className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <Icon className="size-4" aria-hidden="true" />
+            {label}
+          </span>
+          {tone !== "neutral" && (
+            <span
+              className={cn(
+                "size-2 rounded-full",
+                tone === "success" ? "bg-success" : "bg-warning",
+              )}
+              aria-hidden="true"
+            />
+          )}
         </span>
-        <span className="text-3xl font-semibold tabular-nums">{value}</span>
+        <span className={cn("text-3xl font-semibold tabular-nums", valueClass)}>{value}</span>
         <span className="text-xs text-muted-foreground">{hint}</span>
       </Link>
     </Card>
@@ -183,6 +202,7 @@ export default async function DashboardPage() {
           value={formatNumberL(stats.unreadMessages)}
           hint={t("stats.unreadHint", { count: stats.unreadConversations })}
           href="/inbox"
+          tone={stats.unreadMessages === 0 ? "success" : "warning"}
         />
         <StatCard
           icon={FileText}
@@ -190,6 +210,7 @@ export default async function DashboardPage() {
           value={formatNumberL(stats.pendingQuotes)}
           hint={t("stats.pendingQuotesHint")}
           href="/quotes"
+          tone={stats.pendingQuotes > 0 ? "warning" : "neutral"}
         />
         <StatCard
           icon={Users}

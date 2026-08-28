@@ -19,6 +19,7 @@ import { ContactsTable, type StageOption } from "./ContactsTable";
 import { ContactCreateForm } from "./ContactCreateForm";
 import { SavedViews } from "./SavedViews";
 import { createTagAction } from "./actions";
+import { FormDialogTrigger } from "@/components/ui/form-dialog";
 import { listContactViews } from "@/modules/crm/contact-views";
 import {
   buildContactHref,
@@ -126,6 +127,9 @@ export default async function ContactsPage({
           description={t("intro")}
           action={
             <div className="flex flex-wrap gap-2">
+              <FormDialogTrigger id="nuevo-contacto" label={t("createTitle")} title={t("createTitle")}>
+                <ContactCreateForm />
+              </FormDialogTrigger>
               {/* Import is offered even on an empty list — a brand-new
                   tenant migrating off GoHighLevel starts here (§13 H6). */}
               <Link
@@ -391,11 +395,6 @@ export default async function ContactsPage({
             )}
           </>
         )}
-      </section>
-
-      <section id="nuevo-contacto" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        <ContactCreateForm />
       </section>
 
       <section>

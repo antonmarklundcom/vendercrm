@@ -7,7 +7,8 @@
     "cancel": "Cancelar",
     "create": "Crear",
     "back": "Volver",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "close": "Cerrar"
   },
   "auth": {
     "login": {
@@ -348,7 +349,8 @@
           "nameTaken": "Ya existe una vista con ese nombre",
           "unknown": "No se pudo guardar la vista"
         }
-      }
+      },
+      "createdToast": "Contacto creado"
     },
     "pipeline": {
       "title": "Pipeline",
@@ -380,7 +382,8 @@
       "moveFailed": "No pudimos mover la oportunidad. Se restauró su etapa anterior.",
       "showClosed": "Ver {count} cerrados",
       "hideClosed": "Ocultar cerrados",
-      "editStages": "Editar etapas"
+      "editStages": "Editar etapas",
+      "createdToast": "Negocio creado"
     },
     "calendar": {
       "title": "Agenda",

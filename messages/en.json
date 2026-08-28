@@ -7,7 +7,8 @@
     "cancel": "Cancel",
     "create": "Create",
     "back": "Back",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "close": "Close"
   },
   "auth": {
     "login": {
@@ -196,7 +197,8 @@
       "moveFailed": "We couldn't move the deal. Its previous stage was restored.",
       "showClosed": "Show {count} closed",
       "hideClosed": "Hide closed",
-      "editStages": "Edit stages"
+      "editStages": "Edit stages",
+      "createdToast": "Deal created"
     },
     "calendar": {
       "title": "Calendar",
@@ -545,7 +547,8 @@
           "nameTaken": "A view with that name already exists",
           "unknown": "The view couldn't be saved"
         }
-      }
+      },
+      "createdToast": "Contact created"
     },
     "inbox": {
       "title": "Inbox",

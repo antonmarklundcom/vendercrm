@@ -12,9 +12,11 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { moveDealAction } from "./actions";
+import { formatNumber } from "@/lib/i18n/format";
+import { Avatar } from "@/components/ui/avatar";
 
 type Stage = { id: string; name: string; color: string | null };
 type Deal = {
@@ -116,6 +118,7 @@ function DealCard({ deal }: { deal: Deal }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
   });
+  const locale = useLocale();
 
   return (
     <div
@@ -129,7 +132,7 @@ function DealCard({ deal }: { deal: Deal }) {
       }
       // touch-none keeps the browser from claiming the gesture as a scroll
       // once the press-and-hold has started the drag.
-      className={`touch-none cursor-grab rounded-md border bg-background p-2 text-sm shadow-sm ${
+      className={`touch-none cursor-grab rounded-md border border-l-2 border-l-primary bg-card p-2.5 text-sm shadow-xs ${
         isDragging ? "opacity-50" : ""
       }`}
     >
@@ -138,10 +141,15 @@ function DealCard({ deal }: { deal: Deal }) {
       <Link href={`/pipeline/${deal.id}`} className="font-medium underline-offset-4 hover:underline">
         {deal.title}
       </Link>
-      <p className="text-muted-foreground">{deal.contactName}</p>
-      <p className="text-muted-foreground">
-        {deal.value} {deal.currency}
-      </p>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+          <Avatar name={deal.contactName} size="xs" />
+          <span className="truncate">{deal.contactName}</span>
+        </span>
+        <span className="shrink-0 font-medium tabular-nums">
+          {formatNumber(deal.value, locale)} {deal.currency}
+        </span>
+      </div>
     </div>
   );
 }

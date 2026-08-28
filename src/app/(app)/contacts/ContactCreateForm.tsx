@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   createContactAction,
@@ -9,6 +10,7 @@ import {
   type ContactFormState,
 } from "./actions";
 import { Input } from "@/components/ui/form-fields";
+import { useFormDialogClose } from "@/components/ui/form-dialog";
 
 // Lives here, not in actions.ts: a "use server" module may only export
 // async functions, so a shared constant there breaks the build.
@@ -36,6 +38,17 @@ export function ContactCreateForm() {
     createContactAction,
     initialState,
   );
+
+  // Closes the create-contact dialog and confirms the save — a no-op when
+  // this form isn't rendered inside one (its default context value).
+  const closeDialog = useFormDialogClose();
+  const notified = useRef(false);
+  useEffect(() => {
+    if (!state.saved || notified.current) return;
+    notified.current = true;
+    toast.success(t("createdToast"));
+    closeDialog();
+  }, [state.saved, closeDialog, t]);
 
   function FieldError({ field }: { field: ContactField }) {
     if (state.field !== field || !state.error) return null;

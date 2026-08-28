@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createDealAction, type DealField, type DealFormState } from "./actions";
 import { Input, Select } from "@/components/ui/form-fields";
+import { useFormDialogClose } from "@/components/ui/form-dialog";
 
 // Declared here rather than in actions.ts: a "use server" module may only
 // export async functions.
@@ -36,6 +38,15 @@ export function CreateDealForm({
     createDealAction,
     initialState,
   );
+
+  const closeDialog = useFormDialogClose();
+  const notified = useRef(false);
+  useEffect(() => {
+    if (!state.created || notified.current) return;
+    notified.current = true;
+    toast.success(t("createdToast"));
+    closeDialog();
+  }, [state.created, closeDialog, t]);
 
   function FieldError({ field }: { field: DealField }) {
     if (state.field !== field || !state.error) return null;

@@ -7,7 +7,8 @@
     "cancel": "Avbryt",
     "create": "Skapa",
     "back": "Tillbaka",
-    "signOut": "Logga ut"
+    "signOut": "Logga ut",
+    "close": "Stäng"
   },
   "auth": {
     "login": {
@@ -196,7 +197,8 @@
       "moveFailed": "Vi kunde inte flytta affären. Den återgick till föregående steg.",
       "showClosed": "Visa {count} stängda",
       "hideClosed": "Dölj stängda",
-      "editStages": "Redigera steg"
+      "editStages": "Redigera steg",
+      "createdToast": "Affär skapad"
     },
     "calendar": {
       "title": "Kalender",
@@ -545,7 +547,8 @@
           "nameTaken": "Det finns redan en vy med det namnet",
           "unknown": "Vyn kunde inte sparas"
         }
-      }
+      },
+      "createdToast": "Kontakt skapad"
     },
     "inbox": {
       "title": "Inkorg",

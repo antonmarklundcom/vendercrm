@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Input } from "@/components/ui/form-fields";
+import { FormDialogTrigger } from "@/components/ui/form-dialog";
 
 export default async function PipelinePage({
   searchParams,
@@ -37,7 +38,12 @@ export default async function PipelinePage({
           title={t("noPipeline")}
           description={t("noPipelineBody")}
         />
-        {isAdmin && <NewPipelineForm t={t} />}
+        {isAdmin && (
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">{t("newPipelineTitle")}</h2>
+            <NewPipelineForm t={t} />
+          </section>
+        )}
       </div>
     );
   }
@@ -66,14 +72,39 @@ export default async function PipelinePage({
         title={pipeline.name}
         description={t("intro")}
         action={
-          isAdmin ? (
-            <Link
-              href={`/pipeline/etapas?pipeline=${pipeline.id}`}
-              className="text-sm underline underline-offset-4"
-            >
-              {t("editStages")}
-            </Link>
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-2">
+            {contacts.length > 0 && (
+              <FormDialogTrigger
+                id="nuevo-negocio"
+                label={t("createDealTitle")}
+                title={t("createDealTitle")}
+              >
+                <CreateDealForm
+                  pipelineId={pipeline.id}
+                  contacts={contacts.map((contact) => ({ id: contact.id, name: contact.name }))}
+                  stages={stages.map((stage) => ({ id: stage.id, name: stage.name }))}
+                />
+              </FormDialogTrigger>
+            )}
+            {isAdmin && (
+              <FormDialogTrigger
+                id="nueva-pipeline"
+                label={t("newPipelineTitle")}
+                title={t("newPipelineTitle")}
+                variant="ghost"
+              >
+                <NewPipelineForm t={t} />
+              </FormDialogTrigger>
+            )}
+            {isAdmin && (
+              <Link
+                href={`/pipeline/etapas?pipeline=${pipeline.id}`}
+                className="text-sm underline underline-offset-4"
+              >
+                {t("editStages")}
+              </Link>
+            )}
+          </div>
         }
       />
 
@@ -124,27 +155,17 @@ export default async function PipelinePage({
         />
       )}
 
-      <section id="nuevo-negocio" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createDealTitle")}</h2>
-        {/* A deal hangs off a contact (§5), so the form is unusable before
-            there is one — say so instead of rendering an empty picker. */}
-        {contacts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t("needContact")}{" "}
-            <Link href="/contacts" className="underline underline-offset-4">
-              {t("goToContacts")}
-            </Link>
-          </p>
-        ) : (
-          <CreateDealForm
-            pipelineId={pipeline.id}
-            contacts={contacts.map((contact) => ({ id: contact.id, name: contact.name }))}
-            stages={stages.map((stage) => ({ id: stage.id, name: stage.name }))}
-          />
-        )}
-      </section>
-
-      {isAdmin && <NewPipelineForm t={t} />}
+      {/* A deal hangs off a contact (§5), so the create action is offered
+          only once one exists — say so instead of a header button that
+          opens a form with nothing to pick. */}
+      {contacts.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          {t("needContact")}{" "}
+          <Link href="/contacts" className="underline underline-offset-4">
+            {t("goToContacts")}
+          </Link>
+        </p>
+      )}
     </div>
   );
 }
@@ -155,21 +176,14 @@ function NewPipelineForm({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   return (
-    <section id="nueva-pipeline" className="scroll-mt-6">
-      <h2 className="mb-4 text-lg font-semibold">{t("newPipelineTitle")}</h2>
-      <form action={createPipelineAction} className="flex max-w-sm flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t("newPipelineName")}
-          <Input
-            name="name"
-            required
-            placeholder={t("newPipelineNamePlaceholder")}
-          />
-        </label>
-        <Button type="submit" variant="outline" className="w-fit">
-          {t("newPipelineCreate")}
-        </Button>
-      </form>
-    </section>
+    <form action={createPipelineAction} className="flex max-w-sm flex-col gap-4">
+      <label className="flex flex-col gap-1 text-sm">
+        {t("newPipelineName")}
+        <Input name="name" required placeholder={t("newPipelineNamePlaceholder")} />
+      </label>
+      <Button type="submit" variant="outline" className="w-fit">
+        {t("newPipelineCreate")}
+      </Button>
+    </form>
   );
 }

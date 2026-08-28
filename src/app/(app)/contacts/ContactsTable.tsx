@@ -13,6 +13,7 @@ import {
   bulkDeleteContactsAction,
 } from "./bulk-actions";
 import { Select } from "@/components/ui/form-fields";
+import { Avatar } from "@/components/ui/avatar";
 
 // Row selection + bulk actions (PLAN.md §10 1J #1). Calls the server actions
 // directly as plain async functions rather than through a <form> — Next.js
@@ -299,14 +300,17 @@ export function ContactsTable({
                   />
                 </td>
                 <td className="py-2">
-                  <Link href={`/contacts/${row.id}`} className="underline underline-offset-4">
-                    {row.name}
-                  </Link>
-                  {row.hasOpenDeal && (
-                    <span className="ml-2 rounded-full bg-success-surface px-2 py-0.5 text-[10px] whitespace-nowrap text-success">
-                      {labels.openDealBadge}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-2">
+                    <Avatar name={row.name} size="xs" />
+                    <Link href={`/contacts/${row.id}`} className="underline underline-offset-4">
+                      {row.name}
+                    </Link>
+                    {row.hasOpenDeal && (
+                      <span className="rounded-full bg-success-surface px-2 py-0.5 text-[10px] whitespace-nowrap text-success">
+                        {labels.openDealBadge}
+                      </span>
+                    )}
+                  </span>
                 </td>
                 <td className="py-2 tabular-nums">{row.phone}</td>
                 <td className="py-2">{row.email}</td>
