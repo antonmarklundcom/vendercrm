@@ -1429,7 +1429,28 @@
         "booking_context_missing": "Bokningen saknar uppgifter.",
         "booking_not_found": "Bokningen finns inte längre.",
         "tenant_not_found": "Företaget finns inte längre."
-      }
+      },
+      "capacityTitle": "Platser och handpenning",
+      "capacityHelp": "För klasser, banor eller allt där fler än en person får plats samtidigt — och för att be om handpenning innan bokningen bekräftas.",
+      "capacity": "Platser per tid",
+      "capacityFieldHelp": "1 är det vanliga: en person per tid. Sätt 12 för en klass med tolv.",
+      "depositAmount": "Handpenning (₲)",
+      "depositAmountHelp": "Lämna tomt om du inte tar handpenning. Med ett belopp står bokningen som väntande tills du bekräftar kvittot.",
+      "depositExpiry": "Minuter att betala",
+      "depositExpiryHelp": "Kommer handpenningen inte in inom den tiden släpps tiden automatiskt.",
+      "allowMultiService": "Erbjud tilläggstjänster på den publika sidan",
+      "servicesTitle": "Tilläggstjänster",
+      "servicesHelp": "Tillval kunden kan kryssa i: de förlänger tiden och sparas på bokningen.",
+      "servicesEmpty": "Inga tilläggstjänster än",
+      "servicesDisabledHint": "De visas inte: slå på \\u201cErbjud tilläggstjänster\\u201d ovan.",
+      "serviceName": "Namn",
+      "serviceExtraDuration": "+ minuter",
+      "serviceExtraPrice": "+ pris (₲)",
+      "serviceAdd": "Lägg till",
+      "serviceRemove": "Ta bort",
+      "confirmDeposit": "Bekräfta handpenning",
+      "rejectDeposit": "Kom aldrig",
+      "partySize": "{count} personer"
     },
     "chat": {
       "title": "Webbchatt",
@@ -2391,7 +2412,13 @@
       "locationPhone": "Per telefon",
       "locationVideo": "Videosamtal",
       "locationWhatsapp": "På WhatsApp",
-      "statusPendingDeposit": "Väntar på handpenning"
+      "statusPendingDeposit": "Väntar på handpenning",
+      "servicesTitle": "Vill du lägga till något?",
+      "partySize": "Hur många personer?",
+      "seatsRemaining": "{count} kvar",
+      "depositTitle": "Reserverad — handpenning saknas",
+      "depositBody": "För att bekräfta behöver vi en handpenning på {amount}. Vi skickar uppgifterna via WhatsApp — skicka kvittot så är det klart.",
+      "errorPartyTooLarge": "Det är fler personer än den här tiden rymmer. Prova med färre."
     },
     "chat": {
       "title": "Chatt",

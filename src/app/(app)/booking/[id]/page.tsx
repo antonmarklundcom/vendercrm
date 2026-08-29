@@ -11,9 +11,12 @@ import { listSites } from "@/modules/sites/sites";
 import { siteSettings } from "@/modules/sites/settings";
 import { getBookingType, resolveBookingTypeSettings } from "@/modules/booking/types";
 import { listResources, listResourcesForType } from "@/modules/booking/resources";
+import { listServicesForType } from "@/modules/booking/services";
+import { formatMoney } from "@/lib/i18n/format";
 import { PageHeader } from "@/components/page-header";
 import { TypeResourcesPicker } from "../BookingForms";
 import { BookingTypeForm, type Question } from "./BookingTypeForm";
+import { ServicesEditor } from "./ServicesEditor";
 
 // One booking type, in full (docs/SPEC-BOOKING.md §2). The list page creates
 // a type with the three fields it takes to publish a page; every other column
@@ -49,6 +52,8 @@ export default async function BookingTypePage({
     listResources(ctx),
     listResourcesForType(ctx, type.id),
   ]);
+
+  const services = await listServicesForType(ctx, type.id);
 
   const stageLists = await Promise.all(
     pipelines.map(
@@ -129,11 +134,35 @@ export default async function BookingTypePage({
           // default the booking engine actually applies to it today.
           reminderMinutes: settings.reminderMinutes ?? 0,
           cancellationCutoffMinutes: settings.cancellationCutoffMinutes,
+          capacity: type.capacity,
+          depositAmount: type.depositAmount,
+          allowMultiService: type.allowMultiService,
+          depositExpiryMinutes: settings.depositExpiryMinutes,
           confirmationMessage: settings.confirmationMessage ?? "",
           questions: ((type.questions as Question[] | null) ?? []).map((question) => ({
             ...question,
             options: question.options ?? [],
           })),
+        }}
+      />
+
+      <ServicesEditor
+        bookingTypeId={type.id}
+        services={services}
+        allowMultiService={type.allowMultiService}
+        formatPrice={(value) => formatMoney(value, type.depositCurrency, tenant?.locale ?? "es")}
+        labels={{
+          title: t("servicesTitle"),
+          help: t("servicesHelp"),
+          empty: t("servicesEmpty"),
+          name: t("serviceName"),
+          extraDuration: t("serviceExtraDuration"),
+          extraPrice: t("serviceExtraPrice"),
+          add: t("serviceAdd"),
+          remove: t("serviceRemove"),
+          active: t("active"),
+          inactive: t("inactive"),
+          disabledHint: t("servicesDisabledHint"),
         }}
       />
     </div>

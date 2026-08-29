@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { createService, deleteService, toggleService } from "@/modules/booking/services";
 import { requireTenantAdmin } from "@/modules/tenancy/context";
 import { slugify } from "@/lib/slug";
 import {
@@ -40,6 +41,11 @@ const settingsSchema = z.object({
   minNoticeMinutes: z.coerce.number().int().min(0).max(60 * 24 * 365),
   maxAdvanceDays: z.coerce.number().int().min(1).max(730),
   maxPerDay: z.coerce.number().int().min(1).max(500).nullable(),
+  capacity: z.coerce.number().int().min(1).max(500),
+  // Whole guaraníes, never a float — the same money rule the quotes module
+  // follows. Blank means no seña.
+  depositAmount: z.coerce.number().int().min(0).max(1_000_000_000).nullable(),
+  allowMultiService: z.boolean(),
 
   assignment: z.enum(["any", "round_robin"]),
   locationMode: z.enum(["in_person", "phone", "video", "whatsapp"]),
@@ -57,6 +63,8 @@ const settingsSchema = z.object({
   // deliberate rather than as an unset field.
   reminderMinutes: z.coerce.number().int().min(0).max(60 * 24 * 30),
   cancellationCutoffMinutes: z.coerce.number().int().min(0).max(60 * 24 * 30),
+  /** How long an unpaid seña holds its slot before the job releases it. */
+  depositExpiryMinutes: z.coerce.number().int().min(5).max(60 * 24 * 7),
   confirmationMessage: z.string().max(2000),
 });
 
@@ -89,6 +97,9 @@ export async function saveBookingTypeAction(
     minNoticeMinutes: String(formData.get("minNoticeMinutes") ?? "0"),
     maxAdvanceDays: String(formData.get("maxAdvanceDays") ?? "60"),
     maxPerDay: optionalNumber(formData.get("maxPerDay")),
+    capacity: String(formData.get("capacity") ?? "1"),
+    depositAmount: optionalNumber(formData.get("depositAmount")),
+    allowMultiService: formData.get("allowMultiService") === "on",
 
     assignment: String(formData.get("assignment") ?? "any"),
     locationMode: String(formData.get("locationMode") ?? "in_person"),
@@ -104,6 +115,7 @@ export async function saveBookingTypeAction(
     requireTurnstile: formData.get("requireTurnstile") === "on",
     reminderMinutes: String(formData.get("reminderMinutes") ?? "0"),
     cancellationCutoffMinutes: String(formData.get("cancellationCutoffMinutes") ?? "120"),
+    depositExpiryMinutes: String(formData.get("depositExpiryMinutes") ?? "120"),
     confirmationMessage: String(formData.get("confirmationMessage") ?? ""),
   };
 
@@ -141,6 +153,9 @@ export async function saveBookingTypeAction(
     minNoticeMinutes: data.minNoticeMinutes,
     maxAdvanceDays: data.maxAdvanceDays,
     maxPerDay: data.maxPerDay,
+    capacity: data.capacity,
+    depositAmount: data.depositAmount,
+    allowMultiService: data.allowMultiService,
 
     assignment: data.assignment,
     locationMode: data.locationMode,
@@ -160,6 +175,7 @@ export async function saveBookingTypeAction(
       requireTurnstile: data.requireTurnstile,
       reminderMinutes: data.reminderMinutes,
       cancellationCutoffMinutes: data.cancellationCutoffMinutes,
+      depositExpiryMinutes: data.depositExpiryMinutes,
       confirmationMessage: data.confirmationMessage || undefined,
     },
   });
@@ -207,4 +223,44 @@ function readQuestions(
   }
 
   return { ok: true, questions };
+}
+
+// Add-on services (plan-booking.md §5.2). Separate actions rather than fields
+// on the big settings form: a list that grows and shrinks does not fit the
+// "one form, one save" shape the rest of the page has, and mixing them would
+// mean a failed validation on the duration wiping a half-typed add-on.
+
+export async function createServiceAction(bookingTypeId: string, formData: FormData) {
+  const ctx = await requireTenantAdmin();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  await createService(ctx, {
+    bookingTypeId,
+    name,
+    extraDurationMinutes: Number(formData.get("extraDurationMinutes") ?? 0) || 0,
+    extraPrice: Number(formData.get("extraPrice") ?? 0) || null,
+    sort: Number(formData.get("sort") ?? 0) || 0,
+  });
+
+  revalidatePath(`/booking/${bookingTypeId}`);
+}
+
+export async function deleteServiceAction(bookingTypeId: string, serviceId: string) {
+  const ctx = await requireTenantAdmin();
+  // Deleted, not soft-deleted: bookings snapshot their services onto the row
+  // (`bookings.services`), so removing the definition cannot rewrite what a
+  // customer was told they were buying.
+  await deleteService(ctx, serviceId);
+  revalidatePath(`/booking/${bookingTypeId}`);
+}
+
+export async function toggleServiceAction(
+  bookingTypeId: string,
+  serviceId: string,
+  isActive: boolean,
+) {
+  const ctx = await requireTenantAdmin();
+  await toggleService(ctx, serviceId, isActive);
+  revalidatePath(`/booking/${bookingTypeId}`);
 }

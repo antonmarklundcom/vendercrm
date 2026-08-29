@@ -1429,7 +1429,28 @@
         "booking_context_missing": "The booking is missing data.",
         "booking_not_found": "The booking no longer exists.",
         "tenant_not_found": "The tenant no longer exists."
-      }
+      },
+      "capacityTitle": "Capacity and deposit",
+      "capacityHelp": "For classes, courts, or anything more than one person fits into at a time — and for asking a deposit before confirming.",
+      "capacity": "Places per slot",
+      "capacityFieldHelp": "1 is the normal case: one person per appointment. Set 12 for a class of twelve.",
+      "depositAmount": "Deposit (₲)",
+      "depositAmountHelp": "Leave empty if you don't ask for one. With an amount, the booking stays pending until you confirm the receipt.",
+      "depositExpiry": "Minutes to transfer",
+      "depositExpiryHelp": "If the deposit doesn't arrive within this time, the slot is released automatically.",
+      "allowMultiService": "Offer add-on services on the public page",
+      "servicesTitle": "Add-on services",
+      "servicesHelp": "Extras the customer can tick: they lengthen the appointment and are stored on the booking.",
+      "servicesEmpty": "No add-on services yet",
+      "servicesDisabledHint": "These are not shown: switch on \\u201cOffer add-on services\\u201d above.",
+      "serviceName": "Name",
+      "serviceExtraDuration": "+ minutes",
+      "serviceExtraPrice": "+ price (₲)",
+      "serviceAdd": "Add",
+      "serviceRemove": "Remove",
+      "confirmDeposit": "Confirm deposit",
+      "rejectDeposit": "Never arrived",
+      "partySize": "{count} people"
     },
     "chat": {
       "title": "Website chat",
@@ -2391,7 +2412,13 @@
       "locationPhone": "By phone",
       "locationVideo": "Video call",
       "locationWhatsapp": "On WhatsApp",
-      "statusPendingDeposit": "Deposit pending"
+      "statusPendingDeposit": "Deposit pending",
+      "servicesTitle": "Anything to add?",
+      "partySize": "How many people?",
+      "seatsRemaining": "{count} left",
+      "depositTitle": "Reserved — deposit pending",
+      "depositBody": "To confirm it we need a deposit of {amount}. We'll send you the details on WhatsApp — send us the receipt and you're set.",
+      "errorPartyTooLarge": "That's more people than this time slot holds. Try a smaller party."
     },
     "chat": {
       "title": "Chat",

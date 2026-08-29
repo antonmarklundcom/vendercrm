@@ -22,7 +22,17 @@ import {
   listResourcesForType,
   type BookingResource,
 } from "./resources";
-import { generateSlots, pickResource, type BusyInterval, type Slot } from "./slots";
+import {
+  extraDurationOf,
+  resolveBookedServices,
+} from "./services";
+import {
+  generateSlots,
+  pickResource,
+  type BusyInterval,
+  type SeatUsage,
+  type Slot,
+} from "./slots";
 import {
   getBookingType,
   resolveBookingTypeSettings,
@@ -42,6 +52,20 @@ export type Booking = typeof bookings.$inferSelect;
 
 export const BOOKING_REMINDER_JOB_TYPE = "booking.reminder";
 
+/**
+ * The statuses that hold a slot.
+ *
+ * `pending_deposit` is in here on purpose (plan-booking.md §5.2): a
+ * reservation waiting on a seña *is* taking the chair. Leaving it out would
+ * make the seña request an invitation to double-book — two people paying for
+ * the same 15:00 is worse than a slot sitting idle for the twenty minutes it
+ * takes someone to transfer. The expiry job is what stops it sitting idle
+ * forever.
+ */
+export const SLOT_HOLDING_STATUSES = ["confirmed", "pending_deposit"] as const;
+
+const holdsSlot = () => inArray(bookings.status, [...SLOT_HOLDING_STATUSES]);
+
 export class BookingError extends Error {
   constructor(
     readonly code:
@@ -51,6 +75,8 @@ export class BookingError extends Error {
       | "slotUnavailable"
       | "cutoffPassed"
       | "alreadyCancelled"
+      /** More people than the type's capacity — never bookable, not "taken". */
+      | "partyTooLarge"
       /** A reschedule to the start the booking already has: nothing to do. */
       | "sameSlot",
   ) {
@@ -72,6 +98,10 @@ export type ReserveInput = {
   ipAddress?: string;
   userAgent?: string;
   source?: string;
+  /** Places this reservation takes, for a type with capacity > 1. */
+  partySize?: number;
+  /** Ids of the `booking_type_services` add-ons the visitor ticked. */
+  serviceIds?: string[];
 };
 
 export type ReserveResult = {
@@ -80,8 +110,24 @@ export type ReserveResult = {
   dealId: string | null;
 };
 
-function slotKey(resourceId: string, startsAt: Date): string {
-  return `${resourceId}:${Math.floor(startsAt.getTime() / 1000)}`;
+/**
+ * The value behind the `bookings_tenant_active_slot_idx` unique index.
+ *
+ * Capacity forced this to change, and the change had to be additive rather
+ * than a relaxation: dropping the index would take the double-click and
+ * retry backstop with it, and those are the failures it was built for. So
+ * the key gains a *seat offset* — how many places were already taken at this
+ * exact start when this booking was written. Two clicks of the same button
+ * compute the same offset (the transaction below serialises them on the
+ * resource row), collide, and the second gets its 409 exactly as before.
+ * N genuine bookings into a class of twelve get twelve distinct keys.
+ *
+ * Offset 0 renders byte-for-byte as the old key, so every row written before
+ * capacity existed keeps the value it has and no backfill is needed.
+ */
+function slotKey(resourceId: string, startsAt: Date, seatOffset = 0): string {
+  const base = `${resourceId}:${Math.floor(startsAt.getTime() / 1000)}`;
+  return seatOffset > 0 ? `${base}#${seatOffset}` : base;
 }
 
 function newToken(): string {
@@ -113,7 +159,33 @@ export async function busyFor(
   to: Date,
   exclude?: BusyExclusion,
 ): Promise<BusyInterval[]> {
-  if (resources.length === 0) return [];
+  return (await busyAndSeatsFor(ctx, resources, from, to, exclude)).busy;
+}
+
+/**
+ * Busy time *and* seat usage, which is one query and two different questions
+ * (see `SeatUsage` in ./slots.ts).
+ *
+ * `groupTypeId` names the type being generated for. Its bookings, at exactly
+ * the starts it offers, are counted as seats instead of being returned as
+ * busy — that is the whole of what capacity > 1 changes about availability.
+ * Every other booking, including one of the same type at 15:15 when the
+ * slot is 15:00, is still a hard block: two classes cannot half-overlap on
+ * the same resource no matter how many places each has.
+ *
+ * With no `groupTypeId` (or capacity 1, where the caller doesn't pass one)
+ * every booking comes back as busy, byte for byte what this returned before
+ * capacity existed.
+ */
+export async function busyAndSeatsFor(
+  ctx: TenantContext,
+  resources: BookingResource[],
+  from: Date,
+  to: Date,
+  exclude?: BusyExclusion,
+  groupTypeId?: string,
+): Promise<{ busy: BusyInterval[]; seats: SeatUsage[] }> {
+  if (resources.length === 0) return { busy: [], seats: [] };
 
   const bookingRows = await tenantDb(ctx).select(
     bookings,
@@ -122,18 +194,30 @@ export async function busyFor(
         bookings.resourceId,
         resources.map((resource) => resource.id),
       ),
-      eq(bookings.status, "confirmed"),
+      holdsSlot(),
       lt(bookings.startsAt, to),
       gt(bookings.endsAt, from),
       ...(exclude ? [ne(bookings.id, exclude.bookingId)] : []),
     ),
   );
 
-  const intervals: BusyInterval[] = bookingRows.map((row) => ({
-    resourceId: row.resourceId,
-    startsAt: row.startsAt,
-    endsAt: row.endsAt,
-  }));
+  const seats: SeatUsage[] = [];
+  const intervals: BusyInterval[] = [];
+  for (const row of bookingRows) {
+    if (groupTypeId && row.bookingTypeId === groupTypeId) {
+      seats.push({
+        resourceId: row.resourceId,
+        startsAt: row.startsAt,
+        seats: Math.max(1, row.partySize),
+      });
+      continue;
+    }
+    intervals.push({
+      resourceId: row.resourceId,
+      startsAt: row.startsAt,
+      endsAt: row.endsAt,
+    });
+  }
 
   const userResources = resources.filter((resource) => resource.kind === "user" && resource.userId);
   if (userResources.length > 0) {
@@ -162,7 +246,7 @@ export async function busyFor(
     }
   }
 
-  return intervals;
+  return { busy: intervals, seats };
 }
 
 /** Everything the pure generator needs, gathered for one type and window. */
@@ -173,6 +257,13 @@ export async function availableSlots(
   to: DayKey,
   now: Date = new Date(),
   exclude?: BusyExclusion,
+  /**
+   * Minutes the visitor's chosen add-ons add to this type's duration
+   * (plan-booking.md §5.2). The search has to run at the *longer* duration or
+   * the last slot of the day would be offered for a booking that then runs
+   * past closing time.
+   */
+  extraDurationMinutes = 0,
 ): Promise<Slot[]> {
   const tenant = await getTenant(ctx.tenantId);
   if (!tenant) return [];
@@ -192,8 +283,19 @@ export async function availableSlots(
   const windowFrom = new Date(`${addDays(from, -1)}T00:00:00Z`);
   const windowTo = new Date(`${addDays(to, 2)}T00:00:00Z`);
 
-  const [busy, blackouts] = await Promise.all([
-    busyFor(ctx, resources, windowFrom, windowTo, exclude),
+  const capacity = Math.max(1, type.capacity);
+  const [{ busy, seats }, blackouts] = await Promise.all([
+    busyAndSeatsFor(
+      ctx,
+      resources,
+      windowFrom,
+      windowTo,
+      exclude,
+      // Only a type that actually has capacity gets the seat treatment; at
+      // capacity 1 the old "every booking is busy" path is kept verbatim
+      // rather than reproduced through a second code path.
+      capacity > 1 ? type.id : undefined,
+    ),
     listBlackouts(ctx, windowFrom, windowTo),
   ]);
 
@@ -201,7 +303,14 @@ export async function availableSlots(
     timeZone,
     from,
     to,
-    type: slotConfigOf(type),
+    // The grid stays on the type's own increment (15:00, 15:30, …) while the
+    // *fit* test uses the longer duration — otherwise ticking "barba +15"
+    // would also shift every offered start by fifteen minutes.
+    type: {
+      ...slotConfigOf(type),
+      durationMinutes: type.durationMinutes + Math.max(0, extraDurationMinutes),
+      capacity,
+    },
     rules: rules.map((rule) => ({
       resourceId: rule.resourceId,
       weekday: rule.weekday,
@@ -210,6 +319,7 @@ export async function availableSlots(
     })),
     businessHours: settings.businessHours ?? null,
     busy,
+    seatsTaken: seats,
     blackouts: blackouts.map((row) => ({
       resourceId: row.resourceId,
       startsAt: row.startsAt,
@@ -244,6 +354,8 @@ type ReserveOptions = {
   rescheduledFromId?: string;
   /** The message that came with the original booking, for the agenda row. */
   message?: string | null;
+  /** A reschedule carries the original's status, seña included. */
+  inheritStatus?: "confirmed" | "pending_deposit";
 };
 
 /**
@@ -284,12 +396,27 @@ async function performReserve(
   const timeZone = tenant.timezone;
   const day = dayKeyOf(input.startsAt, timeZone);
 
+  // Add-ons are resolved from the database, never taken from the body: an id
+  // that belongs to another tenant, or to another type, must not be able to
+  // stretch this booking's duration.
+  const chosenServices = type.allowMultiService
+    ? await resolveBookedServices(ctx, type.id, input.serviceIds ?? [])
+    : [];
+  const extraDuration = extraDurationOf(chosenServices);
+
+  const capacity = Math.max(1, type.capacity);
+  const partySize = Math.max(1, Math.floor(input.partySize ?? 1));
+  // A party larger than the whole class is not a slot problem to be
+  // discovered later; it can never fit, whatever else is booked.
+  if (partySize > capacity) throw new BookingError("partyTooLarge");
+
   // Authoritative availability: the offered slot is re-derived server-side.
   // A start time posted by hand that was never on offer is refused here, not
   // trusted because it arrived in the body.
-  const slots = await availableSlots(ctx, type, day, day, now, options.exclude);
+  const slots = await availableSlots(ctx, type, day, day, now, options.exclude, extraDuration);
   const slot = slots.find((candidate) => candidate.startsAt.getTime() === input.startsAt.getTime());
   if (!slot) throw new BookingError("slotUnavailable");
+  if (slot.seatsRemaining < partySize) throw new BookingError("slotTaken");
 
   const load = await bookingsPerResourceOn(
     ctx,
@@ -305,7 +432,18 @@ async function performReserve(
   if (!resource) throw new BookingError("slotUnavailable");
 
   const settings = resolveBookingTypeSettings(type.settings as never);
-  const endsAt = new Date(input.startsAt.getTime() + type.durationMinutes * 60_000);
+  const endsAt = new Date(
+    input.startsAt.getTime() + (type.durationMinutes + extraDuration) * 60_000,
+  );
+
+  // A type that asks for a seña does not confirm on the spot: the slot is
+  // held, the customer is asked to transfer, and staff flip it once the
+  // comprobante lands (plan-booking.md §5.2). A reschedule keeps whatever
+  // the original had — moving an already-paid booking must not re-ask for
+  // the money.
+  const initialStatus: "confirmed" | "pending_deposit" =
+    options.inheritStatus ??
+    (type.depositAmount && type.depositAmount > 0 ? "pending_deposit" : "confirmed");
 
   const dealDefaults = {
     pipelineId: type.createDeal ? type.defaultPipelineId : null,
@@ -370,20 +508,37 @@ async function performReserve(
       bookings,
       and(
         eq(bookings.resourceId, resourceId),
-        eq(bookings.status, "confirmed"),
+        holdsSlot(),
         lt(bookings.startsAt, dayEnd),
         gt(bookings.endsAt, dayStart),
-        // The booking being moved is still confirmed at this point — it is
+        // The booking being moved is still live at this point — it is
         // cancelled only once its replacement is safely committed — so it has
         // to be excluded here too, or a reschedule clashes with itself.
         ...(options.exclude ? [ne(bookings.id, options.exclude.bookingId)] : []),
       ),
     );
 
+    // Same split as availability, now under the lock. A booking of this type
+    // at this exact start is a *seat*; anything else that overlaps is a
+    // clash, capacity or no capacity.
+    const sharesThisStart = (row: (typeof live)[number]) =>
+      capacity > 1 &&
+      row.bookingTypeId === type.id &&
+      row.startsAt.getTime() === input.startsAt.getTime();
+
     const clash = live.some(
-      (row) => row.startsAt < endsAt && input.startsAt < row.endsAt,
+      (row) =>
+        !sharesThisStart(row) && row.startsAt < endsAt && input.startsAt < row.endsAt,
     );
     if (clash) throw new BookingError("slotTaken");
+
+    const seatsTaken = live
+      .filter(sharesThisStart)
+      .reduce((sum, row) => sum + Math.max(1, row.partySize), 0);
+    // The authoritative capacity check. The availability read above can go
+    // stale between the query and here; this one cannot, because the
+    // resource row is locked.
+    if (seatsTaken + partySize > capacity) throw new BookingError("slotTaken");
 
     await tx.insert(calendarEvents).values({
       id: eventId,
@@ -412,7 +567,9 @@ async function performReserve(
       rescheduledFromId: options.rescheduledFromId ?? null,
       startsAt: input.startsAt,
       endsAt,
-      status: "confirmed",
+      status: initialStatus,
+      partySize,
+      services: chosenServices as object,
       publicToken: token,
       answers: input.answers ?? {},
       source: input.source || "booking",
@@ -421,7 +578,7 @@ async function performReserve(
       referrer: input.referrer ?? null,
       ipAddress: input.ipAddress ?? null,
       userAgent: input.userAgent ?? null,
-      activeSlot: slotKey(resourceId, input.startsAt),
+      activeSlot: slotKey(resourceId, input.startsAt, seatsTaken),
     });
   }).catch((error: unknown) => {
     // The unique index fired: someone took this exact start between the read
@@ -459,6 +616,13 @@ async function performReserve(
     },
   });
 
+  // A hold that nobody chases holds a Saturday evening forever.
+  if (initialStatus === "pending_deposit") {
+    const { scheduleDepositExpiry } = await import("./deposits");
+    const created = await getBooking(ctx, bookingId);
+    if (created) await scheduleDepositExpiry(ctx, created, now);
+  }
+
   if (settings.reminderMinutes) {
     const runAt = new Date(input.startsAt.getTime() - settings.reminderMinutes * 60_000);
     if (runAt.getTime() > now.getTime()) {
@@ -482,6 +646,7 @@ async function performReserve(
     resourceId,
     startsAt: input.startsAt,
     rescheduledFromId: options.rescheduledFromId ?? null,
+    status: initialStatus,
   });
 
   // Read last, not first: the deal backfill and the reminder job both write
@@ -524,7 +689,7 @@ async function bookingsPerResourceOn(
     bookings,
     and(
       inArray(bookings.resourceId, resourceIds),
-      eq(bookings.status, "confirmed"),
+      holdsSlot(),
       gt(bookings.startsAt, from),
       lt(bookings.startsAt, to),
       // A booking being moved must not count against its own resource's load
@@ -698,6 +863,10 @@ export async function rescheduleBooking(
       ipAddress: original.ipAddress ?? undefined,
       userAgent: original.userAgent ?? undefined,
       source: original.source ?? "booking",
+      partySize: original.partySize,
+      serviceIds: (
+        (original.services as Array<{ id: string }> | null) ?? []
+      ).map((service) => service.id),
     },
     {
       identity: {
@@ -708,6 +877,10 @@ export async function rescheduleBooking(
       exclude: { bookingId: original.id, calendarEventId: original.calendarEventId },
       rescheduledFromId: original.id,
       message,
+      // A booking whose seña was already paid must not be sent back to
+      // `pending_deposit` — and one still waiting for it must not be
+      // promoted to confirmed by the act of moving it.
+      inheritStatus: original.status === "pending_deposit" ? "pending_deposit" : "confirmed",
     },
     now,
   );

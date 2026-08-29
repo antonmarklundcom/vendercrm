@@ -17,13 +17,27 @@ export type NotifyJobPayload = {
   kind: "confirmation" | "reschedule" | "cancellation" | "deposit_request" | "review_request";
 };
 
+/**
+ * A hold is not a confirmation. Asking for the seña *is* the notification a
+ * `pending_deposit` booking needs — sending "quedó confirmada" first and the
+ * bank details second would be the wrong way round in the one message the
+ * customer actually reads.
+ */
+function statusKind(
+  status: "confirmed" | "pending_deposit",
+  rescheduledFromId: string | null,
+): NotifyJobPayload["kind"] {
+  if (status === "pending_deposit") return "deposit_request";
+  return rescheduledFromId ? "reschedule" : "confirmation";
+}
+
 let registered = false;
 
 export function registerBookingNotificationTriggers() {
   if (registered) return;
   registered = true;
 
-  bookingEvents.on("booking.created", async ({ tenantId, bookingId, rescheduledFromId }) => {
+  bookingEvents.on("booking.created", async ({ tenantId, bookingId, rescheduledFromId, status }) => {
     // A reschedule arrives here as a *new* booking (cancel + create linked
     // by `rescheduled_from_id`, docs/SPEC-BOOKING.md), so the one event has
     // to answer two questions. Telling a customer who moved their 15:00 to
@@ -34,7 +48,7 @@ export function registerBookingNotificationTriggers() {
       {
         tenantId,
         bookingId,
-        kind: rescheduledFromId ? "reschedule" : "confirmation",
+        kind: statusKind(status, rescheduledFromId),
       } satisfies NotifyJobPayload,
       { tenantId },
     );

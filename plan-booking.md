@@ -281,6 +281,52 @@ kind on the chain), `bookings.ts`'s three double-booking guards and the
 `bookings_tenant_active_slot_idx` unique index, which capacity > 1 has to
 replace rather than relax.
 
+### 2026-08-29 — B2 capacity, multi-service, señas (same branch, PR #77)
+
+What now exists:
+- **Capacity.** The conflict-logic decision, spelled out because it is the
+  one a later phase must not undo: capacity is counted per *exact start of
+  the same booking type*, and everything else stays a hard overlap block. So
+  `slots.ts` gained a `seatsTaken` input separate from `busy` — "the resource
+  is unavailable" and "the class is full" are different questions and are now
+  different inputs — and `busyAndSeatsFor` splits the one query accordingly.
+  At capacity 1 the old path is kept verbatim; the 21 existing slot tests
+  pass untouched.
+- **The unique index was extended, not relaxed.** `active_slot` gained a seat
+  offset (`<resource>:<epoch>#<n>`), computed inside the transaction under
+  the existing `booking_resources` row lock. A double-click computes the same
+  offset and still collides — the backstop the index exists for survives —
+  while N genuine bookings get N distinct keys. Offset 0 renders exactly as
+  the old value, so no backfill.
+- **Multi-service.** `booking_type_services` CRUD, resolved server-side from
+  ids (never trusted from the body), snapshotted onto `bookings.services`.
+  The chosen add-ons lengthen the *fit* test while the offered starts stay on
+  the type's own increment.
+- **Señas.** `pending_deposit` is in `SLOT_HOLDING_STATUSES`, so a hold holds
+  the chair; the deposit_request notification goes out instead of a
+  confirmation; staff confirm or reject on the booking row; a per-booking
+  expiry job plus a stale sweep release it. `expireDeposit` re-reads the
+  status, so a job queued two hours ago cannot cancel a booking that has
+  since been paid.
+
+Decisions / deviations:
+- A reschedule inherits its status: a paid booking stays confirmed, an unpaid
+  hold stays pending. Moving a booking must not re-ask for money, and must
+  not grant it for free.
+- The pure service arithmetic lives in `service-totals.ts` so it is testable
+  without env or a database, matching `notification-chain.ts`.
+- `partyTooLarge` is a distinct error (422, not 409): no amount of waiting
+  makes a party of eight fit a class of six.
+- Same limitation as B1: no MySQL in the build environment, so
+  `capacity.integration.test.ts` — which is where the index and the hold are
+  actually proven — has never run. The pure capacity boundary tests (N-1/N/
+  N+1) do run and pass.
+
+Where B3 should look first: `notification-templates.ts` for the send shape,
+`whatsapp/send.ts` (interactive messages go next to `sendTemplate`), and
+`public.ts`'s `publicReserve` — the WhatsApp booking path must land in the
+same transactional reserve, not a second one.
+
 ## §10 Backlog
 
 Payment gateway (Pagopar) for señas; two-way GCal sync; per-slot capacity overrides;

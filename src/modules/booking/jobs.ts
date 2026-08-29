@@ -12,6 +12,12 @@ import {
   type NotifyJobPayload,
 } from "./notification-triggers";
 import { sendBookingReminder, type ReminderPayload } from "./reminders";
+import {
+  BOOKING_DEPOSIT_EXPIRY_JOB_TYPE,
+  expireDeposit,
+  expireStaleDeposits,
+  type DepositExpiryPayload,
+} from "./deposits";
 
 // Booking's job handlers (docs/SPEC-BOOKING.md §7/§8), registered at import
 // time the way whatsapp/jobs.ts and automations/jobs.ts are.
@@ -28,6 +34,13 @@ registerBookingNotificationTriggers();
 registerHandler(BOOKING_NOTIFY_JOB_TYPE, async (payload) => {
   const { tenantId, bookingId, kind } = payload as NotifyJobPayload;
   await notifyBooking({ tenantId, bookingId, kind });
+});
+
+// Releasing a hold whose seña never arrived. Scheduled per booking with a
+// future run_at, the same shape as the reminder — not a sweep, because the
+// window is per booking type.
+registerHandler(BOOKING_DEPOSIT_EXPIRY_JOB_TYPE, async (payload) => {
+  await expireDeposit(payload as DepositExpiryPayload);
 });
 
 export const BOOKING_COMPLETE_JOB_TYPE = "booking.complete_past";
@@ -64,7 +77,13 @@ export async function completePastBookings(
 
 registerHandler(BOOKING_COMPLETE_JOB_TYPE, async (payload) => {
   const { tenantId } = payload as { tenantId?: string };
-  if (tenantId) await completePastBookings(tenantId);
+  if (tenantId) {
+    await completePastBookings(tenantId);
+    // Belt and braces for a hold whose own expiry job never ran (worker
+    // restart, pruned row). A slot held forever with nobody chasing it is
+    // the failure mode `pending_deposit` introduces.
+    await expireStaleDeposits(tenantId);
+  }
   // Self-rescheduling chain, the same shape maintenance.ts uses — no cron
   // guarantee exists on this platform (§2.1), so the job books its own next
   // run.

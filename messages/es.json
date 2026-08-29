@@ -1429,7 +1429,28 @@
         "booking_context_missing": "Faltan datos de la reserva.",
         "booking_not_found": "La reserva ya no existe.",
         "tenant_not_found": "La empresa ya no existe."
-      }
+      },
+      "capacityTitle": "Cupo y seña",
+      "capacityHelp": "Para clases, canchas o cualquier cosa que entre más de una persona a la vez — y para pedir una seña antes de confirmar.",
+      "capacity": "Lugares por horario",
+      "capacityFieldHelp": "1 es lo normal: una persona por turno. Poné 12 para una clase de doce.",
+      "depositAmount": "Seña (₲)",
+      "depositAmountHelp": "Dejalo vacío si no pedís seña. Con un monto, la reserva queda pendiente hasta que confirmes el comprobante.",
+      "depositExpiry": "Minutos para transferir",
+      "depositExpiryHelp": "Si no llega la seña en este tiempo, el horario se libera solo.",
+      "allowMultiService": "Ofrecer servicios adicionales en la página pública",
+      "servicesTitle": "Servicios adicionales",
+      "servicesHelp": "Extras que el cliente puede sumar: alargan el turno y se guardan en la reserva.",
+      "servicesEmpty": "Todavía no hay servicios adicionales",
+      "servicesDisabledHint": "Estos servicios no se muestran: activá «Ofrecer servicios adicionales» arriba.",
+      "serviceName": "Nombre",
+      "serviceExtraDuration": "+ minutos",
+      "serviceExtraPrice": "+ precio (₲)",
+      "serviceAdd": "Agregar",
+      "serviceRemove": "Quitar",
+      "confirmDeposit": "Confirmar seña",
+      "rejectDeposit": "No llegó",
+      "partySize": "{count} personas"
     },
     "chat": {
       "title": "Chat del sitio",
@@ -2391,7 +2412,13 @@
       "locationPhone": "Por teléfono",
       "locationVideo": "Por videollamada",
       "locationWhatsapp": "Por WhatsApp",
-      "statusPendingDeposit": "Pendiente de seña"
+      "statusPendingDeposit": "Pendiente de seña",
+      "servicesTitle": "¿Querés agregar algo?",
+      "partySize": "¿Cuántas personas?",
+      "seatsRemaining": "quedan {count}",
+      "depositTitle": "Reservado, falta la seña",
+      "depositBody": "Para dejarla confirmada necesitamos una seña de {amount}. Te mandamos los datos por WhatsApp — pasanos el comprobante y listo.",
+      "errorPartyTooLarge": "Son más personas de las que entran en este horario. Probá con menos."
     },
     "chat": {
       "title": "Chat",

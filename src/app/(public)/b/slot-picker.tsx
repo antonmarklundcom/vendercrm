@@ -39,6 +39,9 @@ export function SlotPicker({
   selected,
   onSelect,
   excluded = [],
+  serviceIds = [],
+  partySize = 1,
+  seatsLabel,
 }: {
   tenantSlug: string;
   typeSlug: string;
@@ -49,12 +52,24 @@ export function SlotPicker({
   onSelect: (startsAt: string | null) => void;
   /** Slots the caller has learned are gone — a 409 on submit, typically. */
   excluded?: string[];
+  /**
+   * Ticked add-ons. They lengthen the appointment, so the server has to be
+   * asked again: the last slot of the day fits a corte but not a corte plus
+   * barba, and offering it would be a promise the calendar can't keep.
+   */
+  serviceIds?: string[];
+  /** Places wanted, for a type with capacity — hides slots too full to take them. */
+  partySize?: number;
+  /** Renders "quedan N lugares"; omitted for ordinary one-at-a-time types. */
+  seatsLabel?: (remaining: number) => string;
 }) {
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<Array<{ startsAt: string; seatsRemaining?: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [monthOffset, setMonthOffset] = useState(0);
   const [day, setDay] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const serviceKey = useMemo(() => [...serviceIds].sort().join(","), [serviceIds]);
 
   const window = useMemo(() => {
     const base = new Date();
@@ -71,18 +86,23 @@ export function SlotPicker({
     setLoading(true);
     setError(null);
 
+    const query = new URLSearchParams({ from: window.from, to: window.to });
+    for (const id of serviceKey.split(",").filter(Boolean)) query.append("services", id);
+
     fetch(
-      `/api/v1/booking/${encodeURIComponent(tenantSlug)}/${encodeURIComponent(typeSlug)}/slots?from=${window.from}&to=${window.to}`,
+      `/api/v1/booking/${encodeURIComponent(tenantSlug)}/${encodeURIComponent(typeSlug)}/slots?${query}`,
     )
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(response.status === 429 ? labels.rateLimited : labels.errorGeneric);
         }
-        return response.json() as Promise<{ slots: Array<{ startsAt: string }> }>;
+        return response.json() as Promise<{
+          slots: Array<{ startsAt: string; seatsRemaining?: number }>;
+        }>;
       })
       .then((body) => {
         if (cancelled) return;
-        setSlots(body.slots.map((slot) => slot.startsAt));
+        setSlots(body.slots);
       })
       .catch((cause: Error) => {
         if (!cancelled) setError(cause.message);
@@ -94,17 +114,28 @@ export function SlotPicker({
     return () => {
       cancelled = true;
     };
-  }, [tenantSlug, typeSlug, window, labels.errorGeneric, labels.rateLimited]);
+    // `serviceKey` rather than the array: a new array identity on every
+    // render would re-fetch the month forever.
+  }, [tenantSlug, typeSlug, window, serviceKey, labels.errorGeneric, labels.rateLimited]);
+
+  const seatsByStart = useMemo(
+    () => new Map(slots.map((slot) => [slot.startsAt, slot.seatsRemaining])),
+    [slots],
+  );
 
   const byDay = useMemo(() => {
     const grouped = new Map<string, string[]>();
     for (const slot of slots) {
-      if (excluded.includes(slot)) continue;
-      const key = dayKeyOf(slot, timeZone);
-      grouped.set(key, [...(grouped.get(key) ?? []), slot]);
+      if (excluded.includes(slot.startsAt)) continue;
+      // A class with two places left is not on offer to a party of four.
+      // Hidden rather than shown-and-refused: an offer the server will
+      // reject is worse than one that was never made.
+      if (slot.seatsRemaining !== undefined && slot.seatsRemaining < partySize) continue;
+      const key = dayKeyOf(slot.startsAt, timeZone);
+      grouped.set(key, [...(grouped.get(key) ?? []), slot.startsAt]);
     }
     return grouped;
-  }, [slots, timeZone, excluded]);
+  }, [slots, timeZone, excluded, partySize]);
 
   const days = useMemo(() => [...byDay.keys()].sort(), [byDay]);
 
@@ -191,6 +222,11 @@ export function SlotPicker({
                   minute: "2-digit",
                   hour12: false,
                 }).format(new Date(slot))}
+                {seatsLabel && seatsByStart.get(slot) !== undefined ? (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {seatsLabel(seatsByStart.get(slot)!)}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>

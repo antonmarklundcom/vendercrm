@@ -27,6 +27,8 @@ import {
 } from "./BookingForms";
 import {
   cancelBookingByStaffAction,
+  confirmDepositAction,
+  rejectDepositAction,
   deleteBlackoutAction,
   markNoShowAction,
   toggleBookingTypeAction,
@@ -342,6 +344,10 @@ export default async function BookingPage() {
                     <span>
                       {formatDateTime(booking.startsAt, locale, tenant?.timezone)} ·{" "}
                       {contact?.name ?? "—"} · {statusLabel}
+                      {booking.partySize > 1 ? ` · ${t("partySize", { count: booking.partySize })}` : ""}
+                      {((booking.services as Array<{ name: string }> | null) ?? [])
+                        .map((service) => ` · ${service.name}`)
+                        .join("")}
                     </span>
                     <BookingDelivery
                       notifications={deliveries.get(booking.id) ?? []}
@@ -349,7 +355,23 @@ export default async function BookingPage() {
                       formatWhen={(value) => formatDateTime(value, locale, tenant?.timezone)}
                     />
                   </span>
-                  {booking.status === "confirmed" ? (
+                  {booking.status === "pending_deposit" ? (
+                    // The seña decision sits where the booking is, not behind
+                    // a separate queue: staff see "pendiente" on the row and
+                    // act on the same row.
+                    <span className="flex gap-3">
+                      <form action={confirmDepositAction.bind(null, booking.id)}>
+                        <button type="submit" className="text-xs underline">
+                          {t("confirmDeposit")}
+                        </button>
+                      </form>
+                      <form action={rejectDepositAction.bind(null, booking.id)}>
+                        <button type="submit" className="text-xs underline text-destructive">
+                          {t("rejectDeposit")}
+                        </button>
+                      </form>
+                    </span>
+                  ) : booking.status === "confirmed" ? (
                     <span className="flex gap-3">
                       <form action={markNoShowAction.bind(null, booking.id)}>
                         <button type="submit" className="text-xs underline">
