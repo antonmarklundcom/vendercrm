@@ -616,6 +616,17 @@
         "phoneNumberIdRequired": "Enter the Phone Number ID.",
         "accessTokenRequired": "Enter the access token.",
         "unknown": "We couldn't connect the number. Try again."
+      },
+      "bookingTemplatesTitle": "Booking templates",
+      "bookingTemplatesHelp": "Meta has to approve these templates in your own account before notices can reach customers who never messaged you. Until then, notices go out by email.",
+      "submitBookingTemplates": "Submit templates to Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Approved",
+        "PENDING": "In review",
+        "REJECTED": "Rejected",
+        "PAUSED": "Paused",
+        "DISABLED": "Disabled",
+        "MISSING": "Not submitted"
       }
     },
     "quotes": {
@@ -1384,6 +1395,40 @@
           "invalidQuestion": "Check the questions: one is incomplete, or two share a key.",
           "notFound": "That appointment type no longer exists."
         }
+      },
+      "statusPendingDeposit": "Deposit pending",
+      "deliveryTitle": "Customer notices",
+      "deliveryEmpty": "No notice has been sent yet",
+      "deliveryNever": "No notices",
+      "deliveryKind": {
+        "confirmation": "Confirmation",
+        "reminder": "Reminder",
+        "cancellation": "Cancellation",
+        "reschedule": "Reschedule",
+        "deposit_request": "Deposit request",
+        "review_request": "Review request"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (template)",
+        "wa_freeform": "WhatsApp",
+        "email": "Email",
+        "none": "No channel"
+      },
+      "deliveryStatus": {
+        "queued": "Queued",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "skipped": "Could not notify"
+      },
+      "deliveryDetail": {
+        "no_channel": "The contact has neither a connected WhatsApp nor an email address.",
+        "template_not_approved_and_window_closed": "Meta has not approved the template yet and the 24-hour window is closed.",
+        "email_not_delivered": "The email did not go out: check the Resend configuration.",
+        "booking_context_missing": "The booking is missing data.",
+        "booking_not_found": "The booking no longer exists.",
+        "tenant_not_found": "The tenant no longer exists."
       }
     },
     "chat": {
@@ -2345,7 +2390,8 @@
       "locationInPerson": "In person",
       "locationPhone": "By phone",
       "locationVideo": "Video call",
-      "locationWhatsapp": "On WhatsApp"
+      "locationWhatsapp": "On WhatsApp",
+      "statusPendingDeposit": "Deposit pending"
     },
     "chat": {
       "title": "Chat",

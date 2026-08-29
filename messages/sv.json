@@ -616,6 +616,17 @@
         "phoneNumberIdRequired": "Ange Phone Number ID.",
         "accessTokenRequired": "Ange åtkomsttoken.",
         "unknown": "Vi kunde inte ansluta numret. Försök igen."
+      },
+      "bookingTemplatesTitle": "Bokningsmallar",
+      "bookingTemplatesHelp": "Meta måste godkänna de här mallarna i ditt eget konto innan aviseringar kan nå kunder som aldrig har skrivit till dig. Fram till dess går aviseringarna via e-post.",
+      "submitBookingTemplates": "Skicka mallar till Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Godkänd",
+        "PENDING": "Under granskning",
+        "REJECTED": "Avvisad",
+        "PAUSED": "Pausad",
+        "DISABLED": "Inaktiverad",
+        "MISSING": "Inte skickad"
       }
     },
     "quotes": {
@@ -1384,6 +1395,40 @@
           "invalidQuestion": "Kolla frågorna: någon är ofullständig, eller två delar nyckel.",
           "notFound": "Bokningstypen finns inte längre."
         }
+      },
+      "statusPendingDeposit": "Väntar på handpenning",
+      "deliveryTitle": "Aviseringar till kunden",
+      "deliveryEmpty": "Ingen avisering har skickats än",
+      "deliveryNever": "Inga aviseringar",
+      "deliveryKind": {
+        "confirmation": "Bekräftelse",
+        "reminder": "Påminnelse",
+        "cancellation": "Avbokning",
+        "reschedule": "Ombokning",
+        "deposit_request": "Begäran om handpenning",
+        "review_request": "Begäran om omdöme"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (mall)",
+        "wa_freeform": "WhatsApp",
+        "email": "E-post",
+        "none": "Ingen kanal"
+      },
+      "deliveryStatus": {
+        "queued": "I kö",
+        "sent": "Skickad",
+        "delivered": "Levererad",
+        "read": "Läst",
+        "failed": "Misslyckades",
+        "skipped": "Kunde inte avisera"
+      },
+      "deliveryDetail": {
+        "no_channel": "Kontakten har varken WhatsApp eller e-postadress.",
+        "template_not_approved_and_window_closed": "Meta har inte godkänt mallen än och 24-timmarsfönstret är stängt.",
+        "email_not_delivered": "E-posten gick inte ut: kontrollera Resend-konfigurationen.",
+        "booking_context_missing": "Bokningen saknar uppgifter.",
+        "booking_not_found": "Bokningen finns inte längre.",
+        "tenant_not_found": "Företaget finns inte längre."
       }
     },
     "chat": {
@@ -2345,7 +2390,8 @@
       "locationInPerson": "På plats",
       "locationPhone": "Per telefon",
       "locationVideo": "Videosamtal",
-      "locationWhatsapp": "På WhatsApp"
+      "locationWhatsapp": "På WhatsApp",
+      "statusPendingDeposit": "Väntar på handpenning"
     },
     "chat": {
       "title": "Chatt",

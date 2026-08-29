@@ -610,6 +610,17 @@
         "phoneNumberIdRequired": "Ingresá el Phone Number ID.",
         "accessTokenRequired": "Ingresá el token de acceso.",
         "unknown": "No se pudo conectar el número. Intentá de nuevo."
+      },
+      "bookingTemplatesTitle": "Plantillas de reservas",
+      "bookingTemplatesHelp": "Meta tiene que aprobar estas plantillas en tu propia cuenta antes de que se puedan enviar avisos a clientes que nunca te escribieron. Mientras tanto, los avisos salen por email.",
+      "submitBookingTemplates": "Enviar plantillas a Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Aprobada",
+        "PENDING": "En revisión",
+        "REJECTED": "Rechazada",
+        "PAUSED": "Pausada",
+        "DISABLED": "Deshabilitada",
+        "MISSING": "Sin enviar"
       }
     },
     "inbox": {
@@ -1384,6 +1395,40 @@
           "invalidQuestion": "Revisá las preguntas: falta un dato o hay dos con la misma clave.",
           "notFound": "Ese tipo de cita ya no existe."
         }
+      },
+      "statusPendingDeposit": "Seña pendiente",
+      "deliveryTitle": "Avisos al cliente",
+      "deliveryEmpty": "Todavía no se envió ningún aviso",
+      "deliveryNever": "Sin avisos",
+      "deliveryKind": {
+        "confirmation": "Confirmación",
+        "reminder": "Recordatorio",
+        "cancellation": "Cancelación",
+        "reschedule": "Reprogramación",
+        "deposit_request": "Pedido de seña",
+        "review_request": "Pedido de reseña"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (plantilla)",
+        "wa_freeform": "WhatsApp",
+        "email": "Email",
+        "none": "Sin canal"
+      },
+      "deliveryStatus": {
+        "queued": "En cola",
+        "sent": "Enviado",
+        "delivered": "Entregado",
+        "read": "Leído",
+        "failed": "Falló",
+        "skipped": "No se pudo avisar"
+      },
+      "deliveryDetail": {
+        "no_channel": "El contacto no tiene WhatsApp conectado ni email.",
+        "template_not_approved_and_window_closed": "La plantilla todavía no está aprobada por Meta y la ventana de 24 horas está cerrada.",
+        "email_not_delivered": "El email no salió: revisá la configuración de Resend.",
+        "booking_context_missing": "Faltan datos de la reserva.",
+        "booking_not_found": "La reserva ya no existe.",
+        "tenant_not_found": "La empresa ya no existe."
       }
     },
     "chat": {
@@ -2345,7 +2390,8 @@
       "locationInPerson": "Presencial",
       "locationPhone": "Por teléfono",
       "locationVideo": "Por videollamada",
-      "locationWhatsapp": "Por WhatsApp"
+      "locationWhatsapp": "Por WhatsApp",
+      "statusPendingDeposit": "Pendiente de seña"
     },
     "chat": {
       "title": "Chat",

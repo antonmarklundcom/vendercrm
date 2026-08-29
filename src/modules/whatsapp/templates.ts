@@ -106,3 +106,49 @@ export async function listApprovedTemplates(ctx: TenantContext, accountId: strin
   const rows = await listTemplates(ctx, accountId);
   return rows.filter((row) => row.status === "APPROVED");
 }
+
+export type TemplateSubmission = {
+  name: string;
+  language: string;
+  category: "UTILITY" | "MARKETING";
+  components: unknown[];
+};
+
+export type SubmitTemplateOutcome =
+  | { status: "submitted"; name: string }
+  | { status: "exists"; name: string }
+  | { status: "failed"; name: string; error: string };
+
+/**
+ * Creates one template in the tenant's own WABA and returns what Meta said.
+ *
+ * Per-tenant by necessity: a template belongs to a WhatsApp Business
+ * Account, so the platform cannot approve one centrally and lend it out —
+ * every tenant submits its own copy and waits out its own review. Callers
+ * are expected to treat "already exists" as success, because this is a
+ * button an admin will press twice.
+ */
+export async function submitTemplate(
+  ctx: TenantContext,
+  accountId: string,
+  submission: TemplateSubmission,
+): Promise<SubmitTemplateOutcome> {
+  const account = await getAccount(ctx, accountId);
+  if (!account) throw new Error(`WhatsApp account ${accountId} not found`);
+
+  const token = getDecryptedAccessToken(account);
+  const res = await fetch(`${GRAPH_API_BASE}/${account.wabaId}/message_templates`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(submission),
+  });
+
+  if (res.ok) return { status: "submitted", name: submission.name };
+
+  const body = await res.text();
+  if (res.status === 401 || res.status === 403) await markAccountError(account.id);
+  // Meta answers a re-submission with error 2388023 / "template name already
+  // exists"; that is the steady state after the first press, not a fault.
+  if (/already exist/i.test(body)) return { status: "exists", name: submission.name };
+  return { status: "failed", name: submission.name, error: body.slice(0, 500) };
+}

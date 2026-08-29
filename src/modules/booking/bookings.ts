@@ -481,6 +481,7 @@ async function performReserve(
     contactId: identity.contactId,
     resourceId,
     startsAt: input.startsAt,
+    rescheduledFromId: options.rescheduledFromId ?? null,
   });
 
   // Read last, not first: the deal backfill and the reminder job both write

@@ -13,6 +13,7 @@ import { resolveAccountByPhoneNumberId, getDecryptedAccessToken } from "./accoun
 import { GRAPH_API_BASE } from "./graph";
 import { whatsappEvents } from "./events";
 import { inboundMessageTime, latest } from "./inbound-time";
+import { advanceNotificationForMessage } from "@/modules/booking/notifications";
 import { advancesMessageStatus, type MessageStatus } from "./message-status";
 
 // Webhook ingestion (PLAN.md §6.3, reliability-critical). The route handler
@@ -141,6 +142,12 @@ async function processValue(eventId: string, value: z.infer<typeof webhookValueS
       .update(messagesTable)
       .set({ status: status.status, error: status.errors ? { errors: status.errors } : null })
       .where(eq(messagesTable.waMessageId, status.id));
+
+    // A booking notice sent over WhatsApp is *this* message. Mirroring the
+    // status onto its notification row is what lets the booking timeline say
+    // "entregado" instead of stopping at "enviado" — the distinction staff
+    // actually argue about when a customer says nobody told them.
+    await advanceNotificationForMessage(ctx, message.id, status.status);
   }
 
   await markEvent(eventId, "processed");

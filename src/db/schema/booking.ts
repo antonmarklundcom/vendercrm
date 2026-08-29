@@ -10,6 +10,7 @@ import {
   text,
   int,
   tinyint,
+  bigint,
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
@@ -86,6 +87,26 @@ export const bookingTypes = mysqlTable(
     minNoticeMinutes: int("min_notice_minutes").notNull().default(120),
     maxAdvanceDays: int("max_advance_days").notNull().default(60),
     maxPerDay: int("max_per_day"),
+
+    /**
+     * How many people fit one slot (B2 group bookings). 1 is the historical
+     * behaviour and stays the default, so a barbería's chair keeps meaning
+     * "one at a time" while a clase de spinning can say twelve. Capacity is
+     * counted in `party_size`, not in rows: four people on one reservation
+     * take four places.
+     */
+    capacity: int("capacity").notNull().default(1),
+
+    /**
+     * The seña (deposit) this type asks for, in guaraníes as a whole-unit
+     * bigint — the same money convention the quotes module uses, never a
+     * float. Null means no deposit and the booking confirms immediately.
+     */
+    depositAmount: bigint("deposit_amount", { mode: "number" }),
+    depositCurrency: varchar("deposit_currency", { length: 3 }).notNull().default("PYG"),
+
+    /** Whether the public page offers `booking_type_services` add-ons (B2). */
+    allowMultiService: boolean("allow_multi_service").notNull().default(false),
 
     /**
      * How the resource is chosen when several are free. `fixed` was a third
@@ -241,9 +262,15 @@ export const bookings = mysqlTable(
     startsAt: datetime("starts_at").notNull(),
     endsAt: datetime("ends_at").notNull(),
 
+    /**
+     * `pending_deposit` is a *held* reservation waiting on a seña (B2): the
+     * slot is taken, nobody else can book it, and it is not yet a promise the
+     * business has made. It expires back to `cancelled` if the transfer never
+     * arrives, which is why it is a status and not a boolean.
+     */
     status: varchar("status", {
-      length: 12,
-      enum: ["confirmed", "cancelled", "completed", "no_show"],
+      length: 16,
+      enum: ["confirmed", "pending_deposit", "cancelled", "completed", "no_show"],
     })
       .notNull()
       .default("confirmed"),
@@ -255,6 +282,21 @@ export const bookings = mysqlTable(
 
     /** The manage/cancel link's secret — same model as /q/[token] (§8). */
     publicToken: varchar("public_token", { length: 64 }).notNull(),
+
+    /** How many places this reservation takes against the type's capacity. */
+    partySize: int("party_size").notNull().default(1),
+
+    /** Seña bookkeeping (B2): who accepted the comprobante, and when. */
+    depositConfirmedAt: datetime("deposit_confirmed_at"),
+    depositConfirmedByUserId: char("deposit_confirmed_by_user_id", { length: 26 }),
+
+    /**
+     * Snapshot of the add-on services chosen at booking time, in the shape
+     * `[{ id, name, extraDurationMinutes, extraPrice }]`. A snapshot, not a
+     * join: renaming or repricing a service later must not rewrite what a
+     * customer was told when they booked.
+     */
+    services: json("services"),
 
     answers: json("answers"),
     source: varchar("source", { length: 100 }),
@@ -299,5 +341,92 @@ export const bookings = mysqlTable(
     index("bookings_tenant_status_idx").on(table.tenantId, table.status),
     uniqueIndex("bookings_public_token_idx").on(table.publicToken),
     uniqueIndex("bookings_tenant_active_slot_idx").on(table.tenantId, table.activeSlot),
+  ],
+);
+
+/**
+ * Optional add-on services a booking type can offer (B2 multi-service):
+ * "barba +15 min", "lavado +10.000". Chosen services extend the duration the
+ * slot search uses and are snapshotted onto `bookings.services`.
+ */
+export const bookingTypeServices = mysqlTable(
+  "booking_type_services",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    bookingTypeId: char("booking_type_id", { length: 26 }).notNull(),
+    name: varchar("name", { length: 200 }).notNull(),
+    extraDurationMinutes: int("extra_duration_minutes").notNull().default(0),
+    /** Whole guaraníes, same convention as `booking_types.deposit_amount`. */
+    extraPrice: bigint("extra_price", { mode: "number" }),
+    sort: int("sort").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("booking_type_services_type_idx").on(table.tenantId, table.bookingTypeId, table.sort),
+  ],
+);
+
+/**
+ * Every customer-facing notification this system *attempted*, whether or not
+ * it went out.
+ *
+ * The reason this table exists rather than a flag on the booking: WhatsApp
+ * delivery is a chain of fallbacks (approved template → free-form inside the
+ * 24h window → email → nothing), and when a customer says "nunca me
+ * avisaron" the answerable question is which rung was tried and what came
+ * back. A boolean `reminder_sent_at` cannot answer it; this can, and the
+ * booking view reads it straight as a timeline.
+ */
+export const bookingNotifications = mysqlTable(
+  "booking_notifications",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    bookingId: char("booking_id", { length: 26 }).notNull(),
+    kind: varchar("kind", {
+      length: 20,
+      enum: [
+        "confirmation",
+        "reminder",
+        "cancellation",
+        "reschedule",
+        "deposit_request",
+        "review_request",
+      ],
+    }).notNull(),
+    channel: varchar("channel", {
+      length: 12,
+      enum: ["wa_template", "wa_freeform", "email", "none"],
+    }).notNull(),
+    status: varchar("status", {
+      length: 10,
+      enum: ["queued", "sent", "delivered", "read", "failed", "skipped"],
+    })
+      .notNull()
+      .default("queued"),
+    /** The Meta template used, when the chain landed on `wa_template`. */
+    templateName: varchar("template_name", { length: 200 }),
+    /** The outbound `messages` row, so status webhooks can advance this one. */
+    messageId: char("message_id", { length: 26 }),
+    /** Why the rung was skipped or failed — shown verbatim to staff. */
+    detail: varchar("detail", { length: 500 }),
+    sentAt: datetime("sent_at"),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("booking_notifications_booking_idx").on(table.tenantId, table.bookingId),
+    index("booking_notifications_message_idx").on(table.tenantId, table.messageId),
   ],
 );

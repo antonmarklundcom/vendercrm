@@ -86,6 +86,14 @@ export type TenantSettings = {
    * `https://g.page/r/.../review`.
    */
   reviewLink?: string;
+  /**
+   * Where a customer should transfer a seña, as the business would write it
+   * ("Banco Itaú, cta. 12345678, a nombre de ..."). Read by the booking
+   * deposit-request notification (plan-booking.md §5.1); flattened to one
+   * line before it goes into a WhatsApp template variable, which is why the
+   * bank details belong here rather than in a multi-paragraph blob.
+   */
+  depositInstructions?: string;
 };
 
 export async function updateTenantBranding(ctx: TenantContext, branding: TenantBranding) {

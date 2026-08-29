@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireTenantAdmin } from "@/modules/tenancy/context";
 import { connectAccountManually } from "@/modules/whatsapp/accounts";
 import { syncTemplates } from "@/modules/whatsapp/templates";
+import { submitBookingTemplates } from "@/modules/booking/notification-registration";
 
 const connectSchema = z.object({
   wabaId: z.string().min(1),
@@ -80,5 +81,18 @@ export async function syncTemplatesAction(formData: FormData) {
   const parsed = z.string().min(1).safeParse(formData.get("accountId"));
   if (!parsed.success) return;
   await syncTemplates(ctx, parsed.data);
+  revalidatePath("/whatsapp");
+}
+
+/**
+ * Submits the booking notification templates to this tenant's own WABA
+ * (plan-booking.md §7). A button rather than an automatic step on connect:
+ * it creates artifacts in someone else's Meta account and starts a review
+ * cycle, which is a thing an admin should choose to do — and pressing it
+ * twice is harmless, since an existing template comes back as "exists".
+ */
+export async function submitBookingTemplatesAction() {
+  const ctx = await requireTenantAdmin();
+  await submitBookingTemplates(ctx);
   revalidatePath("/whatsapp");
 }

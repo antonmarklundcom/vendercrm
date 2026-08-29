@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { isAppHost, isPublicPath, resolveHostRedirect } from "./middleware";
 
@@ -40,6 +42,16 @@ describe("isPublicPath", () => {
     ]) {
       expect(isPublicPath(path)).toBe(false);
     }
+  });
+
+  it("allows the public booking pages and the embedded chat widget", () => {
+    // Both of these shipped *missing* from the allowlist. The failure is the
+    // confusing kind this whole suite exists for: a customer opening the
+    // manage link a business WhatsApp'd them got the CRM login page, and the
+    // chat widget iframe 302'd on every third-party site that embedded it.
+    expect(isPublicPath("/b/barberia-central/corte")).toBe(true);
+    expect(isPublicPath("/b/g/tok123")).toBe(true);
+    expect(isPublicPath("/w/wk_abc123")).toBe(true);
   });
 
   it("does not treat a lookalike prefix as public", () => {
@@ -139,7 +151,15 @@ describe("resolveHostRedirect", () => {
   it("keeps shared customer links and the API on whichever host they were opened", () => {
     // A quote link sent over WhatsApp, or a site posting its leads, must not
     // be bounced to another hostname mid-request.
-    for (const path of ["/api/v1/leads", "/q/tok", "/d/tok/pdf", "/f/acme/contacto"]) {
+    for (const path of [
+      "/api/v1/leads",
+      "/q/tok",
+      "/d/tok/pdf",
+      "/f/acme/contacto",
+      "/b/acme/corte",
+      "/b/g/tok",
+      "/w/wk_abc",
+    ]) {
       expect(resolveHostRedirect("clientes.com.py", path)).toBeNull();
     }
   });
@@ -160,5 +180,31 @@ describe("resolveHostRedirect", () => {
   it("leaves the crm host untouched", () => {
     expect(resolveHostRedirect("crm.clientes.com.py", "/dashboard")).toBeNull();
     expect(resolveHostRedirect("crm.clientes.com.py", "/")).toBeNull();
+  });
+});
+
+// The allowlist is a hand-maintained copy of a fact the filesystem already
+// knows: everything under the (public) route group is, by construction,
+// public. Every entry that has ever been forgotten (/d/, then /b/ and /w/)
+// was forgotten the same way — a route group was added and the list wasn't.
+// So the list is checked against the directory rather than against a
+// developer's memory, and the next omission fails here instead of in
+// production.
+describe("the (public) route group is fully allowlisted", () => {
+  const publicGroup = path.join(__dirname, "app", "(public)");
+
+  const segments = readdirSync(publicGroup, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    // Route groups and dynamic segments are not URL segments of their own.
+    .filter((entry) => !entry.name.startsWith("(") && !entry.name.startsWith("["))
+    .map((entry) => entry.name);
+
+  it("finds the segments it is supposed to be checking", () => {
+    // Guards against the scan silently passing because it found nothing.
+    expect(segments.length).toBeGreaterThan(0);
+  });
+
+  it.each(segments)("treats /%s/ as public", (segment) => {
+    expect(isPublicPath(`/${segment}/anything`)).toBe(true);
   });
 });

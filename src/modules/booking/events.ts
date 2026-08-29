@@ -14,7 +14,13 @@ export type BookingEventPayload = {
 };
 
 export const bookingEvents = createEventBus<{
-  "booking.created": BookingEventPayload;
+  /**
+   * `rescheduledFromId` is what makes a move distinguishable from a fresh
+   * booking on this bus. A reschedule is cancel + create (bookings.ts), so
+   * without it every listener would greet a customer who moved their 15:00
+   * to 15:30 as a brand-new reservation.
+   */
+  "booking.created": BookingEventPayload & { rescheduledFromId: string | null };
   "booking.cancelled": BookingEventPayload & {
     cancelledBy: "contact" | "staff" | "system";
     /** Free text, except for one pair the automation layer reads: `system` +

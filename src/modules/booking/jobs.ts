@@ -5,6 +5,12 @@ import { buildSystemTenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { registerHandler } from "@/worker/handlers";
 import { BOOKING_REMINDER_JOB_TYPE } from "./bookings";
+import { notifyBooking } from "./notifications";
+import {
+  BOOKING_NOTIFY_JOB_TYPE,
+  registerBookingNotificationTriggers,
+  type NotifyJobPayload,
+} from "./notification-triggers";
 import { sendBookingReminder, type ReminderPayload } from "./reminders";
 
 // Booking's job handlers (docs/SPEC-BOOKING.md §7/§8), registered at import
@@ -12,6 +18,16 @@ import { sendBookingReminder, type ReminderPayload } from "./reminders";
 
 registerHandler(BOOKING_REMINDER_JOB_TYPE, async (payload) => {
   await sendBookingReminder(payload as ReminderPayload);
+});
+
+// Confirmation, reschedule and cancellation notices. Subscribed here rather
+// than at the send site so the reservation transaction never waits on Meta,
+// and registered from the same module the worker already imports.
+registerBookingNotificationTriggers();
+
+registerHandler(BOOKING_NOTIFY_JOB_TYPE, async (payload) => {
+  const { tenantId, bookingId, kind } = payload as NotifyJobPayload;
+  await notifyBooking({ tenantId, bookingId, kind });
 });
 
 export const BOOKING_COMPLETE_JOB_TYPE = "booking.complete_past";
