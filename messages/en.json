@@ -850,7 +850,20 @@
         "disable": "Turn off"
       },
       "aiBookingEnabled": "Let the assistant offer booking slots",
-      "aiBookingEnabledHelp": "The assistant only shows free times; the customer books by tapping an option, never the assistant."
+      "aiBookingEnabledHelp": "The assistant only shows free times; the customer books by tapping an option, never the assistant.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Connect your calendar and the system stops offering times you are already busy. It only reads your availability: it never writes to or changes your Google Calendar.",
+        "notConfigured": "Google Calendar is not configured on this installation yet.",
+        "connect": "Connect my calendar",
+        "disconnect": "Disconnect",
+        "connected": "Calendar connected",
+        "lastRead": "last read {when}",
+        "status": {
+          "error": "There was a problem reading the calendar.",
+          "revoked": "Access was revoked: connect it again."
+        }
+      }
     },
     "automations": {
       "title": "Automations",

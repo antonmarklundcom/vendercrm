@@ -220,6 +220,33 @@ export async function busyAndSeatsFor(
   }
 
   const userResources = resources.filter((resource) => resource.kind === "user" && resource.userId);
+
+  // Google Calendar busy windows (plan-booking.md §5.4), merged into the
+  // same list — a rep's dentist appointment is busy for exactly the reason
+  // their own agenda entry is. Read here rather than in `slots.ts`, which
+  // stays pure: the generator takes busy time, it does not fetch it.
+  //
+  // Never throws and never blocks: `busyFromGoogle` degrades to an empty
+  // list, so a Google outage costs an over-offered slot, not a booking page.
+  if (userResources.length > 0) {
+    const { busyFromGoogle } = await import("@/modules/calendar/gcal");
+    const googleBusy = await busyFromGoogle(
+      ctx,
+      userResources.map((resource) => resource.userId!),
+      from,
+      to,
+    );
+    for (const window of googleBusy) {
+      const resource = userResources.find((candidate) => candidate.userId === window.userId);
+      if (!resource) continue;
+      intervals.push({
+        resourceId: resource.id,
+        startsAt: window.startsAt,
+        endsAt: window.endsAt,
+      });
+    }
+  }
+
   if (userResources.length > 0) {
     const events = await tenantDb(ctx).select(
       calendarEvents,

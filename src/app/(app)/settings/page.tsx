@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { BusinessHours, TenantSettings } from "@/modules/tenancy/settings";
@@ -14,6 +14,10 @@ import { resolveAiConfig } from "@/modules/ai/config";
 import { monthlyTokenUsage } from "@/modules/ai/replies";
 import { COUNTRY_CODES, DEFAULT_COUNTRY } from "@/lib/phone";
 import { SheetsFeed, type SheetsLabels } from "./SheetsFeed";
+import { getConnection, isGcalConfigured } from "@/modules/calendar/gcal";
+import { connectGcalAction, disconnectGcalAction } from "./actions";
+import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/i18n/format";
 import {
   BrandingForm,
   BusinessHoursForm,
@@ -27,6 +31,7 @@ export default async function SettingsPage() {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.settings");
   const ta = await getTranslations("audit");
+  const locale = await getLocale();
 
   // Language is the one setting that isn't tenant configuration: it's the
   // user's own, so an agent gets this page for that alone rather than the
@@ -54,10 +59,12 @@ export default async function SettingsPage() {
       sun: null,
     };
 
-  const [auditEntries, currentUser] = await Promise.all([
+  const [auditEntries, currentUser, gcalConnection] = await Promise.all([
     listAuditLogForTenant(ctx.tenantId),
     getUserById(ctx.userId),
+    getConnection(ctx, ctx.userId),
   ]);
+  const gcalConfigured = isGcalConfigured();
 
   const ai = resolveAiConfig(tenant?.name ?? "", settings.ai);
   const aiUsage = await monthlyTokenUsage(ctx);
@@ -183,6 +190,48 @@ export default async function SettingsPage() {
             disable: t("taskReminders.disable"),
           }}
         />
+      </section>
+
+      {/* Google Calendar busy-read (plan-booking.md §5.4). Per staff member,
+          not per tenant: it is this person's own calendar, and the answer it
+          gives is "when is *she* busy". */}
+      <section>
+        <h2 className="mb-2 text-lg font-semibold">{t("gcal.title")}</h2>
+        <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("gcal.intro")}</p>
+        {!gcalConfigured ? (
+          <p className="text-sm text-muted-foreground">{t("gcal.notConfigured")}</p>
+        ) : gcalConnection ? (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span>
+              {t("gcal.connected")}
+              {gcalConnection.lastBusyReadAt
+                ? ` · ${t("gcal.lastRead", {
+                    when: formatDateTime(gcalConnection.lastBusyReadAt, locale, tenant?.timezone),
+                  })}`
+                : ""}
+            </span>
+            {/* A revoked or erroring connection is silent otherwise: slots
+                just quietly stop excluding the calendar. */}
+            {gcalConnection.status !== "connected" ? (
+              <span className="text-destructive">
+                {gcalConnection.status === "revoked"
+                  ? t("gcal.status.revoked")
+                  : t("gcal.status.error")}
+              </span>
+            ) : null}
+            <form action={disconnectGcalAction}>
+              <Button type="submit" size="sm" variant="outline">
+                {t("gcal.disconnect")}
+              </Button>
+            </form>
+          </div>
+        ) : (
+          <form action={connectGcalAction}>
+            <Button type="submit" size="sm" variant="outline">
+              {t("gcal.connect")}
+            </Button>
+          </form>
+        )}
       </section>
 
       <section>

@@ -584,7 +584,20 @@
         "disable": "Desactivar"
       },
       "aiBookingEnabled": "Dejar que el asistente ofrezca horarios",
-      "aiBookingEnabledHelp": "El asistente solo muestra los horarios libres; la reserva la hace el cliente tocando la opción, nunca el asistente."
+      "aiBookingEnabledHelp": "El asistente solo muestra los horarios libres; la reserva la hace el cliente tocando la opción, nunca el asistente.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Conectá tu calendario y el sistema deja de ofrecer horarios en los que ya estás ocupado. Solo lee tu disponibilidad: no escribe ni modifica nada en tu Google Calendar.",
+        "notConfigured": "Google Calendar todavía no está configurado en esta instalación.",
+        "connect": "Conectar mi calendario",
+        "disconnect": "Desconectar",
+        "connected": "Calendario conectado",
+        "lastRead": "última lectura {when}",
+        "status": {
+          "error": "Hubo un problema al leer el calendario.",
+          "revoked": "Se revocó el acceso: volvé a conectarlo."
+        }
+      }
     },
     "whatsapp": {
       "title": "WhatsApp",

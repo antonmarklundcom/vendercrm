@@ -370,8 +370,46 @@ Where B4 should look first: `bookings.ts`'s `busyAndSeatsFor` — GCal busy
 windows merge into the `busy` list it returns, outside `slots.ts`, which
 stays pure. `gcal_connections` already exists from B1.
 
+### 2026-08-29 — B4 Google Calendar busy-read (same branch, PR #77)
+
+What now exists:
+- `modules/calendar/gcal.ts` — per-user OAuth (offline + consent, so a repeat
+  authorization still returns a refresh token), AES-GCM token storage in the
+  `gcal_connections` table B1 created, silent refresh, and `busyFromGoogle`.
+- `/api/gcal/callback` — compares Google's `state` against the *session's*
+  own tenant and user rather than trusting it as identity, so a crafted
+  callback cannot attach someone else's calendar to an account.
+- Busy windows merge into the list `busyAndSeatsFor` already builds, in
+  `bookings.ts`. `slots.ts` never learns Google exists.
+- Connect/disconnect in `/settings`, per staff member. `GOOGLE_CLIENT_ID` /
+  `GOOGLE_CLIENT_SECRET` in `.env.example`; unset means the section says so
+  and slot generation simply has no Google windows.
+
+Decisions / deviations:
+- `busyFromGoogle` never throws. A Google outage costs an over-offered slot,
+  not a booking page — which is the right trade only because the busy list is
+  a union rather than a source of truth, and is why two-way sync stays in the
+  backlog.
+- A re-authorization that returns no refresh token does not wipe the stored
+  one; otherwise "reconnect" would break the connection it was meant to fix.
+- Disconnect forgets the row without revoking the Google-side grant: revoking
+  needs a live token we may no longer have, and a disconnect button that
+  fails when the token has expired is worse than a stale grant.
+- No busy-read cache in this phase. Freebusy is one request per connected
+  staff member per slot query, which is fine at current volumes; a short
+  cache is the obvious first optimisation and is noted in §10.
+- The OAuth round trip has not been run against Google — no credentials in
+  this environment. The merge behaviour (a Google window closes a slot; an
+  empty list changes nothing) is unit-tested and passes.
+
+Next: B5 and B6 are the Sonnet phases — vertical presets, onboarding wizard,
+deeplinks, voseo pass, widget and QR. Hard limits in §6 apply: no schema, no
+auth, no slot logic, no notification-chain changes.
+
 ## §10 Backlog
 
-Payment gateway (Pagopar) for señas; two-way GCal sync; per-slot capacity overrides;
+Payment gateway (Pagopar) for señas; two-way GCal sync; a short cache in
+front of the GCal freebusy read (one request per connected staff member per
+slot query today); per-slot capacity overrides;
 waitlists; SMS fallback channel; per-vertical marketing landing pages; WhatsApp
 Flows (native forms) for intake questions.

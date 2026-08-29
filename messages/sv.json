@@ -850,7 +850,20 @@
         "disable": "Stäng av"
       },
       "aiBookingEnabled": "Låt assistenten erbjuda tider",
-      "aiBookingEnabledHelp": "Assistenten visar bara lediga tider; kunden bokar genom att trycka på ett alternativ, aldrig assistenten."
+      "aiBookingEnabledHelp": "Assistenten visar bara lediga tider; kunden bokar genom att trycka på ett alternativ, aldrig assistenten.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Koppla din kalender så slutar systemet erbjuda tider när du redan är upptagen. Den läser bara din tillgänglighet: den skriver aldrig till eller ändrar något i din Google Calendar.",
+        "notConfigured": "Google Calendar är inte konfigurerat i den här installationen än.",
+        "connect": "Koppla min kalender",
+        "disconnect": "Koppla från",
+        "connected": "Kalender kopplad",
+        "lastRead": "senast läst {when}",
+        "status": {
+          "error": "Det gick inte att läsa kalendern.",
+          "revoked": "Åtkomsten återkallades: koppla den igen."
+        }
+      }
     },
     "automations": {
       "title": "Automationer",
