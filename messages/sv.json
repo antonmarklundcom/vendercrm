@@ -586,9 +586,13 @@
         "aiWindowClosed": "Kunde inte skicka: 24-timmarsfönstret stängdes medan utkastet väntade.",
         "aiConversationDisabled": "Kunde inte skicka: AI är avstängt i den här konversationen.",
         "aiOptedOut": "Kunde inte skicka: kontakten har bett att inte få fler meddelanden.",
-        "aiSendFailed": "Utkastet kunde inte skickas. Försök igen."
+        "aiSendFailed": "Utkastet kunde inte skickas. Försök igen.",
+        "noSlots": "Inga lediga tider de närmaste dagarna.",
+        "bookingTypeRequired": "Välj en tjänst att erbjuda."
       },
-      "actionFailed": "Vi kunde inte slutföra åtgärden. Försök igen."
+      "actionFailed": "Vi kunde inte slutföra åtgärden. Försök igen.",
+      "offerSlots": "Erbjud tider",
+      "offerSlotsSent": "Skickade {count} tider"
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -844,7 +848,9 @@
         "off": "Av",
         "enable": "Slå på",
         "disable": "Stäng av"
-      }
+      },
+      "aiBookingEnabled": "Låt assistenten erbjuda tider",
+      "aiBookingEnabledHelp": "Assistenten visar bara lediga tider; kunden bokar genom att trycka på ett alternativ, aldrig assistenten."
     },
     "automations": {
       "title": "Automationer",

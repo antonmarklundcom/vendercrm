@@ -582,7 +582,9 @@
         "off": "Desactivados",
         "enable": "Activar",
         "disable": "Desactivar"
-      }
+      },
+      "aiBookingEnabled": "Dejar que el asistente ofrezca horarios",
+      "aiBookingEnabledHelp": "El asistente solo muestra los horarios libres; la reserva la hace el cliente tocando la opción, nunca el asistente."
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -662,9 +664,13 @@
         "aiWindowClosed": "No se pudo enviar: la ventana de 24 horas se cerró mientras el borrador esperaba.",
         "aiConversationDisabled": "No se pudo enviar: la IA está desactivada en esta conversación.",
         "aiOptedOut": "No se pudo enviar: este contacto pidió no recibir más mensajes.",
-        "aiSendFailed": "No se pudo enviar el borrador. Intentá de nuevo."
+        "aiSendFailed": "No se pudo enviar el borrador. Intentá de nuevo.",
+        "noSlots": "No hay horarios libres en los próximos días.",
+        "bookingTypeRequired": "Elegí un servicio para ofrecer."
       },
-      "actionFailed": "No pudimos completar la acción. Probá de nuevo."
+      "actionFailed": "No pudimos completar la acción. Probá de nuevo.",
+      "offerSlots": "Ofrecer horarios",
+      "offerSlotsSent": "Se enviaron {count} horarios"
     },
     "sites": {
       "title": "Sitios",

@@ -327,6 +327,49 @@ Where B3 should look first: `notification-templates.ts` for the send shape,
 `public.ts`'s `publicReserve` — the WhatsApp booking path must land in the
 same transactional reserve, not a second one.
 
+### 2026-08-29 — B3 booking inside WhatsApp (same branch, PR #77)
+
+What now exists:
+- `sendInteractive` in `whatsapp/send.ts` — reply buttons for ≤3 options, a
+  list beyond that, with Meta's row/title caps enforced before the call
+  rather than discovered as a 400. Interactive messages are free-form and so
+  carry the same 24h-window guard as text; they are not templates and cannot
+  open a conversation.
+- `slot-choice.ts` — the row-id wire format (`bk:<typeId>:<epoch>`), pure and
+  import-free because it has to survive a round trip through Meta with no
+  server-side state.
+- `whatsapp-booking.ts` — `offerSlots` and `handleSlotTap`. The tap lands in
+  `reserveBooking`: same transaction, same three guards, same capacity
+  accounting as the public page. When the slot went while the list sat
+  unread, the customer is told in the thread and offered the next ones.
+- Three ways to offer: a rep's "Ofrecer horarios" in the inbox, an
+  `offer_slots` automation action, and the AI.
+
+Decisions / deviations:
+- **The AI booking tool is a text marker, not provider-native tool calls.**
+  The plan said "give the drivers a tool-call ability (both OpenAI and Gemini
+  drivers)". Instead the model emits `[[SLOTS:<slug>]]`, which is stripped
+  before the reply is ever stored, and the system offers the slots. Two
+  reasons: the driver interface is prompt-in-string-out, so native tools
+  would mean two provider-specific implementations of one idea; and — the
+  reason it should stay this way — the model then cannot reserve anything.
+  It offers, the customer taps, the tap reserves. "Confirm with the customer
+  before reserving" stops being a prompt instruction a model might ignore and
+  becomes the shape of the system. Gated per tenant on
+  `settings.ai.bookingEnabled`, off by default.
+- The marker is stripped at generation, not at send, so a rep approving a
+  draft in the inbox sees exactly what the customer will get.
+- `handleSlotTap` sends no confirmation of its own: the B1 chain already
+  fires on `booking.created`, and for a type with a seña that message is a
+  request for money, not a "listo".
+- Same limitation as B1/B2: no MySQL here. The wire format, the prompt
+  construction and the marker extraction are unit-tested and pass; the
+  webhook round trip has not been run against a database.
+
+Where B4 should look first: `bookings.ts`'s `busyAndSeatsFor` — GCal busy
+windows merge into the `busy` list it returns, outside `slots.ts`, which
+stays pure. `gcal_connections` already exists from B1.
+
 ## §10 Backlog
 
 Payment gateway (Pagopar) for señas; two-way GCal sync; per-slot capacity overrides;

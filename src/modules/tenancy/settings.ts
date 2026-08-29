@@ -50,6 +50,12 @@ export type TenantExports = {
  * draft mode if it is ever turned on.
  */
 export type TenantAiSettings = {
+  /**
+   * Lets the assistant offer bookable slots in the thread (plan-booking.md
+   * §5.3). It can only *offer*: the customer's tap is what reserves, through
+   * the same transaction the public page uses.
+   */
+  bookingEnabled?: boolean;
   enabled?: boolean;
   /** Falls back to the tenant name when unset. */
   businessName?: string;

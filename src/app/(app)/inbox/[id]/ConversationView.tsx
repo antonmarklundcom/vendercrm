@@ -9,12 +9,14 @@ import { useEchoGeneration } from "@/lib/use-echo-generation";
 import {
   sendTextAction,
   sendTemplateAction,
+  offerSlotsAction,
   approveAiDraftAction,
   discardAiDraftAction,
   setConversationAiAction,
   type ApproveDraftState,
   type SendTemplateState,
   type SendTextState,
+  type OfferSlotsState,
 } from "../actions";
 import { formatDateTime } from "@/lib/i18n/format";
 import { Input, Select } from "@/components/ui/form-fields";
@@ -54,6 +56,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const sendTextInitialState: SendTextState = { error: null, sent: false, values: { body: "" } };
 const sendTemplateInitialState: SendTemplateState = { error: null, values: { template: "" } };
 const approveInitialState: ApproveDraftState = { error: null };
+const offerSlotsInitialState: OfferSlotsState = { error: null, offered: 0 };
 
 function formatRemaining(lastInboundAt: string | null): string {
   if (!lastInboundAt) return "";
@@ -80,12 +83,15 @@ export function ConversationView({
   conversationId,
   initial,
   users,
+  bookingTypes,
 }: {
   conversationId: string;
   initial: ConversationData;
   /** Active members of the tenant, passed once from the page: the one part
    *  of this screen the 5s poll has no reason to re-fetch. */
   users: AssignableUser[];
+  /** Bookable types, for "Ofrecer horarios". Static per tenant, same reason. */
+  bookingTypes: Array<{ id: string; name: string }>;
 }) {
   const t = useTranslations("app.inbox");
   const locale = useLocale();
@@ -96,6 +102,11 @@ export function ConversationView({
     { fallbackData: initial, refreshInterval: 5000 },
   );
   const d = data ?? initial;
+
+  const [offerState, offerFormAction] = useActionState(
+    offerSlotsAction,
+    offerSlotsInitialState,
+  );
 
   const listRef = useRef<HTMLUListElement>(null);
   const prevCountRef = useRef(d.messages.length);
@@ -246,6 +257,37 @@ export function ConversationView({
               </span>
             )}
           </form>
+
+          {/* Booking inside the conversation (plan-booking.md §5.3). Only
+              while the window is open: these are free-form messages, and
+              this answers someone who just wrote rather than opening a
+              thread. */}
+          {bookingTypes.length > 0 ? (
+            <form action={offerFormAction} className="flex flex-col gap-1">
+              <div className="flex gap-2">
+                <input type="hidden" name="conversationId" value={conversationId} />
+                <Select name="bookingTypeId" className="flex-1">
+                  {bookingTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit" variant="outline" disabled={busy}>
+                  {t("offerSlots")}
+                </Button>
+              </div>
+              {offerState.error ? (
+                <span role="alert" className="text-xs text-destructive">
+                  {t(`errors.${offerState.error}` as "errors.sendFailed")}
+                </span>
+              ) : offerState.offered > 0 ? (
+                <span className="text-xs text-muted-foreground">
+                  {t("offerSlotsSent", { count: offerState.offered })}
+                </span>
+              ) : null}
+            </form>
+          ) : null}
         </div>
       ) : (
         <div className="mt-4 flex flex-col gap-2">

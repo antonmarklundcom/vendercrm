@@ -140,6 +140,7 @@ export default async function SettingsPage() {
           maxRepliesPerConversationPerDay={ai.maxRepliesPerConversationPerDay}
           maxRepliesPerTenantPerDay={ai.maxRepliesPerTenantPerDay}
           handoffKeyword={ai.handoffKeyword}
+          bookingEnabled={ai.bookingEnabled}
         />
 
         <div className="mt-6 max-w-2xl rounded-md border p-3 text-sm">

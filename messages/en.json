@@ -586,9 +586,13 @@
         "aiWindowClosed": "Couldn't send: the 24-hour window closed while the draft was waiting.",
         "aiConversationDisabled": "Couldn't send: AI is off for this conversation.",
         "aiOptedOut": "Couldn't send: this contact asked not to receive more messages.",
-        "aiSendFailed": "The draft couldn't be sent. Try again."
+        "aiSendFailed": "The draft couldn't be sent. Try again.",
+        "noSlots": "No free slots in the next few days.",
+        "bookingTypeRequired": "Pick a service to offer."
       },
-      "actionFailed": "We couldn't complete the action. Try again."
+      "actionFailed": "We couldn't complete the action. Try again.",
+      "offerSlots": "Offer slots",
+      "offerSlotsSent": "Sent {count} slots"
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -844,7 +848,9 @@
         "off": "Off",
         "enable": "Turn on",
         "disable": "Turn off"
-      }
+      },
+      "aiBookingEnabled": "Let the assistant offer booking slots",
+      "aiBookingEnabledHelp": "The assistant only shows free times; the customer books by tapping an option, never the assistant."
     },
     "automations": {
       "title": "Automations",

@@ -35,6 +35,12 @@ export const MAX_PER_TENANT_PER_DAY_LIMIT = 2000;
 
 export type ResolvedAiConfig = {
   enabled: boolean;
+  /**
+   * Whether the assistant may offer bookable slots (plan-booking.md §5.3).
+   * Off by default and gated per tenant, on the same principle as `mode`: a
+   * capability that reaches customers starts switched off.
+   */
+  bookingEnabled: boolean;
   mode: "draft" | "send";
   maxRepliesPerConversationPerDay: number;
   maxRepliesPerTenantPerDay: number;
@@ -48,6 +54,7 @@ export function resolveAiConfig(
 ): ResolvedAiConfig {
   return {
     enabled: settings?.enabled === true,
+    bookingEnabled: settings?.bookingEnabled === true,
     mode: settings?.mode === "send" ? "send" : DEFAULT_MODE,
     maxRepliesPerConversationPerDay: clamp(
       settings?.maxRepliesPerConversationPerDay,

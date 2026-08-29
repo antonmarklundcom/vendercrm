@@ -190,6 +190,8 @@ const aiSettingsSchema = z.object({
     .max(MAX_PER_CONVERSATION_PER_DAY_LIMIT),
   maxRepliesPerTenantPerDay: z.coerce.number().int().min(0).max(MAX_PER_TENANT_PER_DAY_LIMIT),
   handoffKeyword: z.string().min(1).max(50),
+  /** Lets the assistant offer bookable slots (plan-booking.md §5.3). */
+  bookingEnabled: z.boolean(),
 });
 
 export async function updateAiSettingsAction(
@@ -210,6 +212,7 @@ export async function updateAiSettingsAction(
     maxRepliesPerConversationPerDay: formData.get("maxRepliesPerConversationPerDay") || 3,
     maxRepliesPerTenantPerDay: formData.get("maxRepliesPerTenantPerDay") || 200,
     handoffKeyword: formData.get("handoffKeyword") || "humano",
+    bookingEnabled: formData.get("bookingEnabled") === "on",
   });
 
   if (!parsed.success) {

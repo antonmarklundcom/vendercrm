@@ -52,6 +52,15 @@ const webhookValueSchema = z.object({
         document: z.object({ id: z.string(), mime_type: z.string().optional() }).optional(),
         audio: z.object({ id: z.string(), mime_type: z.string().optional() }).optional(),
         video: z.object({ id: z.string(), mime_type: z.string().optional() }).optional(),
+        // A tapped reply button or list row. `id` is ours — we put it on the
+        // row when the options were sent (modules/booking/whatsapp-booking).
+        interactive: z
+          .object({
+            type: z.string().optional(),
+            button_reply: z.object({ id: z.string(), title: z.string().optional() }).optional(),
+            list_reply: z.object({ id: z.string(), title: z.string().optional() }).optional(),
+          })
+          .optional(),
       }),
     )
     .optional(),
@@ -218,9 +227,13 @@ async function ingestInboundMessage(
   }
   if (!conversation) return;
 
+  const reply = message.interactive?.button_reply ?? message.interactive?.list_reply;
+
   const messageType = ["text", "image", "document", "audio", "video"].includes(message.type)
     ? (message.type as "text" | "image" | "document" | "audio" | "video")
-    : "unsupported";
+    : message.type === "interactive" && reply
+      ? ("interactive" as const)
+      : "unsupported";
 
   const mediaRef = message.image ?? message.document ?? message.audio ?? message.video;
   let storageKey: string | undefined;
@@ -237,7 +250,9 @@ async function ingestInboundMessage(
       direction: "in",
       waMessageId: message.id,
       type: messageType,
-      body: message.text?.body,
+      // The *title* the customer saw, not the opaque id: a rep scrolling the
+      // thread should read "lun 7, 09:00", not "bk:01J…:1789…".
+      body: message.text?.body ?? reply?.title ?? undefined,
       mediaId: mediaRef?.id,
       storageKey,
       status: "delivered",
@@ -252,6 +267,20 @@ async function ingestInboundMessage(
     contactId: contact.id,
     messageId,
   });
+
+  // A tapped slot is a booking (plan-booking.md §5.3). Handled after the
+  // message is persisted and the event has fired, so the thread reads in the
+  // right order and an automation still sees the customer's reply — and
+  // handled *last*, because a failure to reserve must not lose the inbound
+  // message that is already safely written.
+  if (reply) {
+    const { handleSlotTap } = await import("@/modules/booking/whatsapp-booking");
+    await handleSlotTap(ctx, {
+      conversationId: conversation.id,
+      contactId: contact.id,
+      replyId: reply.id,
+    });
+  }
 }
 
 /** Media URLs Meta returns expire quickly — fetch immediately (§6.3 rule 3). */

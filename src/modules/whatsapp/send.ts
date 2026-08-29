@@ -14,12 +14,36 @@ import { GRAPH_API_BASE } from "./graph";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 
+// Meta's own limits on interactive messages. Exceeding any of them is a 400
+// on the send, not a truncation, so they are enforced before the call.
+const MAX_LIST_ROWS = 10;
+const MAX_BUTTONS = 3;
+const MAX_ROW_TITLE = 24;
+
 export type SendTextInput = { conversationId: string; body: string };
 export type SendTemplateInput = {
   conversationId: string;
   templateName: string;
   language: string;
   components?: unknown[];
+};
+
+/**
+ * An interactive reply-button or list message (Cloud API `interactive`).
+ *
+ * The rows carry an `id` of our own choosing, which is what Meta echoes back
+ * in the webhook when the customer taps — that id is how a tap becomes a
+ * booking without asking them to type a time back at us.
+ */
+export type SendInteractiveInput = {
+  conversationId: string;
+  body: string;
+  /** Shown above the list; ignored for buttons. */
+  header?: string;
+  footer?: string;
+  /** The list's own button label, e.g. "Ver horarios". Lists only. */
+  actionLabel?: string;
+  rows: Array<{ id: string; title: string; description?: string }>;
 };
 
 export type SendDocumentInput = {
@@ -91,6 +115,65 @@ export async function sendDocument(ctx: TenantContext, input: SendDocumentInput)
   });
 }
 
+/**
+ * Interactive messages are free-form as far as Meta is concerned, so they
+ * need an open 24h window exactly like text. Worth stating because "it's a
+ * template-shaped thing with buttons" is the natural wrong assumption: an
+ * interactive message is *not* a template and cannot open a conversation.
+ *
+ * Meta caps a list at 10 rows and a title at 24 characters, and rejects the
+ * whole send when either is exceeded — so both are enforced here rather than
+ * left to a 400 the caller sees as "sending is broken".
+ */
+export async function sendInteractive(ctx: TenantContext, input: SendInteractiveInput) {
+  const conversation = await getConversationOrThrow(ctx, input.conversationId);
+
+  if (!withinFreeFormWindow(conversation.lastInboundAt)) {
+    throw new Error(
+      "La ventana de 24 horas está cerrada — solo se pueden enviar plantillas aprobadas.",
+    );
+  }
+  if (input.rows.length === 0) throw new Error("No hay opciones para ofrecer.");
+
+  const rows = input.rows.slice(0, MAX_LIST_ROWS).map((row) => ({
+    id: row.id.slice(0, 200),
+    title: row.title.slice(0, MAX_ROW_TITLE),
+    ...(row.description ? { description: row.description.slice(0, 72) } : {}),
+  }));
+
+  // Three or fewer options read better as buttons — no extra tap to open a
+  // list — and that is the common case for "here are the next slots".
+  const useButtons = rows.length <= MAX_BUTTONS;
+  const interactive = useButtons
+    ? {
+        type: "button",
+        body: { text: input.body },
+        ...(input.footer ? { footer: { text: input.footer } } : {}),
+        action: {
+          buttons: rows.map((row) => ({
+            type: "reply",
+            reply: { id: row.id, title: row.title },
+          })),
+        },
+      }
+    : {
+        type: "list",
+        ...(input.header ? { header: { type: "text", text: input.header } } : {}),
+        body: { text: input.body },
+        ...(input.footer ? { footer: { text: input.footer } } : {}),
+        action: {
+          button: (input.actionLabel ?? "Ver opciones").slice(0, 20),
+          sections: [{ title: (input.header ?? "Opciones").slice(0, 24), rows }],
+        },
+      };
+
+  return queueOutboundMessage(ctx, conversation.id, {
+    type: "interactive",
+    body: input.body,
+    graphPayload: { messaging_product: "whatsapp", type: "interactive", interactive },
+  });
+}
+
 function withinFreeFormWindow(lastInboundAt: Date | null): boolean {
   if (!lastInboundAt) return false;
   return Date.now() - lastInboundAt.getTime() < WINDOW_MS;
@@ -109,7 +192,7 @@ async function queueOutboundMessage(
   ctx: TenantContext,
   conversationId: string,
   input: {
-    type: "text" | "template" | "document";
+    type: "text" | "template" | "document" | "interactive";
     body: string;
     graphPayload: Record<string, unknown>;
   },
