@@ -2415,3 +2415,71 @@ shared-pipeline decision — needs an owner call first), custom fields, duplicat
 merge UI, email-as-channel, *public* self-booking (the internal agenda has
 since been built — §11's table), native mobile app (H7's PWA is the Phase-1
 answer), payment gateway, websockets/SSE for the inbox.
+
+## 14. Improvement batch (Fable review, 2026-08-28 — found during the crmswe fork audit)
+
+> **Authored by Fable 5.** These surfaced while auditing the repo to fork it for
+> the Swedish market (crmswe). Same conventions as §13: one PR per batch, branch
+> off `main`, no batch reopens a §1.2 locked decision. I1 and I2 are
+> file-disjoint and can run in parallel; I3 runs after. Where crmswe fixes the
+> same item (noted below), prefer cherry-picking its commit over re-implementing.
+
+**I1 — Single-process assumptions made safe (Opus 5).**
+1. `src/lib/rate-limit/index.ts` is an in-memory fixed window: it resets on
+   every deploy and silently stops limiting if the app ever runs >1 process
+   (documented in the file, not mitigated). Replace with a MySQL-backed window
+   (one small table, `INSERT ... ON DUPLICATE KEY UPDATE`, periodic cleanup in
+   `src/worker/maintenance.ts`) so limits survive restarts and horizontal
+   scale; keep the in-memory driver as a test/dev fallback behind the same
+   interface. All existing call sites unchanged.
+2. `resolveTenantByContactsFeedToken` (`src/modules/tenancy/settings.ts`)
+   table-scans every tenant per Sheets-feed request. Store a SHA-256 of the
+   token in an indexed column (same pattern as `site_api_keys`) and look up
+   directly; migration backfills from existing settings.
+**Exit criteria:** rate-limit integration test passes against MySQL driver
+(window survives a simulated restart); feed lookup is a single indexed query
+(assert via test on the new column); suites green.
+
+**I2 — Consistency & config hygiene (Sonnet 5).**
+1. **One money renderer.** `formatMoney` (`src/lib/i18n/format.ts`) renders
+   `"1 500 000 PYG"` (code suffixed, no Intl currency style) while
+   `src/modules/renderable-document/format.ts` renders `"PYG 1.500.000"` —
+   two currencies formats in one product. Unify on a single helper using
+   `Intl.NumberFormat` currency style with correct fraction digits per
+   currency (PYG=0), used by UI, PDFs, and public pages alike. (crmswe phase
+   O1 builds exactly this — cherry-pick candidate.)
+2. **Graph API version pin.** `GRAPH_API_BASE` hardcodes `v21.0`
+   (`src/modules/whatsapp/graph.ts:4`); Meta retires versions on a schedule.
+   Make the version an env value with the current default, and add a
+   `whatsapp-health` warning row when the configured version is past a
+   documented review date.
+3. **`src/lib/site-config.ts` split.** Infra constants (`APEX_HOST`,
+   `APP_HOST` — consumed by `middleware.ts`) live in the same file as
+   marketing content (owner phone, address, RUC, several unfilled
+   `TODO(owner)` fields that render as gaps on the live site). Move hosts to
+   env-driven config, keep content separate, and surface the unfilled owner
+   fields to §12 as an owner question.
+**Exit criteria:** one grep-able money formatter; envs documented in
+`.env.example`; middleware behavior unchanged (host-routing tests green).
+
+**I3 — Dark mode toggle (Sonnet 5).** `globals.css` ships a complete dark
+OKLCH token set with documented contrast ratios, but no `.dark` toggle exists.
+Add a theme switcher (system/light/dark, persisted per user next to the locale
+preference), apply the class on `<html>` before hydration (no flash), and QA
+the app group's heavy surfaces (pipeline board, inbox, PDFs excluded — print
+stays light). **Exit criteria:** toggle persists across sessions; no
+flash-of-wrong-theme on reload; contacts/pipeline/inbox legible in dark.
+
+### 14.1 Noted, deliberately not batched
+
+- **Tenant-level currency setting.** vendercrm is PYG-only by product decision;
+  crmswe (the Swedish fork) builds tenant currency + öre minor-units in its
+  phase O1. If vendercrm ever needs a second currency, port that work — don't
+  redesign it here.
+- **PLAN.md size** (2 417 lines): splitting per-domain would churn every `§`
+  reference in code comments; not worth it while the doc is stable.
+- **`scripts/seed-demo-data.ts`** is non-idempotent by declared design; leave
+  as-is, it's dev-only.
+- **i18n guard gap:** only `es.json` key-parity is enforced; hardcoded strings
+  in new tsx files slip through review. A lint rule for literal JSX text in
+  `(app)`/`(public)` would close it — nice-to-have, low urgency.
