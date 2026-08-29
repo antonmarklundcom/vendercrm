@@ -93,7 +93,8 @@
       "calendar": "Agenda",
       "reports": "Informes",
       "booking": "Reservas",
-      "chat": "Chat web"
+      "chat": "Chat web",
+      "onboarding": "Rubro"
     },
     "dashboard": {
       "title": "Panel de {tenant}",
@@ -1556,6 +1557,19 @@
         "siteRequired": "Elegí un sitio.",
         "exists": "Ese sitio ya tiene un widget."
       }
+    },
+    "onboarding": {
+      "title": "Configurá tu rubro",
+      "adminOnly": "Solo los administradores pueden ver esta página",
+      "intro": "Elegí a qué se dedica tu negocio y te dejamos los servicios, los horarios y el embudo listos para empezar a recibir reservas.",
+      "apply": "Usar este rubro",
+      "previewServices": "Servicios:",
+      "previewResources": "Recursos:",
+      "previewStages": "Embudo:",
+      "previewCapacity": "{count} lugares",
+      "alreadyApplied": "Ya aplicaste el rubro «{name}».",
+      "alreadyAppliedHelp": "Podés aplicar otro rubro cuando quieras: se agrega a lo que ya tenés, nunca reemplaza nada.",
+      "additiveNote": "Aplicar un rubro solo agrega servicios, recursos, etapas y etiquetas. Nunca borra ni cambia lo que ya configuraste."
     }
   },
   "superadmin": {

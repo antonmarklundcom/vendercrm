@@ -104,6 +104,9 @@ export default async function AppLayout({
             { href: "/forms", label: t("forms"), icon: "forms" as const },
             { href: "/sites", label: t("sites"), icon: "sites" as const },
             { href: "/booking", label: t("booking"), icon: "booking" as const },
+            // The rubro wizard sits next to booking because that is what it
+            // configures (plan-booking.md §6.1).
+            { href: "/onboarding", label: t("onboarding"), icon: "booking" as const },
           ]
         : [],
     },

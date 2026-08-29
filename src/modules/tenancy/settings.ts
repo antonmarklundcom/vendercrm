@@ -93,6 +93,15 @@ export type TenantSettings = {
    */
   reviewLink?: string;
   /**
+   * The vertical preset this tenant picked in the onboarding wizard
+   * (plan-booking.md §6.1). Bookkeeping only: nothing branches on it. It
+   * exists so the wizard can say "ya aplicaste barbería" rather than
+   * offering to apply it again, and so support can see what a tenant started
+   * from. If anything ever reads this to change behaviour, presets have
+   * become code paths and the whole design has been lost.
+   */
+  vertical?: string;
+  /**
    * Where a customer should transfer a seña, as the business would write it
    * ("Banco Itaú, cta. 12345678, a nombre de ..."). Read by the booking
    * deposit-request notification (plan-booking.md §5.1); flattened to one
@@ -167,6 +176,10 @@ export async function resolveTenantByContactsFeedToken(token: string) {
     if (timingSafeEqual(expected, provided)) return tenant;
   }
   return null;
+}
+
+export async function updateTenantVertical(ctx: TenantContext, vertical: string) {
+  return mergeTenantSettings(ctx, { vertical });
 }
 
 async function mergeTenantSettings(ctx: TenantContext, patch: Partial<TenantSettings>) {

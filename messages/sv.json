@@ -93,7 +93,8 @@
       "calendar": "Kalender",
       "reports": "Rapporter",
       "booking": "Bokningar",
-      "chat": "Webbchatt"
+      "chat": "Webbchatt",
+      "onboarding": "Bransch"
     },
     "dashboard": {
       "title": "Översikt för {tenant}",
@@ -1556,6 +1557,19 @@
         "siteRequired": "Välj en webbplats.",
         "exists": "Webbplatsen har redan en widget."
       }
+    },
+    "onboarding": {
+      "title": "Ställ in din bransch",
+      "adminOnly": "Bara administratörer kan se den här sidan",
+      "intro": "Välj vad ditt företag gör så lämnar vi tjänster, tider och pipeline klara för att börja ta emot bokningar.",
+      "apply": "Använd den här branschen",
+      "previewServices": "Tjänster:",
+      "previewResources": "Resurser:",
+      "previewStages": "Pipeline:",
+      "previewCapacity": "{count} platser",
+      "alreadyApplied": "Du har redan tillämpat branschen \\u201c{name}\\u201d.",
+      "alreadyAppliedHelp": "Du kan tillämpa en annan när du vill: den läggs till det du har och ersätter aldrig något.",
+      "additiveNote": "Att tillämpa en bransch lägger bara till tjänster, resurser, steg och etiketter. Den tar aldrig bort eller ändrar det du redan konfigurerat."
     }
   },
   "superadmin": {

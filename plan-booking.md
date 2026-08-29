@@ -402,9 +402,43 @@ Decisions / deviations:
   this environment. The merge behaviour (a Google window closes a slot; an
   empty list changes nothing) is unit-tested and passes.
 
-Next: B5 and B6 are the Sonnet phases — vertical presets, onboarding wizard,
-deeplinks, voseo pass, widget and QR. Hard limits in §6 apply: no schema, no
-auth, no slot logic, no notification-chain changes.
+### 2026-08-29 — B5 vertical presets + wizard, PARTIAL (same branch, PR #77)
+
+Built on Opus rather than Sonnet, at Anton's instruction in the session.
+
+What now exists:
+- `verticals.ts` — the preset catalogue for barbería, clínica, taller,
+  gimnasio, profesionales and genérico. Pure and import-free, so it is
+  diffable and unit-tested without a database. Presets are **data, not code
+  paths**: there is no `if (vertical === …)` anywhere and there must never be
+  one. `settings.vertical` is bookkeeping for the wizard, nothing branches
+  on it.
+- `verticals-apply.ts` — additive and idempotent by construction. Nothing is
+  deleted, renamed or overwritten; every step skips what already exists.
+  Stages are appended to the first pipeline rather than replacing its stage
+  set, because deleting a stage with deals on it is the one unacceptable
+  outcome.
+- `/onboarding` — one screen, not a stepper: there is one decision to make.
+  Each card previews exactly what applying will add. Nav entry next to
+  Booking.
+- 9 preset tests, passing: every preset yields a bookable page, slugs are
+  unique, hours are valid and ordered, the siesta split is preserved, only
+  the gym uses capacity, and no preset invents a price.
+
+STILL TO DO in B5:
+- The automation flows the plan asks for (§6.1 item 1): no-show reactivation
+  and post-completed review request using `send_review_request` +
+  `reviewLink`. The `offer_slots` action from B3 is available to them.
+- An integration test applying each preset to a fresh demo tenant and
+  asserting a working public booking page (§6.1 exit criterion).
+
+### B6 — NOT STARTED
+
+wa.me deeplinks on contact/deal/booking/inbox views; the voseo pass over
+customer-facing `messages/es.json` and the public pages; the embeddable
+booking widget (`public/b.js` + iframe route, mirroring the chat widget's
+`public/w.js` / `(public)/w/`); and the QR generator on the booking-type
+page. Nothing here is blocked — B6 has no dependency on B5's remainder.
 
 ## §10 Backlog
 

@@ -93,7 +93,8 @@
       "calendar": "Calendar",
       "reports": "Reports",
       "booking": "Bookings",
-      "chat": "Web chat"
+      "chat": "Web chat",
+      "onboarding": "Industry"
     },
     "dashboard": {
       "title": "{tenant} dashboard",
@@ -1556,6 +1557,19 @@
         "siteRequired": "Pick a site.",
         "exists": "That site already has a widget."
       }
+    },
+    "onboarding": {
+      "title": "Set up your industry",
+      "adminOnly": "Only admins can see this page",
+      "intro": "Pick what your business does and we'll leave the services, hours and pipeline ready to start taking bookings.",
+      "apply": "Use this industry",
+      "previewServices": "Services:",
+      "previewResources": "Resources:",
+      "previewStages": "Pipeline:",
+      "previewCapacity": "{count} places",
+      "alreadyApplied": "You already applied the \\u201c{name}\\u201d industry.",
+      "alreadyAppliedHelp": "You can apply another one whenever you like: it adds to what you have and never replaces anything.",
+      "additiveNote": "Applying an industry only adds services, resources, stages and tags. It never deletes or changes what you already configured."
     }
   },
   "superadmin": {
