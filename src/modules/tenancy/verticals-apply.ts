@@ -10,8 +10,10 @@ import {
 import { createBookingType, listBookingTypes } from "@/modules/booking/types";
 import { setResourcesForType } from "@/modules/booking/resources";
 import { createService, listServicesForType } from "@/modules/booking/services";
+import { createFlow, listFlows, publishFlow, saveDraft } from "@/modules/automations/flows";
+import type { FlowGraph } from "@/modules/automations/graph";
 import { updateTenantVertical } from "./settings";
-import { findPreset, type VerticalPreset } from "./verticals";
+import { findPreset, type PresetFlow, type VerticalPreset } from "./verticals";
 
 // Applying a preset (plan-booking.md §6.1).
 //
@@ -38,6 +40,7 @@ export type ApplyOutcome = {
     services: number;
     stages: number;
     tags: number;
+    flows: number;
   };
 };
 
@@ -54,11 +57,16 @@ export async function applyVerticalPreset(
     services: 0,
     stages: await applyStages(ctx, preset),
     tags: await applyTags(ctx, preset),
+    flows: 0,
   };
 
   const types = await applyBookingTypes(ctx, preset);
   created.bookingTypes = types.types;
   created.services = types.services;
+
+  // After the booking types, because a no-show flow offers slots for one of
+  // them and needs its id.
+  created.flows = await applyFlows(ctx, preset);
 
   // Recorded last, so a half-applied preset (a crash mid-way) does not claim
   // to have been applied. Settings only — no migration, per §2.
@@ -213,4 +221,86 @@ async function applyTags(ctx: TenantContext, preset: VerticalPreset): Promise<nu
     count += 1;
   }
   return count;
+}
+
+/**
+ * The preset's automation flows (plan-booking.md §6.1), created published and
+ * active so that picking a rubro actually turns the behaviour on — a flow
+ * left in draft is a flow nobody notices is off.
+ *
+ * One graph shape serves every preset flow, built from the data rather than
+ * per rubro:
+ *
+ *     trigger → wait → say something → (offer slots)
+ *
+ * The `offer_slots` tail only exists for flows that name a booking type, so
+ * the review request ends after its message rather than inviting someone to
+ * book again in the same breath as thanking them.
+ */
+async function applyFlows(ctx: TenantContext, preset: VerticalPreset): Promise<number> {
+  if (preset.flows.length === 0) return 0;
+
+  const existing = await listFlows(ctx);
+  const byName = new Set(existing.map((row) => row.name.toLowerCase()));
+  const types = await listBookingTypes(ctx);
+  let count = 0;
+
+  for (const definition of preset.flows) {
+    if (byName.has(definition.name.toLowerCase())) continue;
+
+    // A flow whose slots cannot be resolved would publish an `offer_slots`
+    // node pointing nowhere. Skipping the tail is better than skipping the
+    // flow: the message is the half that matters.
+    const offerTypeId = definition.offerSlotsFor
+      ? (types.find((type) => type.slug === definition.offerSlotsFor)?.id ?? null)
+      : null;
+
+    const flow = await createFlow(ctx, { name: definition.name, triggerType: definition.trigger });
+    if (!flow) continue;
+
+    const saved = await saveDraft(ctx, flow.id, graphFor(definition, offerTypeId));
+    if (!saved) continue;
+
+    const published = await publishFlow(ctx, flow.id);
+    if (!published.ok) continue;
+
+    byName.add(definition.name.toLowerCase());
+    count += 1;
+  }
+
+  return count;
+}
+
+function graphFor(definition: PresetFlow, offerTypeId: string | null): FlowGraph {
+  const nodes: FlowGraph["nodes"] = [
+    { id: "trigger", type: "trigger", config: { triggerType: definition.trigger } },
+    {
+      id: "wait",
+      type: "delay",
+      config: { kind: "wait_duration", minutes: definition.waitMinutes },
+    },
+    {
+      id: "message",
+      type: "action",
+      config:
+        definition.trigger === "booking_completed"
+          ? { kind: "send_review_request", text: definition.text }
+          : { kind: "send_whatsapp", text: definition.text },
+    },
+  ];
+  const edges: FlowGraph["edges"] = [
+    { id: "e1", source: "trigger", target: "wait", branch: "default" },
+    { id: "e2", source: "wait", target: "message", branch: "default" },
+  ];
+
+  if (offerTypeId) {
+    nodes.push({
+      id: "offer",
+      type: "action",
+      config: { kind: "offer_slots", bookingTypeId: offerTypeId },
+    });
+    edges.push({ id: "e3", source: "message", target: "offer", branch: "default" });
+  }
+
+  return { nodes, edges };
 }

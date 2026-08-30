@@ -23,7 +23,7 @@ import { Input, Select } from "@/components/ui/form-fields";
 import { AssigneePicker, type AssignableUser } from "../AssigneePicker";
 
 export type ConversationData = {
-  contact: { name: string; phone: string } | null;
+  contact: { name: string; phone: string; whatsappHref: string | null } | null;
   conversation: {
     id: string;
     lastInboundAt: string | null;
@@ -176,7 +176,24 @@ export function ConversationView({
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold">{d.contact?.name ?? d.conversation.id}</h1>
-      <p className="text-sm text-muted-foreground">{d.contact?.phone}</p>
+      <p className="text-sm text-muted-foreground">
+        {d.contact?.whatsappHref ? (
+          // The rep is already in this conversation; the link is for the
+          // times WhatsApp itself is the better place to answer from — a
+          // voice note, a photo, their phone (plan-booking.md §6.2).
+          <a
+            href={d.contact.whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="WhatsApp"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            {d.contact.phone}
+          </a>
+        ) : (
+          d.contact?.phone
+        )}
+      </p>
 
       <AssigneePicker
         conversationId={conversationId}

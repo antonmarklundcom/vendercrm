@@ -5,6 +5,10 @@ import { requireTenantContext } from "@/modules/tenancy/context";
 import { getDeal } from "@/modules/crm/deals";
 import { getPipeline, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { getContact } from "@/modules/crm/contacts";
+import { WhatsAppLink } from "@/components/whatsapp-link";
+import { DEFAULT_COUNTRY } from "@/lib/phone";
+import { getTenant } from "@/modules/tenancy/tenants";
+import type { TenantSettings } from "@/modules/tenancy/settings";
 import { listActivitiesForContact } from "@/modules/crm/activities";
 import { listTasksForContact } from "@/modules/crm/tasks";
 import { listQuotesForContact } from "@/modules/quotes/quotes";
@@ -38,6 +42,10 @@ export default async function DealPage({
 
   const deal = await getDeal(ctx, dealId);
   if (!deal) notFound();
+
+  const tenantRow = await getTenant(ctx.tenantId);
+  const defaultCountry =
+    ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
   const [
     pipeline,
@@ -126,6 +134,22 @@ export default async function DealPage({
           label={t("stageSince")}
           value={formatDateTime(deal.stageEnteredAt, locale)}
         />
+        {contact?.phone ? (
+          // The rep's next move on a deal in Paraguay is a WhatsApp message,
+          // so the number is a link rather than something to copy out
+          // (plan-booking.md §6.2). Prefilled with the deal's own title: the
+          // customer should not have to ask which quote this is about.
+          <Fact
+            label={t("whatsapp")}
+            value={
+              <WhatsAppLink
+                phone={contact.phone}
+                country={defaultCountry}
+                text={t("whatsappGreeting", { deal: deal.title })}
+              />
+            }
+          />
+        ) : null}
       </section>
 
       {closed ? (
@@ -307,7 +331,15 @@ export default async function DealPage({
   );
 }
 
-function Fact({ label, value, href }: { label: string; value: string; href?: string }) {
+function Fact({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: React.ReactNode;
+  href?: string;
+}) {
   return (
     <div className="rounded-md border px-3 py-2">
       <p className="text-xs text-muted-foreground">{label}</p>

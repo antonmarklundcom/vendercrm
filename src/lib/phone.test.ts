@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePhone } from "./phone";
+import { normalizePhone, waMeHref } from "./phone";
 
 describe("normalizePhone", () => {
   it("passes through numbers that already carry a +", () => {
@@ -31,5 +31,33 @@ describe("normalizePhone", () => {
 
   it("does not double the dial code when it's already present without a +", () => {
     expect(normalizePhone("595981123456", "PY")).toBe("+595981123456");
+  });
+});
+
+describe("waMeHref", () => {
+  it("builds a bare-digit wa.me link from a stored number", () => {
+    expect(waMeHref("+595981123456")).toBe("https://wa.me/595981123456");
+  });
+
+  it("normalizes a local number first, so an imported row still reaches someone", () => {
+    // "0981 123 456" as typed into a spreadsheet. Linking it verbatim would
+    // open a chat with a number that does not exist.
+    expect(waMeHref("0981 123 456", "PY")).toBe("https://wa.me/595981123456");
+  });
+
+  it("respects the tenant's country rather than assuming Paraguay", () => {
+    expect(waMeHref("070-123 45 67", "SE")).toBe("https://wa.me/46701234567");
+  });
+
+  it("prefills a message when the view knows what it is about", () => {
+    expect(waMeHref("+595981123456", "PY", "Hola, ¿qué tal?")).toBe(
+      "https://wa.me/595981123456?text=Hola%2C%20%C2%BFqu%C3%A9%20tal%3F",
+    );
+  });
+
+  it("returns null for anything that is not dialable, so callers render text", () => {
+    expect(waMeHref(null)).toBeNull();
+    expect(waMeHref("")).toBeNull();
+    expect(waMeHref("123")).toBeNull();
   });
 });

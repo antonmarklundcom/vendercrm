@@ -425,64 +425,120 @@ What now exists:
   unique, hours are valid and ordered, the siesta split is preserved, only
   the gym uses capacity, and no preset invents a price.
 
-STILL TO DO in B5:
-- The automation flows the plan asks for (§6.1 item 1): no-show reactivation
-  and post-completed review request using `send_review_request` +
-  `reviewLink`. The `offer_slots` action from B3 is available to them.
-- An integration test applying each preset to a fresh demo tenant and
-  asserting a working public booking page (§6.1 exit criterion).
+### 2026-08-30 — B5 complete: preset automation flows + the apply integration test
 
-### 2026-08-30 — CI red: the first run of B1/B2 against a real database
+The two items B5 left open are done, and §6.1's exit criterion now has a test
+behind it.
 
-The B1 and B2 entries each end with "has never been run against MySQL". CI
-does run one (a `mysql:8` service), so those suites had been failing on every
-push since B1 — 16 failures, all surfacing as `slotUnavailable` from
-`performReserve`. Both causes are now fixed and the whole suite is green
-against a real database (85 files, 716 tests).
-
-**The engine bug (capacity).** Every booking also writes a mirror row into
-`calendar_events` so it shows on the rep's agenda, and `busyAndSeatsFor` read
-those mirrors back as third-party busy time. At capacity 1 that is invisible —
-the booking and its mirror say the same thing and the union hides it — but at
-capacity > 1 a class's own first booking blocked its remaining places, so a
-gym class of three took exactly one. `busyAndSeatsFor` now remembers the
-`calendarEventId` of each booking it counted as a seat and skips that event
-when building the busy list. This is the same idea as the existing
-`exclude.calendarEventId`, which already did it for the reschedule case; the
-seat accounting, the capacity rule and the `active_slot` index scheme are
-untouched.
-
-**The test bug (shared resource, shared start).** Both new suites book one
-resource at one start in every test, so the first test passed and each later
-one hit a genuine conflict. They now take a fresh Monday per test, the way
-`bookings.integration.test.ts` already did.
+What now exists:
+- **Flows are preset data too.** `PresetFlow` on every preset: a trigger, a
+  wait, what to say, and optionally which of that preset's own booking types
+  to offer slots for. `verticals-apply.ts` builds one graph shape out of
+  whichever flows a preset lists — `trigger → wait → message → (offer slots)`
+  — so what differs between a barbería and a gimnasio is the wording and the
+  waiting time, not a code path. Two builders (`reactivateNoShow`,
+  `askForReview`) keep that visible in the catalogue.
+- **No-show reactivation**: `booking_no_show` → wait → free-form WhatsApp →
+  `offer_slots` for the preset's main type (B3's action). **Review request**:
+  `booking_completed` → wait → `send_review_request`, which already fills in
+  the tenant's `reviewLink` and skips cleanly when there is none.
+- `booking.completed` — the event and trigger this hangs off. `markCompleted`
+  wrote a status and emitted nothing; it now records an activity and emits,
+  exactly as `markNoShow` already did.
+- Applying a preset creates its flows **published and active**, and counts
+  them in `ApplyOutcome`. The wizard card lists them, so the preview still
+  states everything applying will add.
+- `verticals-apply.integration.test.ts` — B5's exit criterion. Each preset is
+  applied to its own fresh tenant and then booked through the public entry
+  points: the page resolves, it offers slots, and one of those slots actually
+  reserves. Plus: both flows land published and the `offer_slots` node points
+  at a booking type that exists, and a second apply adds nothing.
 
 Decisions / deviations:
-- A start with **no** places left is not on offer at all, so it is refused
-  with `slotUnavailable`, not `slotTaken`; `slotTaken` is what a class with
-  *some* room says to a party too big to fit it. Three expectations were
-  corrected to match. This is not a weakened assertion: `public.ts` and
-  `whatsapp-booking.ts` already handle the two codes identically, so the
-  customer-facing outcome is the same refusal either way — and at capacity 1
-  `slotUnavailable` is what the engine gave before capacity existed, which is
-  exactly what that regression guard means to pin.
-- The build environment still has no MySQL of its own; this run used a locally
-  installed MariaDB 10.11 with the real migrations applied. The migration
-  chain, B1's notifications, B2's capacity/señas and B3's webhook round trip
-  have now all run against a real database.
+- `booking_completed` was added to the `flows.trigger_type` enum. That is a
+  varchar with a drizzle-level enum and B1's own comment says widening it is
+  a type change with nothing to migrate, so this is not the retrofitted
+  schema §1 forbids.
+- A flow whose `offerSlotsFor` slug cannot be resolved loses its offer tail
+  rather than the whole flow: the message is the half that matters. A pure
+  test pins every slug to a type its own preset creates, so that path should
+  stay unreachable.
+- Flows are idempotent by name, like every other step — an admin who renames
+  one and re-applies gets a second, which is the additive rule working as
+  intended rather than a bug.
+- The review request ends after saying thank you: no `offer_slots` tail.
+  Asking for a reseña and touting the next appointment in one breath cheapens
+  both.
 
-### B6 — NOT STARTED
+Where B6 should look first: nothing here blocks it. `src/lib/phone.ts` for
+the deeplinks, `public/w.js` + `(public)/w/` as the widget to mirror.
 
-wa.me deeplinks on contact/deal/booking/inbox views; the voseo pass over
-customer-facing `messages/es.json` and the public pages; the embeddable
-booking widget (`public/b.js` + iframe route, mirroring the chat widget's
-`public/w.js` / `(public)/w/`); and the QR generator on the booking-type
-page. Nothing here is blocked — B6 has no dependency on B5's remainder.
+### 2026-08-30 — B6 complete: deeplinks, voseo, widget, QR (branch `claude/vendercrm-booking-b5-b6-centja`)
+
+PR #77 was merged while this phase was in progress, at the CI-fix commit. B5
+and B6 therefore continue on a fresh branch off the new main, in a new PR.
+
+What now exists:
+- **wa.me deeplinks.** `waMeHref` in `lib/phone.ts` (normalizes first, then
+  strips to bare digits; null when nothing is dialable) and a
+  `WhatsAppLink` component over it. Wired into the contact detail page and
+  the contacts table, the deal detail page, the upcoming-bookings list and
+  the inbox conversation header. The tenant's `defaultCountry` is read
+  server-side in each, so a bare local number links to the right country
+  rather than always to Paraguay.
+- **Voseo.** The customer-facing strings were already voseo throughout — B1
+  and the earlier public pages had done the work — so what this phase adds is
+  the guard: `messages.test.ts` now fails on tuteo anywhere under `public.*`.
+  The blocklist is whole-word and accent-sensitive on purpose: `contactanos`
+  and `dejanos` are the voseo imperatives and correct, `contáctanos` and
+  `déjanos` are not.
+- **The booking widget.** `public/b.js` (inline via `data-inline="#selector"`,
+  or a floating button) plus the iframe route `/b/e/<tenant>/<type>`,
+  mirroring `public/w.js` and `/w/[widgetKey]`. The booking page body moved to
+  `(public)/b/booking-view.tsx` and is rendered by both routes, so embedding
+  cannot drift from the page it embeds.
+- **QR.** `lib/qr.ts` — pure, unit-tested, one `<path>` per code — and a
+  `ShareCode` component on the booking-type page offering SVG and PNG (1024px,
+  canvas-rasterised) for both the booking URL and the tenant's own wa.me link,
+  next to the embed snippet.
+
+Decisions / deviations:
+- **`w.js` was never allowlisted.** `PUBLIC_EXACT` had only
+  `/vc-attribution.js`, so on the `crm.*` host the chat loader was redirected
+  to `/login` — a widget that silently never appears. `b.js` would have
+  shipped with the same hole. Both are listed now, and the middleware test
+  scans `public/*.js` rather than trusting memory, the way it already scans
+  the `(public)` route group. Scripts the marketing site loads for itself are
+  named as exempt, so a new embed loader fails the test until someone says
+  which kind it is.
+- The embed route has no key and no origin allowlist, unlike the chat widget.
+  `/b/<tenant>/<type>` is already a public page anyone may open; refusing to
+  render the same content in an iframe would protect nothing. The reserve
+  endpoint keeps its own rate limits, honeypot and Turnstile.
+- The iframe reports its height from the *content wrapper's* box. Both
+  `documentElement.scrollHeight` and the body's are stretched to the iframe
+  viewport by the app layout, so measuring either makes the frame agree with
+  itself and it can only ever grow. Found by driving the real thing, not by
+  reading it.
+- `qrcode-generator` (MIT, no dependencies of its own) rather than a
+  hand-written encoder: Reed-Solomon error correction is the one part of a QR
+  that should not be written from memory.
+- `/b/e/` joins `/b/g/` as a reserved first segment under `/b/`, so no tenant
+  may have the slug `e`. Worth a validation rule; noted in §10 rather than
+  bolted on here.
+
+Verified: `npx tsc --noEmit`, `npm run lint`, `npm test` (87 files, 746 tests)
+and `npm run build` all green **against a real database** (a local MariaDB
+with the migrations applied), not skipped. The widget's exit criterion was
+driven end to end in Chromium against a plain HTML page on another origin: the
+iframe loads, the form renders, a day click reaches the time list, and the
+frame resizes itself (364 → 382 → 476px) as the calendar opens.
 
 ## §10 Backlog
 
 Payment gateway (Pagopar) for señas; two-way GCal sync; a short cache in
 front of the GCal freebusy read (one request per connected staff member per
 slot query today); per-slot capacity overrides;
+a tenant-slug validation rule reserving the `/b/` sub-paths (`g`, `e`);
 waitlists; SMS fallback channel; per-vertical marketing landing pages; WhatsApp
 Flows (native forms) for intake questions.

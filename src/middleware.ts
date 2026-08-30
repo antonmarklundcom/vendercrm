@@ -39,7 +39,12 @@ export const PUBLIC_PREFIXES = [
 // narrow allowlist rather than "anything under /vc-*". The attribution
 // snippet (§5.1) is loaded by connected sites' visitors, who by definition
 // have no session here — without this it would be redirected to /login.
-export const PUBLIC_EXACT = ["/vc-attribution.js"];
+// Every one of these is a script loaded by a visitor to *someone else's*
+// site, who has no session here — so a redirect to /login is not an auth
+// failure but a widget that silently never appears. `w.js` was missing until
+// the booking widget was built beside it; the test below now checks this
+// list against `public/` rather than against memory.
+export const PUBLIC_EXACT = ["/vc-attribution.js", "/w.js", "/b.js"];
 
 // One Node app answers both the apex marketing domain and the crm.* app
 // subdomain (parked domain, shared document root — see hPanel Domains).

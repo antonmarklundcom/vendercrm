@@ -36,4 +36,9 @@ export const bookingEvents = createEventBus<{
     cancelReason: string | null;
   };
   "booking.no_show": BookingEventPayload;
+  /**
+   * The appointment happened. Staff say so — like `no_show`, nothing in the
+   * system knows — and it is the one honest moment to ask for a review.
+   */
+  "booking.completed": BookingEventPayload;
 }>();
