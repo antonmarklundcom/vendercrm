@@ -29,6 +29,9 @@ import {
   type ContactSearchParams,
 } from "./query";
 import { formatDate } from "@/lib/i18n/format";
+import { DEFAULT_COUNTRY, waMeHref } from "@/lib/phone";
+import { getTenant } from "@/modules/tenancy/tenants";
+import type { TenantSettings } from "@/modules/tenancy/settings";
 import { getLocale } from "next-intl/server";
 import { Input, Select } from "@/components/ui/form-fields";
 
@@ -45,6 +48,12 @@ export default async function ContactsPage({
 
   const query = parseContactQuery(params);
   const options = parseContactOptions(params);
+
+  // One lookup for the whole table: the wa.me links are built here because
+  // only the server knows the tenant's dialing country (plan-booking.md §6.2).
+  const tenantRow = await getTenant(ctx.tenantId);
+  const defaultCountry =
+    ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
   const [page, tags, sources, users, openDeals, pipelines, views] = await Promise.all([
     queryContacts(ctx, query, options),
@@ -319,6 +328,7 @@ export default async function ContactsPage({
                 ownerName: contact.ownerUserId ? (userNames.get(contact.ownerUserId) ?? null) : null,
                 createdAtLabel: formatDate(contact.createdAt, locale),
                 hasOpenDeal: openDeals.has(contact.id),
+                whatsappHref: waMeHref(contact.phone, defaultCountry),
               }))}
               nameHeader={<SortHeader field="name" label={t("name")} />}
               phoneHeader={<SortHeader field="phone" label={t("phone")} />}

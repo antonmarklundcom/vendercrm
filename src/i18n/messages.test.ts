@@ -134,3 +134,73 @@ describe("hookGuide.platforms", () => {
     });
   }
 });
+
+// Voseo in customer-facing Spanish (plan-booking.md §1, §6.2 #2).
+//
+// The reader of everything under `public.*` is the customer of a Paraguayan
+// business, not the CRM's user, and "elige un horario" reads to them the way
+// "kindly select a timeslot" reads to an English speaker: correct, and
+// written by somebody else's software. Admin copy is exempt — it is the
+// tenant's own screen and neutral Spanish is fine there.
+//
+// A blocklist of the tuteo imperatives and present-tense forms these strings
+// actually reach for, rather than an attempt to conjugate Spanish: the point
+// is to fail when somebody adds "Selecciona una fecha", not to be a grammar
+// checker.
+describe("customer-facing Spanish uses voseo", () => {
+  // Whole words only: "Enviar" is an infinitive on a button and perfectly
+  // fine; "envía" is the tuteo imperative that is not.
+  const TUTEO = [
+    "elige",
+    "elija",
+    "selecciona",
+    "escribe",
+    "env[íi]a",
+    "ingresa",
+    "confirma",
+    "descarga",
+    "revisa",
+    "espera",
+    "intenta",
+    "vuelve",
+    "recuerda",
+    // Accent and all: "contactanos" and "dejanos" are the voseo imperatives
+    // and are correct — it is "contáctanos" and "déjanos" that are not.
+    "cuéntanos",
+    "contáctanos",
+    "déjanos",
+    "compártelo",
+    "tienes",
+    "puedes",
+    "debes",
+    "quieres",
+    "necesitas",
+    "prefieres",
+    "deseas",
+  ].map((form) => new RegExp(`\\b${form}\\b`, "i"));
+
+  const strings: Array<[string, string]> = [];
+  const walk = (node: unknown, path: string[]) => {
+    if (typeof node === "string") {
+      strings.push([path.join("."), node]);
+      return;
+    }
+    if (node && typeof node === "object") {
+      for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+        walk(value, [...path, key]);
+      }
+    }
+  };
+  walk((messages as Record<string, unknown>).public, ["public"]);
+
+  it("finds the strings it is supposed to be checking", () => {
+    expect(strings.length).toBeGreaterThan(20);
+  });
+
+  it("has no tuteo left anywhere a customer can read", () => {
+    const offenders = strings.filter(([, value]) =>
+      TUTEO.some((form) => form.test(value)),
+    );
+    expect(offenders).toEqual([]);
+  });
+});

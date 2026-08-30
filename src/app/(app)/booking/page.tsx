@@ -15,6 +15,9 @@ import {
 import { listBookings } from "@/modules/booking/bookings";
 import { notificationsByBooking } from "@/modules/booking/notifications";
 import { getContact } from "@/modules/crm/contacts";
+import { WhatsAppLink } from "@/components/whatsapp-link";
+import { DEFAULT_COUNTRY } from "@/lib/phone";
+import type { TenantSettings } from "@/modules/tenancy/settings";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { BookingDelivery, type DeliveryLabels } from "./BookingDelivery";
@@ -68,6 +71,10 @@ export default async function BookingPage() {
     types.map(async (type) => [type.id, await listResourcesForType(ctx, type.id)] as const),
   );
   const resourcesByType = new Map(typeResources);
+
+  const defaultCountry =
+    ((tenant?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
+
 
   const contacts = new Map(
     await Promise.all(
@@ -343,7 +350,23 @@ export default async function BookingPage() {
                   <span className="flex flex-col gap-1">
                     <span>
                       {formatDateTime(booking.startsAt, locale, tenant?.timezone)} ·{" "}
-                      {contact?.name ?? "—"} · {statusLabel}
+                      {contact ? (
+                        // Chasing a booking — a reminder, a running-late
+                        // message, a no-show — is a WhatsApp message, and this
+                        // list is where staff do it (plan-booking.md §6.2).
+                        <WhatsAppLink
+                          phone={contact.phone}
+                          country={defaultCountry}
+                          text={t("whatsappGreeting", {
+                            when: formatDateTime(booking.startsAt, locale, tenant?.timezone),
+                          })}
+                        >
+                          {contact.name}
+                        </WhatsAppLink>
+                      ) : (
+                        "—"
+                      )}{" "}
+                      · {statusLabel}
                       {booking.partySize > 1 ? ` · ${t("partySize", { count: booking.partySize })}` : ""}
                       {((booking.services as Array<{ name: string }> | null) ?? [])
                         .map((service) => ` · ${service.name}`)

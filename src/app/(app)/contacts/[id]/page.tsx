@@ -17,6 +17,10 @@ import {
 } from "@/modules/whatsapp/inbox";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { Button } from "@/components/ui/button";
+import { WhatsAppLink } from "@/components/whatsapp-link";
+import { getTenant } from "@/modules/tenancy/tenants";
+import { DEFAULT_COUNTRY } from "@/lib/phone";
+import type { TenantSettings } from "@/modules/tenancy/settings";
 import { cn } from "@/lib/utils";
 import { TaskList, type TaskListLabels } from "@/components/task-list";
 import { EmptyState } from "@/components/empty-state";
@@ -79,6 +83,12 @@ export default async function ContactDetailPage({
 
   const contact = await getContact(ctx, id);
   if (!contact) notFound();
+
+  // The tenant's dialing convention, so a wa.me link built from a bare local
+  // number reaches the right country (plan-booking.md §6.2).
+  const tenantRow = await getTenant(ctx.tenantId);
+  const defaultCountry =
+    ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
   const tab: Tab = TABS.includes(rawTab as Tab) ? (rawTab as Tab) : "conversacion";
 
@@ -196,7 +206,7 @@ export default async function ContactDetailPage({
       <header className="flex flex-col gap-2">
         <h1 className="text-xl font-semibold">{contact.name}</h1>
         <p className="text-sm text-muted-foreground">
-          {contact.phone}
+          <WhatsAppLink phone={contact.phone} country={defaultCountry} />
           {contact.email ? ` · ${contact.email}` : ""}
           {contact.source ? ` · ${contact.source}` : ""}
         </p>

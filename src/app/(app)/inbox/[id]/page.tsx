@@ -12,6 +12,9 @@ import { listPendingDrafts } from "@/modules/ai/replies";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { listBookingTypes } from "@/modules/booking/types";
 import { ConversationView, type ConversationData } from "./ConversationView";
+import { DEFAULT_COUNTRY, waMeHref } from "@/lib/phone";
+import { getTenant } from "@/modules/tenancy/tenants";
+import type { TenantSettings } from "@/modules/tenancy/settings";
 
 export default async function ConversationPage({
   params,
@@ -23,6 +26,10 @@ export default async function ConversationPage({
 
   const conversation = await getConversation(ctx, id);
   if (!conversation) notFound();
+
+  const tenantRow = await getTenant(ctx.tenantId);
+  const defaultCountry =
+    ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
   const [contact, messages, templates, aiDrafts, users, bookingTypes] = await Promise.all([
     getContact(ctx, conversation.contactId),
@@ -38,7 +45,13 @@ export default async function ConversationPage({
   }
 
   const initial: ConversationData = {
-    contact: contact ? { name: contact.name, phone: contact.phone } : null,
+    contact: contact
+      ? {
+          name: contact.name,
+          phone: contact.phone,
+          whatsappHref: waMeHref(contact.phone, defaultCountry),
+        }
+      : null,
     conversation: {
       id: conversation.id,
       lastInboundAt: conversation.lastInboundAt ? conversation.lastInboundAt.toISOString() : null,

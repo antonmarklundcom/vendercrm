@@ -35,3 +35,28 @@ export function normalizePhone(raw: string, country: CountryCode = DEFAULT_COUNT
   if (digits.startsWith(dial)) return `+${digits}`;
   return `+${dial}${digits}`;
 }
+
+/**
+ * A wa.me deep link for a number we hold (plan-booking.md §6.2).
+ *
+ * wa.me wants bare digits — no `+`, no spaces — so the number is normalized
+ * first and then stripped. Normalizing rather than trusting the stored string
+ * matters for rows that predate normalization or arrived through an import:
+ * a link built from "0981 123 456" opens a chat with nobody.
+ *
+ * Returns null when there is nothing dialable, so a caller renders plain text
+ * instead of a link that would open WhatsApp on an empty conversation.
+ */
+export function waMeHref(
+  raw: string | null | undefined,
+  country: CountryCode = DEFAULT_COUNTRY,
+  text?: string,
+): string | null {
+  if (!raw) return null;
+  const digits = normalizePhone(raw, country).replace(/\D/g, "");
+  // Shorter than a country code plus a subscriber number is not a phone
+  // number, whatever it is.
+  if (digits.length < 8) return null;
+  const query = text ? `?text=${encodeURIComponent(text)}` : "";
+  return `https://wa.me/${digits}${query}`;
+}

@@ -208,3 +208,32 @@ describe("the (public) route group is fully allowlisted", () => {
     expect(isPublicPath(`/${segment}/anything`)).toBe(true);
   });
 });
+
+// The same reasoning one level out: the loaders in `public/` that *other
+// people's sites* embed are fetched by visitors with no session here, and
+// each one needs a hand-added entry in PUBLIC_EXACT. `w.js` shipped without
+// one and was only noticed when `b.js` was written next to it.
+//
+// Scripts the marketing site loads for itself are exempt: they are only ever
+// fetched from the apex host, where everything outside /api is public and
+// there is no allowlist to forget. They are named here rather than inferred,
+// so adding a new *embed* loader fails this test until someone decides which
+// kind it is — which is the decision that was missed for `w.js`.
+const MARKETING_ONLY_SCRIPTS = ["mk-motion.js"];
+
+describe("every shipped embed loader is allowlisted", () => {
+  const publicDir = path.join(__dirname, "..", "public");
+
+  const loaders = readdirSync(publicDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
+    .map((entry) => entry.name)
+    .filter((name) => !MARKETING_ONLY_SCRIPTS.includes(name));
+
+  it("finds the loaders it is supposed to be checking", () => {
+    expect(loaders.length).toBeGreaterThan(0);
+  });
+
+  it.each(loaders)("serves /%s to a visitor with no session", (loader) => {
+    expect(isPublicPath(`/${loader}`)).toBe(true);
+  });
+});

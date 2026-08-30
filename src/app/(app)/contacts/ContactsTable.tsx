@@ -29,6 +29,11 @@ export type ContactRow = {
   ownerName: string | null;
   createdAtLabel: string;
   hasOpenDeal: boolean;
+  /**
+   * Built server-side, where the tenant's dialing country is known
+   * (plan-booking.md §6.2). Null when the stored number is not dialable.
+   */
+  whatsappHref: string | null;
 };
 
 export type StageOption = { id: string; pipelineId: string; label: string };
@@ -308,7 +313,24 @@ export function ContactsTable({
                     </span>
                   )}
                 </td>
-                <td className="py-2 tabular-nums">{row.phone}</td>
+                <td className="py-2 tabular-nums">
+                  {row.whatsappHref ? (
+                    <a
+                      href={row.whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="WhatsApp"
+                      className="underline underline-offset-2 hover:text-foreground"
+                      // The row itself navigates to the contact; opening
+                      // WhatsApp must not also open the detail page behind it.
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {row.phone}
+                    </a>
+                  ) : (
+                    row.phone
+                  )}
+                </td>
                 <td className="py-2">{row.email}</td>
                 <td className="py-2">{row.source}</td>
                 <td className="py-2">{row.ownerName}</td>

@@ -473,18 +473,72 @@ Decisions / deviations:
 Where B6 should look first: nothing here blocks it. `src/lib/phone.ts` for
 the deeplinks, `public/w.js` + `(public)/w/` as the widget to mirror.
 
-### B6 — NOT STARTED
+### 2026-08-30 — B6 complete: deeplinks, voseo, widget, QR (branch `claude/vendercrm-booking-b5-b6-centja`)
 
-wa.me deeplinks on contact/deal/booking/inbox views; the voseo pass over
-customer-facing `messages/es.json` and the public pages; the embeddable
-booking widget (`public/b.js` + iframe route, mirroring the chat widget's
-`public/w.js` / `(public)/w/`); and the QR generator on the booking-type
-page. Nothing here is blocked — B6 has no dependency on B5's remainder.
+PR #77 was merged while this phase was in progress, at the CI-fix commit. B5
+and B6 therefore continue on a fresh branch off the new main, in a new PR.
+
+What now exists:
+- **wa.me deeplinks.** `waMeHref` in `lib/phone.ts` (normalizes first, then
+  strips to bare digits; null when nothing is dialable) and a
+  `WhatsAppLink` component over it. Wired into the contact detail page and
+  the contacts table, the deal detail page, the upcoming-bookings list and
+  the inbox conversation header. The tenant's `defaultCountry` is read
+  server-side in each, so a bare local number links to the right country
+  rather than always to Paraguay.
+- **Voseo.** The customer-facing strings were already voseo throughout — B1
+  and the earlier public pages had done the work — so what this phase adds is
+  the guard: `messages.test.ts` now fails on tuteo anywhere under `public.*`.
+  The blocklist is whole-word and accent-sensitive on purpose: `contactanos`
+  and `dejanos` are the voseo imperatives and correct, `contáctanos` and
+  `déjanos` are not.
+- **The booking widget.** `public/b.js` (inline via `data-inline="#selector"`,
+  or a floating button) plus the iframe route `/b/e/<tenant>/<type>`,
+  mirroring `public/w.js` and `/w/[widgetKey]`. The booking page body moved to
+  `(public)/b/booking-view.tsx` and is rendered by both routes, so embedding
+  cannot drift from the page it embeds.
+- **QR.** `lib/qr.ts` — pure, unit-tested, one `<path>` per code — and a
+  `ShareCode` component on the booking-type page offering SVG and PNG (1024px,
+  canvas-rasterised) for both the booking URL and the tenant's own wa.me link,
+  next to the embed snippet.
+
+Decisions / deviations:
+- **`w.js` was never allowlisted.** `PUBLIC_EXACT` had only
+  `/vc-attribution.js`, so on the `crm.*` host the chat loader was redirected
+  to `/login` — a widget that silently never appears. `b.js` would have
+  shipped with the same hole. Both are listed now, and the middleware test
+  scans `public/*.js` rather than trusting memory, the way it already scans
+  the `(public)` route group. Scripts the marketing site loads for itself are
+  named as exempt, so a new embed loader fails the test until someone says
+  which kind it is.
+- The embed route has no key and no origin allowlist, unlike the chat widget.
+  `/b/<tenant>/<type>` is already a public page anyone may open; refusing to
+  render the same content in an iframe would protect nothing. The reserve
+  endpoint keeps its own rate limits, honeypot and Turnstile.
+- The iframe reports its height from the *content wrapper's* box. Both
+  `documentElement.scrollHeight` and the body's are stretched to the iframe
+  viewport by the app layout, so measuring either makes the frame agree with
+  itself and it can only ever grow. Found by driving the real thing, not by
+  reading it.
+- `qrcode-generator` (MIT, no dependencies of its own) rather than a
+  hand-written encoder: Reed-Solomon error correction is the one part of a QR
+  that should not be written from memory.
+- `/b/e/` joins `/b/g/` as a reserved first segment under `/b/`, so no tenant
+  may have the slug `e`. Worth a validation rule; noted in §10 rather than
+  bolted on here.
+
+Verified: `npx tsc --noEmit`, `npm run lint`, `npm test` (87 files, 746 tests)
+and `npm run build` all green **against a real database** (a local MariaDB
+with the migrations applied), not skipped. The widget's exit criterion was
+driven end to end in Chromium against a plain HTML page on another origin: the
+iframe loads, the form renders, a day click reaches the time list, and the
+frame resizes itself (364 → 382 → 476px) as the calendar opens.
 
 ## §10 Backlog
 
 Payment gateway (Pagopar) for señas; two-way GCal sync; a short cache in
 front of the GCal freebusy read (one request per connected staff member per
 slot query today); per-slot capacity overrides;
+a tenant-slug validation rule reserving the `/b/` sub-paths (`g`, `e`);
 waitlists; SMS fallback channel; per-vertical marketing landing pages; WhatsApp
 Flows (native forms) for intake questions.
