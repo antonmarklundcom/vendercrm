@@ -41,6 +41,10 @@ export const flows = mysqlTable(
         "booking_created",
         "booking_cancelled",
         "booking_no_show",
+        // Completed is the review-request moment (plan-booking.md §6.1): the
+        // only point at which asking for a reseña is a thank-you rather than
+        // a guess.
+        "booking_completed",
         "chat_lead_captured",
       ],
     }).notNull(),

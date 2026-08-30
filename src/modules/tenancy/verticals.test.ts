@@ -98,6 +98,46 @@ describe("vertical presets", () => {
     }
   });
 
+  it("gives every preset both booking flows", () => {
+    // The two §6.1 asks for. A rubro that quietly shipped without the
+    // reactivation flow would only be noticed the first time somebody
+    // failed to turn up.
+    for (const preset of VERTICAL_PRESETS) {
+      const triggers = preset.flows.map((flow) => flow.trigger).sort();
+      expect(triggers, preset.slug).toEqual(["booking_completed", "booking_no_show"]);
+    }
+  });
+
+  it("offers slots only for a booking type the same preset creates", () => {
+    // `verticals-apply` resolves this slug to an id and drops the offer tail
+    // when it cannot. A typo here would cost a silently half-built flow.
+    for (const preset of VERTICAL_PRESETS) {
+      const slugs = new Set(preset.bookingTypes.map((type) => type.slug));
+      for (const flow of preset.flows) {
+        if (!flow.offerSlotsFor) continue;
+        expect(slugs.has(flow.offerSlotsFor), `${preset.slug}/${flow.offerSlotsFor}`).toBe(true);
+      }
+    }
+  });
+
+  it("never sends a preset message the instant the trigger fires", () => {
+    // A reactivation that lands while the customer is still in traffic reads
+    // as a reproach, and a review request must not beat them out the door.
+    for (const preset of VERTICAL_PRESETS) {
+      for (const flow of preset.flows) {
+        expect(flow.waitMinutes, `${preset.slug}/${flow.name}`).toBeGreaterThan(0);
+        expect(flow.text.trim().length, `${preset.slug}/${flow.name}`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("keeps the review link a placeholder, so the tenant's own link is used", () => {
+    for (const preset of VERTICAL_PRESETS) {
+      const review = preset.flows.find((flow) => flow.trigger === "booking_completed");
+      expect(review!.text, preset.slug).toContain("{{review_link}}");
+    }
+  });
+
   it("returns null for a slug nobody defined", () => {
     expect(findPreset("panaderia")).toBeNull();
     expect(findPreset(null)).toBeNull();

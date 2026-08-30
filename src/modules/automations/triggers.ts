@@ -159,6 +159,15 @@ export function registerAutomationTriggers() {
     });
   });
 
+  bookingEvents.on("booking.completed", async ({ tenantId, contactId, bookingId, bookingTypeId }) => {
+    await fireTrigger({
+      tenantId,
+      triggerType: "booking_completed",
+      contactId,
+      data: { bookingId, bookingTypeId },
+    });
+  });
+
   chatEvents.on("chat.captured", async ({ tenantId, contactId, widgetId, siteId }) => {
     await fireTrigger({
       tenantId,

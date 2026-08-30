@@ -983,10 +983,38 @@ export async function markNoShow(ctx: TenantContext, id: string): Promise<Bookin
   return getBooking(ctx, id);
 }
 
+/**
+ * Completed is also always a human's call, and for the same reason as
+ * no-show: the system knows the hour passed, not that anybody turned up.
+ *
+ * It emits, where before it only wrote a status. `booking.completed` is what
+ * a review request hangs off (plan-booking.md §6.1) — the one moment at which
+ * asking for a reseña is a thank-you rather than a guess.
+ */
 export async function markCompleted(ctx: TenantContext, id: string): Promise<Booking | null> {
+  const booking = await getBooking(ctx, id);
+  if (!booking) throw new BookingError("notFound");
+
   await tenantDb(ctx)
     .update(bookings)
     .set({ status: "completed", activeSlot: null, updatedAt: new Date() })
     .where(eq(bookings.id, id));
+
+  await createActivity(ctx, {
+    contactId: booking.contactId,
+    dealId: booking.dealId ?? undefined,
+    type: "booking",
+    payload: { bookingId: id, status: "completed", startsAt: booking.startsAt.toISOString() },
+  });
+
+  await bookingEvents.emit("booking.completed", {
+    tenantId: ctx.tenantId,
+    bookingId: id,
+    bookingTypeId: booking.bookingTypeId,
+    contactId: booking.contactId,
+    resourceId: booking.resourceId,
+    startsAt: booking.startsAt,
+  });
+
   return getBooking(ctx, id);
 }

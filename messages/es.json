@@ -1566,6 +1566,7 @@
       "previewServices": "Servicios:",
       "previewResources": "Recursos:",
       "previewStages": "Embudo:",
+      "previewFlows": "Automatizaciones:",
       "previewCapacity": "{count} lugares",
       "alreadyApplied": "Ya aplicaste el rubro «{name}».",
       "alreadyAppliedHelp": "Podés aplicar otro rubro cuando quieras: se agrega a lo que ya tenés, nunca reemplaza nada.",
