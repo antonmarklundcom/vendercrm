@@ -35,6 +35,22 @@ export type Blackout = {
   endsAt: Date;
 };
 
+/**
+ * Seats already taken at one exact start, for the type being generated.
+ *
+ * Capacity is deliberately *not* expressed as a busy interval. A busy
+ * interval is "this resource is unavailable", which is true of a rep's site
+ * visit and false of the four people already signed up for a spinning class
+ * that fits twelve. Overlap and capacity are different questions, so they
+ * are different inputs — and a booking of a *different* type, or of the same
+ * type at a different start, is still an ordinary hard block.
+ */
+export type SeatUsage = {
+  resourceId: string;
+  startsAt: Date;
+  seats: number;
+};
+
 export type SlotTypeConfig = {
   durationMinutes: number;
   bufferBeforeMinutes: number;
@@ -43,6 +59,11 @@ export type SlotTypeConfig = {
   minNoticeMinutes: number;
   maxAdvanceDays: number;
   maxPerDay?: number | null;
+  /**
+   * How many places one start holds. 1 — the default — reproduces the
+   * pre-capacity behaviour exactly: one seat taken at a start fills it.
+   */
+  capacity?: number;
 };
 
 export type GenerateSlotsInput = {
@@ -54,6 +75,8 @@ export type GenerateSlotsInput = {
   /** The tenant-wide ceiling. A slot must satisfy this *and* a rule. */
   businessHours: BusinessHours | null;
   busy: BusyInterval[];
+  /** Only meaningful when `type.capacity` > 1; empty is the ordinary case. */
+  seatsTaken?: SeatUsage[];
   blackouts: Blackout[];
   now: Date;
 };
@@ -63,6 +86,12 @@ export type Slot = {
   endsAt: Date;
   /** Every resource free at this start; assignment picks one at booking time. */
   resourceIds: string[];
+  /**
+   * Places left at this start, across the offered resources — the most any
+   * one of them can still take. 1 for an ordinary one-at-a-time type, which
+   * is what every caller that ignores this field assumes.
+   */
+  seatsRemaining: number;
 };
 
 /** "HH:MM" → minutes since local midnight. */
@@ -121,6 +150,7 @@ export function generateSlots(input: GenerateSlotsInput): Slot[] {
   const { timeZone, type, now } = input;
   const increment = Math.max(1, type.slotIncrementMinutes || type.durationMinutes);
   const earliest = now.getTime() + type.minNoticeMinutes * 60_000;
+  const capacity = Math.max(1, type.capacity ?? 1);
   // The horizon counts from today where the tenant is, never from the window
   // the visitor asked for — otherwise paging to next month would slide the
   // horizon forward with them and `maxAdvanceDays` would mean nothing.
@@ -135,7 +165,7 @@ export function generateSlots(input: GenerateSlotsInput): Slot[] {
 
   // Grouped by exact start instant, so two free reps produce one offered slot
   // carrying both — the visitor picks a time, not a person.
-  const byStart = new Map<number, { startsAt: Date; endsAt: Date; resourceIds: string[] }>();
+  const byStart = new Map<number, Slot>();
   const perDayCount = new Map<string, number>();
 
   for (let day = input.from; day <= input.to; day = addDays(day, 1)) {
@@ -186,12 +216,35 @@ export function generateSlots(input: GenerateSlotsInput): Slot[] {
           );
           if (isBlackedOut) continue;
 
+          // Capacity, second and separately: the resource is free, but the
+          // class may be full. At capacity 1 this is the same sentence as
+          // "somebody already booked this exact start", which is why that
+          // booking is counted here rather than passed in as busy.
+          const taken = (input.seatsTaken ?? []).reduce(
+            (sum, entry) =>
+              entry.resourceId === resourceId &&
+              entry.startsAt.getTime() === startsAt.getTime()
+                ? sum + entry.seats
+                : sum,
+            0,
+          );
+          const remaining = capacity - taken;
+          if (remaining <= 0) continue;
+
           const key = startsAt.getTime();
           const existing = byStart.get(key);
           if (existing) {
             if (!existing.resourceIds.includes(resourceId)) existing.resourceIds.push(resourceId);
+            // Across resources the honest number is the roomiest one: that
+            // is how many places a visitor can actually still buy here.
+            existing.seatsRemaining = Math.max(existing.seatsRemaining, remaining);
           } else {
-            byStart.set(key, { startsAt, endsAt, resourceIds: [resourceId] });
+            byStart.set(key, {
+              startsAt,
+              endsAt,
+              resourceIds: [resourceId],
+              seatsRemaining: remaining,
+            });
             perDayCount.set(day, (perDayCount.get(day) ?? 0) + 1);
           }
         }

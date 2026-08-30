@@ -93,7 +93,8 @@
       "calendar": "Agenda",
       "reports": "Informes",
       "booking": "Reservas",
-      "chat": "Chat web"
+      "chat": "Chat web",
+      "onboarding": "Rubro"
     },
     "dashboard": {
       "title": "Panel de {tenant}",
@@ -582,6 +583,21 @@
         "off": "Desactivados",
         "enable": "Activar",
         "disable": "Desactivar"
+      },
+      "aiBookingEnabled": "Dejar que el asistente ofrezca horarios",
+      "aiBookingEnabledHelp": "El asistente solo muestra los horarios libres; la reserva la hace el cliente tocando la opción, nunca el asistente.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Conectá tu calendario y el sistema deja de ofrecer horarios en los que ya estás ocupado. Solo lee tu disponibilidad: no escribe ni modifica nada en tu Google Calendar.",
+        "notConfigured": "Google Calendar todavía no está configurado en esta instalación.",
+        "connect": "Conectar mi calendario",
+        "disconnect": "Desconectar",
+        "connected": "Calendario conectado",
+        "lastRead": "última lectura {when}",
+        "status": {
+          "error": "Hubo un problema al leer el calendario.",
+          "revoked": "Se revocó el acceso: volvé a conectarlo."
+        }
       }
     },
     "whatsapp": {
@@ -610,6 +626,17 @@
         "phoneNumberIdRequired": "Ingresá el Phone Number ID.",
         "accessTokenRequired": "Ingresá el token de acceso.",
         "unknown": "No se pudo conectar el número. Intentá de nuevo."
+      },
+      "bookingTemplatesTitle": "Plantillas de reservas",
+      "bookingTemplatesHelp": "Meta tiene que aprobar estas plantillas en tu propia cuenta antes de que se puedan enviar avisos a clientes que nunca te escribieron. Mientras tanto, los avisos salen por email.",
+      "submitBookingTemplates": "Enviar plantillas a Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Aprobada",
+        "PENDING": "En revisión",
+        "REJECTED": "Rechazada",
+        "PAUSED": "Pausada",
+        "DISABLED": "Deshabilitada",
+        "MISSING": "Sin enviar"
       }
     },
     "inbox": {
@@ -651,9 +678,13 @@
         "aiWindowClosed": "No se pudo enviar: la ventana de 24 horas se cerró mientras el borrador esperaba.",
         "aiConversationDisabled": "No se pudo enviar: la IA está desactivada en esta conversación.",
         "aiOptedOut": "No se pudo enviar: este contacto pidió no recibir más mensajes.",
-        "aiSendFailed": "No se pudo enviar el borrador. Intentá de nuevo."
+        "aiSendFailed": "No se pudo enviar el borrador. Intentá de nuevo.",
+        "noSlots": "No hay horarios libres en los próximos días.",
+        "bookingTypeRequired": "Elegí un servicio para ofrecer."
       },
-      "actionFailed": "No pudimos completar la acción. Probá de nuevo."
+      "actionFailed": "No pudimos completar la acción. Probá de nuevo.",
+      "offerSlots": "Ofrecer horarios",
+      "offerSlotsSent": "Se enviaron {count} horarios"
     },
     "sites": {
       "title": "Sitios",
@@ -1384,7 +1415,62 @@
           "invalidQuestion": "Revisá las preguntas: falta un dato o hay dos con la misma clave.",
           "notFound": "Ese tipo de cita ya no existe."
         }
-      }
+      },
+      "statusPendingDeposit": "Seña pendiente",
+      "deliveryTitle": "Avisos al cliente",
+      "deliveryEmpty": "Todavía no se envió ningún aviso",
+      "deliveryNever": "Sin avisos",
+      "deliveryKind": {
+        "confirmation": "Confirmación",
+        "reminder": "Recordatorio",
+        "cancellation": "Cancelación",
+        "reschedule": "Reprogramación",
+        "deposit_request": "Pedido de seña",
+        "review_request": "Pedido de reseña"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (plantilla)",
+        "wa_freeform": "WhatsApp",
+        "email": "Email",
+        "none": "Sin canal"
+      },
+      "deliveryStatus": {
+        "queued": "En cola",
+        "sent": "Enviado",
+        "delivered": "Entregado",
+        "read": "Leído",
+        "failed": "Falló",
+        "skipped": "No se pudo avisar"
+      },
+      "deliveryDetail": {
+        "no_channel": "El contacto no tiene WhatsApp conectado ni email.",
+        "template_not_approved_and_window_closed": "La plantilla todavía no está aprobada por Meta y la ventana de 24 horas está cerrada.",
+        "email_not_delivered": "El email no salió: revisá la configuración de Resend.",
+        "booking_context_missing": "Faltan datos de la reserva.",
+        "booking_not_found": "La reserva ya no existe.",
+        "tenant_not_found": "La empresa ya no existe."
+      },
+      "capacityTitle": "Cupo y seña",
+      "capacityHelp": "Para clases, canchas o cualquier cosa que entre más de una persona a la vez — y para pedir una seña antes de confirmar.",
+      "capacity": "Lugares por horario",
+      "capacityFieldHelp": "1 es lo normal: una persona por turno. Poné 12 para una clase de doce.",
+      "depositAmount": "Seña (₲)",
+      "depositAmountHelp": "Dejalo vacío si no pedís seña. Con un monto, la reserva queda pendiente hasta que confirmes el comprobante.",
+      "depositExpiry": "Minutos para transferir",
+      "depositExpiryHelp": "Si no llega la seña en este tiempo, el horario se libera solo.",
+      "allowMultiService": "Ofrecer servicios adicionales en la página pública",
+      "servicesTitle": "Servicios adicionales",
+      "servicesHelp": "Extras que el cliente puede sumar: alargan el turno y se guardan en la reserva.",
+      "servicesEmpty": "Todavía no hay servicios adicionales",
+      "servicesDisabledHint": "Estos servicios no se muestran: activá «Ofrecer servicios adicionales» arriba.",
+      "serviceName": "Nombre",
+      "serviceExtraDuration": "+ minutos",
+      "serviceExtraPrice": "+ precio (₲)",
+      "serviceAdd": "Agregar",
+      "serviceRemove": "Quitar",
+      "confirmDeposit": "Confirmar seña",
+      "rejectDeposit": "No llegó",
+      "partySize": "{count} personas"
     },
     "chat": {
       "title": "Chat del sitio",
@@ -1471,6 +1557,19 @@
         "siteRequired": "Elegí un sitio.",
         "exists": "Ese sitio ya tiene un widget."
       }
+    },
+    "onboarding": {
+      "title": "Configurá tu rubro",
+      "adminOnly": "Solo los administradores pueden ver esta página",
+      "intro": "Elegí a qué se dedica tu negocio y te dejamos los servicios, los horarios y el embudo listos para empezar a recibir reservas.",
+      "apply": "Usar este rubro",
+      "previewServices": "Servicios:",
+      "previewResources": "Recursos:",
+      "previewStages": "Embudo:",
+      "previewCapacity": "{count} lugares",
+      "alreadyApplied": "Ya aplicaste el rubro «{name}».",
+      "alreadyAppliedHelp": "Podés aplicar otro rubro cuando quieras: se agrega a lo que ya tenés, nunca reemplaza nada.",
+      "additiveNote": "Aplicar un rubro solo agrega servicios, recursos, etapas y etiquetas. Nunca borra ni cambia lo que ya configuraste."
     }
   },
   "superadmin": {
@@ -2345,7 +2444,14 @@
       "locationInPerson": "Presencial",
       "locationPhone": "Por teléfono",
       "locationVideo": "Por videollamada",
-      "locationWhatsapp": "Por WhatsApp"
+      "locationWhatsapp": "Por WhatsApp",
+      "statusPendingDeposit": "Pendiente de seña",
+      "servicesTitle": "¿Querés agregar algo?",
+      "partySize": "¿Cuántas personas?",
+      "seatsRemaining": "quedan {count}",
+      "depositTitle": "Reservado, falta la seña",
+      "depositBody": "Para dejarla confirmada necesitamos una seña de {amount}. Te mandamos los datos por WhatsApp — pasanos el comprobante y listo.",
+      "errorPartyTooLarge": "Son más personas de las que entran en este horario. Probá con menos."
     },
     "chat": {
       "title": "Chat",

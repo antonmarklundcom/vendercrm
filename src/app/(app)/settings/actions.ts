@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { disconnectGcal, gcalAuthUrl } from "@/modules/calendar/gcal";
 import { requireTenantAdmin, requireTenantContext } from "@/modules/tenancy/context";
 import {
   updateTenantBranding,
@@ -190,6 +192,8 @@ const aiSettingsSchema = z.object({
     .max(MAX_PER_CONVERSATION_PER_DAY_LIMIT),
   maxRepliesPerTenantPerDay: z.coerce.number().int().min(0).max(MAX_PER_TENANT_PER_DAY_LIMIT),
   handoffKeyword: z.string().min(1).max(50),
+  /** Lets the assistant offer bookable slots (plan-booking.md §5.3). */
+  bookingEnabled: z.boolean(),
 });
 
 export async function updateAiSettingsAction(
@@ -210,6 +214,7 @@ export async function updateAiSettingsAction(
     maxRepliesPerConversationPerDay: formData.get("maxRepliesPerConversationPerDay") || 3,
     maxRepliesPerTenantPerDay: formData.get("maxRepliesPerTenantPerDay") || 200,
     handoffKeyword: formData.get("handoffKeyword") || "humano",
+    bookingEnabled: formData.get("bookingEnabled") === "on",
   });
 
   if (!parsed.success) {
@@ -254,5 +259,24 @@ export async function setTaskRemindersAction(formData: FormData) {
   if (!parsed.success) return;
 
   await setUserTaskReminders(ctx.userId, parsed.data.enabled === "true");
+  revalidatePath("/settings");
+}
+
+// Google Calendar busy-read (plan-booking.md §5.4). The connect half is a
+// redirect to Google rather than a form post, so it lives here only to build
+// the URL with the signed-in user's own state — the callback compares it
+// against the session before attaching anybody's calendar.
+
+export async function connectGcalAction(): Promise<void> {
+  const ctx = await requireTenantContext();
+  const url = gcalAuthUrl(`${ctx.tenantId}:${ctx.userId}`);
+  // No credentials configured: the button is already disabled in the UI, so
+  // reaching here means a stale page. Back to settings rather than a crash.
+  redirect(url ?? "/settings?gcal=not_configured");
+}
+
+export async function disconnectGcalAction(): Promise<void> {
+  const ctx = await requireTenantContext();
+  await disconnectGcal(ctx, ctx.userId);
   revalidatePath("/settings");
 }

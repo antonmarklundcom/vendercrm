@@ -6,7 +6,8 @@ import { listTemplates } from "@/modules/whatsapp/templates";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { syncTemplatesAction } from "./actions";
+import { bookingTemplateStatuses } from "@/modules/booking/notification-registration";
+import { submitBookingTemplatesAction, syncTemplatesAction } from "./actions";
 import { WhatsappConnectForm } from "./WhatsappConnectForm";
 
 export default async function WhatsappPage() {
@@ -18,6 +19,10 @@ export default async function WhatsappPage() {
   }
 
   const accounts = await listAccountsForTenant(ctx);
+  // The booking chain falls back to email until these are APPROVED, so the
+  // page has to say where they stand rather than leave a tenant assuming
+  // their customers are being told (plan-booking.md §5.1).
+  const bookingTemplates = await bookingTemplateStatuses(ctx);
   const templatesByAccount = new Map(
     await Promise.all(
       accounts.map(
@@ -80,6 +85,26 @@ export default async function WhatsappPage() {
         </ul>
         )}
       </section>
+
+      {accounts.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">{t("bookingTemplatesTitle")}</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">{t("bookingTemplatesHelp")}</p>
+          <ul className="flex flex-wrap gap-1">
+            {bookingTemplates.map((template) => (
+              <li key={template.name} className="rounded-full border px-2 py-0.5 text-xs">
+                {template.name} ·{" "}
+                {t(`bookingTemplateStatus.${template.status}` as "bookingTemplateStatus.APPROVED")}
+              </li>
+            ))}
+          </ul>
+          <form action={submitBookingTemplatesAction}>
+            <Button type="submit" size="sm" variant="outline">
+              {t("submitBookingTemplates")}
+            </Button>
+          </form>
+        </section>
+      ) : null}
 
       <section id="conectar-numero" className="scroll-mt-6">
         <h2 className="mb-4 text-lg font-semibold">{t("connectTitle")}</h2>

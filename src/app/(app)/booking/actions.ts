@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireTenantAdmin } from "@/modules/tenancy/context";
+import { confirmDeposit, rejectDeposit } from "@/modules/booking/deposits";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { addDays, zonedTimeToUtc } from "@/modules/calendar/zoned-time";
 import { slugify } from "@/lib/slug";
@@ -282,5 +283,25 @@ export async function cancelBookingByStaffAction(id: string): Promise<void> {
   // Staff are never bound by the visitor's cancellation cutoff — somebody has
   // to be able to clear a day when the shop closes unexpectedly.
   await cancelBooking(ctx, id, "staff");
+  revalidatePath("/booking");
+}
+
+/**
+ * "El comprobante llegó." A human decision, and deliberately so: nothing in
+ * this system can see a bank account, and a booking that says confirmada
+ * because software guessed is worse than one that says pendiente because
+ * nobody has looked yet (plan-booking.md §1 — señas are manual-transfer
+ * first).
+ */
+export async function confirmDepositAction(id: string): Promise<void> {
+  const ctx = await requireTenantAdmin();
+  await confirmDeposit(ctx, id);
+  revalidatePath("/booking");
+}
+
+/** "Nunca transfirió." Releases the slot before the expiry job would. */
+export async function rejectDepositAction(id: string): Promise<void> {
+  const ctx = await requireTenantAdmin();
+  await rejectDeposit(ctx, id);
   revalidatePath("/booking");
 }

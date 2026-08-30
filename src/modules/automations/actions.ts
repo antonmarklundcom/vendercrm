@@ -15,6 +15,7 @@ import { createActivity } from "@/modules/crm/activities";
 import { getPrimaryAccount } from "@/modules/whatsapp/accounts";
 import { getOrCreateConversation } from "@/modules/whatsapp/inbox";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
+import { offerSlots } from "@/modules/booking/whatsapp-booking";
 import type { FlowNode } from "./graph";
 
 // Action nodes (PLAN.md §7.1) and the guards every send has to respect (§7.2).
@@ -52,6 +53,13 @@ export async function executeAction(
 
   if (kind === "ai_reply") {
     return aiReplyAction(ctx, node.id, config, contactId, runId);
+  }
+
+  if (kind === "offer_slots") {
+    if (await hasOptedOut(ctx, contactId)) {
+      return { skipped: true, detail: { reason: "contact_opted_out" } };
+    }
+    return offerSlotsAction(ctx, config, contactId);
   }
 
   if (kind === "send_review_request") {
@@ -249,4 +257,31 @@ export function renderTemplateVars(
   return text
     .replaceAll("{{contact.name}}", contact.name)
     .replaceAll("{{contact.phone}}", contact.phone);
+}
+
+/**
+ * Offers bookable slots in the contact's thread (plan-booking.md §5.3).
+ *
+ * Everything about the reservation itself stays in the booking module: this
+ * only picks the conversation. The tap that follows arrives as a webhook and
+ * lands in the same transactional reserve the public page uses.
+ */
+async function offerSlotsAction(
+  ctx: TenantContext,
+  config: Record<string, unknown>,
+  contactId: string,
+): Promise<ActionResult> {
+  const bookingTypeId = String(config.bookingTypeId ?? "");
+  if (!bookingTypeId) return { skipped: true, detail: { reason: "no_booking_type" } };
+
+  const account = await getPrimaryAccount(ctx);
+  if (!account) return { skipped: true, detail: { reason: "no_wa_account" } };
+
+  const conversation = await getOrCreateConversation(ctx, account.id, contactId);
+  if (!conversation) return { skipped: true, detail: { reason: "no_conversation" } };
+
+  const outcome = await offerSlots(ctx, { conversationId: conversation.id, bookingTypeId });
+  return outcome.status === "offered"
+    ? { skipped: false, detail: { bookingTypeId, offered: outcome.count } }
+    : { skipped: true, detail: { reason: outcome.reason } };
 }

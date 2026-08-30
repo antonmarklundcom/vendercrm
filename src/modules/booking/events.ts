@@ -14,7 +14,21 @@ export type BookingEventPayload = {
 };
 
 export const bookingEvents = createEventBus<{
-  "booking.created": BookingEventPayload;
+  /**
+   * `rescheduledFromId` is what makes a move distinguishable from a fresh
+   * booking on this bus. A reschedule is cancel + create (bookings.ts), so
+   * without it every listener would greet a customer who moved their 15:00
+   * to 15:30 as a brand-new reservation.
+   */
+  "booking.created": BookingEventPayload & {
+    rescheduledFromId: string | null;
+    /**
+     * A booking that asks for a seña is created as `pending_deposit`, and
+     * what the customer must be sent is a request for money, not a
+     * confirmation of something that isn't confirmed yet.
+     */
+    status: "confirmed" | "pending_deposit";
+  };
   "booking.cancelled": BookingEventPayload & {
     cancelledBy: "contact" | "staff" | "system";
     /** Free text, except for one pair the automation layer reads: `system` +

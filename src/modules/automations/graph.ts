@@ -62,6 +62,11 @@ export const flowNodeSchema = z.discriminatedUnion("type", [
           // it sends the tenant's own review link over WhatsApp, same
           // free-form-send guards as send_whatsapp.
           "send_review_request",
+          // Offer the next free slots as tappable options in the thread
+          // (plan-booking.md §5.3). Free-form, so the same 24h-window guard
+          // as send_whatsapp applies — this answers someone who just wrote,
+          // it does not open a conversation.
+          "offer_slots",
         ]),
         /**
          * Only meaningful on `ai_reply`. Absent means draft, and the tenant
@@ -70,6 +75,8 @@ export const flowNodeSchema = z.discriminatedUnion("type", [
          * draft-mode tenant send.
          */
         mode: z.enum(["draft", "send"]).optional(),
+        /** Only meaningful on `offer_slots`: which booking type to offer. */
+        bookingTypeId: z.string().max(26).optional(),
       })
       .passthrough(),
   }),

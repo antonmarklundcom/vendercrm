@@ -25,13 +25,24 @@ export type BookingTypeSettings = {
   /** A visitor may not cancel inside this many minutes of the start. */
   cancellationCutoffMinutes?: number;
   confirmationMessage?: string;
+  /**
+   * How long a `pending_deposit` reservation holds its slot before the
+   * expiry job releases it (plan-booking.md §5.2). Absent = the default
+   * below; a business that takes transfers overnight can raise it.
+   */
+  depositExpiryMinutes?: number;
 };
 
 export const DEFAULT_CANCELLATION_CUTOFF_MINUTES = 120;
 export const DEFAULT_REMINDER_MINUTES = 24 * 60;
+/** Long enough to walk to a bank, short enough not to lose the evening. */
+export const DEFAULT_DEPOSIT_EXPIRY_MINUTES = 120;
 
 export type ResolvedBookingTypeSettings = Required<
-  Pick<BookingTypeSettings, "requireTurnstile" | "cancellationCutoffMinutes">
+  Pick<
+    BookingTypeSettings,
+    "requireTurnstile" | "cancellationCutoffMinutes" | "depositExpiryMinutes"
+  >
 > & {
   turnstileSiteId: string | null;
   reminderMinutes: number | null;
@@ -54,6 +65,10 @@ export function resolveBookingTypeSettings(
     cancellationCutoffMinutes: clampNonNegative(
       settings?.cancellationCutoffMinutes,
       DEFAULT_CANCELLATION_CUTOFF_MINUTES,
+    ),
+    depositExpiryMinutes: Math.max(
+      1,
+      clampNonNegative(settings?.depositExpiryMinutes, DEFAULT_DEPOSIT_EXPIRY_MINUTES),
     ),
     confirmationMessage: settings?.confirmationMessage?.trim() || null,
   };
@@ -85,6 +100,11 @@ export type BookingTypeInput = {
   minNoticeMinutes?: number;
   maxAdvanceDays?: number;
   maxPerDay?: number | null;
+  /** Places per start. 1 keeps the one-at-a-time behaviour. */
+  capacity?: number;
+  /** Seña in whole guaraníes; null/0 means the booking confirms immediately. */
+  depositAmount?: number | null;
+  allowMultiService?: boolean;
   assignment?: "any" | "round_robin";
   locationMode?: "in_person" | "phone" | "video" | "whatsapp";
   locationDetail?: string | null;
@@ -161,6 +181,11 @@ function toRow(input: BookingTypeInput) {
     minNoticeMinutes: input.minNoticeMinutes ?? 120,
     maxAdvanceDays: input.maxAdvanceDays ?? 60,
     maxPerDay: input.maxPerDay ?? null,
+    capacity: Math.max(1, Math.floor(input.capacity ?? 1)),
+    // 0 and null both mean "no seña"; storing 0 would make
+    // `depositAmount > 0` the only safe test everywhere downstream.
+    depositAmount: input.depositAmount && input.depositAmount > 0 ? input.depositAmount : null,
+    allowMultiService: input.allowMultiService ?? false,
     assignment: input.assignment ?? "any",
     locationMode: input.locationMode ?? "in_person",
     locationDetail: input.locationDetail ?? null,
@@ -184,5 +209,6 @@ export function slotConfigOf(type: BookingType) {
     minNoticeMinutes: type.minNoticeMinutes,
     maxAdvanceDays: type.maxAdvanceDays,
     maxPerDay: type.maxPerDay,
+    capacity: Math.max(1, type.capacity),
   };
 }

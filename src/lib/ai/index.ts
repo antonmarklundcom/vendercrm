@@ -4,8 +4,14 @@ import { geminiDriverFromEnv } from "./gemini";
 import type { AiDriver } from "./types";
 
 export type { AiDriver, AiGenerateInput, AiGenerateResult, AiProvider, AiTurn } from "./types";
-export { buildReplyPrompt, buildSystemPrompt, serialisePrompt, toTurns } from "./prompt";
-export type { BusinessContext } from "./prompt";
+export {
+  buildReplyPrompt,
+  buildSystemPrompt,
+  extractBookingIntent,
+  serialisePrompt,
+  toTurns,
+} from "./prompt";
+export type { BookingIntent, BusinessContext } from "./prompt";
 
 // Driver selection by env (PLAN.md §10 1O), same shape as lib/storage —
 // with one deliberate difference: storage always resolves to *some* adapter

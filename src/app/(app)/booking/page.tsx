@@ -13,9 +13,11 @@ import {
   listResourcesForType,
 } from "@/modules/booking/resources";
 import { listBookings } from "@/modules/booking/bookings";
+import { notificationsByBooking } from "@/modules/booking/notifications";
 import { getContact } from "@/modules/crm/contacts";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { BookingDelivery, type DeliveryLabels } from "./BookingDelivery";
 import {
   AvailabilityForm,
   NewBlackoutForm,
@@ -25,6 +27,8 @@ import {
 } from "./BookingForms";
 import {
   cancelBookingByStaffAction,
+  confirmDepositAction,
+  rejectDepositAction,
   deleteBlackoutAction,
   markNoShowAction,
   toggleBookingTypeAction,
@@ -73,7 +77,50 @@ export default async function BookingPage() {
     ),
   );
 
+  // What the customer was actually told, per booking (plan-booking.md §5.1).
+  const deliveries = await notificationsByBooking(
+    ctx,
+    upcoming.map((booking) => booking.id),
+  );
+
   const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => t(`weekday${day}` as "weekday0"));
+  const deliveryLabels: DeliveryLabels = {
+    title: t("deliveryTitle"),
+    empty: t("deliveryEmpty"),
+    never: t("deliveryNever"),
+    kind: {
+      confirmation: t("deliveryKind.confirmation"),
+      reminder: t("deliveryKind.reminder"),
+      cancellation: t("deliveryKind.cancellation"),
+      reschedule: t("deliveryKind.reschedule"),
+      deposit_request: t("deliveryKind.deposit_request"),
+      review_request: t("deliveryKind.review_request"),
+    },
+    channel: {
+      wa_template: t("deliveryChannel.wa_template"),
+      wa_freeform: t("deliveryChannel.wa_freeform"),
+      email: t("deliveryChannel.email"),
+      none: t("deliveryChannel.none"),
+    },
+    status: {
+      queued: t("deliveryStatus.queued"),
+      sent: t("deliveryStatus.sent"),
+      delivered: t("deliveryStatus.delivered"),
+      read: t("deliveryStatus.read"),
+      failed: t("deliveryStatus.failed"),
+      skipped: t("deliveryStatus.skipped"),
+    },
+    detail: {
+      no_channel: t("deliveryDetail.no_channel"),
+      template_not_approved_and_window_closed: t(
+        "deliveryDetail.template_not_approved_and_window_closed",
+      ),
+      email_not_delivered: t("deliveryDetail.email_not_delivered"),
+      booking_context_missing: t("deliveryDetail.booking_context_missing"),
+      booking_not_found: t("deliveryDetail.booking_not_found"),
+      tenant_not_found: t("deliveryDetail.tenant_not_found"),
+    },
+  };
   const errorLabels = {
     nameRequired: t("errors.nameRequired"),
     slugTaken: t("errors.slugTaken"),
@@ -282,6 +329,7 @@ export default async function BookingPage() {
               const contact = contacts.get(booking.contactId);
               const statusLabel = {
                 confirmed: t("statusConfirmed"),
+                pending_deposit: t("statusPendingDeposit"),
                 cancelled: t("statusCancelled"),
                 completed: t("statusCompleted"),
                 no_show: t("statusNoShow"),
@@ -292,11 +340,38 @@ export default async function BookingPage() {
                   key={booking.id}
                   className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3 text-sm"
                 >
-                  <span>
-                    {formatDateTime(booking.startsAt, locale, tenant?.timezone)} ·{" "}
-                    {contact?.name ?? "—"} · {statusLabel}
+                  <span className="flex flex-col gap-1">
+                    <span>
+                      {formatDateTime(booking.startsAt, locale, tenant?.timezone)} ·{" "}
+                      {contact?.name ?? "—"} · {statusLabel}
+                      {booking.partySize > 1 ? ` · ${t("partySize", { count: booking.partySize })}` : ""}
+                      {((booking.services as Array<{ name: string }> | null) ?? [])
+                        .map((service) => ` · ${service.name}`)
+                        .join("")}
+                    </span>
+                    <BookingDelivery
+                      notifications={deliveries.get(booking.id) ?? []}
+                      labels={deliveryLabels}
+                      formatWhen={(value) => formatDateTime(value, locale, tenant?.timezone)}
+                    />
                   </span>
-                  {booking.status === "confirmed" ? (
+                  {booking.status === "pending_deposit" ? (
+                    // The seña decision sits where the booking is, not behind
+                    // a separate queue: staff see "pendiente" on the row and
+                    // act on the same row.
+                    <span className="flex gap-3">
+                      <form action={confirmDepositAction.bind(null, booking.id)}>
+                        <button type="submit" className="text-xs underline">
+                          {t("confirmDeposit")}
+                        </button>
+                      </form>
+                      <form action={rejectDepositAction.bind(null, booking.id)}>
+                        <button type="submit" className="text-xs underline text-destructive">
+                          {t("rejectDeposit")}
+                        </button>
+                      </form>
+                    </span>
+                  ) : booking.status === "confirmed" ? (
                     <span className="flex gap-3">
                       <form action={markNoShowAction.bind(null, booking.id)}>
                         <button type="submit" className="text-xs underline">

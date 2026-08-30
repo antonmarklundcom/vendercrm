@@ -34,6 +34,10 @@ export type BookingTypeValues = {
   minNoticeMinutes: number;
   maxAdvanceDays: number;
   maxPerDay: number | null;
+  capacity: number;
+  depositAmount: number | null;
+  allowMultiService: boolean;
+  depositExpiryMinutes: number;
   assignment: "any" | "round_robin";
   locationMode: "in_person" | "phone" | "video" | "whatsapp";
   locationDetail: string;
@@ -145,6 +149,37 @@ export function BookingTypeForm({
         <Field label={t("reminderMinutes")} help={t("reminderMinutesHelp")}>
           <Input name="reminderMinutes" type="number" min={0} defaultValue={values.reminderMinutes} />
         </Field>
+      </Section>
+
+      <Section title={t("capacityTitle")} help={t("capacityHelp")}>
+        <Field label={t("capacity")} help={t("capacityFieldHelp")}>
+          <Input name="capacity" type="number" min={1} defaultValue={values.capacity} />
+        </Field>
+        <Field label={t("depositAmount")} help={t("depositAmountHelp")}>
+          <Input
+            name="depositAmount"
+            type="number"
+            min={0}
+            step={1}
+            defaultValue={values.depositAmount ?? ""}
+          />
+        </Field>
+        <Field label={t("depositExpiry")} help={t("depositExpiryHelp")}>
+          <Input
+            name="depositExpiryMinutes"
+            type="number"
+            min={5}
+            defaultValue={values.depositExpiryMinutes}
+          />
+        </Field>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="allowMultiService"
+            defaultChecked={values.allowMultiService}
+          />
+          {t("allowMultiService")}
+        </label>
       </Section>
 
       <Section title={t("assignmentTitle")} help={t("assignmentHelp")}>

@@ -231,8 +231,258 @@ market first; whether señas should be plan-gated.
 
 (append entries here — newest last)
 
+### 2026-08-29 — B1 foundation, notifications (branch `claude/vendercrm-booking-plan-5xti3e`)
+
+What now exists:
+- `/b/` and `/w/` are in `PUBLIC_PREFIXES`. Both were missing: a customer
+  opening the manage link a business sent them got the CRM login page. The
+  allowlist is now checked against the `(public)` route-group *directory*
+  (`src/middleware.test.ts`), so the next forgotten segment fails a test.
+- All of §2's schema, in migration `0025_add_booking_notifications` —
+  `booking_notifications`, `booking_type_services`, `gcal_connections`, the
+  `booking_types` capacity/deposit/multi-service columns and the `bookings`
+  party_size/deposit/services columns, plus `pending_deposit` in the status
+  enum. B2–B4 add no schema.
+- The delivery chain: `notification-chain.ts` (pure, four branches),
+  `notification-templates.ts` (voseo copy + the Meta submission/send
+  payloads), `notifications.ts` (the impure walk + the
+  `booking_notifications` log), `notification-triggers.ts` (listeners that
+  enqueue `booking.notify`). Reminders now run on it and no longer skip in
+  silence when the 24h window is shut.
+- Per-tenant template submission from `/whatsapp` (`submitTemplate` in
+  `whatsapp/templates.ts`, `notification-registration.ts` on top), with each
+  template's Meta status on the page.
+- Delivery timeline on each row of the upcoming-bookings list, and WhatsApp
+  delivery-status webhooks mirrored onto the notification rows.
+
+Decisions / deviations:
+- The plan said "booking detail UI (`(app)/booking/[id]`)". That route is the
+  booking *type* editor; individual bookings only appear in the upcoming list
+  on `/booking`. The timeline went there, as a per-row disclosure. A real
+  booking detail page is worth having but is not this phase's job.
+- Customer-facing notification copy lives in
+  `notification-templates.ts`, not `messages/*.json`. A WhatsApp template is
+  a string Meta approved and cannot be localized per viewer; the free-form
+  and email rungs must say the same thing or the fallback changes the
+  message. Admin-facing strings went into the messages files as usual.
+- A reschedule is detected from `rescheduledFromId`, now carried on the
+  `booking.created` event, rather than a new event type.
+- `tenants.settings.depositInstructions` added (no migration) for the seña
+  transfer details B2 will ask for.
+- Not verified here, and the first thing the next session should do: this
+  environment has no MySQL and no `.env`, so every DB-backed suite skipped
+  (19 files already fail at import on missing env — that is the pre-existing
+  baseline, unchanged by this phase). `npm run lint`, `npm run build` and all
+  non-DB tests are green; `notifications.integration.test.ts` and the
+  migration itself have never been run against a real database.
+
+Where B2 should look first: `notifications.ts` (the seña request is already a
+kind on the chain), `bookings.ts`'s three double-booking guards and the
+`bookings_tenant_active_slot_idx` unique index, which capacity > 1 has to
+replace rather than relax.
+
+### 2026-08-29 — B2 capacity, multi-service, señas (same branch, PR #77)
+
+What now exists:
+- **Capacity.** The conflict-logic decision, spelled out because it is the
+  one a later phase must not undo: capacity is counted per *exact start of
+  the same booking type*, and everything else stays a hard overlap block. So
+  `slots.ts` gained a `seatsTaken` input separate from `busy` — "the resource
+  is unavailable" and "the class is full" are different questions and are now
+  different inputs — and `busyAndSeatsFor` splits the one query accordingly.
+  At capacity 1 the old path is kept verbatim; the 21 existing slot tests
+  pass untouched.
+- **The unique index was extended, not relaxed.** `active_slot` gained a seat
+  offset (`<resource>:<epoch>#<n>`), computed inside the transaction under
+  the existing `booking_resources` row lock. A double-click computes the same
+  offset and still collides — the backstop the index exists for survives —
+  while N genuine bookings get N distinct keys. Offset 0 renders exactly as
+  the old value, so no backfill.
+- **Multi-service.** `booking_type_services` CRUD, resolved server-side from
+  ids (never trusted from the body), snapshotted onto `bookings.services`.
+  The chosen add-ons lengthen the *fit* test while the offered starts stay on
+  the type's own increment.
+- **Señas.** `pending_deposit` is in `SLOT_HOLDING_STATUSES`, so a hold holds
+  the chair; the deposit_request notification goes out instead of a
+  confirmation; staff confirm or reject on the booking row; a per-booking
+  expiry job plus a stale sweep release it. `expireDeposit` re-reads the
+  status, so a job queued two hours ago cannot cancel a booking that has
+  since been paid.
+
+Decisions / deviations:
+- A reschedule inherits its status: a paid booking stays confirmed, an unpaid
+  hold stays pending. Moving a booking must not re-ask for money, and must
+  not grant it for free.
+- The pure service arithmetic lives in `service-totals.ts` so it is testable
+  without env or a database, matching `notification-chain.ts`.
+- `partyTooLarge` is a distinct error (422, not 409): no amount of waiting
+  makes a party of eight fit a class of six.
+- Same limitation as B1: no MySQL in the build environment, so
+  `capacity.integration.test.ts` — which is where the index and the hold are
+  actually proven — has never run. The pure capacity boundary tests (N-1/N/
+  N+1) do run and pass.
+
+Where B3 should look first: `notification-templates.ts` for the send shape,
+`whatsapp/send.ts` (interactive messages go next to `sendTemplate`), and
+`public.ts`'s `publicReserve` — the WhatsApp booking path must land in the
+same transactional reserve, not a second one.
+
+### 2026-08-29 — B3 booking inside WhatsApp (same branch, PR #77)
+
+What now exists:
+- `sendInteractive` in `whatsapp/send.ts` — reply buttons for ≤3 options, a
+  list beyond that, with Meta's row/title caps enforced before the call
+  rather than discovered as a 400. Interactive messages are free-form and so
+  carry the same 24h-window guard as text; they are not templates and cannot
+  open a conversation.
+- `slot-choice.ts` — the row-id wire format (`bk:<typeId>:<epoch>`), pure and
+  import-free because it has to survive a round trip through Meta with no
+  server-side state.
+- `whatsapp-booking.ts` — `offerSlots` and `handleSlotTap`. The tap lands in
+  `reserveBooking`: same transaction, same three guards, same capacity
+  accounting as the public page. When the slot went while the list sat
+  unread, the customer is told in the thread and offered the next ones.
+- Three ways to offer: a rep's "Ofrecer horarios" in the inbox, an
+  `offer_slots` automation action, and the AI.
+
+Decisions / deviations:
+- **The AI booking tool is a text marker, not provider-native tool calls.**
+  The plan said "give the drivers a tool-call ability (both OpenAI and Gemini
+  drivers)". Instead the model emits `[[SLOTS:<slug>]]`, which is stripped
+  before the reply is ever stored, and the system offers the slots. Two
+  reasons: the driver interface is prompt-in-string-out, so native tools
+  would mean two provider-specific implementations of one idea; and — the
+  reason it should stay this way — the model then cannot reserve anything.
+  It offers, the customer taps, the tap reserves. "Confirm with the customer
+  before reserving" stops being a prompt instruction a model might ignore and
+  becomes the shape of the system. Gated per tenant on
+  `settings.ai.bookingEnabled`, off by default.
+- The marker is stripped at generation, not at send, so a rep approving a
+  draft in the inbox sees exactly what the customer will get.
+- `handleSlotTap` sends no confirmation of its own: the B1 chain already
+  fires on `booking.created`, and for a type with a seña that message is a
+  request for money, not a "listo".
+- Same limitation as B1/B2: no MySQL here. The wire format, the prompt
+  construction and the marker extraction are unit-tested and pass; the
+  webhook round trip has not been run against a database.
+
+Where B4 should look first: `bookings.ts`'s `busyAndSeatsFor` — GCal busy
+windows merge into the `busy` list it returns, outside `slots.ts`, which
+stays pure. `gcal_connections` already exists from B1.
+
+### 2026-08-29 — B4 Google Calendar busy-read (same branch, PR #77)
+
+What now exists:
+- `modules/calendar/gcal.ts` — per-user OAuth (offline + consent, so a repeat
+  authorization still returns a refresh token), AES-GCM token storage in the
+  `gcal_connections` table B1 created, silent refresh, and `busyFromGoogle`.
+- `/api/gcal/callback` — compares Google's `state` against the *session's*
+  own tenant and user rather than trusting it as identity, so a crafted
+  callback cannot attach someone else's calendar to an account.
+- Busy windows merge into the list `busyAndSeatsFor` already builds, in
+  `bookings.ts`. `slots.ts` never learns Google exists.
+- Connect/disconnect in `/settings`, per staff member. `GOOGLE_CLIENT_ID` /
+  `GOOGLE_CLIENT_SECRET` in `.env.example`; unset means the section says so
+  and slot generation simply has no Google windows.
+
+Decisions / deviations:
+- `busyFromGoogle` never throws. A Google outage costs an over-offered slot,
+  not a booking page — which is the right trade only because the busy list is
+  a union rather than a source of truth, and is why two-way sync stays in the
+  backlog.
+- A re-authorization that returns no refresh token does not wipe the stored
+  one; otherwise "reconnect" would break the connection it was meant to fix.
+- Disconnect forgets the row without revoking the Google-side grant: revoking
+  needs a live token we may no longer have, and a disconnect button that
+  fails when the token has expired is worse than a stale grant.
+- No busy-read cache in this phase. Freebusy is one request per connected
+  staff member per slot query, which is fine at current volumes; a short
+  cache is the obvious first optimisation and is noted in §10.
+- The OAuth round trip has not been run against Google — no credentials in
+  this environment. The merge behaviour (a Google window closes a slot; an
+  empty list changes nothing) is unit-tested and passes.
+
+### 2026-08-29 — B5 vertical presets + wizard, PARTIAL (same branch, PR #77)
+
+Built on Opus rather than Sonnet, at Anton's instruction in the session.
+
+What now exists:
+- `verticals.ts` — the preset catalogue for barbería, clínica, taller,
+  gimnasio, profesionales and genérico. Pure and import-free, so it is
+  diffable and unit-tested without a database. Presets are **data, not code
+  paths**: there is no `if (vertical === …)` anywhere and there must never be
+  one. `settings.vertical` is bookkeeping for the wizard, nothing branches
+  on it.
+- `verticals-apply.ts` — additive and idempotent by construction. Nothing is
+  deleted, renamed or overwritten; every step skips what already exists.
+  Stages are appended to the first pipeline rather than replacing its stage
+  set, because deleting a stage with deals on it is the one unacceptable
+  outcome.
+- `/onboarding` — one screen, not a stepper: there is one decision to make.
+  Each card previews exactly what applying will add. Nav entry next to
+  Booking.
+- 9 preset tests, passing: every preset yields a bookable page, slugs are
+  unique, hours are valid and ordered, the siesta split is preserved, only
+  the gym uses capacity, and no preset invents a price.
+
+STILL TO DO in B5:
+- The automation flows the plan asks for (§6.1 item 1): no-show reactivation
+  and post-completed review request using `send_review_request` +
+  `reviewLink`. The `offer_slots` action from B3 is available to them.
+- An integration test applying each preset to a fresh demo tenant and
+  asserting a working public booking page (§6.1 exit criterion).
+
+### 2026-08-30 — CI red: the first run of B1/B2 against a real database
+
+The B1 and B2 entries each end with "has never been run against MySQL". CI
+does run one (a `mysql:8` service), so those suites had been failing on every
+push since B1 — 16 failures, all surfacing as `slotUnavailable` from
+`performReserve`. Both causes are now fixed and the whole suite is green
+against a real database (85 files, 716 tests).
+
+**The engine bug (capacity).** Every booking also writes a mirror row into
+`calendar_events` so it shows on the rep's agenda, and `busyAndSeatsFor` read
+those mirrors back as third-party busy time. At capacity 1 that is invisible —
+the booking and its mirror say the same thing and the union hides it — but at
+capacity > 1 a class's own first booking blocked its remaining places, so a
+gym class of three took exactly one. `busyAndSeatsFor` now remembers the
+`calendarEventId` of each booking it counted as a seat and skips that event
+when building the busy list. This is the same idea as the existing
+`exclude.calendarEventId`, which already did it for the reschedule case; the
+seat accounting, the capacity rule and the `active_slot` index scheme are
+untouched.
+
+**The test bug (shared resource, shared start).** Both new suites book one
+resource at one start in every test, so the first test passed and each later
+one hit a genuine conflict. They now take a fresh Monday per test, the way
+`bookings.integration.test.ts` already did.
+
+Decisions / deviations:
+- A start with **no** places left is not on offer at all, so it is refused
+  with `slotUnavailable`, not `slotTaken`; `slotTaken` is what a class with
+  *some* room says to a party too big to fit it. Three expectations were
+  corrected to match. This is not a weakened assertion: `public.ts` and
+  `whatsapp-booking.ts` already handle the two codes identically, so the
+  customer-facing outcome is the same refusal either way — and at capacity 1
+  `slotUnavailable` is what the engine gave before capacity existed, which is
+  exactly what that regression guard means to pin.
+- The build environment still has no MySQL of its own; this run used a locally
+  installed MariaDB 10.11 with the real migrations applied. The migration
+  chain, B1's notifications, B2's capacity/señas and B3's webhook round trip
+  have now all run against a real database.
+
+### B6 — NOT STARTED
+
+wa.me deeplinks on contact/deal/booking/inbox views; the voseo pass over
+customer-facing `messages/es.json` and the public pages; the embeddable
+booking widget (`public/b.js` + iframe route, mirroring the chat widget's
+`public/w.js` / `(public)/w/`); and the QR generator on the booking-type
+page. Nothing here is blocked — B6 has no dependency on B5's remainder.
+
 ## §10 Backlog
 
-Payment gateway (Pagopar) for señas; two-way GCal sync; per-slot capacity overrides;
+Payment gateway (Pagopar) for señas; two-way GCal sync; a short cache in
+front of the GCal freebusy read (one request per connected staff member per
+slot query today); per-slot capacity overrides;
 waitlists; SMS fallback channel; per-vertical marketing landing pages; WhatsApp
 Flows (native forms) for intake questions.

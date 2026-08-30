@@ -16,7 +16,48 @@ export type BusinessContext = {
   neverPromise?: string;
   /** Extra per-node instructions from the flow's ai_reply node. */
   instructions?: string;
+  /**
+   * Bookable types the assistant may offer, when the tenant has turned
+   * booking on. Empty or absent means the marker below is never mentioned,
+   * so a tenant who has not opted in gets exactly the prompt they had.
+   */
+  bookableTypes?: Array<{ slug: string; name: string }>;
 };
+
+/**
+ * How the model asks for the slot picker (plan-booking.md §5.3).
+ *
+ * Deliberately a marker in the text rather than provider-native tool calls.
+ * Two reasons, and the second is the important one. First, the driver
+ * interface is prompt-in-string-out for both OpenAI and Gemini, so native
+ * tools would mean two provider-specific implementations of the same idea.
+ * Second — and this is why it stays this way even if that changes — the
+ * model never books anything. It can *offer* times; the customer's tap is
+ * what reserves, through the same transaction the public page uses. A model
+ * that cannot write to the database cannot hallucinate an appointment into
+ * existence, and "confirm with the customer before reserving" stops being a
+ * prompt instruction the model might ignore and becomes the shape of the
+ * system.
+ */
+export const BOOKING_MARKER = /\[\[SLOTS:([a-z0-9-]{1,100})\]\]/i;
+
+export type BookingIntent = { text: string; bookingTypeSlug: string | null };
+
+/**
+ * Splits a generated reply into the text to send and the slots to offer.
+ *
+ * Pure, and tested — the marker must be stripped whether or not the slug is
+ * one this tenant actually has, because a customer should never see
+ * `[[SLOTS:corte]]` in a WhatsApp message.
+ */
+export function extractBookingIntent(reply: string): BookingIntent {
+  const match = reply.match(BOOKING_MARKER);
+  if (!match) return { text: reply.trim(), bookingTypeSlug: null };
+  return {
+    text: reply.replace(BOOKING_MARKER, "").replace(/\s{2,}/g, " ").trim(),
+    bookingTypeSlug: match[1].toLowerCase(),
+  };
+}
 
 /** Kept in Spanish because the product is Spanish-only (§1.2). */
 const GUARDRAILS = [
@@ -41,6 +82,20 @@ export function buildSystemPrompt(business: BusinessContext): string {
 
   lines.push("Reglas obligatorias:");
   for (const rule of GUARDRAILS) lines.push(`- ${rule}`);
+
+  const bookable = business.bookableTypes ?? [];
+  if (bookable.length > 0) {
+    lines.push(
+      "Si el cliente quiere agendar un turno, terminá tu mensaje con el marcador " +
+        "[[SLOTS:slug]] usando uno de estos servicios:",
+    );
+    for (const type of bookable) lines.push(`- ${type.slug} — ${type.name}`);
+    lines.push(
+      "El sistema le va a mostrar los horarios libres para que toque el que quiera. " +
+        "Nunca digas vos un horario concreto ni des una reserva por confirmada: " +
+        "eso lo hace el cliente tocando la opción.",
+    );
+  }
 
   return lines.join("\n");
 }

@@ -93,7 +93,8 @@
       "calendar": "Kalender",
       "reports": "Rapporter",
       "booking": "Bokningar",
-      "chat": "Webbchatt"
+      "chat": "Webbchatt",
+      "onboarding": "Bransch"
     },
     "dashboard": {
       "title": "Översikt för {tenant}",
@@ -586,9 +587,13 @@
         "aiWindowClosed": "Kunde inte skicka: 24-timmarsfönstret stängdes medan utkastet väntade.",
         "aiConversationDisabled": "Kunde inte skicka: AI är avstängt i den här konversationen.",
         "aiOptedOut": "Kunde inte skicka: kontakten har bett att inte få fler meddelanden.",
-        "aiSendFailed": "Utkastet kunde inte skickas. Försök igen."
+        "aiSendFailed": "Utkastet kunde inte skickas. Försök igen.",
+        "noSlots": "Inga lediga tider de närmaste dagarna.",
+        "bookingTypeRequired": "Välj en tjänst att erbjuda."
       },
-      "actionFailed": "Vi kunde inte slutföra åtgärden. Försök igen."
+      "actionFailed": "Vi kunde inte slutföra åtgärden. Försök igen.",
+      "offerSlots": "Erbjud tider",
+      "offerSlotsSent": "Skickade {count} tider"
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -616,6 +621,17 @@
         "phoneNumberIdRequired": "Ange Phone Number ID.",
         "accessTokenRequired": "Ange åtkomsttoken.",
         "unknown": "Vi kunde inte ansluta numret. Försök igen."
+      },
+      "bookingTemplatesTitle": "Bokningsmallar",
+      "bookingTemplatesHelp": "Meta måste godkänna de här mallarna i ditt eget konto innan aviseringar kan nå kunder som aldrig har skrivit till dig. Fram till dess går aviseringarna via e-post.",
+      "submitBookingTemplates": "Skicka mallar till Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Godkänd",
+        "PENDING": "Under granskning",
+        "REJECTED": "Avvisad",
+        "PAUSED": "Pausad",
+        "DISABLED": "Inaktiverad",
+        "MISSING": "Inte skickad"
       }
     },
     "quotes": {
@@ -833,6 +849,21 @@
         "off": "Av",
         "enable": "Slå på",
         "disable": "Stäng av"
+      },
+      "aiBookingEnabled": "Låt assistenten erbjuda tider",
+      "aiBookingEnabledHelp": "Assistenten visar bara lediga tider; kunden bokar genom att trycka på ett alternativ, aldrig assistenten.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Koppla din kalender så slutar systemet erbjuda tider när du redan är upptagen. Den läser bara din tillgänglighet: den skriver aldrig till eller ändrar något i din Google Calendar.",
+        "notConfigured": "Google Calendar är inte konfigurerat i den här installationen än.",
+        "connect": "Koppla min kalender",
+        "disconnect": "Koppla från",
+        "connected": "Kalender kopplad",
+        "lastRead": "senast läst {when}",
+        "status": {
+          "error": "Det gick inte att läsa kalendern.",
+          "revoked": "Åtkomsten återkallades: koppla den igen."
+        }
       }
     },
     "automations": {
@@ -1384,7 +1415,62 @@
           "invalidQuestion": "Kolla frågorna: någon är ofullständig, eller två delar nyckel.",
           "notFound": "Bokningstypen finns inte längre."
         }
-      }
+      },
+      "statusPendingDeposit": "Väntar på handpenning",
+      "deliveryTitle": "Aviseringar till kunden",
+      "deliveryEmpty": "Ingen avisering har skickats än",
+      "deliveryNever": "Inga aviseringar",
+      "deliveryKind": {
+        "confirmation": "Bekräftelse",
+        "reminder": "Påminnelse",
+        "cancellation": "Avbokning",
+        "reschedule": "Ombokning",
+        "deposit_request": "Begäran om handpenning",
+        "review_request": "Begäran om omdöme"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (mall)",
+        "wa_freeform": "WhatsApp",
+        "email": "E-post",
+        "none": "Ingen kanal"
+      },
+      "deliveryStatus": {
+        "queued": "I kö",
+        "sent": "Skickad",
+        "delivered": "Levererad",
+        "read": "Läst",
+        "failed": "Misslyckades",
+        "skipped": "Kunde inte avisera"
+      },
+      "deliveryDetail": {
+        "no_channel": "Kontakten har varken WhatsApp eller e-postadress.",
+        "template_not_approved_and_window_closed": "Meta har inte godkänt mallen än och 24-timmarsfönstret är stängt.",
+        "email_not_delivered": "E-posten gick inte ut: kontrollera Resend-konfigurationen.",
+        "booking_context_missing": "Bokningen saknar uppgifter.",
+        "booking_not_found": "Bokningen finns inte längre.",
+        "tenant_not_found": "Företaget finns inte längre."
+      },
+      "capacityTitle": "Platser och handpenning",
+      "capacityHelp": "För klasser, banor eller allt där fler än en person får plats samtidigt — och för att be om handpenning innan bokningen bekräftas.",
+      "capacity": "Platser per tid",
+      "capacityFieldHelp": "1 är det vanliga: en person per tid. Sätt 12 för en klass med tolv.",
+      "depositAmount": "Handpenning (₲)",
+      "depositAmountHelp": "Lämna tomt om du inte tar handpenning. Med ett belopp står bokningen som väntande tills du bekräftar kvittot.",
+      "depositExpiry": "Minuter att betala",
+      "depositExpiryHelp": "Kommer handpenningen inte in inom den tiden släpps tiden automatiskt.",
+      "allowMultiService": "Erbjud tilläggstjänster på den publika sidan",
+      "servicesTitle": "Tilläggstjänster",
+      "servicesHelp": "Tillval kunden kan kryssa i: de förlänger tiden och sparas på bokningen.",
+      "servicesEmpty": "Inga tilläggstjänster än",
+      "servicesDisabledHint": "De visas inte: slå på \\u201cErbjud tilläggstjänster\\u201d ovan.",
+      "serviceName": "Namn",
+      "serviceExtraDuration": "+ minuter",
+      "serviceExtraPrice": "+ pris (₲)",
+      "serviceAdd": "Lägg till",
+      "serviceRemove": "Ta bort",
+      "confirmDeposit": "Bekräfta handpenning",
+      "rejectDeposit": "Kom aldrig",
+      "partySize": "{count} personer"
     },
     "chat": {
       "title": "Webbchatt",
@@ -1471,6 +1557,19 @@
         "siteRequired": "Välj en webbplats.",
         "exists": "Webbplatsen har redan en widget."
       }
+    },
+    "onboarding": {
+      "title": "Ställ in din bransch",
+      "adminOnly": "Bara administratörer kan se den här sidan",
+      "intro": "Välj vad ditt företag gör så lämnar vi tjänster, tider och pipeline klara för att börja ta emot bokningar.",
+      "apply": "Använd den här branschen",
+      "previewServices": "Tjänster:",
+      "previewResources": "Resurser:",
+      "previewStages": "Pipeline:",
+      "previewCapacity": "{count} platser",
+      "alreadyApplied": "Du har redan tillämpat branschen \\u201c{name}\\u201d.",
+      "alreadyAppliedHelp": "Du kan tillämpa en annan när du vill: den läggs till det du har och ersätter aldrig något.",
+      "additiveNote": "Att tillämpa en bransch lägger bara till tjänster, resurser, steg och etiketter. Den tar aldrig bort eller ändrar det du redan konfigurerat."
     }
   },
   "superadmin": {
@@ -2345,7 +2444,14 @@
       "locationInPerson": "På plats",
       "locationPhone": "Per telefon",
       "locationVideo": "Videosamtal",
-      "locationWhatsapp": "På WhatsApp"
+      "locationWhatsapp": "På WhatsApp",
+      "statusPendingDeposit": "Väntar på handpenning",
+      "servicesTitle": "Vill du lägga till något?",
+      "partySize": "Hur många personer?",
+      "seatsRemaining": "{count} kvar",
+      "depositTitle": "Reserverad — handpenning saknas",
+      "depositBody": "För att bekräfta behöver vi en handpenning på {amount}. Vi skickar uppgifterna via WhatsApp — skicka kvittot så är det klart.",
+      "errorPartyTooLarge": "Det är fler personer än den här tiden rymmer. Prova med färre."
     },
     "chat": {
       "title": "Chatt",

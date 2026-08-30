@@ -25,6 +25,14 @@ export const PUBLIC_PREFIXES = [
   // redirect to /login here doesn't look like an auth bug — it looks like
   // WhatsApp silently not delivering attachments.
   "/d/",
+  // The public booking page (/b/[tenantSlug]/[typeSlug]) and the customer's
+  // own manage/cancel link (/b/g/[token]). Both shipped behind the auth gate
+  // — a customer opening the link a business sent them landed on a CRM login
+  // page, which reads as "the booking system is broken", not as an auth bug.
+  "/b/",
+  // The embedded chat widget's iframe (/w/[widgetKey]). Loaded by visitors
+  // of *other people's* websites, who by definition have no session here.
+  "/w/",
 ];
 
 // Exact public paths, kept separate from the prefixes above so this stays a

@@ -6,6 +6,7 @@ import type { TenantSettings } from "@/modules/tenancy/settings";
 import { clientIp } from "@/lib/http/client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getTranslator } from "@/lib/i18n/translator";
+import { formatMoney } from "@/lib/i18n/format";
 import { BookingPicker } from "./picker";
 
 // The public booking page (docs/SPEC-BOOKING.md §5). Same shape as the public
@@ -33,7 +34,7 @@ export default async function PublicBookingPage({
   const resolved = await getPublicBookingType(tenantSlug, typeSlug);
   if (!resolved) notFound();
 
-  const { type, questions, turnstileSiteKey, timeZone } = resolved;
+  const { type, questions, turnstileSiteKey, timeZone, services } = resolved;
   const tenant = await getTenant(resolved.tenant.id);
   const branding = ((tenant?.settings ?? {}) as TenantSettings).branding ?? {};
   const accent = branding.primaryColor || undefined;
@@ -76,6 +77,18 @@ export default async function PublicBookingPage({
         questions={questions}
         turnstileSiteKey={turnstileSiteKey}
         accent={accent}
+        services={services.map((service) => ({
+          id: service.id,
+          name: service.name,
+          extraDurationMinutes: service.extraDurationMinutes,
+          extraPrice: service.extraPrice,
+        }))}
+        capacity={type.capacity}
+        depositAmount={
+          type.depositAmount
+            ? formatMoney(type.depositAmount, type.depositCurrency, locale)
+            : null
+        }
         labels={{
           chooseDay: t("chooseDay"),
           chooseTime: t("chooseTime"),
@@ -92,6 +105,12 @@ export default async function PublicBookingPage({
           manageHint: t("manageHint"),
           errorSlotTaken: t("errorSlotTaken"),
           errorGeneric: t("errorGeneric"),
+          servicesTitle: t("servicesTitle"),
+          partySize: t("partySize"),
+          seatsRemaining: t("seatsRemaining", { count: "{count}" }),
+          depositTitle: t("depositTitle"),
+          depositBody: t("depositBody", { amount: "{amount}" }),
+          errorPartyTooLarge: t("errorPartyTooLarge"),
           rateLimited: (await getTranslator(locale, "public.shared"))("rateLimited"),
         }}
       />

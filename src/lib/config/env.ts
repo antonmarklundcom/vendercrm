@@ -56,6 +56,12 @@ const envSchema = z
     // means the ai_reply action node skips with a reason instead of the app
     // refusing to boot — an unconfigured tenant must still be able to run
     // every other automation.
+    // Google Calendar busy-read (plan-booking.md §5.4). Optional by the same
+    // rule as Resend and the AI drivers: absent means the feature no-ops —
+    // the connect button says it isn't configured and slot generation runs
+    // with no Google busy windows — rather than the app refusing to boot.
+    GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+    GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     AI_DRIVER: z.enum(["none", "openai", "gemini"]).default("none"),
     OPENAI_API_KEY: z.string().min(1).optional(),
     GEMINI_API_KEY: z.string().min(1).optional(),

@@ -10,6 +10,7 @@ import { getContact } from "@/modules/crm/contacts";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { listPendingDrafts } from "@/modules/ai/replies";
 import { listTenantUsers } from "@/modules/tenancy/users";
+import { listBookingTypes } from "@/modules/booking/types";
 import { ConversationView, type ConversationData } from "./ConversationView";
 
 export default async function ConversationPage({
@@ -23,12 +24,13 @@ export default async function ConversationPage({
   const conversation = await getConversation(ctx, id);
   if (!conversation) notFound();
 
-  const [contact, messages, templates, aiDrafts, users] = await Promise.all([
+  const [contact, messages, templates, aiDrafts, users, bookingTypes] = await Promise.all([
     getContact(ctx, conversation.contactId),
     listMessagesForConversation(ctx, id),
     listApprovedTemplates(ctx, conversation.waAccountId),
     listPendingDrafts(ctx, id),
     listTenantUsers(ctx),
+    listBookingTypes(ctx),
   ]);
 
   if (conversation.unreadCount > 0) {
@@ -69,6 +71,9 @@ export default async function ConversationPage({
       conversationId={id}
       initial={initial}
       users={users.filter((user) => !user.banned).map((user) => ({ id: user.id, name: user.name }))}
+      bookingTypes={bookingTypes
+        .filter((type) => type.isActive)
+        .map((type) => ({ id: type.id, name: type.name }))}
     />
   );
 }

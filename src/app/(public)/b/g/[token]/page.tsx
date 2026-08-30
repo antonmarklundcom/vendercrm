@@ -42,6 +42,7 @@ export default async function ManageBookingPage({
 
   const statusLabel = {
     confirmed: t("statusConfirmed"),
+    pending_deposit: t("statusPendingDeposit"),
     cancelled: t("statusCancelled"),
     completed: t("statusCompleted"),
     no_show: t("statusNoShow"),

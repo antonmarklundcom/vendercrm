@@ -93,7 +93,8 @@
       "calendar": "Calendar",
       "reports": "Reports",
       "booking": "Bookings",
-      "chat": "Web chat"
+      "chat": "Web chat",
+      "onboarding": "Industry"
     },
     "dashboard": {
       "title": "{tenant} dashboard",
@@ -586,9 +587,13 @@
         "aiWindowClosed": "Couldn't send: the 24-hour window closed while the draft was waiting.",
         "aiConversationDisabled": "Couldn't send: AI is off for this conversation.",
         "aiOptedOut": "Couldn't send: this contact asked not to receive more messages.",
-        "aiSendFailed": "The draft couldn't be sent. Try again."
+        "aiSendFailed": "The draft couldn't be sent. Try again.",
+        "noSlots": "No free slots in the next few days.",
+        "bookingTypeRequired": "Pick a service to offer."
       },
-      "actionFailed": "We couldn't complete the action. Try again."
+      "actionFailed": "We couldn't complete the action. Try again.",
+      "offerSlots": "Offer slots",
+      "offerSlotsSent": "Sent {count} slots"
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -616,6 +621,17 @@
         "phoneNumberIdRequired": "Enter the Phone Number ID.",
         "accessTokenRequired": "Enter the access token.",
         "unknown": "We couldn't connect the number. Try again."
+      },
+      "bookingTemplatesTitle": "Booking templates",
+      "bookingTemplatesHelp": "Meta has to approve these templates in your own account before notices can reach customers who never messaged you. Until then, notices go out by email.",
+      "submitBookingTemplates": "Submit templates to Meta",
+      "bookingTemplateStatus": {
+        "APPROVED": "Approved",
+        "PENDING": "In review",
+        "REJECTED": "Rejected",
+        "PAUSED": "Paused",
+        "DISABLED": "Disabled",
+        "MISSING": "Not submitted"
       }
     },
     "quotes": {
@@ -833,6 +849,21 @@
         "off": "Off",
         "enable": "Turn on",
         "disable": "Turn off"
+      },
+      "aiBookingEnabled": "Let the assistant offer booking slots",
+      "aiBookingEnabledHelp": "The assistant only shows free times; the customer books by tapping an option, never the assistant.",
+      "gcal": {
+        "title": "Google Calendar",
+        "intro": "Connect your calendar and the system stops offering times you are already busy. It only reads your availability: it never writes to or changes your Google Calendar.",
+        "notConfigured": "Google Calendar is not configured on this installation yet.",
+        "connect": "Connect my calendar",
+        "disconnect": "Disconnect",
+        "connected": "Calendar connected",
+        "lastRead": "last read {when}",
+        "status": {
+          "error": "There was a problem reading the calendar.",
+          "revoked": "Access was revoked: connect it again."
+        }
       }
     },
     "automations": {
@@ -1384,7 +1415,62 @@
           "invalidQuestion": "Check the questions: one is incomplete, or two share a key.",
           "notFound": "That appointment type no longer exists."
         }
-      }
+      },
+      "statusPendingDeposit": "Deposit pending",
+      "deliveryTitle": "Customer notices",
+      "deliveryEmpty": "No notice has been sent yet",
+      "deliveryNever": "No notices",
+      "deliveryKind": {
+        "confirmation": "Confirmation",
+        "reminder": "Reminder",
+        "cancellation": "Cancellation",
+        "reschedule": "Reschedule",
+        "deposit_request": "Deposit request",
+        "review_request": "Review request"
+      },
+      "deliveryChannel": {
+        "wa_template": "WhatsApp (template)",
+        "wa_freeform": "WhatsApp",
+        "email": "Email",
+        "none": "No channel"
+      },
+      "deliveryStatus": {
+        "queued": "Queued",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "skipped": "Could not notify"
+      },
+      "deliveryDetail": {
+        "no_channel": "The contact has neither a connected WhatsApp nor an email address.",
+        "template_not_approved_and_window_closed": "Meta has not approved the template yet and the 24-hour window is closed.",
+        "email_not_delivered": "The email did not go out: check the Resend configuration.",
+        "booking_context_missing": "The booking is missing data.",
+        "booking_not_found": "The booking no longer exists.",
+        "tenant_not_found": "The tenant no longer exists."
+      },
+      "capacityTitle": "Capacity and deposit",
+      "capacityHelp": "For classes, courts, or anything more than one person fits into at a time — and for asking a deposit before confirming.",
+      "capacity": "Places per slot",
+      "capacityFieldHelp": "1 is the normal case: one person per appointment. Set 12 for a class of twelve.",
+      "depositAmount": "Deposit (₲)",
+      "depositAmountHelp": "Leave empty if you don't ask for one. With an amount, the booking stays pending until you confirm the receipt.",
+      "depositExpiry": "Minutes to transfer",
+      "depositExpiryHelp": "If the deposit doesn't arrive within this time, the slot is released automatically.",
+      "allowMultiService": "Offer add-on services on the public page",
+      "servicesTitle": "Add-on services",
+      "servicesHelp": "Extras the customer can tick: they lengthen the appointment and are stored on the booking.",
+      "servicesEmpty": "No add-on services yet",
+      "servicesDisabledHint": "These are not shown: switch on \\u201cOffer add-on services\\u201d above.",
+      "serviceName": "Name",
+      "serviceExtraDuration": "+ minutes",
+      "serviceExtraPrice": "+ price (₲)",
+      "serviceAdd": "Add",
+      "serviceRemove": "Remove",
+      "confirmDeposit": "Confirm deposit",
+      "rejectDeposit": "Never arrived",
+      "partySize": "{count} people"
     },
     "chat": {
       "title": "Website chat",
@@ -1471,6 +1557,19 @@
         "siteRequired": "Pick a site.",
         "exists": "That site already has a widget."
       }
+    },
+    "onboarding": {
+      "title": "Set up your industry",
+      "adminOnly": "Only admins can see this page",
+      "intro": "Pick what your business does and we'll leave the services, hours and pipeline ready to start taking bookings.",
+      "apply": "Use this industry",
+      "previewServices": "Services:",
+      "previewResources": "Resources:",
+      "previewStages": "Pipeline:",
+      "previewCapacity": "{count} places",
+      "alreadyApplied": "You already applied the \\u201c{name}\\u201d industry.",
+      "alreadyAppliedHelp": "You can apply another one whenever you like: it adds to what you have and never replaces anything.",
+      "additiveNote": "Applying an industry only adds services, resources, stages and tags. It never deletes or changes what you already configured."
     }
   },
   "superadmin": {
@@ -2345,7 +2444,14 @@
       "locationInPerson": "In person",
       "locationPhone": "By phone",
       "locationVideo": "Video call",
-      "locationWhatsapp": "On WhatsApp"
+      "locationWhatsapp": "On WhatsApp",
+      "statusPendingDeposit": "Deposit pending",
+      "servicesTitle": "Anything to add?",
+      "partySize": "How many people?",
+      "seatsRemaining": "{count} left",
+      "depositTitle": "Reserved — deposit pending",
+      "depositBody": "To confirm it we need a deposit of {amount}. We'll send you the details on WhatsApp — send us the receipt and you're set.",
+      "errorPartyTooLarge": "That's more people than this time slot holds. Try a smaller party."
     },
     "chat": {
       "title": "Chat",

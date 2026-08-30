@@ -22,6 +22,12 @@ import {
   type Booking,
 } from "./bookings";
 import { resolveBookingTypeSettings, type BookingQuestion, type BookingType } from "./types";
+import {
+  extraDurationOf,
+  listActiveServicesForType,
+  resolveBookedServices,
+  type BookingTypeService,
+} from "./services";
 
 // The public booking surface (docs/SPEC-BOOKING.md §5). Resolving a tenant
 // slug to a tenant happens *before* any TenantContext exists — structurally
@@ -40,6 +46,8 @@ export type PublicBookingType = {
   timeZone: string;
   questions: BookingQuestion[];
   turnstileSiteKey: string | null;
+  /** Add-ons the page offers as checkboxes; empty unless the type allows them. */
+  services: BookingTypeService[];
 };
 
 export async function getPublicBookingType(
@@ -70,11 +78,19 @@ export async function getPublicBookingType(
     timeZone: tenant.timezone,
     questions: (type.questions as BookingQuestion[] | null) ?? [],
     turnstileSiteKey: turnstileSite ? siteTurnstileSiteKey(turnstileSite) : null,
+    services: type.allowMultiService ? await listActiveServicesForType(ctx, type.id) : [],
   };
 }
 
-/** The visitor-facing shape: a start time and nothing about who is free. */
-export type PublicSlot = { startsAt: string };
+/**
+ * The visitor-facing shape: a start time, and — only for a type with
+ * capacity — how many places are left.
+ *
+ * Still nothing about *who* is free: resource ids and team shape stay
+ * server-side (§5.1). "Quedan 3 lugares" is about the class the visitor is
+ * buying into; "Ana is free but Bruno isn't" is about the business.
+ */
+export type PublicSlot = { startsAt: string; seatsRemaining?: number };
 
 const SLOTS_RATE_LIMIT = 30;
 const RESERVE_RATE_LIMIT = 10;
@@ -96,6 +112,7 @@ export async function publicSlots(
   toRaw: string | null,
   ipAddress: string,
   now: Date = new Date(),
+  serviceIds: string[] = [],
 ): Promise<PublicOutcome<PublicSlot[]>> {
   const resolved = await getPublicBookingType(tenantSlug, typeSlug);
   if (!resolved) return { ok: false, status: 404, error: "not_found" };
@@ -114,8 +131,28 @@ export async function publicSlots(
     return { ok: false, status: 422, error: "invalid_range" };
   }
 
-  const slots = await availableSlots(resolved.ctx, resolved.type, from, to, now);
-  return { ok: true, data: slots.map((slot) => ({ startsAt: slot.startsAt.toISOString() })) };
+  // The visitor's ticked add-ons lengthen the appointment, so they change
+  // which starts still fit before closing time — the picker re-fetches when
+  // they tick one.
+  const chosen = await resolveBookedServices(resolved.ctx, resolved.type.id, serviceIds);
+  const slots = await availableSlots(
+    resolved.ctx,
+    resolved.type,
+    from,
+    to,
+    now,
+    undefined,
+    extraDurationOf(chosen),
+  );
+
+  const hasCapacity = resolved.type.capacity > 1;
+  return {
+    ok: true,
+    data: slots.map((slot) => ({
+      startsAt: slot.startsAt.toISOString(),
+      ...(hasCapacity ? { seatsRemaining: slot.seatsRemaining } : {}),
+    })),
+  };
 }
 
 export const publicReserveSchema = z.object({
@@ -125,6 +162,10 @@ export const publicReserveSchema = z.object({
   email: z.string().email().max(320).optional().or(z.literal("")),
   message: z.string().max(5000).optional(),
   answers: z.record(z.string(), z.string().max(2000)).optional(),
+  /** Places wanted, for a type with capacity > 1. */
+  party_size: z.coerce.number().int().min(1).max(100).optional(),
+  /** Ids of the ticked add-ons; validated against the type server-side. */
+  service_ids: z.array(z.string().max(26)).max(20).optional(),
   turnstile_token: z.string().max(4000).optional(),
   utm: z
     .object({
@@ -147,6 +188,8 @@ export type PublicReserveResult = {
   bookingId: string;
   startsAt: string;
   manageToken: string;
+  /** `pending_deposit` — the page has to ask for the seña, not say "listo". */
+  status: Booking["status"];
 };
 
 export async function publicReserve(
@@ -211,6 +254,8 @@ export async function publicReserve(
         email: body.email || undefined,
         message: body.message,
         answers: body.answers,
+        partySize: body.party_size,
+        serviceIds: body.service_ids,
         utm: body.utm,
         pageUrl: body.page_url,
         referrer: body.referrer,
@@ -227,6 +272,7 @@ export async function publicReserve(
         bookingId: result.booking.id,
         startsAt: result.booking.startsAt.toISOString(),
         manageToken: result.booking.publicToken,
+        status: result.booking.status,
       },
     };
   } catch (error) {
@@ -253,6 +299,10 @@ function publicErrorFor(error: unknown): { status: 404 | 403 | 409 | 422; error:
         // Not a failure the visitor caused, and not one worth a scary
         // message: they picked the time they already have.
         return { status: 422, error: "same_slot" };
+      case "partyTooLarge":
+        // Not "someone beat you to it": no amount of waiting makes a party
+        // of eight fit a class of six.
+        return { status: 422, error: "party_too_large" };
     }
   }
   return { status: 422, error: "invalid_body" };
@@ -354,6 +404,7 @@ export async function publicReschedule(
         bookingId: result.booking.id,
         startsAt: result.booking.startsAt.toISOString(),
         manageToken: result.booking.publicToken,
+        status: result.booking.status,
       },
     };
   } catch (error) {

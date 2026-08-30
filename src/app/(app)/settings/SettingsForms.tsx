@@ -232,6 +232,7 @@ export function AiSettingsForm({
   maxRepliesPerConversationPerDay,
   maxRepliesPerTenantPerDay,
   handoffKeyword,
+  bookingEnabled,
 }: {
   enabled: boolean;
   mode: string;
@@ -244,6 +245,7 @@ export function AiSettingsForm({
   maxRepliesPerConversationPerDay: number;
   maxRepliesPerTenantPerDay: number;
   handoffKeyword: string;
+  bookingEnabled: boolean;
 }) {
   const t = useTranslations("app.settings");
   const tc = useTranslations("common");
@@ -352,6 +354,20 @@ export function AiSettingsForm({
           />
         </label>
       </div>
+
+      {/* Off by default and gated per tenant, on the same principle as
+          `mode`: a capability that reaches customers starts switched off.
+          The assistant can only *offer* times — the customer's tap is what
+          reserves, through the ordinary transactional path. */}
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="bookingEnabled"
+          defaultChecked={echoedCheckbox(state.values, "bookingEnabled", bookingEnabled)}
+        />
+        {t("aiBookingEnabled")}
+      </label>
+      <p className="text-xs text-muted-foreground">{t("aiBookingEnabledHelp")}</p>
 
       <ErrorOrSaved state={state} tc={tc} t={t} />
 

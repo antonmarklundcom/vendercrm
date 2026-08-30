@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { offerSlots } from "@/modules/booking/whatsapp-booking";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
 import { assignConversation, markConversationRead } from "@/modules/whatsapp/inbox";
@@ -243,4 +244,40 @@ export async function assignConversationAction(formData: FormData) {
 
   revalidatePath(`/inbox/${parsed.data.conversationId}`);
   revalidatePath("/inbox");
+}
+
+/**
+ * "Ofrecer horarios" — the rep's half of booking inside WhatsApp
+ * (plan-booking.md §5.3). Sends the next free slots as tappable options; the
+ * customer's tap arrives as a webhook and reserves through the same
+ * transaction the public page uses.
+ */
+export type OfferSlotsState = { error: string | null; offered: number };
+
+export async function offerSlotsAction(
+  _prevState: OfferSlotsState,
+  formData: FormData,
+): Promise<OfferSlotsState> {
+  const ctx = await requireTenantContext();
+  const conversationId = String(formData.get("conversationId") ?? "");
+  const bookingTypeId = String(formData.get("bookingTypeId") ?? "");
+  if (!conversationId || !bookingTypeId) return { error: "bookingTypeRequired", offered: 0 };
+
+  const outcome = await offerSlots(ctx, { conversationId, bookingTypeId });
+  if (outcome.status !== "offered") {
+    // The three reasons a rep can act on, named rather than collapsed into
+    // "no se pudo": no free slots, a closed window, or a retired type.
+    return {
+      error:
+        outcome.reason === "no_slots"
+          ? "noSlots"
+          : outcome.reason === "window_closed"
+            ? "windowClosed"
+            : "bookingTypeRequired",
+      offered: 0,
+    };
+  }
+
+  revalidatePath(`/inbox/${conversationId}`);
+  return { error: null, offered: outcome.count };
 }
