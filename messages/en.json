@@ -1566,6 +1566,7 @@
       "previewServices": "Services:",
       "previewResources": "Resources:",
       "previewStages": "Pipeline:",
+      "previewFlows": "Automations:",
       "previewCapacity": "{count} places",
       "alreadyApplied": "You already applied the \\u201c{name}\\u201d industry.",
       "alreadyAppliedHelp": "You can apply another one whenever you like: it adds to what you have and never replaces anything.",

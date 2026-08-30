@@ -1566,6 +1566,7 @@
       "previewServices": "Tjänster:",
       "previewResources": "Resurser:",
       "previewStages": "Pipeline:",
+      "previewFlows": "Automationer:",
       "previewCapacity": "{count} platser",
       "alreadyApplied": "Du har redan tillämpat branschen \\u201c{name}\\u201d.",
       "alreadyAppliedHelp": "Du kan tillämpa en annan när du vill: den läggs till det du har och ersätter aldrig något.",

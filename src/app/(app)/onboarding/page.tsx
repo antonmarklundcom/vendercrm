@@ -76,6 +76,12 @@ export default async function OnboardingPage() {
                 <dt className="text-muted-foreground">{t("previewStages")}</dt>
                 <dd>{preset.pipelineStages.join(" → ")}</dd>
               </div>
+              {preset.flows.length > 0 && (
+                <div className="flex gap-2">
+                  <dt className="text-muted-foreground">{t("previewFlows")}</dt>
+                  <dd>{preset.flows.map((flow) => flow.name).join(" · ")}</dd>
+                </div>
+              )}
             </dl>
 
             <form action={applyVerticalAction}>
