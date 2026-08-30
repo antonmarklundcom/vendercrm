@@ -32,6 +32,15 @@ describe.skipIf(!hasDb)("booking notifications (MySQL integration)", () => {
   const at = (iso: string) => new Date(iso);
   const NOW = at("2026-09-01T12:00:00Z");
 
+  // One resource is shared by the whole file, so each booking gets its own
+  // Monday: two bookings at one start on one resource is a real conflict, and
+  // the engine is right to refuse the second. 11:00Z is 08:00 in Asunción
+  // (UTC-3 year round), the first slot of the 08:00-12:00 rule below.
+  const FIRST_MONDAY = Date.UTC(2026, 8, 7, 11, 0, 0);
+  const WEEK = 7 * 24 * 60 * 60 * 1000;
+  let weekCursor = 0;
+  const nextEight = () => new Date(FIRST_MONDAY + weekCursor++ * WEEK);
+
   beforeAll(async () => {
     ({ newId } = await import("@/lib/ids"));
     notifications = await import("./notifications");
@@ -89,7 +98,7 @@ describe.skipIf(!hasDb)("booking notifications (MySQL integration)", () => {
       ctx,
       {
         bookingTypeId: type!.id,
-        startsAt: at("2026-09-07T11:00:00.000Z"),
+        startsAt: nextEight(),
         name: "Ana Giménez",
         phone: `+59598${Math.floor(1000000 + Math.random() * 8999999)}`,
         ...overrides,
@@ -179,7 +188,8 @@ describe.skipIf(!hasDb)("booking notifications (MySQL integration)", () => {
     const moved = await bookingsModule.rescheduleBooking(
       ctx,
       booking.id,
-      at("2026-09-07T11:30:00.000Z"),
+      // Half an hour later on that booking's own Monday.
+      new Date(booking.startsAt.getTime() + 30 * 60_000),
       "contact",
       NOW,
     );

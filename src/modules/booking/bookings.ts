@@ -203,6 +203,12 @@ export async function busyAndSeatsFor(
 
   const seats: SeatUsage[] = [];
   const intervals: BusyInterval[] = [];
+  // Every booking also writes a mirror row into `calendar_events` so it shows
+  // on the rep's agenda. That mirror must not be read back as third-party busy
+  // time for a booking we have already counted as a seat: at capacity 1 the
+  // two say the same thing and the union hides it, but at capacity > 1 the
+  // class's own first booking would otherwise block its remaining places.
+  const seatEventIds = new Set<string>();
   for (const row of bookingRows) {
     if (groupTypeId && row.bookingTypeId === groupTypeId) {
       seats.push({
@@ -210,6 +216,7 @@ export async function busyAndSeatsFor(
         startsAt: row.startsAt,
         seats: Math.max(1, row.partySize),
       });
+      if (row.calendarEventId) seatEventIds.add(row.calendarEventId);
       continue;
     }
     intervals.push({
@@ -263,6 +270,7 @@ export async function busyAndSeatsFor(
       ),
     );
     for (const event of events) {
+      if (seatEventIds.has(event.id)) continue;
       const resource = userResources.find((candidate) => candidate.userId === event.assignedUserId);
       if (!resource) continue;
       intervals.push({

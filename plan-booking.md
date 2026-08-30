@@ -432,6 +432,45 @@ STILL TO DO in B5:
 - An integration test applying each preset to a fresh demo tenant and
   asserting a working public booking page (§6.1 exit criterion).
 
+### 2026-08-30 — CI red: the first run of B1/B2 against a real database
+
+The B1 and B2 entries each end with "has never been run against MySQL". CI
+does run one (a `mysql:8` service), so those suites had been failing on every
+push since B1 — 16 failures, all surfacing as `slotUnavailable` from
+`performReserve`. Both causes are now fixed and the whole suite is green
+against a real database (85 files, 716 tests).
+
+**The engine bug (capacity).** Every booking also writes a mirror row into
+`calendar_events` so it shows on the rep's agenda, and `busyAndSeatsFor` read
+those mirrors back as third-party busy time. At capacity 1 that is invisible —
+the booking and its mirror say the same thing and the union hides it — but at
+capacity > 1 a class's own first booking blocked its remaining places, so a
+gym class of three took exactly one. `busyAndSeatsFor` now remembers the
+`calendarEventId` of each booking it counted as a seat and skips that event
+when building the busy list. This is the same idea as the existing
+`exclude.calendarEventId`, which already did it for the reschedule case; the
+seat accounting, the capacity rule and the `active_slot` index scheme are
+untouched.
+
+**The test bug (shared resource, shared start).** Both new suites book one
+resource at one start in every test, so the first test passed and each later
+one hit a genuine conflict. They now take a fresh Monday per test, the way
+`bookings.integration.test.ts` already did.
+
+Decisions / deviations:
+- A start with **no** places left is not on offer at all, so it is refused
+  with `slotUnavailable`, not `slotTaken`; `slotTaken` is what a class with
+  *some* room says to a party too big to fit it. Three expectations were
+  corrected to match. This is not a weakened assertion: `public.ts` and
+  `whatsapp-booking.ts` already handle the two codes identically, so the
+  customer-facing outcome is the same refusal either way — and at capacity 1
+  `slotUnavailable` is what the engine gave before capacity existed, which is
+  exactly what that regression guard means to pin.
+- The build environment still has no MySQL of its own; this run used a locally
+  installed MariaDB 10.11 with the real migrations applied. The migration
+  chain, B1's notifications, B2's capacity/señas and B3's webhook round trip
+  have now all run against a real database.
+
 ### B6 — NOT STARTED
 
 wa.me deeplinks on contact/deal/booking/inbox views; the voseo pass over
