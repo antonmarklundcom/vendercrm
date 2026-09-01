@@ -1,11 +1,26 @@
 # clientes.com.py — next-steps plan (for the executing model)
 
-> Written 2026-09-01 on branch `claude/clientes-frontend-service-offer-osgdkc`.
-> This is the working plan for finishing and launching the marketing site.
-> Positioning and architecture stay governed by `MARKETING_SITE_PLAN.md` (do not
-> reopen its locked decisions §1.2); resolved design decisions live in
-> `MARKETING_DESIGN.md`. Execute on **Opus or Sonnet** — never schedule or spawn
-> Fable for any of this (fable-cost-guardrail).
+> Written 2026-09-01 on branch `claude/clientes-frontend-service-offer-osgdkc`
+> (PR #79). This is the working plan for finishing and launching the marketing
+> site. Positioning and architecture stay governed by `MARKETING_SITE_PLAN.md`
+> (do not reopen its locked decisions §1.2); resolved design decisions live in
+> `MARKETING_DESIGN.md`. Execute on **Opus or Sonnet** per the phase table —
+> never schedule or spawn Fable for any of this (fable-cost-guardrail).
+
+## How to execute (phased-autonomous-build)
+
+| Phase | Model | Prompt file | Covers |
+|---|---|---|---|
+| M1 — launch: config, imagery, QA | Opus | `prompts/opus-m1-launch-imagery.md` | §2, §3.1–3.2, §6 |
+| M2 — /recursos content hub | Sonnet | `prompts/sonnet-m2-recursos.md` | §3.4, `MARKETING_SITE_PLAN.md` §7 |
+
+Start (after PR #79 is merged): fresh Opus window, auto-accept permission mode,
+paste exactly: `Read prompts/opus-m1-launch-imagery.md in this repo and execute
+it.` M1 spawns M2 on Sonnet when its PR is merged. Recovery rule: if a phase's
+session dies, re-paste that phase's prompt in a fresh window — prompts are
+re-runnable and resume from the first unmet exit criterion; find the current
+phase in §8. §3.3 (GBP) and §3.5 (first case study) are off-site/owner work,
+not build phases. §5 (CRM backlog) is advisory only — no phase builds it.
 
 ---
 
@@ -145,3 +160,47 @@ Design:
 - No fabricated proof anywhere, ever. Sections stay absent until real.
 - `web-design-system` QA gate re-run after the imagery pass.
 - OG preview checked by actually sharing each money page in WhatsApp.
+
+## 7. Autonomy rules for the phase sessions
+
+1. Work until the phase's exit criteria pass; never ask permission for in-plan
+   work. Stop and ask ONLY for a missing credential with no graceful fallback
+   or a decision where guessing wrong forces a rewrite.
+2. One PR per phase, branch `phase/<id>` off latest main; arm GitHub auto-merge
+   (squash) on it if the repo settings allow — if the call fails, say so in the
+   phase report and watch the PR through the GitHub MCP tools instead. Never
+   start on top of an unmerged previous phase. All GitHub state checks go
+   through `mcp__github__*` tools, never curl/gh. Never end a turn "waiting for
+   CI": end merged, or end with a stated blocker.
+3. Minor non-blocking issues → `KNOWN-ISSUES.md`, keep building. Scope creep →
+   §9 Backlog. Missing env/config values never block — degrade gracefully and
+   record what's pending.
+4. Model guardrail: phases run on Opus or Sonnet exactly as the table says.
+   Fable is never spawned, scheduled, or written into a phase
+   (fable-cost-guardrail); if a session believes it needs Fable, it stops and
+   asks Anton with the reason.
+5. Hard rules from Anton, all phases: no CRM code/behavior changes on
+   `crm.clientes.com.py`; no fabricated proof of any kind; voseo Spanish through
+   `next-intl` with en/sv key parity; validate before every push (`lint`,
+   `typecheck`, `npx vitest run src/middleware.test.ts src/i18n/messages.test.ts`,
+   production build).
+6. Before merging, append a build-log entry to §8 (date, phase + PR, what now
+   exists, decisions/deviations, where the next phase should look first).
+
+## 8. Build log & handoff
+
+- 2026-09-01 — pre-phase (Fable planning session, PR #79): built steps 4–5 of
+  `MARKETING_SITE_PLAN.md` §6 — five `/soluciones/*` vertical pages, JSON-LD,
+  host-aware robots/noindex for crm.*, sitemap, `/privacidad` + `/terminos`,
+  og-images; wrote this plan and the M1/M2 prompts. All copy lives in
+  `messages/*.json` under `marketing.soluciones` / `marketing.legal`. Next
+  phase (M1) starts after PR #79 merges; look first at §2 launch blockers and
+  `src/lib/site-config.ts`.
+
+## 9. Backlog
+
+- P6 bleed-image overlap on the closing bands once `hero-bleed` exists
+  (`MARKETING_DESIGN.md` §3 records the swap is copy-compatible).
+- Named method branding ("Método Clientes") — plan §8 open question 4.
+- More /recursos articles beyond the first 10, one cluster at a time.
+- First real case study page + social-proof sections when real material exists.
