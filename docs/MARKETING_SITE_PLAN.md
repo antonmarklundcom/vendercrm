@@ -142,6 +142,11 @@ Hostinger deploy pipeline (same app, same domains — nothing changes in hPanel)
 **Suggested first PR:** steps 1–3 as one deploy — placeholder → credible site in one
 release.
 
+> **Status 2026-09:** steps 1–5 are built (steps 4–5 on branch
+> `claude/clientes-frontend-service-offer-osgdkc`); imagery fill and step 6
+> remain. See `MARKETING_NEXT_STEPS.md` for the working plan, launch blockers
+> and the offer/packaging recommendation.
+
 ---
 
 ## 7. SEO & content strategy (Paraguay)

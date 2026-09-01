@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { CRM_LOGIN_URL, contact, siteConfig, telHref } from "@/lib/site-config";
+import { MARKETING_VERTICALS } from "@/app/(marketing)/soluciones/verticals";
 import { WhatsAppLink } from "./cta";
 
 export async function MarketingFooter() {
@@ -65,6 +66,21 @@ export async function MarketingFooter() {
           </div>
 
           <div>
+            <p style={{ color: "inherit", fontWeight: 500 }}>
+              {t("footer.solucionesTitle")}
+            </p>
+            <ul className="mk-footer__list">
+              {MARKETING_VERTICALS.map((slug) => (
+                <li key={slug}>
+                  <Link href={`/soluciones/${slug}`}>
+                    {t(`soluciones.${slug}.name`)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
             <p style={{ color: "inherit", fontWeight: 500 }}>{t("footer.contactTitle")}</p>
             <ul className="mk-footer__list">
               {contactRows.map((row) => (
@@ -84,7 +100,17 @@ export async function MarketingFooter() {
           <span>
             {new Date().getFullYear()} {siteConfig.name}. {t("footer.rights")}
           </span>
-          <span>{t("footer.madeIn")}</span>
+          <span>
+            <Link href="/privacidad" style={{ color: "inherit" }}>
+              {t("footer.legalPrivacidad")}
+            </Link>
+            {" · "}
+            <Link href="/terminos" style={{ color: "inherit" }}>
+              {t("footer.legalTerminos")}
+            </Link>
+            {" · "}
+            {t("footer.madeIn")}
+          </span>
         </div>
       </div>
     </footer>

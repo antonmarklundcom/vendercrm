@@ -126,6 +126,17 @@ function isAppPath(pathname: string): boolean {
   );
 }
 
+// The crm.* host must never be indexed (MARKETING_SITE_PLAN.md §1.2): every
+// URL under it is a login wall or an unguessable customer link. app/robots.ts
+// is static and can't see the host, so the middleware answers /robots.txt for
+// the app host itself. Exported as a pure function so it's unit-testable the
+// same way the allowlist is.
+export const CRM_ROBOTS_BODY = "User-agent: *\nDisallow: /\n";
+
+export function crmRobotsBody(host: string | null, pathname: string): string | null {
+  return isAppHost(host) && pathname === "/robots.txt" ? CRM_ROBOTS_BODY : null;
+}
+
 export type HostRedirect = { url: string; status: 301 | 307 };
 
 /**
@@ -171,8 +182,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(hostRedirect.url, hostRedirect.status);
   }
 
+  const robots = crmRobotsBody(host, pathname);
+  if (robots) {
+    return new NextResponse(robots, {
+      headers: { "content-type": "text/plain" },
+    });
+  }
+
   if (isPublicPath(pathname, host)) {
-    return NextResponse.next();
+    return withRobotsHeader(NextResponse.next(), host);
   }
 
   const hasSession = !!getSessionCookie(request);
@@ -182,7 +200,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  return withRobotsHeader(NextResponse.next(), host);
+}
+
+// Belt to the robots.txt braces: every page served from the crm host also
+// carries a noindex header, so a page that slips through a future allowlist
+// change still never lands in an index.
+function withRobotsHeader(response: NextResponse, host: string | null): NextResponse {
+  if (isAppHost(host)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return response;
 }
 
 export const config = {

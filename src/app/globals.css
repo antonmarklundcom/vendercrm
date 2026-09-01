@@ -597,6 +597,30 @@
   border: 1px solid var(--mk-hairline);
   border-top: 3px solid var(--mk-accent);
 }
+/* A card that navigates (home verticals grid → /soluciones/[vertical]).
+   Hover follows the house rule: -4px lift + shadow step, never scale. */
+.mk-card--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--mk-dur-fast) var(--mk-ease-io),
+    box-shadow var(--mk-dur-fast) var(--mk-ease-io);
+}
+.mk-card--link:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mk-shadow-2);
+}
+.mk-card__arrow {
+  display: block;
+  margin-top: var(--mk-s-4);
+  color: var(--mk-accent);
+  font-size: var(--mk-t-1);
+  line-height: 1;
+}
+.mk-card--ink .mk-card__arrow {
+  color: var(--mk-accent-on-ink);
+}
 
 /* ---- buttons ---- */
 .mk-btn {
@@ -735,7 +759,7 @@
 }
 @media (min-width: 768px) {
   .mk-footer__grid {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
   }
 }
 .mk-footer__list {

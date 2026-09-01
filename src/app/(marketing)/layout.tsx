@@ -4,7 +4,8 @@ import Script from "next/script";
 import { getTranslations } from "next-intl/server";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
-import { CRM_URL, SITE_URL, siteConfig } from "@/lib/site-config";
+import { JsonLd } from "@/components/marketing/json-ld";
+import { CRM_URL, SITE_URL, contact, siteConfig } from "@/lib/site-config";
 
 // The marketing chrome, kept entirely separate from the app chrome. The `.mk`
 // wrapper is what scopes the marketing design tokens (globals.css) — nothing
@@ -37,6 +38,20 @@ export default async function MarketingLayout({
 
   return (
     <div className={`mk ${newsreader.variable}`}>
+      {/* Organization, once, sitewide (MARKETING_SITE_PLAN.md §5 step 5).
+          Contact fields join only once the owner fills site-config — schema
+          must never claim details the site doesn't show. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: siteConfig.name,
+          url: SITE_URL,
+          areaServed: { "@type": "Country", name: "Paraguay" },
+          ...(contact.email ? { email: contact.email } : {}),
+          ...(contact.phoneE164 ? { telephone: contact.phoneE164 } : {}),
+        }}
+      />
       <a href="#contenido" className="mk-skip">
         {t("skipToContent")}
       </a>

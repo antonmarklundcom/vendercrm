@@ -2216,13 +2216,579 @@
         ]
       }
     },
+    "soluciones": {
+      "common": {
+        "breadcrumbHome": "Inicio",
+        "breadcrumbSection": "Soluciones",
+        "otherEyebrow": "Otros rubros",
+        "otherLead": "El mismo método, con el vocabulario de cada rubro:"
+      },
+      "clinicas": {
+        "name": "Clínicas y consultorios",
+        "meta": {
+          "title": "Más pacientes para tu clínica | clientes.com.py",
+          "description": "Ordenamos la captación de pacientes de tu clínica: cada consulta respondida a tiempo, cada turno con seguimiento, y números claros por tratamiento."
+        },
+        "waPrefill": "Hola, tengo una clínica y quiero agendar un diagnóstico.",
+        "header": {
+          "eyebrow": "Soluciones · Clínicas y consultorios",
+          "title": "Más pacientes, sin perder consultas en el camino",
+          "lead": "Tu clínica ya recibe consultas todos los días. El problema es lo que pasa con ellas: mensajes de WhatsApp fuera de horario, llamadas que nadie devuelve, turnos que se enfrían.",
+          "body": "Trabajamos con clínicas y consultorios que quieren llenar la agenda con un proceso, no con la memoria de la recepción."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en clínicas",
+          "title": "La agenda no se llena sola",
+          "body": "Una persona que consulta por un tratamiento suele escribir a varios lugares a la vez y se queda con el primero que responde bien. Si tu clínica responde al día siguiente, el paciente ya está en otra.",
+          "bodyTwo": "Y la primera consulta es solo la mitad: el paciente que preguntó y no agendó casi nunca vuelve solo. Alguien tiene que retomarlo — y ese alguien suele estar atendiendo el mostrador.",
+          "symptomsTitle": "Te va a sonar conocido",
+          "symptoms": [
+            "Consultas por WhatsApp fuera de horario que se responden al día siguiente — o nunca",
+            "Pacientes que preguntan el precio, no agendan y nadie los vuelve a contactar",
+            "La recepción atiende el mostrador, el teléfono y el WhatsApp al mismo tiempo",
+            "Turnos cancelados que quedan como agujeros en la agenda en vez de reasignarse"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu clínica",
+          "title": "De la consulta al turno agendado",
+          "lead": "Las mismas cuatro etapas de siempre, con el vocabulario de tu agenda.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Miramos por dónde llegan hoy tus pacientes, cuántas consultas se responden tarde y cuántos turnos se pierden entre la primera pregunta y la agenda."
+            },
+            {
+              "title": "Captación",
+              "body": "Presencia ordenada donde el paciente busca: la ficha de Google, la página con turno por WhatsApp, y campañas solo si el diagnóstico las justifica."
+            },
+            {
+              "title": "Seguimiento",
+              "body": "Cada consulta queda registrada con un responsable. El paciente que no agendó reaparece solo para retomarlo, sin depender de la recepción."
+            },
+            {
+              "title": "Medición",
+              "body": "Cuántas consultas entraron, cuántas terminaron en turno y qué tratamiento las trajo. Con eso decidís dónde invertir el mes siguiente."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu clínica",
+          "lead": "No es una campaña: es un circuito que sigue andando cuando la semana se complica.",
+          "items": [
+            {
+              "name": "Respuesta inmediata",
+              "body": "Cada consulta recibe una primera respuesta al momento, también fuera de horario, y queda registrada para el equipo."
+            },
+            {
+              "name": "Una sola lista de interesados",
+              "body": "WhatsApp, llamadas, Instagram y formulario en una sola lista, con historial por paciente."
+            },
+            {
+              "name": "Recuperación de consultas frías",
+              "body": "El que preguntó y no agendó recibe un seguimiento a tiempo, con registro de qué se le dijo."
+            },
+            {
+              "name": "Números por tratamiento",
+              "body": "Sabés qué servicio genera consultas y cuáles se cierran, en vez de intuirlo."
+            }
+          ]
+        },
+        "statement": {
+          "text": "El paciente elige a quien le responde primero.",
+          "sub": "Que sea tu clínica no depende de la suerte: depende de un circuito."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan las clínicas",
+          "items": [
+            {
+              "q": "¿Esto reemplaza a mi secretaría o recepción?",
+              "a": "No. Le saca de encima lo que no debería depender de su memoria: primeras respuestas, registro y recordatorios. La atención personal sigue siendo de tu equipo."
+            },
+            {
+              "q": "¿Funciona para especialidades de ticket alto, como estética u odontología?",
+              "a": "Es donde más se nota: cuanto más cuesta el tratamiento, más compara el paciente y más pesa el seguimiento entre la primera pregunta y la decisión."
+            },
+            {
+              "q": "¿Necesito pauta publicitaria desde el inicio?",
+              "a": "No siempre. Primero ordenamos lo que ya entra; recién cuando el circuito responde y registra bien tiene sentido pagar por más consultas."
+            },
+            {
+              "q": "¿Cómo manejan los datos de los pacientes?",
+              "a": "La base es tuya y las conversaciones quedan en tu plataforma. No compartimos datos con terceros y podés exportar todo cuando quieras."
+            }
+          ]
+        }
+      },
+      "constructoras": {
+        "name": "Constructoras",
+        "meta": {
+          "title": "Más obras para tu constructora | clientes.com.py",
+          "description": "Presupuestos que no quedan sin respuesta y seguimiento de cada obra potencial durante meses. Así ayudamos a constructoras paraguayas a firmar más contratos."
+        },
+        "waPrefill": "Hola, tengo una constructora y quiero agendar un diagnóstico.",
+        "header": {
+          "eyebrow": "Soluciones · Constructoras",
+          "title": "Más obras firmadas, menos presupuestos olvidados",
+          "lead": "En construcción, el que hace el presupuesto no siempre es el que gana la obra. Gana el que sigue presente cuando el cliente por fin decide — y eso puede tardar meses.",
+          "body": "Trabajamos con constructoras y empresas de reformas donde cada contrato vale mucho y el ciclo de decisión es largo."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en constructoras",
+          "title": "El ciclo largo se come tus presupuestos",
+          "body": "Un presupuesto de obra lleva horas de trabajo: visita, medición, cómputo. Y después queda en un PDF enviado por WhatsApp, esperando que el cliente escriba de vuelta.",
+          "bodyTwo": "Con decisiones que tardan de tres a doce meses, la diferencia entre firmar y no firmar suele ser quién retomó el contacto en el momento justo. Sin registro, ese momento pasa y nadie se entera.",
+          "symptomsTitle": "Te va a sonar conocido",
+          "symptoms": [
+            "Presupuestos entregados de los que nunca más se supo",
+            "El seguimiento vive en el celular del dueño o de un ingeniero",
+            "Consultas que entran por recomendación y se enfrían por no responder a tiempo",
+            "Ningún número de cuántos presupuestos se hacen por mes y cuántos terminan en contrato"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu constructora",
+          "title": "Del presupuesto a la firma",
+          "lead": "Las mismas cuatro etapas de siempre, con el vocabulario de la obra.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Revisamos cuántos presupuestos hacés por mes, cuánto tarda una decisión y en qué punto se pierde el contacto con cada obra potencial."
+            },
+            {
+              "title": "Captación",
+              "body": "Presencia que da confianza para montos altos: obras hechas, una página seria y un canal claro para pedir presupuesto."
+            },
+            {
+              "title": "Seguimiento",
+              "body": "Cada presupuesto queda con fecha, responsable y próxima acción. Meses después, el recordatorio aparece solo — antes de que el cliente firme con otro."
+            },
+            {
+              "title": "Medición",
+              "body": "Presupuestos emitidos, obras firmadas, tiempo de decisión. Sabés cuánto vale cada consulta que entra."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu constructora",
+          "lead": "Un circuito pensado para tickets altos y decisiones lentas.",
+          "items": [
+            {
+              "name": "Presupuestos con vida útil",
+              "body": "Cada cómputo enviado tiene una próxima acción; ninguno muere en el chat."
+            },
+            {
+              "name": "Memoria de cada obra potencial",
+              "body": "Visita, planos y conversaciones en un solo lugar, no repartidos en tres celulares."
+            },
+            {
+              "name": "Un canal de entrada serio",
+              "body": "El que pide presupuesto encuentra una empresa ordenada desde el primer mensaje."
+            },
+            {
+              "name": "Números de obra, no sensaciones",
+              "body": "Cuántas consultas, cuántos presupuestos, cuántas firmas. Mes a mes."
+            }
+          ]
+        },
+        "statement": {
+          "text": "La obra la firma el que estuvo presente cuando el cliente decidió.",
+          "sub": "Meses después del presupuesto — justo cuando la mayoría ya lo olvidó."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan las constructoras",
+          "items": [
+            {
+              "q": "Nuestros clientes llegan por recomendación. ¿Esto sirve igual?",
+              "a": "Sí, es el caso típico. La recomendación te trae la consulta; el seguimiento ordenado evita que se enfríe. Y después se puede sumar un canal que no dependa de que te recomienden."
+            },
+            {
+              "q": "¿Sirve para reformas y proyectos chicos, o solo para obra grande?",
+              "a": "Para ambos. Cuanto más chico el ticket, más volumen y más pesa responder rápido; cuanto más grande, más pesa el seguimiento largo."
+            },
+            {
+              "q": "El que cotiza es el dueño y no tiene tiempo de cargar datos.",
+              "a": "Por eso el registro tiene que ser mínimo: la consulta entra sola desde WhatsApp o el formulario, y agregar una nota lleva menos que buscar el chat."
+            },
+            {
+              "q": "¿En cuánto tiempo se nota?",
+              "a": "Lo primero que aparece es la recuperación de presupuestos ya enviados — semanas, no meses. La captación nueva acompaña el ciclo de tu rubro."
+            }
+          ]
+        }
+      },
+      "inmobiliarias": {
+        "name": "Inmobiliarias",
+        "meta": {
+          "title": "Marketing para inmobiliarias en Paraguay | clientes.com.py",
+          "description": "Consultas de portales, WhatsApp y redes en una sola lista, con responsable y seguimiento por interesado. Así ayudamos a inmobiliarias paraguayas a cerrar más."
+        },
+        "waPrefill": "Hola, tengo una inmobiliaria y quiero agendar un diagnóstico.",
+        "header": {
+          "eyebrow": "Soluciones · Inmobiliarias",
+          "title": "Cada consulta con dueño, cada visita con seguimiento",
+          "lead": "Las consultas llegan por los portales, por Instagram, por WhatsApp y por el cartel. Lo difícil no es que lleguen: es que cada una tenga un responsable y una próxima acción.",
+          "body": "Trabajamos con inmobiliarias que manejan varios agentes y decenas de propiedades, donde el desorden cuesta ventas — y también fichas de propietarios."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en inmobiliarias",
+          "title": "Muchas consultas, poco cierre",
+          "body": "Un interesado promedio consulta por varias propiedades en varios lugares a la vez. El agente que responde primero y agenda la visita corre con ventaja — el resto compite por lo que queda.",
+          "bodyTwo": "Y del lado del propietario pasa lo mismo: el que entrega su propiedad elige a la inmobiliaria que se ve profesional y responde. La captación de fichas también es un proceso de venta.",
+          "symptomsTitle": "Te va a sonar conocido",
+          "symptoms": [
+            "Consultas de portales respondidas horas después, cuando el interesado ya coordinó otra visita",
+            "Cada agente con sus contactos en su celular — si se va, se van con él",
+            "Visitas hechas sin ninguna nota de qué buscaba el cliente",
+            "Propietarios que preguntan cómo va la venta y reciben silencio"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu inmobiliaria",
+          "title": "De la consulta a la operación cerrada",
+          "lead": "Las mismas cuatro etapas de siempre, con el vocabulario de tu cartera.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Miramos por dónde entran hoy las consultas, cuánto tardan en responderse y qué pasa después de cada visita."
+            },
+            {
+              "title": "Captación",
+              "body": "Presencia que capta interesados y propietarios: fichas claras, respuesta inmediata y un canal directo por WhatsApp."
+            },
+            {
+              "title": "Seguimiento",
+              "body": "Cada interesado queda asignado a un agente, con historial y próxima acción. El que visitó y no ofertó no desaparece."
+            },
+            {
+              "title": "Medición",
+              "body": "Consultas por canal y por propiedad, visitas agendadas y operaciones cerradas — por agente y por mes."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu inmobiliaria",
+          "lead": "Un circuito que trabaja para el equipo, no para un solo celular.",
+          "items": [
+            {
+              "name": "Respuesta antes que la competencia",
+              "body": "La primera respuesta sale al instante, a cualquier hora, y la consulta queda en la lista del equipo."
+            },
+            {
+              "name": "Cartera de la inmobiliaria, no del agente",
+              "body": "Contactos, visitas y notas quedan en la empresa. Los agentes trabajan sobre la misma base."
+            },
+            {
+              "name": "Seguimiento por interesado",
+              "body": "El que buscaba casa en una zona recibe la nueva ficha que encaja, sin que nadie lo recuerde de memoria."
+            },
+            {
+              "name": "Informes que retienen propietarios",
+              "body": "Podés decirle al dueño cuántas consultas y visitas tuvo su propiedad. Eso renueva la confianza — y la exclusiva."
+            }
+          ]
+        },
+        "statement": {
+          "text": "La visita la agenda el que responde primero.",
+          "sub": "Con decenas de propiedades, eso solo lo sostiene un sistema."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan las inmobiliarias",
+          "items": [
+            {
+              "q": "¿Se integra con los portales que ya usamos?",
+              "a": "Trabajamos con lo que ya usás: las consultas que hoy llegan a correos o a celulares pasan a una sola lista con responsable. En el diagnóstico revisamos canal por canal."
+            },
+            {
+              "q": "¿Cada agente pierde “sus” contactos?",
+              "a": "Al revés: cada agente sigue trabajando su cartera, pero la base queda en la inmobiliaria. Si alguien se va, sus interesados no se van con el celular."
+            },
+            {
+              "q": "¿Sirve para captar propietarios, no solo compradores?",
+              "a": "Sí. La captación de fichas es una venta más — y el propietario elige a la inmobiliaria que responde y muestra números."
+            },
+            {
+              "q": "¿Cuánto trabajo le agrega al equipo?",
+              "a": "El objetivo es lo contrario: la consulta entra sola, la primera respuesta sale sola y el agente solo agrega notas y próximas acciones."
+            }
+          ]
+        }
+      },
+      "servicios-profesionales": {
+        "name": "Servicios profesionales",
+        "meta": {
+          "title": "Más clientes para estudios y consultoras | clientes.com.py",
+          "description": "Un canal de clientes que no depende de referencias: captación ordenada y seguimiento serio para estudios jurídicos, contables y consultoras en Paraguay."
+        },
+        "waPrefill": "Hola, tengo un estudio de servicios profesionales y quiero agendar un diagnóstico.",
+        "header": {
+          "eyebrow": "Soluciones · Servicios profesionales",
+          "title": "Un canal de clientes que no depende de referencias",
+          "lead": "Los estudios y las consultoras crecen por recomendación — hasta que la recomendación deja de alcanzar. El problema no es la calidad del trabajo: es que nadie está a cargo de la captación.",
+          "body": "Trabajamos con estudios jurídicos, contables, de arquitectura y consultoras que quieren crecer sin depender de que los recomienden."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en estudios y consultoras",
+          "title": "El trabajo tapa la captación",
+          "body": "En un estudio, los mismos que venden son los que ejecutan. Cuando hay trabajo, no hay tiempo de buscar clientes; cuando el trabajo se termina, el pipeline está vacío y empieza la sequía.",
+          "bodyTwo": "A eso se suma el pudor comercial del rubro: nadie quiere “vender”. Pero responder a tiempo, retomar una propuesta y mostrar el trabajo hecho no es vender agresivo — es ser serio.",
+          "symptomsTitle": "Te va a sonar conocido",
+          "symptoms": [
+            "Meses llenos y meses vacíos, alternados desde siempre",
+            "Propuestas de honorarios enviadas que nadie retoma",
+            "Consultas nuevas respondidas entre reuniones, días después",
+            "Cero visibilidad de cuántas oportunidades reales hubo el mes pasado"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu estudio",
+          "title": "De la consulta a la propuesta firmada",
+          "lead": "Las mismas cuatro etapas de siempre, con el vocabulario de tus honorarios.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Miramos de dónde salieron tus últimos veinte clientes, qué pasó con las propuestas que no se firmaron y dónde se corta el ciclo."
+            },
+            {
+              "title": "Captación",
+              "body": "Presencia que transmite criterio: una página seria, contenido que muestra cómo pensás y un canal claro para consultar."
+            },
+            {
+              "title": "Seguimiento",
+              "body": "Cada consulta y cada propuesta queda con próxima acción. Retomar deja de sentirse incómodo porque está pautado."
+            },
+            {
+              "title": "Medición",
+              "body": "Consultas, propuestas, cierres y honorarios promedio. El pipeline deja de ser una sensación."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu estudio",
+          "lead": "Captación con proceso, sin convertir a los socios en vendedores.",
+          "items": [
+            {
+              "name": "Pipeline visible",
+              "body": "Sabés cuántas oportunidades reales hay abiertas y en qué estado está cada una."
+            },
+            {
+              "name": "Propuestas que se retoman",
+              "body": "Cada propuesta enviada tiene fecha de seguimiento. La mayoría de los cierres perdidos estaban acá."
+            },
+            {
+              "name": "La captación deja de ser de nadie",
+              "body": "Pasa de ser “de todos” — es decir, de nadie — a tener proceso, responsable y números."
+            },
+            {
+              "name": "Crecimiento sin dejar de facturar",
+              "body": "El circuito corre también en los meses llenos, para que no vuelva la sequía."
+            }
+          ]
+        },
+        "statement": {
+          "text": "La referencia te trae la consulta. El proceso la convierte en cliente.",
+          "sub": "Y el proceso, a diferencia de la referencia, se puede repetir."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan los estudios",
+          "items": [
+            {
+              "q": "En nuestro rubro no se hace publicidad. ¿Qué proponen?",
+              "a": "Captación no es solo pauta: es que te encuentren, que la primera respuesta sea seria y que ninguna propuesta muera en silencio. La pauta solo entra si tu rubro lo permite y el diagnóstico la justifica."
+            },
+            {
+              "q": "¿Cómo se mantiene la confidencialidad de los clientes?",
+              "a": "La base es tuya, con acceso por usuario. Registrar que una consulta existe no exige volcar su contenido."
+            },
+            {
+              "q": "Somos socios sin tiempo comercial. ¿Quién opera esto?",
+              "a": "El sistema hace el registro y los recordatorios; las conversaciones importantes siguen siendo de los socios. El diagnóstico define cuánto se delega."
+            },
+            {
+              "q": "¿Cuándo se nota?",
+              "a": "Primero en las propuestas abiertas que se retoman. Después, en un flujo de consultas que no depende de a quién le hablaron bien de vos."
+            }
+          ]
+        }
+      },
+      "empresas-b2b": {
+        "name": "Empresas B2B",
+        "meta": {
+          "title": "Generación de clientes B2B en Paraguay | clientes.com.py",
+          "description": "Ventas B2B con ciclos largos y varios decisores: pipeline ordenado, seguimiento pautado y números por etapa para empresas paraguayas que venden a empresas."
+        },
+        "waPrefill": "Hola, mi empresa vende a otras empresas y quiero agendar un diagnóstico.",
+        "header": {
+          "eyebrow": "Soluciones · Empresas B2B",
+          "title": "Ventas B2B sin perder el hilo",
+          "lead": "Vender a empresas es un juego de meses: varios contactos, varias reuniones, varios decisores. Perder el hilo una sola vez puede costar el trimestre.",
+          "body": "Trabajamos con empresas paraguayas que venden a otras empresas — insumos, equipos, software, servicios — donde cada cliente nuevo vale mucho y se gana de a poco."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en ventas B2B",
+          "title": "El pipeline vive en la cabeza del vendedor",
+          "body": "Una venta B2B junta cotizaciones, reuniones, correos y llamadas a lo largo de meses. Si eso vive en la memoria y el celular de cada vendedor, la empresa no tiene un pipeline: tiene versiones.",
+          "bodyTwo": "Y cuando un vendedor se va, se va con los contactos, el historial y la mitad del trimestre. Eso no es mala suerte: es no tener sistema.",
+          "symptomsTitle": "Te va a sonar conocido",
+          "symptoms": [
+            "Cotizaciones importantes sin fecha de seguimiento",
+            "El gerente pregunta cómo viene el mes y recibe estimaciones, no datos",
+            "Oportunidades que se enfrían porque el contacto clave cambió de puesto y nadie lo supo",
+            "Cada vendedor con su método, su planilla y su celular"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu empresa",
+          "title": "De la oportunidad al contrato",
+          "lead": "Las mismas cuatro etapas de siempre, con el vocabulario de tu pipeline.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Revisamos tu ciclo real: de dónde salen las oportunidades, cuánto tardan, dónde se caen y qué registra hoy cada vendedor."
+            },
+            {
+              "title": "Captación",
+              "body": "Entrada constante de oportunidades: presencia seria, prospección ordenada y un canal claro para el que llega preguntando."
+            },
+            {
+              "title": "Seguimiento",
+              "body": "Cada oportunidad con etapa, responsable, monto y próxima acción. El historial queda en la empresa, no en el celular."
+            },
+            {
+              "title": "Medición",
+              "body": "Pipeline por etapa, tasa de cierre, ciclo promedio y un pronóstico del mes con datos, no con optimismo."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu empresa",
+          "lead": "Un circuito que aguanta ciclos largos y equipos que rotan.",
+          "items": [
+            {
+              "name": "Un pipeline, no versiones",
+              "body": "Todos los vendedores sobre la misma base, con etapas y montos comparables."
+            },
+            {
+              "name": "Seguimiento que sobrevive al día a día",
+              "body": "Las cotizaciones abiertas reaparecen solas cuando toca retomarlas."
+            },
+            {
+              "name": "Continuidad cuando alguien se va",
+              "body": "El historial de cada cuenta queda en la empresa. La transición es una reasignación, no una crisis."
+            },
+            {
+              "name": "Pronóstico defendible",
+              "body": "El número que presentás al directorio sale del pipeline, no de la intuición."
+            }
+          ]
+        },
+        "statement": {
+          "text": "En B2B no gana el más barato: gana el que no soltó el hilo.",
+          "sub": "Durante todos los meses que dura la decisión."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan las empresas B2B",
+          "items": [
+            {
+              "q": "Ya tenemos una planilla de ventas. ¿No alcanza?",
+              "a": "Alcanza hasta que dos personas la editan, alguien la guarda aparte y nadie sabe cuál es la versión buena. La diferencia no es la planilla: es el registro automático y los recordatorios."
+            },
+            {
+              "q": "¿Los vendedores van a cargar datos de verdad?",
+              "a": "Solo si cuesta menos que no hacerlo. Las consultas entran solas, el WhatsApp queda registrado y el vendedor agrega lo mínimo. La adopción es parte del trabajo, no un supuesto."
+            },
+            {
+              "q": "Nuestras ventas empiezan en ferias y visitas, no en internet. ¿Sirve igual?",
+              "a": "Sí: el sistema ordena lo que entra por cualquier canal. La feria te da la tarjeta; el seguimiento pautado evita que muera en un cajón."
+            },
+            {
+              "q": "¿Cómo arrancamos?",
+              "a": "Con el diagnóstico: media hora sobre tu ciclo de venta actual. De ahí sale qué ordenar primero y si tiene sentido trabajar juntos."
+            }
+          ]
+        }
+      }
+    },
+    "legal": {
+      "privacidad": {
+        "meta": {
+          "title": "Política de privacidad | clientes.com.py",
+          "description": "Qué datos recolecta clientes.com.py, para qué se usan y qué derechos tenés sobre ellos."
+        },
+        "header": {
+          "eyebrow": "Legal",
+          "title": "Política de privacidad",
+          "updated": "Última actualización: septiembre de 2026"
+        },
+        "sections": [
+          {
+            "title": "Qué datos recolectamos",
+            "body": "Cuando completás el formulario de contacto guardamos lo que nos enviás: nombre, empresa, teléfono, correo electrónico, rubro y tu mensaje. El sitio también guarda una cookie propia que recuerda por qué canal llegaste (por ejemplo, desde un anuncio o una búsqueda), durante un máximo de 90 días."
+          },
+          {
+            "title": "Para qué los usamos",
+            "body": "Únicamente para responder tu consulta y coordinar la conversación que pediste. No enviamos correos masivos no solicitados, no vendemos ni alquilamos datos a terceros, y no usamos tus datos para ningún fin distinto del que motivó el contacto."
+          },
+          {
+            "title": "Dónde se guardan",
+            "body": "Los datos se almacenan en nuestra propia plataforma de gestión, con acceso restringido a nuestro equipo. Los proveedores de infraestructura que usamos para operar el sitio procesan los datos solo por cuenta nuestra."
+          },
+          {
+            "title": "Tus derechos",
+            "body": "Podés pedirnos en cualquier momento ver los datos que tenemos sobre vos, corregirlos o eliminarlos. Escribinos por cualquiera de los canales de contacto del sitio y lo resolvemos, conforme a la normativa paraguaya de protección de datos personales."
+          }
+        ]
+      },
+      "terminos": {
+        "meta": {
+          "title": "Términos y condiciones | clientes.com.py",
+          "description": "Condiciones de uso del sitio clientes.com.py y de la información publicada en él."
+        },
+        "header": {
+          "eyebrow": "Legal",
+          "title": "Términos y condiciones",
+          "updated": "Última actualización: septiembre de 2026"
+        },
+        "sections": [
+          {
+            "title": "Sobre este sitio",
+            "body": "clientes.com.py es el sitio informativo de nuestro servicio de crecimiento comercial para empresas paraguayas. El contenido describe cómo trabajamos; no constituye una oferta contractual. Las condiciones concretas de cada servicio se acuerdan por escrito con cada cliente, después del diagnóstico."
+          },
+          {
+            "title": "Sin promesas de resultados",
+            "body": "Trabajamos con método y con medición, pero ningún resultado comercial puede garantizarse de antemano: depende del rubro, de la oferta y del trabajo conjunto. Desconfiá de quien te garantice lo contrario — nosotros no lo hacemos."
+          },
+          {
+            "title": "Propiedad intelectual",
+            "body": "El contenido de este sitio — textos, marca y diseño — es nuestro. Podés citarlo mencionando la fuente; no está permitido copiarlo para uso comercial sin autorización."
+          },
+          {
+            "title": "Ley aplicable",
+            "body": "Este sitio se rige por las leyes de la República del Paraguay. Cualquier controversia se somete a los tribunales ordinarios de la ciudad de Asunción."
+          }
+        ]
+      }
+    },
     "footer": {
       "tagline": "Ayudamos a empresas paraguayas establecidas a conseguir más clientes, con un proceso de ventas ordenado.",
       "siteTitle": "El sitio",
       "contactTitle": "Contacto",
       "loginNote": "¿Sos cliente?",
       "rights": "Todos los derechos reservados.",
-      "madeIn": "Hecho en Paraguay"
+      "madeIn": "Hecho en Paraguay",
+      "solucionesTitle": "Soluciones",
+      "legalPrivacidad": "Política de privacidad",
+      "legalTerminos": "Términos y condiciones"
     }
   },
   "errors": {

@@ -1,7 +1,13 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { isAppHost, isPublicPath, resolveHostRedirect } from "./middleware";
+import {
+  CRM_ROBOTS_BODY,
+  crmRobotsBody,
+  isAppHost,
+  isPublicPath,
+  resolveHostRedirect,
+} from "./middleware";
 
 // The auth allowlist fails closed, which is the right default but makes an
 // omission silent in a confusing way: a missing public prefix doesn't look
@@ -122,6 +128,25 @@ describe("isAppHost", () => {
     expect(isAppHost("www.clientes.com.py")).toBe(false);
     expect(isAppHost("localhost:3000")).toBe(false);
     expect(isAppHost(null)).toBe(false);
+  });
+});
+
+describe("crmRobotsBody", () => {
+  it("serves a disallow-all robots.txt on the crm host only", () => {
+    expect(crmRobotsBody("crm.clientes.com.py", "/robots.txt")).toBe(CRM_ROBOTS_BODY);
+    expect(CRM_ROBOTS_BODY).toContain("Disallow: /");
+  });
+
+  it("leaves the apex, preview and localhost robots to app/robots.ts", () => {
+    expect(crmRobotsBody("clientes.com.py", "/robots.txt")).toBeNull();
+    expect(crmRobotsBody("www.clientes.com.py", "/robots.txt")).toBeNull();
+    expect(crmRobotsBody("localhost:3000", "/robots.txt")).toBeNull();
+    expect(crmRobotsBody(null, "/robots.txt")).toBeNull();
+  });
+
+  it("only ever answers /robots.txt itself", () => {
+    expect(crmRobotsBody("crm.clientes.com.py", "/")).toBeNull();
+    expect(crmRobotsBody("crm.clientes.com.py", "/robots.txt/extra")).toBeNull();
   });
 });
 
