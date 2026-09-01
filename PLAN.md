@@ -2424,7 +2424,7 @@ answer), payment gateway, websockets/SSE for the inbox.
 > file-disjoint and can run in parallel; I3 runs after. Where crmswe fixes the
 > same item (noted below), prefer cherry-picking its commit over re-implementing.
 
-**I1 — Single-process assumptions made safe (Opus 5).**
+**I1 — Single-process assumptions made safe (Opus 5).** — ✅ done
 1. `src/lib/rate-limit/index.ts` is an in-memory fixed window: it resets on
    every deploy and silently stops limiting if the app ever runs >1 process
    (documented in the file, not mitigated). Replace with a MySQL-backed window
@@ -2439,6 +2439,20 @@ answer), payment gateway, websockets/SSE for the inbox.
 **Exit criteria:** rate-limit integration test passes against MySQL driver
 (window survives a simulated restart); feed lookup is a single indexed query
 (assert via test on the new column); suites green.
+
+**What shipped.** `lib/rate-limit` is now a driver seam: `memory` (unchanged
+behavior, the dev/test default) and `mysql` (one `rate_limit_buckets` row per
+key, upsert + read-back in one transaction so the count can only err toward
+limiting). `checkRateLimit` became async — every call site awaits it, and
+`requireWithinRateLimit`/`checkLoginAttempt`/`ingest.rateLimited` with it.
+A database blip degrades to the in-memory driver and reports once a minute
+rather than taking every public page down. Expired rows are swept hourly by
+`maintenance.sweep_rate_limits`, replacing the old in-process timer. The
+feed-token lookup is one indexed match on `tenants.contacts_feed_token_hash`
+(migration 0026 backfills it with MySQL's own `SHA2`, which the app's digest
+is tested to agree with); the timing-safe compare against the stored token
+stays as a second gate. Driver choice is `RATE_LIMIT_DRIVER`, unset =
+mysql outside tests.
 
 **I2 — Consistency & config hygiene (Sonnet 5).**
 1. **One money renderer.** `formatMoney` (`src/lib/i18n/format.ts`) renders

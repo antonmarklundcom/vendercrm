@@ -117,7 +117,7 @@ export async function publicSlots(
   const resolved = await getPublicBookingType(tenantSlug, typeSlug);
   if (!resolved) return { ok: false, status: 404, error: "not_found" };
 
-  if (checkRateLimit(`booking-slots:${resolved.type.id}:${ipAddress}`, SLOTS_RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`booking-slots:${resolved.type.id}:${ipAddress}`, SLOTS_RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
 
@@ -207,7 +207,7 @@ export async function publicReserve(
   if (!resolved) return { ok: false, status: 404, error: "not_found" };
 
   const ip = meta.ipKey ?? meta.ipAddress ?? "unknown";
-  if (checkRateLimit(`booking-reserve:${resolved.type.id}:${ip}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`booking-reserve:${resolved.type.id}:${ip}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
 
@@ -355,7 +355,7 @@ export async function publicCancel(
   ipAddress: string,
   now: Date = new Date(),
 ): Promise<PublicOutcome<{ bookingId: string }>> {
-  if (checkRateLimit(`booking-manage:${token}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`booking-manage:${token}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
   void ipAddress;
@@ -377,7 +377,7 @@ export async function publicReschedule(
   ipAddress: string,
   now: Date = new Date(),
 ): Promise<PublicOutcome<PublicReserveResult>> {
-  if (checkRateLimit(`booking-manage:${token}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`booking-manage:${token}`, RESERVE_RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
   void ipAddress;

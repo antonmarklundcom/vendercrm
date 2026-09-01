@@ -25,6 +25,14 @@ const envSchema = z
     S3_REGION: z.string().default("auto"),
     CRON_SECRET: z.string().min(1, "CRON_SECRET is required"),
     /**
+     * Where the rate-limit windows live (PLAN.md §14 I1 #1). Unset means
+     * MySQL everywhere except tests, which default to the in-memory driver
+     * so a unit test needs no database. Set it to `memory` only to debug the
+     * limiter itself — a production process on `memory` counts per process
+     * and forgets everything on deploy.
+     */
+    RATE_LIMIT_DRIVER: z.enum(["mysql", "memory"]).optional(),
+    /**
      * How many reverse proxies sit in front of this app. Decides which
      * `x-forwarded-for` entry lib/http/client-ip trusts, counting from the
      * right — see that module and docs/DEPLOY.md §10. 1 is Hostinger's

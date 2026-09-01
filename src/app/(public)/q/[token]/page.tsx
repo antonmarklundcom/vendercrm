@@ -24,9 +24,9 @@ export default async function PublicQuotePage({
 
   // Per-IP limit — the token itself is the secret, so this isn't for
   // brute-forcing defense, it's to keep the page from being scraped/hammered
-  // (lib/rate-limit documents the single-process limitation).
+  // (lib/rate-limit holds the window in MySQL, so it survives a deploy).
   const ip = clientIp(await headers());
-  if (checkRateLimit(`quote-view:${ip}`, 60, 60_000).limited) {
+  if ((await checkRateLimit(`quote-view:${ip}`, 60, 60_000)).limited) {
     // No tenant resolved yet at this point, so this one line is the single
     // place the reference locale is the only thing available.
     const tLimit = await getTranslator(null, "public.shared");

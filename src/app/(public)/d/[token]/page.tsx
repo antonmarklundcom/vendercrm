@@ -34,7 +34,7 @@ export default async function PublicDocumentPage({
   // Per-IP limit — the token itself is the secret, so this isn't
   // brute-force defense, it's to keep the page from being hammered.
   const ip = clientIp(await headers());
-  if (checkRateLimit(`document-view:${ip}`, 60, 60_000).limited) {
+  if ((await checkRateLimit(`document-view:${ip}`, 60, 60_000)).limited) {
     // No tenant resolved yet, so the reference locale is all there is.
     const tLimit = await getTranslator(null, "public.shared");
     return (

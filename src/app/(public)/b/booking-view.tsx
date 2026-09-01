@@ -33,7 +33,7 @@ export async function BookingView({
 }) {
 
   const ip = clientIp(await headers());
-  if (checkRateLimit(`booking-page:${ip}`, 60, 60_000).limited) {
+  if ((await checkRateLimit(`booking-page:${ip}`, 60, 60_000)).limited) {
     const tLimit = await getTranslator(null, "public.shared");
     return (
       <div className="mx-auto max-w-2xl p-6 text-sm text-muted-foreground">

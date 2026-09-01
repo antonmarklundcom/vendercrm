@@ -49,6 +49,11 @@ first deploy and every routine redeploy after it.
      encryption key
    - `WHATSAPP_APP_SECRET`, `WHATSAPP_WEBHOOK_VERIFY_TOKEN` — from the Meta
      developer app (PLAN.md §6.1)
+   - `RATE_LIMIT_DRIVER` — optional; leave unset. Unset means the rate-limit
+     windows live in MySQL (PLAN.md §14 I1), which is what makes a limit
+     survive a redeploy and hold if the app is ever run as more than one
+     process. Setting it to `memory` returns to per-process counting and is
+     for debugging the limiter only.
    - `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT=production` —
      optional; leave unset to run without error tracking
    - `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` — optional, only

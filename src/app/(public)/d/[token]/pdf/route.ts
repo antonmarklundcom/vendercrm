@@ -16,7 +16,7 @@ export async function GET(
   // protecting even though the token is unguessable. Generous limit — Meta
   // itself fetches this URL when delivering the WhatsApp document.
   const ip = clientIp(request.headers);
-  if (checkRateLimit(`document-pdf:${ip}`, 30, 60_000).limited) {
+  if ((await checkRateLimit(`document-pdf:${ip}`, 30, 60_000)).limited) {
     return new Response("Too many requests", { status: 429 });
   }
 

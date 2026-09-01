@@ -77,7 +77,7 @@ export async function submitForm(
   const { tenant, form } = resolved;
 
   const rateKey = `form:${form.id}:${input.ipAddress ?? "unknown"}`;
-  if (checkRateLimit(rateKey, RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(rateKey, RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     throw new Error("form_rate_limited");
   }
 

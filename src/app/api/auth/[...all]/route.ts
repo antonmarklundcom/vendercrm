@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       // Not JSON, or already consumed — the per-IP window still applies.
     }
 
-    if (checkLoginAttempt({ ip: clientIp(request.headers), email })) {
+    if (await checkLoginAttempt({ ip: clientIp(request.headers), email })) {
       return NextResponse.json(
         { error: { code: "TOO_MANY_REQUESTS", message: "Too many requests" } },
         { status: 429, headers: { "retry-after": "600" } },

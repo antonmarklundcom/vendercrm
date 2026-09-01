@@ -75,3 +75,26 @@ export const jobs = mysqlTable(
     index("jobs_type_idx").on(table.type),
   ],
 );
+
+// Platform-level rate-limit windows (PLAN.md §14 I1 #1). The limiter used to
+// live in process memory, which was only sound while Hostinger ran exactly
+// one Node process: counts reset on every deploy and a second instance would
+// have silently doubled every limit. One row per bucket makes the window
+// survive restarts and hold across processes.
+//
+// `bucket_key` is the caller's own namespaced key ("auth:ip:1.2.3.4",
+// "leads:api:<siteId>"), so a limited caller can be identified from the row
+// without a join. Rows are disposable: `reset_at` in the past means the
+// window is over, and maintenance sweeps them (worker/maintenance.ts).
+export const rateLimitBuckets = mysqlTable(
+  "rate_limit_buckets",
+  {
+    bucketKey: varchar("bucket_key", { length: 191 }).primaryKey(),
+    hitCount: int("hit_count").notNull().default(0),
+    // fsp: 3 for the same reason `jobs.run_at` has it: a DATETIME with no
+    // fractional part *rounds*, which would push a window's end up to half a
+    // second into the future and let one extra request through.
+    resetAt: datetime("reset_at", { fsp: 3 }).notNull(),
+  },
+  (table) => [index("rate_limit_buckets_reset_at_idx").on(table.resetAt)],
+);

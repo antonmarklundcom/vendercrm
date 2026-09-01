@@ -33,6 +33,13 @@ export const tenants = mysqlTable(
       .notNull()
       .default("America/Asuncion"),
     settings: json("settings").notNull().default({}),
+    // SHA-256 of the contacts feed token, mirrored out of `settings` so the
+    // unauthenticated feed lookup is one indexed equality match instead of a
+    // scan over every tenant's settings JSON (PLAN.md §14 I1 #2 — same
+    // pattern as `site_api_keys.api_key_hash`). The plaintext token stays in
+    // settings because the settings page has to render the feed URL; this
+    // column exists only to find the row.
+    contactsFeedTokenHash: char("contacts_feed_token_hash", { length: 64 }),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -40,7 +47,10 @@ export const tenants = mysqlTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => [uniqueIndex("tenants_slug_idx").on(table.slug)],
+  (table) => [
+    uniqueIndex("tenants_slug_idx").on(table.slug),
+    uniqueIndex("tenants_contacts_feed_token_hash_idx").on(table.contactsFeedTokenHash),
+  ],
 );
 
 // One row per person on the platform, keyed by a globally unique email.

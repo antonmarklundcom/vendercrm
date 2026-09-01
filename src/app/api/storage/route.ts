@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   // shape as /q/[token]/pdf — the caller's address per lib/http/client-ip,
   // with its own namespace so the two routes can't share a bucket.
   const ip = clientIp(request.headers);
-  if (checkRateLimit(`storage:${ip}`, RATE_LIMIT, RATE_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`storage:${ip}`, RATE_LIMIT, RATE_WINDOW_MS)).limited) {
     return new Response("Too many requests", { status: 429 });
   }
 

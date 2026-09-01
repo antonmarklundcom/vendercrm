@@ -183,6 +183,13 @@
       "when": 1788034514959,
       "tag": "0025_add_booking_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1788283071391,
+      "tag": "0026_add_rate_limit_buckets_and_feed_token_hash",
+      "breakpoints": true
     }
   ]
 }
