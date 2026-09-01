@@ -70,7 +70,7 @@ export function SiteHookForm(props: HookPanelProps) {
       {tokenState.token && url && (
         <div className="mt-3 rounded-md border border-warning/30 bg-warning-surface p-3 text-warning">
           <p className="font-medium">{t("copyNow")}</p>
-          <code className="mt-2 block break-all rounded bg-white px-2 py-1 font-mono text-xs">
+          <code className="mt-2 block break-all rounded bg-background px-2 py-1 font-mono text-xs">
             {url}
           </code>
         </div>

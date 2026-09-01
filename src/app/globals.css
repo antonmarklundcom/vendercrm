@@ -30,8 +30,21 @@
  * switch, not a redesign.
  * ========================================================================== */
 
-:root {
+/* `.theme-light` re-declares the same tokens further down the tree, which is
+   how a customer-facing surface opts out of a signed-in user's dark
+   preference (PLAN.md §14 I3): the marketing site and the public quote /
+   nota / booking pages are designed in one palette and are read by people
+   who never chose anything. Descendants inherit from the nearest ancestor
+   that sets a variable, so this wins over `.dark` on <html> without any
+   specificity games. */
+:root,
+.theme-light {
   --radius: 0.625rem;
+
+  /* Tells the browser which palette its own chrome belongs to — scrollbars,
+     form controls, the caret. Without it a dark page keeps light scrollbars
+     and white autofill boxes (PLAN.md §14 I3). */
+  color-scheme: light;
 
   /* Surfaces: the page is a shade cooler than the cards standing on it, which
      is what gives a table or a form an edge without drawing a border. */
@@ -81,6 +94,8 @@
 }
 
 .dark {
+  color-scheme: dark;
+
   --background: oklch(0.2081 0.0228 227.21);
   --foreground: oklch(0.9474 0.0080 216.63);
   --card: oklch(0.2486 0.0282 228.25);

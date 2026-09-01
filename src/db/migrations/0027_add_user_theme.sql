@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `theme` varchar(10);

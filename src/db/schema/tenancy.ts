@@ -96,6 +96,10 @@ export const users = mysqlTable(
     // Daily "your tasks are due" email (PLAN.md §13 H6). Opt-out, not
     // opt-in: a reminder nobody switched on is a reminder nobody gets, and
     // the whole point is that follow-up happens without being remembered.
+    // Light/dark preference (PLAN.md §14 I3): "system" | "light" | "dark".
+    // Nullable and unset by default — no preference means the light palette
+    // the app was designed in, never the visitor's OS (lib/theme.ts says why).
+    theme: varchar("theme", { length: 10 }),
     taskReminders: boolean("task_reminders").notNull().default(true),
     createdAt: datetime("created_at")
       .notNull()

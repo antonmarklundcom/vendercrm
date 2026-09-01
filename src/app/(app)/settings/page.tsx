@@ -5,6 +5,7 @@ import type { BusinessHours, TenantSettings } from "@/modules/tenancy/settings";
 import { PageHeader } from "@/components/page-header";
 import { AuditTable } from "@/components/audit-table";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { getUserById } from "@/modules/tenancy/users";
 import { TaskReminderToggle } from "./TaskReminderToggle";
 import { listAuditLogForTenant } from "@/modules/tenancy/audit";
@@ -41,6 +42,8 @@ export default async function SettingsPage() {
       <div className="flex flex-col gap-8">
         <PageHeader title={t("language.title")} description={t("language.intro")} />
         <LanguageSwitcher />
+        <PageHeader title={t("theme.title")} description={t("theme.intro")} />
+        <ThemeSwitcher />
         <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>
       </div>
     );
@@ -238,6 +241,12 @@ export default async function SettingsPage() {
         <h2 className="mb-2 text-lg font-semibold">{t("language.title")}</h2>
         <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("language.intro")}</p>
         <LanguageSwitcher />
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-lg font-semibold">{t("theme.title")}</h2>
+        <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("theme.intro")}</p>
+        <ThemeSwitcher />
       </section>
 
       {/* Own tenant only — the cross-tenant feed lives in the superadmin

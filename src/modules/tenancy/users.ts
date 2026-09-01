@@ -369,6 +369,13 @@ export async function setUserLocale(userId: string, locale: string): Promise<voi
   await db.update(users).set({ locale }).where(eq(users.id, userId));
 }
 
+/** Per-user light/dark preference (PLAN.md §14 I3). Stored beside the
+ * locale for the same reason: it is a property of the person, not of the
+ * browser they happen to be sitting at. */
+export async function setUserTheme(userId: string, theme: string): Promise<void> {
+  await db.update(users).set({ theme }).where(eq(users.id, userId));
+}
+
 /** Per-user daily task reminder opt-out (PLAN.md §13 H6). */
 export async function setUserTaskReminders(userId: string, enabled: boolean): Promise<void> {
   await db.update(users).set({ taskReminders: enabled }).where(eq(users.id, userId));

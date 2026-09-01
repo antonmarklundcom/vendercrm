@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import { THEME_SCRIPT, themeClass } from "@/lib/theme";
+import { resolveTheme } from "@/lib/theme-resolve";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,11 +51,22 @@ export default async function RootLayout({
   // pinned to Spanish — screen readers and translation tooling both read it.
   const locale = await getLocale();
 
+  // Appearance (PLAN.md §14 I3). The server can settle "dark" and "light"
+  // from the cookie; only "system" needs the browser, so THEME_SCRIPT runs
+  // before paint and corrects the class. suppressHydrationWarning covers
+  // exactly that: the script is *expected* to have changed this attribute
+  // before React looks at it.
+  const theme = await resolveTheme();
+
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${themeClass(theme)}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
