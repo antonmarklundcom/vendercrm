@@ -576,6 +576,17 @@
         "label": "Idioma",
         "save": "Guardar"
       },
+      "theme": {
+        "title": "Apariencia",
+        "intro": "Elegí cómo se ve la app para vos. No cambia lo que ven tus compañeros ni lo que reciben tus clientes.",
+        "label": "Apariencia",
+        "save": "Guardar",
+        "options": {
+          "system": "Según el sistema",
+          "light": "Claro",
+          "dark": "Oscuro"
+        }
+      },
       "taskReminders": {
         "title": "Recordatorios de tareas",
         "intro": "Un correo por día con tus tareas vencidas y las que vencen hoy. Solo llega si tenés alguna.",

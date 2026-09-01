@@ -842,6 +842,17 @@
         "label": "Språk",
         "save": "Spara"
       },
+      "theme": {
+        "title": "Utseende",
+        "intro": "Välj hur appen ser ut för dig. Det ändrar inte vad dina kollegor ser eller vad dina kunder får.",
+        "label": "Utseende",
+        "save": "Spara",
+        "options": {
+          "system": "Följ systemet",
+          "light": "Ljust",
+          "dark": "Mörkt"
+        }
+      },
       "taskReminders": {
         "title": "Uppgiftspåminnelser",
         "intro": "Ett mejl om dagen med dina försenade uppgifter och de som förfaller i dag. Det kommer bara om du har några.",

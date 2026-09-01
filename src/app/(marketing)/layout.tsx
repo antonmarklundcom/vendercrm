@@ -38,7 +38,7 @@ export default async function MarketingLayout({
   const t = await getTranslations("marketing.nav");
 
   return (
-    <div className={`mk ${newsreader.variable}`}>
+    <div className={`mk theme-light ${newsreader.variable}`}>
       {/* Organization, once, sitewide (MARKETING_SITE_PLAN.md §5 step 5).
           Contact fields join only once the owner fills site-config — schema
           must never claim details the site doesn't show. */}

@@ -372,7 +372,7 @@ function AiDraftCard({
   }, [state, mutate]);
 
   return (
-    <div className="flex flex-col gap-2 rounded-md bg-white p-3 text-sm">
+    <div className="flex flex-col gap-2 rounded-md bg-card text-card-foreground p-3 text-sm">
       <p>{draft.body}</p>
       <p className="text-xs text-muted-foreground">
         {draft.provider} · {draft.model} ·{" "}

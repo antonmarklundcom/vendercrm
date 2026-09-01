@@ -2502,13 +2502,36 @@ from `process.env` with the production values as defaults (plain reads, not
 the zod `env` module, because `middleware.ts` runs on the edge runtime). The
 owner's five unfilled fields are now §12 question 10.
 
-**I3 — Dark mode toggle (Sonnet 5).** `globals.css` ships a complete dark
+**I3 — Dark mode toggle (Sonnet 5).** — ✅ done `globals.css` ships a complete dark
 OKLCH token set with documented contrast ratios, but no `.dark` toggle exists.
 Add a theme switcher (system/light/dark, persisted per user next to the locale
 preference), apply the class on `<html>` before hydration (no flash), and QA
 the app group's heavy surfaces (pipeline board, inbox, PDFs excluded — print
 stays light). **Exit criteria:** toggle persists across sessions; no
 flash-of-wrong-theme on reload; contacts/pipeline/inbox legible in dark.
+
+**What shipped.** `users.theme` (migration 0027) plus a `vc_theme` cookie,
+resolved and persisted exactly the way the locale preference is — the
+switcher sits beside the language one on the settings page and works signed
+out too. No flash: the server puts `.dark` on `<html>` from the cookie, and
+an inline `<head>` script settles the `system` case before first paint (it is
+a string constant so a test can assert it is wrapped in try/catch — a script
+that threw would silently strand every dark-mode user on light). `:root` now
+declares `color-scheme`, so scrollbars, form controls and autofill follow the
+palette.
+
+Two decisions worth naming. **No preference means light, not system**: the
+public quote / nota / booking pages and the marketing site share this
+stylesheet and are read by customers who never chose anything, so dark is
+opt-in and `system` is one of the things a person can opt into. And those
+customer-facing surfaces carry a `.theme-light` class that re-declares the
+light tokens further down the tree, so a signed-in user's dark preference
+does not follow them into a document a customer is reading.
+
+The dark audit also found three surfaces that were light-only and would have
+been unreadable: the AI draft box in the inbox (`bg-white` with inherited
+light text) and the API-key / webhook-token code blocks on the sites page.
+Fixed to tokens. The QR code's white background is deliberate and stays.
 
 ### 14.1 Noted, deliberately not batched
 

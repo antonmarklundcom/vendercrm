@@ -842,6 +842,17 @@
         "label": "Language",
         "save": "Save"
       },
+      "theme": {
+        "title": "Appearance",
+        "intro": "Choose how the app looks for you. It doesn't change what your colleagues see or what your customers receive.",
+        "label": "Appearance",
+        "save": "Save",
+        "options": {
+          "system": "Match system",
+          "light": "Light",
+          "dark": "Dark"
+        }
+      },
       "taskReminders": {
         "title": "Task reminders",
         "intro": "One email a day with your overdue tasks and the ones due today. It only arrives if you have any.",
