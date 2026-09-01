@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/config/hosts";
 
 // One Node app answers both hosts (middleware.ts), so this file has to
 // speak for both: the marketing site wants to be indexed, and the CRM host

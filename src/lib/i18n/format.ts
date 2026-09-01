@@ -17,10 +17,28 @@ export function formatNumber(
   return new Intl.NumberFormat(intlTag(locale), options).format(value);
 }
 
-/** Amount + currency code, the shape the whole app shows money in: integer
- * minor units for zero-decimal PYG, so no fraction digits are invented. */
+/**
+ * The app's only money renderer (PLAN.md §14 I2 #1). The UI used to print
+ * "1 500 000 PYG" while quotes and notas de venta printed "PYG 1.500.000" —
+ * two currency formats in one product, and the UI one invented no fraction
+ * digits for currencies that have them.
+ *
+ * `Intl` currency style settles both: it knows PYG has zero decimals and USD
+ * has two, and it puts the code where each locale puts it (Spanish leads
+ * with it, Swedish trails it). `currencyDisplay: "code"` rather than a
+ * symbol because ₲ and $ are ambiguous next to each other on a quote, and
+ * the code is what a Paraguayan invoice carries anyway.
+ */
 export function formatMoney(value: number, currency: string, locale: string): string {
-  return `${formatNumber(value, locale)} ${currency}`;
+  const formatted = new Intl.NumberFormat(intlTag(locale), {
+    style: "currency",
+    currency,
+    currencyDisplay: "code",
+  }).format(value);
+  // Intl separates the code from the amount with a non-breaking space. It
+  // renders identically and breaks every exact-match test and grep, so it
+  // becomes an ordinary space on the way out.
+  return formatted.replace(/\u00a0/g, " ");
 }
 
 export function formatDate(

@@ -1731,7 +1731,9 @@
       "clearError": "Mark as resolved",
       "retryTenantJobs": "Retry {count} send(s)",
       "sendFailures": "Failed sends",
-      "noSendFailures": "No sends have failed recently."
+      "noSendFailures": "No sends have failed recently.",
+      "graphVersionPastReview": "Meta API version {version} is past its review date ({date}). Meta retires old versions, and when it does, WhatsApp stops working for every business. Check the current version and update WHATSAPP_GRAPH_API_VERSION.",
+      "graphVersionUndocumented": "Meta API version {version} has no documented review date. Record one in modules/whatsapp/graph.ts so this page can warn you in time."
     },
     "users": {
       "title": "Users",

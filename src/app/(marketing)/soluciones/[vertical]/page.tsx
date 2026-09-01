@@ -12,7 +12,8 @@ import { Statement } from "@/components/marketing/statement";
 import { Faq, type FaqItem } from "@/components/marketing/faq";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { SITE_URL, contact, siteConfig } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/config/hosts";
+import { contact, siteConfig } from "@/lib/site-config";
 import { MARKETING_VERTICALS, isMarketingVertical } from "../verticals";
 
 // The five vertical sales pages: one template, five content configs

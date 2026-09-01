@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { CRM_LOGIN_URL, contact, telHref } from "@/lib/site-config";
+import { CRM_LOGIN_URL } from "@/lib/config/hosts";
+import { contact, telHref } from "@/lib/site-config";
 
 // `data-sticky-header` is read by mk-motion.js, which toggles `is-stuck`
 // past 24px of scroll — the hairline under the header appears only once the

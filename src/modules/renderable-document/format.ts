@@ -1,17 +1,17 @@
-import { formatDate, formatNumber } from "@/lib/i18n/format";
+import { formatDate, formatMoney } from "@/lib/i18n/format";
 
 // Money and dates as customer-facing documents print them (PLAN.md §13 H9).
 // Quotes and notas de venta had a private copy of each of these; SIFEN
 // (§9) will need the same again, which is exactly why they live here now.
 
-/** PYG has no decimal places (§2.3), so amounts are whole guaraníes and the
- * thousands separator is the only formatting needed. */
+/**
+ * Documents print money exactly as the rest of the app does — this is now
+ * one line over `formatMoney` (PLAN.md §14 I2 #1). Kept as a named export so
+ * the PDF renderers and public pages keep reading in document vocabulary,
+ * and so §9's SIFEN work has the same seam to reach for.
+ */
 export function money(amount: number, currency: string, locale: string): string {
-  const formatted = formatNumber(amount, locale, {
-    minimumFractionDigits: currency === "PYG" ? 0 : 2,
-    maximumFractionDigits: currency === "PYG" ? 0 : 2,
-  });
-  return `${currency} ${formatted}`;
+  return formatMoney(amount, currency, locale);
 }
 
 export function documentDate(value: Date, locale: string): string {

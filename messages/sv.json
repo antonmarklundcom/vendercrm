@@ -1731,7 +1731,9 @@
       "clearError": "Markera som löst",
       "retryTenantJobs": "Försök igen med {count} utskick",
       "sendFailures": "Misslyckade utskick",
-      "noSendFailures": "Inga utskick har misslyckats nyligen."
+      "noSendFailures": "Inga utskick har misslyckats nyligen.",
+      "graphVersionPastReview": "Metas API-version {version} har passerat sitt granskningsdatum ({date}). Meta pensionerar gamla versioner, och när det sker slutar WhatsApp fungera för alla företag. Kontrollera aktuell version och uppdatera WHATSAPP_GRAPH_API_VERSION.",
+      "graphVersionUndocumented": "Metas API-version {version} saknar dokumenterat granskningsdatum. Notera ett i modules/whatsapp/graph.ts så att den här sidan kan varna i tid."
     },
     "users": {
       "title": "Användare",

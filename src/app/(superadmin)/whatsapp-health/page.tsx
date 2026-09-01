@@ -16,6 +16,7 @@ import {
   retryTenantWhatsappJobsAction,
 } from "./actions";
 import { formatDateTime } from "@/lib/i18n/format";
+import { graphVersionWarning } from "@/modules/whatsapp/graph";
 import { getLocale } from "next-intl/server";
 
 export default async function WhatsappHealthPage() {
@@ -34,10 +35,26 @@ export default async function WhatsappHealthPage() {
       countDeadJobsByTenant(ctx),
     ]);
 
+  // Meta retires Graph API versions on a schedule and a retired one simply
+  // stops answering, taking every tenant's WhatsApp with it (PLAN.md §14 I2
+  // #2). This page is where an operator already looks when WhatsApp misbehaves,
+  // so the warning belongs above the accounts rather than in a log nobody reads.
+  const versionWarning = graphVersionWarning();
+
   return (
     <div className="flex flex-col gap-8">
       <section>
         <h1 className="mb-4 text-xl font-semibold">{t("title")}</h1>
+        {versionWarning && (
+          <p className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {versionWarning.kind === "past_review"
+              ? t("graphVersionPastReview", {
+                  version: versionWarning.version,
+                  date: versionWarning.reviewDate,
+                })
+              : t("graphVersionUndocumented", { version: versionWarning.version })}
+          </p>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>

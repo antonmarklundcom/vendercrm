@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { CRM_LOGIN_URL, contact, siteConfig, telHref } from "@/lib/site-config";
+import { CRM_LOGIN_URL } from "@/lib/config/hosts";
+import { contact, siteConfig, telHref } from "@/lib/site-config";
 import { MARKETING_VERTICALS } from "@/app/(marketing)/soluciones/verticals";
 import { WhatsAppLink } from "./cta";
 

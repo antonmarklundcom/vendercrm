@@ -1,21 +1,19 @@
+import { SITE_URL } from "@/lib/config/hosts";
+
 /**
- * Single source of truth for every launch-day detail of the clientes.com.py
- * marketing site (MARKETING_SITE_PLAN.md §1.2, "TBD details").
+ * Single source of truth for every launch-day *content* detail of the
+ * clientes.com.py marketing site (MARKETING_SITE_PLAN.md §1.2, "TBD
+ * details"). The hostnames that used to live here moved to
+ * `lib/config/hosts.ts` — infrastructure the middleware needs has no
+ * business sitting next to the owner's RUC (PLAN.md §14 I2 #3).
  *
  * Everything the owner still has to supply lives in `contact` below as an
  * explicit `null` with a TODO next to it. `null` is deliberate rather than a
- * dummy string: the components below read these through the helpers at the
- * bottom and simply omit the element when a detail is missing, so the site
- * never renders a placeholder phone number or a wa.me link pointing at a
- * number nobody owns. Filling them in is a one-file edit.
+ * dummy string: the components read these through the helpers at the bottom
+ * and simply omit the element when a detail is missing, so the site never
+ * renders a placeholder phone number or a wa.me link pointing at a number
+ * nobody owns. Filling them in is a one-file edit (PLAN.md §12).
  */
-
-export const APEX_HOST = "clientes.com.py";
-export const APP_HOST = `crm.${APEX_HOST}`;
-
-export const SITE_URL = `https://${APEX_HOST}`;
-export const CRM_URL = `https://${APP_HOST}`;
-export const CRM_LOGIN_URL = `${CRM_URL}/login`;
 
 export const siteConfig = {
   name: "clientes.com.py",
