@@ -2216,13 +2216,579 @@
         ]
       }
     },
+    "soluciones": {
+      "common": {
+        "breadcrumbHome": "Hem",
+        "breadcrumbSection": "Lösningar",
+        "otherEyebrow": "Andra branscher",
+        "otherLead": "Samma metod, med varje bransch eget språk:"
+      },
+      "clinicas": {
+        "name": "Kliniker och mottagningar",
+        "meta": {
+          "title": "Fler patienter till din klinik | clientes.com.py",
+          "description": "Vi organiserar klinikens patientanskaffning: varje förfrågan besvarad i tid, varje bokning med uppföljning och tydliga siffror per behandling."
+        },
+        "waPrefill": "Hej, jag driver en klinik och vill boka ett diagnossamtal.",
+        "header": {
+          "eyebrow": "Lösningar · Kliniker och mottagningar",
+          "title": "Fler patienter, utan att tappa förfrågningar på vägen",
+          "lead": "Din klinik får redan förfrågningar varje dag. Problemet är vad som händer med dem: WhatsApp-meddelanden efter stängning, samtal ingen ringer tillbaka, bokningar som kallnar.",
+          "body": "Vi arbetar med kliniker och mottagningar som vill fylla kalendern med en process, inte med receptionens minne."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser på kliniker",
+          "title": "Kalendern fyller inte sig själv",
+          "body": "Den som frågar om en behandling skriver oftast till flera ställen samtidigt och stannar hos den första som svarar bra. Om din klinik svarar dagen efter är patienten redan någon annanstans.",
+          "bodyTwo": "Och den första förfrågan är bara halva jobbet: patienten som frågade men inte bokade kommer nästan aldrig tillbaka av sig själv. Någon måste följa upp — och den personen står oftast i receptionen.",
+          "symptomsTitle": "Det här känner du igen",
+          "symptoms": [
+            "WhatsApp-förfrågningar efter stängning som besvaras dagen efter — eller aldrig",
+            "Patienter som frågar om priset, inte bokar och aldrig kontaktas igen",
+            "Receptionen sköter disken, telefonen och WhatsApp samtidigt",
+            "Avbokade tider som blir hål i kalendern i stället för att fyllas igen"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din klinik",
+          "title": "Från förfrågan till bokad tid",
+          "lead": "Samma fyra steg som alltid, med kalenderns eget språk.",
+          "steps": [
+            {
+              "title": "Diagnos",
+              "body": "Vi ser var dina patienter kommer ifrån i dag, hur många förfrågningar som besvaras sent och hur många bokningar som tappas mellan första frågan och kalendern."
+            },
+            {
+              "title": "Anskaffning",
+              "body": "Ordnad närvaro där patienten söker: Google-profilen, en sida med bokning via WhatsApp, och kampanjer bara om diagnosen motiverar dem."
+            },
+            {
+              "title": "Uppföljning",
+              "body": "Varje förfrågan registreras med en ansvarig. Patienten som inte bokade dyker upp igen av sig själv för uppföljning, utan att receptionen behöver minnas."
+            },
+            {
+              "title": "Mätning",
+              "body": "Hur många förfrågningar som kom in, hur många som blev bokningar och vilken behandling som lockade dem. Utifrån det bestämmer du var du satsar nästa månad."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera på din klinik",
+          "lead": "Det är ingen kampanj: det är en krets som fortsätter gå när veckan blir rörig.",
+          "items": [
+            {
+              "name": "Omedelbart svar",
+              "body": "Varje förfrågan får ett första svar direkt, även efter stängning, och registreras för teamet."
+            },
+            {
+              "name": "En enda lista med intresserade",
+              "body": "WhatsApp, samtal, Instagram och formuläret i en enda lista, med historik per patient."
+            },
+            {
+              "name": "Kalla förfrågningar återvinns",
+              "body": "Den som frågade men inte bokade får uppföljning i tid, med anteckning om vad som sagts."
+            },
+            {
+              "name": "Siffror per behandling",
+              "body": "Du vet vilken tjänst som genererar förfrågningar och vilka som bokas, i stället för att gissa."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Patienten väljer den som svarar först.",
+          "sub": "Att det blir din klinik beror inte på tur: det beror på en krets."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Vad kliniker frågar oss",
+          "items": [
+            {
+              "q": "Ersätter det här min sekreterare eller reception?",
+              "a": "Nej. Det tar bort det som inte borde hänga på deras minne: första svar, registrering och påminnelser. Det personliga bemötandet är fortfarande teamets."
+            },
+            {
+              "q": "Fungerar det för specialiteter med höga belopp, som estetik eller tandvård?",
+              "a": "Det är där det märks mest: ju dyrare behandling, desto mer jämför patienten och desto mer avgör uppföljningen mellan första frågan och beslutet."
+            },
+            {
+              "q": "Behöver jag betald annonsering från start?",
+              "a": "Inte alltid. Först ordnar vi det som redan kommer in; först när kretsen svarar och registrerar väl är det värt att betala för fler förfrågningar."
+            },
+            {
+              "q": "Hur hanterar ni patienternas uppgifter?",
+              "a": "Databasen är din och konversationerna stannar på din plattform. Vi delar inte uppgifter med tredje part och du kan exportera allt när du vill."
+            }
+          ]
+        }
+      },
+      "constructoras": {
+        "name": "Byggföretag",
+        "meta": {
+          "title": "Fler projekt till ditt byggföretag | clientes.com.py",
+          "description": "Offerter som inte lämnas obesvarade och månadslång uppföljning av varje potentiellt projekt. Så hjälper vi paraguayanska byggföretag att teckna fler kontrakt."
+        },
+        "waPrefill": "Hej, jag driver ett byggföretag och vill boka ett diagnossamtal.",
+        "header": {
+          "eyebrow": "Lösningar · Byggföretag",
+          "title": "Fler tecknade projekt, färre bortglömda offerter",
+          "lead": "I byggbranschen är det inte alltid den som skriver offerten som vinner projektet. Det gör den som fortfarande är närvarande när kunden till slut bestämmer sig — och det kan ta månader.",
+          "body": "Vi arbetar med bygg- och renoveringsföretag där varje kontrakt är värt mycket och beslutscykeln är lång."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser hos byggföretag",
+          "title": "Den långa cykeln äter upp dina offerter",
+          "body": "En byggofert kräver timmar av arbete: platsbesök, mätning, kalkyl. Och sedan ligger den i en PDF skickad via WhatsApp och väntar på att kunden ska höra av sig.",
+          "bodyTwo": "När beslut tar tre till tolv månader avgörs kontraktet oftast av vem som följde upp i rätt ögonblick. Utan registrering passerar det ögonblicket utan att någon märker det.",
+          "symptomsTitle": "Det här känner du igen",
+          "symptoms": [
+            "Offerter som lämnats och aldrig hörts av igen",
+            "Uppföljningen bor i ägarens eller en ingenjörs mobil",
+            "Förfrågningar via rekommendationer som kallnar för att svaret dröjer",
+            "Inga siffror på hur många offerter som görs per månad och hur många som blir kontrakt"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på ditt företag",
+          "title": "Från offert till underskrift",
+          "lead": "Samma fyra steg som alltid, med byggets eget språk.",
+          "steps": [
+            {
+              "title": "Diagnos",
+              "body": "Vi går igenom hur många offerter du gör per månad, hur lång tid ett beslut tar och var kontakten med varje potentiellt projekt tappas."
+            },
+            {
+              "title": "Anskaffning",
+              "body": "Närvaro som inger förtroende för stora belopp: utförda projekt, en seriös webbplats och en tydlig kanal för att begära offert."
+            },
+            {
+              "title": "Uppföljning",
+              "body": "Varje offert får datum, ansvarig och nästa åtgärd. Månader senare dyker påminnelsen upp av sig själv — innan kunden skriver på hos någon annan."
+            },
+            {
+              "title": "Mätning",
+              "body": "Utfärdade offerter, tecknade projekt, beslutstid. Du vet vad varje inkommande förfrågan är värd."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera i ditt företag",
+          "lead": "En krets byggd för höga belopp och långsamma beslut.",
+          "items": [
+            {
+              "name": "Offerter med hållbarhet",
+              "body": "Varje skickad kalkyl har en nästa åtgärd; ingen dör i chatten."
+            },
+            {
+              "name": "Minne för varje potentiellt projekt",
+              "body": "Platsbesök, ritningar och konversationer på ett ställe, inte utspridda på tre mobiler."
+            },
+            {
+              "name": "En seriös ingångskanal",
+              "body": "Den som begär offert möter ett organiserat företag från första meddelandet."
+            },
+            {
+              "name": "Projektsiffror, inte magkänsla",
+              "body": "Hur många förfrågningar, hur många offerter, hur många underskrifter. Månad för månad."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Projektet tecknas av den som var närvarande när kunden bestämde sig.",
+          "sub": "Månader efter offerten — precis när de flesta redan glömt den."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Vad byggföretag frågar oss",
+          "items": [
+            {
+              "q": "Våra kunder kommer via rekommendationer. Hjälper det här ändå?",
+              "a": "Ja — det är det typiska fallet. Rekommendationen ger dig förfrågan; ordnad uppföljning hindrar att den kallnar. Och sedan kan du lägga till en kanal som inte hänger på att bli rekommenderad."
+            },
+            {
+              "q": "Fungerar det för renoveringar och små projekt, eller bara stora jobb?",
+              "a": "Båda. Ju mindre belopp, desto större volym och desto mer avgör ett snabbt svar; ju större, desto mer avgör den långa uppföljningen."
+            },
+            {
+              "q": "Det är ägaren som räknar på jobben och har inte tid att mata in data.",
+              "a": "Därför måste registreringen vara minimal: förfrågan kommer in själv via WhatsApp eller formuläret, och att lägga en anteckning tar kortare tid än att leta i chatten."
+            },
+            {
+              "q": "Hur snabbt märks det?",
+              "a": "Det första som syns är att redan skickade offerter återupptas — veckor, inte månader. Ny anskaffning följer branschens cykel."
+            }
+          ]
+        }
+      },
+      "inmobiliarias": {
+        "name": "Mäklarbyråer",
+        "meta": {
+          "title": "Marknadsföring för mäklarbyråer i Paraguay | clientes.com.py",
+          "description": "Förfrågningar från portaler, WhatsApp och sociala medier i en enda lista, med ansvarig och uppföljning per spekulant. Så hjälper vi paraguayanska byråer att stänga fler affärer."
+        },
+        "waPrefill": "Hej, jag driver en mäklarbyrå och vill boka ett diagnossamtal.",
+        "header": {
+          "eyebrow": "Lösningar · Mäklarbyråer",
+          "title": "Varje förfrågan med ansvarig, varje visning med uppföljning",
+          "lead": "Förfrågningarna kommer via portalerna, Instagram, WhatsApp och skylten. Det svåra är inte att de kommer: det är att var och en får en ansvarig och en nästa åtgärd.",
+          "body": "Vi arbetar med byråer som hanterar flera mäklare och tiotals objekt, där oordning kostar affärer — och även säljuppdrag."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser hos byråer",
+          "title": "Många förfrågningar, få avslut",
+          "body": "En genomsnittlig spekulant frågar om flera objekt på flera ställen samtidigt. Mäklaren som svarar först och bokar visningen får försprång — resten tävlar om det som blir kvar.",
+          "bodyTwo": "Och på säljarsidan är det likadant: den som lämnar sitt objekt väljer byrån som ser professionell ut och svarar. Att vinna uppdrag är också en säljprocess.",
+          "symptomsTitle": "Det här känner du igen",
+          "symptoms": [
+            "Portalförfrågningar besvarade timmar senare, när spekulanten redan bokat en annan visning",
+            "Varje mäklare med sina kontakter i sin egen mobil — slutar de, följer kontakterna med",
+            "Visningar utan en enda anteckning om vad kunden letade efter",
+            "Säljare som frågar hur försäljningen går och möts av tystnad"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din byrå",
+          "title": "Från förfrågan till avslutad affär",
+          "lead": "Samma fyra steg som alltid, med portföljens eget språk.",
+          "steps": [
+            {
+              "title": "Diagnos",
+              "body": "Vi ser var förfrågningarna kommer in i dag, hur lång tid de tar att besvara och vad som händer efter varje visning."
+            },
+            {
+              "title": "Anskaffning",
+              "body": "Närvaro som lockar både spekulanter och säljare: tydliga objektbeskrivningar, omedelbart svar och en direkt WhatsApp-kanal."
+            },
+            {
+              "title": "Uppföljning",
+              "body": "Varje spekulant tilldelas en mäklare, med historik och nästa åtgärd. Den som var på visning men inte la bud försvinner inte."
+            },
+            {
+              "title": "Mätning",
+              "body": "Förfrågningar per kanal och objekt, bokade visningar och avslutade affärer — per mäklare och månad."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera på din byrå",
+          "lead": "En krets som arbetar för teamet, inte för en enda mobil.",
+          "items": [
+            {
+              "name": "Svar före konkurrenterna",
+              "body": "Första svaret går ut direkt, dygnet runt, och förfrågan hamnar på teamets lista."
+            },
+            {
+              "name": "Byråns portfölj, inte mäklarens",
+              "body": "Kontakter, visningar och anteckningar stannar i företaget. Mäklarna arbetar på samma bas."
+            },
+            {
+              "name": "Uppföljning per spekulant",
+              "body": "Den som sökte hus i ett visst område får det nya objekt som passar, utan att någon behöver minnas det."
+            },
+            {
+              "name": "Rapporter som behåller säljarna",
+              "body": "Du kan berätta för säljaren hur många förfrågningar och visningar objektet fått. Det förnyar förtroendet — och ensamrätten."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Visningen bokas av den som svarar först.",
+          "sub": "Med tiotals objekt klarar bara ett system det."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Vad byråer frågar oss",
+          "items": [
+            {
+              "q": "Fungerar det med portalerna vi redan använder?",
+              "a": "Vi arbetar med det du redan använder: förfrågningar som i dag landar i inkorgar eller mobiler flyttas till en enda lista med ansvarig. I diagnosen går vi igenom kanal för kanal."
+            },
+            {
+              "q": "Förlorar varje mäklare ”sina” kontakter?",
+              "a": "Tvärtom: varje mäklare fortsätter arbeta med sin portfölj, men basen stannar hos byrån. Om någon slutar följer spekulanterna inte med mobilen."
+            },
+            {
+              "q": "Hjälper det till att vinna säljuppdrag, inte bara köpare?",
+              "a": "Ja. Att vinna uppdrag är också en försäljning — och säljaren väljer byrån som svarar och visar siffror."
+            },
+            {
+              "q": "Hur mycket arbete lägger det på teamet?",
+              "a": "Målet är motsatsen: förfrågan kommer in själv, första svaret går ut själv och mäklaren lägger bara till anteckningar och nästa åtgärder."
+            }
+          ]
+        }
+      },
+      "servicios-profesionales": {
+        "name": "Professionella tjänster",
+        "meta": {
+          "title": "Fler klienter till byråer och konsulter | clientes.com.py",
+          "description": "En klientkanal som inte hänger på rekommendationer: ordnad anskaffning och seriös uppföljning för advokat-, redovisnings- och konsultbyråer i Paraguay."
+        },
+        "waPrefill": "Hej, jag driver en byrå inom professionella tjänster och vill boka ett diagnossamtal.",
+        "header": {
+          "eyebrow": "Lösningar · Professionella tjänster",
+          "title": "En klientkanal som inte hänger på rekommendationer",
+          "lead": "Byråer och konsulter växer genom rekommendationer — tills rekommendationerna slutar räcka. Problemet är inte arbetets kvalitet: det är att ingen ansvarar för anskaffningen.",
+          "body": "Vi arbetar med advokat-, redovisnings- och arkitektbyråer samt konsulter som vill växa utan att vara beroende av att bli rekommenderade."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser hos byråer och konsulter",
+          "title": "Arbetet begraver anskaffningen",
+          "body": "På en byrå är det samma personer som säljer och levererar. När det finns arbete finns ingen tid att söka klienter; när arbetet tar slut är pipelinen tom och torkan börjar.",
+          "bodyTwo": "Lägg till branschens säljblygsel: ingen vill ”sälja”. Men att svara i tid, följa upp en offert och visa utfört arbete är inte aggressiv försäljning — det är att vara seriös.",
+          "symptomsTitle": "Det här känner du igen",
+          "symptoms": [
+            "Fulla månader och tomma månader, om vartannat sedan alltid",
+            "Arvodesförslag som skickats och aldrig följts upp",
+            "Nya förfrågningar besvarade mellan möten, dagar senare",
+            "Noll insyn i hur många verkliga möjligheter som fanns förra månaden"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din byrå",
+          "title": "Från förfrågan till signerat förslag",
+          "lead": "Samma fyra steg som alltid, med arvodenas eget språk.",
+          "steps": [
+            {
+              "title": "Diagnos",
+              "body": "Vi ser var dina senaste tjugo klienter kom ifrån, vad som hände med förslagen som inte signerades och var cykeln bryts."
+            },
+            {
+              "title": "Anskaffning",
+              "body": "Närvaro som förmedlar omdöme: en seriös webbplats, innehåll som visar hur du tänker och en tydlig kanal för förfrågningar."
+            },
+            {
+              "title": "Uppföljning",
+              "body": "Varje förfrågan och varje förslag får en nästa åtgärd. Att följa upp slutar kännas obekvämt eftersom det är schemalagt."
+            },
+            {
+              "title": "Mätning",
+              "body": "Förfrågningar, förslag, avslut och genomsnittliga arvoden. Pipelinen slutar vara en känsla."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera på din byrå",
+          "lead": "Anskaffning med process, utan att göra delägarna till säljare.",
+          "items": [
+            {
+              "name": "Synlig pipeline",
+              "body": "Du vet hur många verkliga möjligheter som är öppna och i vilket läge var och en är."
+            },
+            {
+              "name": "Förslag som följs upp",
+              "body": "Varje skickat förslag har ett uppföljningsdatum. De flesta förlorade avsluten fanns här."
+            },
+            {
+              "name": "Anskaffningen slutar vara ingens jobb",
+              "body": "Den går från att vara ”allas” — alltså ingens — till att ha process, ansvarig och siffror."
+            },
+            {
+              "name": "Tillväxt utan att sluta fakturera",
+              "body": "Kretsen går även under de fulla månaderna, så att torkan inte kommer tillbaka."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Rekommendationen ger dig förfrågan. Processen gör den till klient.",
+          "sub": "Och processen kan, till skillnad från rekommendationen, upprepas."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Vad byråerna frågar oss",
+          "items": [
+            {
+              "q": "I vår bransch annonserar man inte. Vad föreslår ni?",
+              "a": "Anskaffning är inte bara annonser: det är att bli hittad, att första svaret är seriöst och att inget förslag dör i tystnad. Annonser blir aktuella bara om din bransch tillåter det och diagnosen motiverar det."
+            },
+            {
+              "q": "Hur upprätthålls klienternas konfidentialitet?",
+              "a": "Databasen är din, med behörighet per användare. Att registrera att en förfrågan finns kräver inte att dess innehåll skrivs in."
+            },
+            {
+              "q": "Vi är delägare utan tid för försäljning. Vem sköter det här?",
+              "a": "Systemet sköter registrering och påminnelser; de viktiga samtalen är fortfarande delägarnas. Diagnosen avgör hur mycket som delegeras."
+            },
+            {
+              "q": "När märks det?",
+              "a": "Först i de öppna förslag som följs upp. Sedan i ett flöde av förfrågningar som inte hänger på vem som talat väl om dig."
+            }
+          ]
+        }
+      },
+      "empresas-b2b": {
+        "name": "B2B-företag",
+        "meta": {
+          "title": "B2B-kundanskaffning i Paraguay | clientes.com.py",
+          "description": "B2B-försäljning med långa cykler och flera beslutsfattare: ordnad pipeline, schemalagd uppföljning och siffror per steg för paraguayanska företag som säljer till företag."
+        },
+        "waPrefill": "Hej, mitt företag säljer till andra företag och jag vill boka ett diagnossamtal.",
+        "header": {
+          "eyebrow": "Lösningar · B2B-företag",
+          "title": "B2B-försäljning utan att tappa tråden",
+          "lead": "Att sälja till företag är ett spel över månader: flera kontakter, flera möten, flera beslutsfattare. Att tappa tråden en enda gång kan kosta kvartalet.",
+          "body": "Vi arbetar med paraguayanska företag som säljer till andra företag — insatsvaror, utrustning, mjukvara, tjänster — där varje ny kund är värd mycket och vinns steg för steg."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser i B2B-försäljning",
+          "title": "Pipelinen bor i säljarens huvud",
+          "body": "En B2B-affär samlar offerter, möten, mejl och samtal under månader. Om det bor i varje säljares minne och mobil har företaget ingen pipeline: det har versioner.",
+          "bodyTwo": "Och när en säljare slutar följer kontakterna, historiken och halva kvartalet med. Det är inte otur: det är avsaknad av system.",
+          "symptomsTitle": "Det här känner du igen",
+          "symptoms": [
+            "Viktiga offerter utan uppföljningsdatum",
+            "Chefen frågar hur månaden går och får uppskattningar, inte data",
+            "Möjligheter som kallnar för att nyckelkontakten bytte tjänst utan att någon visste",
+            "Varje säljare med sin egen metod, sitt eget kalkylblad och sin egen mobil"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på ditt företag",
+          "title": "Från möjlighet till kontrakt",
+          "lead": "Samma fyra steg som alltid, med pipelinens eget språk.",
+          "steps": [
+            {
+              "title": "Diagnos",
+              "body": "Vi går igenom din verkliga cykel: var möjligheterna kommer ifrån, hur lång tid de tar, var de faller och vad varje säljare registrerar i dag."
+            },
+            {
+              "title": "Anskaffning",
+              "body": "Ett konstant inflöde av möjligheter: seriös närvaro, ordnad prospektering och en tydlig kanal för den som hör av sig."
+            },
+            {
+              "title": "Uppföljning",
+              "body": "Varje möjlighet med steg, ansvarig, belopp och nästa åtgärd. Historiken stannar i företaget, inte i mobilen."
+            },
+            {
+              "title": "Mätning",
+              "body": "Pipeline per steg, avslutsfrekvens, genomsnittlig cykel och en månadsprognos byggd på data, inte optimism."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera i ditt företag",
+          "lead": "En krets som tål långa cykler och team som byts ut.",
+          "items": [
+            {
+              "name": "En pipeline, inte versioner",
+              "body": "Alla säljare på samma bas, med jämförbara steg och belopp."
+            },
+            {
+              "name": "Uppföljning som överlever vardagen",
+              "body": "Öppna offerter dyker upp igen av sig själva när det är dags att återuppta dem."
+            },
+            {
+              "name": "Kontinuitet när någon slutar",
+              "body": "Varje kunds historik stannar i företaget. Övergången är en omfördelning, inte en kris."
+            },
+            {
+              "name": "En försvarbar prognos",
+              "body": "Siffran du presenterar för styrelsen kommer från pipelinen, inte från intuitionen."
+            }
+          ]
+        },
+        "statement": {
+          "text": "I B2B vinner inte den billigaste: den som aldrig släppte tråden vinner.",
+          "sub": "Under alla de månader beslutet tar."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Vad B2B-företag frågar oss",
+          "items": [
+            {
+              "q": "Vi har redan ett kalkylblad för försäljningen. Räcker inte det?",
+              "a": "Det räcker tills två personer redigerar det, någon sparar en kopia och ingen vet vilken version som gäller. Skillnaden är inte kalkylbladet: det är automatisk registrering och påminnelser."
+            },
+            {
+              "q": "Kommer säljarna verkligen att mata in data?",
+              "a": "Bara om det kostar mindre än att låta bli. Förfrågningarna kommer in själva, WhatsApp registreras och säljaren lägger till ett minimum. Adoption är en del av arbetet, inte ett antagande."
+            },
+            {
+              "q": "Våra affärer börjar på mässor och besök, inte på nätet. Hjälper det ändå?",
+              "a": "Ja: systemet ordnar det som kommer in via vilken kanal som helst. Mässan ger dig visitkortet; schemalagd uppföljning hindrar att det dör i en låda."
+            },
+            {
+              "q": "Hur kommer vi igång?",
+              "a": "Med diagnosen: en halvtimme om din nuvarande säljcykel. Därifrån kommer vad som ska ordnas först och om det är rimligt att arbeta ihop."
+            }
+          ]
+        }
+      }
+    },
+    "legal": {
+      "privacidad": {
+        "meta": {
+          "title": "Integritetspolicy | clientes.com.py",
+          "description": "Vilka uppgifter clientes.com.py samlar in, vad de används till och vilka rättigheter du har."
+        },
+        "header": {
+          "eyebrow": "Juridik",
+          "title": "Integritetspolicy",
+          "updated": "Senast uppdaterad: september 2026"
+        },
+        "sections": [
+          {
+            "title": "Vilka uppgifter vi samlar in",
+            "body": "När du fyller i kontaktformuläret sparar vi det du skickar: namn, företag, telefon, e-post, bransch och ditt meddelande. Webbplatsen sparar också en förstapartscookie som minns vilken kanal du kom via (till exempel en annons eller en sökning), i högst 90 dagar."
+          },
+          {
+            "title": "Vad vi använder dem till",
+            "body": "Endast för att besvara din förfrågan och boka det samtal du bett om. Vi skickar inga oönskade massutskick, vi säljer eller hyr inte ut uppgifter till tredje part, och vi använder inte dina uppgifter för något annat ändamål än det som föranledde kontakten."
+          },
+          {
+            "title": "Var de lagras",
+            "body": "Uppgifterna lagras på vår egen plattform, med åtkomst begränsad till vårt team. De infrastrukturleverantörer vi använder för att driva webbplatsen behandlar uppgifter endast för vår räkning."
+          },
+          {
+            "title": "Dina rättigheter",
+            "body": "Du kan när som helst be att få se de uppgifter vi har om dig, rätta dem eller radera dem. Skriv till oss via någon av webbplatsens kontaktkanaler så löser vi det, i enlighet med paraguayansk dataskyddslagstiftning."
+          }
+        ]
+      },
+      "terminos": {
+        "meta": {
+          "title": "Villkor | clientes.com.py",
+          "description": "Villkor för användning av webbplatsen clientes.com.py och informationen som publiceras på den."
+        },
+        "header": {
+          "eyebrow": "Juridik",
+          "title": "Villkor",
+          "updated": "Senast uppdaterad: september 2026"
+        },
+        "sections": [
+          {
+            "title": "Om den här webbplatsen",
+            "body": "clientes.com.py är informationswebbplatsen för vår tillväxttjänst för paraguayanska företag. Innehållet beskriver hur vi arbetar; det utgör inget avtalserbjudande. De konkreta villkoren för varje tjänst avtalas skriftligt med varje kund, efter diagnosen."
+          },
+          {
+            "title": "Inga utlovade resultat",
+            "body": "Vi arbetar med metod och mätning, men inget kommersiellt resultat kan garanteras i förväg: det beror på branschen, erbjudandet och det gemensamma arbetet. Misstro den som garanterar motsatsen — det gör inte vi."
+          },
+          {
+            "title": "Immateriella rättigheter",
+            "body": "Innehållet på den här webbplatsen — texter, varumärke och design — är vårt. Du får citera det med källhänvisning; att kopiera det för kommersiellt bruk utan tillstånd är inte tillåtet."
+          },
+          {
+            "title": "Tillämplig lag",
+            "body": "Den här webbplatsen lyder under Republiken Paraguays lagar. Eventuella tvister avgörs av de allmänna domstolarna i Asunción."
+          }
+        ]
+      }
+    },
     "footer": {
       "tagline": "Vi hjälper etablerade paraguayanska företag att få fler kunder, med en ordnad säljprocess.",
       "siteTitle": "Webbplatsen",
       "contactTitle": "Kontakt",
       "loginNote": "Är du kund?",
       "rights": "Alla rättigheter förbehållna.",
-      "madeIn": "Gjort i Paraguay"
+      "madeIn": "Gjort i Paraguay",
+      "solucionesTitle": "Lösningar",
+      "legalPrivacidad": "Integritetspolicy",
+      "legalTerminos": "Villkor"
     }
   },
   "errors": {

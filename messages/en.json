@@ -2216,13 +2216,579 @@
         ]
       }
     },
+    "soluciones": {
+      "common": {
+        "breadcrumbHome": "Home",
+        "breadcrumbSection": "Solutions",
+        "otherEyebrow": "Other industries",
+        "otherLead": "The same method, in each industry's own vocabulary:"
+      },
+      "clinicas": {
+        "name": "Clinics and practices",
+        "meta": {
+          "title": "More patients for your clinic | clientes.com.py",
+          "description": "We organize your clinic's patient acquisition: every inquiry answered on time, every appointment followed up, and clear numbers per treatment."
+        },
+        "waPrefill": "Hi, I run a clinic and I'd like to book a diagnostic call.",
+        "header": {
+          "eyebrow": "Solutions · Clinics and practices",
+          "title": "More patients, without losing inquiries along the way",
+          "lead": "Your clinic already gets inquiries every day. The problem is what happens to them: WhatsApp messages after hours, calls nobody returns, appointments that go cold.",
+          "body": "We work with clinics and practices that want to fill the schedule with a process, not with the receptionist's memory."
+        },
+        "pains": {
+          "eyebrow": "What we see in clinics",
+          "title": "The schedule doesn't fill itself",
+          "body": "A person asking about a treatment usually writes to several places at once and stays with the first one that answers well. If your clinic replies the next day, the patient is already somewhere else.",
+          "bodyTwo": "And the first inquiry is only half of it: the patient who asked but didn't book almost never comes back on their own. Someone has to follow up — and that someone is usually busy at the front desk.",
+          "symptomsTitle": "This will sound familiar",
+          "symptoms": [
+            "After-hours WhatsApp inquiries answered the next day — or never",
+            "Patients who ask for the price, don't book, and are never contacted again",
+            "Reception handling the front desk, the phone and WhatsApp at the same time",
+            "Cancelled appointments left as holes in the schedule instead of being refilled"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your clinic",
+          "title": "From inquiry to booked appointment",
+          "lead": "The same four stages as always, in the vocabulary of your schedule.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at where your patients come from today, how many inquiries are answered late, and how many appointments are lost between the first question and the schedule."
+            },
+            {
+              "title": "Acquisition",
+              "body": "An organized presence where patients search: the Google listing, a page with WhatsApp booking, and campaigns only if the diagnosis justifies them."
+            },
+            {
+              "title": "Follow-up",
+              "body": "Every inquiry is recorded with an owner. The patient who didn't book resurfaces on their own for follow-up, without depending on reception."
+            },
+            {
+              "title": "Measurement",
+              "body": "How many inquiries came in, how many ended in appointments, and which treatment brought them. That's how you decide where to invest next month."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your clinic",
+          "lead": "It's not a campaign: it's a circuit that keeps working when the week gets complicated.",
+          "items": [
+            {
+              "name": "Immediate response",
+              "body": "Every inquiry gets a first reply right away, also after hours, and is recorded for the team."
+            },
+            {
+              "name": "One single list of prospects",
+              "body": "WhatsApp, calls, Instagram and the form in one list, with a history per patient."
+            },
+            {
+              "name": "Recovering cold inquiries",
+              "body": "Whoever asked but didn't book gets a timely follow-up, with a record of what they were told."
+            },
+            {
+              "name": "Numbers per treatment",
+              "body": "You know which service generates inquiries and which ones close, instead of guessing."
+            }
+          ]
+        },
+        "statement": {
+          "text": "The patient chooses whoever answers first.",
+          "sub": "Making that your clinic doesn't depend on luck: it depends on a circuit."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What clinics ask us",
+          "items": [
+            {
+              "q": "Does this replace my secretary or reception?",
+              "a": "No. It takes off their plate what shouldn't depend on their memory: first replies, records and reminders. Personal care stays with your team."
+            },
+            {
+              "q": "Does it work for high-ticket specialties like aesthetics or dentistry?",
+              "a": "That's where it shows most: the more a treatment costs, the more the patient compares, and the more the follow-up between first question and decision matters."
+            },
+            {
+              "q": "Do I need paid advertising from the start?",
+              "a": "Not always. First we organize what already comes in; only when the circuit answers and records well does it make sense to pay for more inquiries."
+            },
+            {
+              "q": "How do you handle patient data?",
+              "a": "The database is yours and the conversations stay on your platform. We don't share data with third parties, and you can export everything whenever you want."
+            }
+          ]
+        }
+      },
+      "constructoras": {
+        "name": "Construction companies",
+        "meta": {
+          "title": "More projects for your construction company | clientes.com.py",
+          "description": "Quotes that don't go unanswered and months-long follow-up on every potential project. That's how we help Paraguayan construction companies sign more contracts."
+        },
+        "waPrefill": "Hi, I run a construction company and I'd like to book a diagnostic call.",
+        "header": {
+          "eyebrow": "Solutions · Construction companies",
+          "title": "More signed projects, fewer forgotten quotes",
+          "lead": "In construction, the one who writes the quote isn't always the one who wins the project. The winner is whoever is still present when the client finally decides — and that can take months.",
+          "body": "We work with construction and renovation companies where every contract is worth a lot and the decision cycle is long."
+        },
+        "pains": {
+          "eyebrow": "What we see in construction companies",
+          "title": "The long cycle eats your quotes",
+          "body": "A project quote takes hours of work: site visit, measurements, takeoff. And then it sits in a PDF sent over WhatsApp, waiting for the client to write back.",
+          "bodyTwo": "With decisions taking three to twelve months, the difference between signing and not signing is usually who followed up at the right moment. Without a record, that moment passes and nobody notices.",
+          "symptomsTitle": "This will sound familiar",
+          "symptoms": [
+            "Quotes delivered and never heard of again",
+            "Follow-up lives on the owner's or an engineer's phone",
+            "Inquiries arriving through referrals that go cold for lack of a timely reply",
+            "No number for how many quotes go out per month and how many end in contracts"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your company",
+          "title": "From quote to signature",
+          "lead": "The same four stages as always, in the vocabulary of the job site.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We review how many quotes you produce per month, how long a decision takes, and where contact with each potential project gets lost."
+            },
+            {
+              "title": "Acquisition",
+              "body": "A presence that builds trust for large amounts: completed projects, a serious website, and a clear channel to request a quote."
+            },
+            {
+              "title": "Follow-up",
+              "body": "Every quote gets a date, an owner and a next action. Months later, the reminder appears on its own — before the client signs with someone else."
+            },
+            {
+              "title": "Measurement",
+              "body": "Quotes issued, projects signed, decision time. You know what every incoming inquiry is worth."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your company",
+          "lead": "A circuit built for high tickets and slow decisions.",
+          "items": [
+            {
+              "name": "Quotes with a shelf life",
+              "body": "Every takeoff you send has a next action; none of them die in the chat."
+            },
+            {
+              "name": "A memory for every potential project",
+              "body": "Site visit, drawings and conversations in one place, not spread across three phones."
+            },
+            {
+              "name": "A serious intake channel",
+              "body": "Whoever requests a quote meets an organized company from the very first message."
+            },
+            {
+              "name": "Project numbers, not gut feelings",
+              "body": "How many inquiries, how many quotes, how many signatures. Month by month."
+            }
+          ]
+        },
+        "statement": {
+          "text": "The project is signed by whoever was present when the client decided.",
+          "sub": "Months after the quote — right when most have already forgotten it."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What construction companies ask us",
+          "items": [
+            {
+              "q": "Our clients come through referrals. Does this still help?",
+              "a": "Yes — that's the typical case. The referral brings you the inquiry; organized follow-up keeps it from going cold. And later you can add a channel that doesn't depend on being recommended."
+            },
+            {
+              "q": "Does it work for renovations and small projects, or only large jobs?",
+              "a": "Both. The smaller the ticket, the higher the volume and the more a fast reply matters; the bigger it is, the more the long follow-up matters."
+            },
+            {
+              "q": "The owner does the quoting and has no time to enter data.",
+              "a": "That's why data entry has to be minimal: the inquiry comes in on its own from WhatsApp or the form, and adding a note takes less time than searching the chat."
+            },
+            {
+              "q": "How soon does it show?",
+              "a": "The first thing that appears is the recovery of quotes already sent — weeks, not months. New acquisition follows your industry's cycle."
+            }
+          ]
+        }
+      },
+      "inmobiliarias": {
+        "name": "Real estate agencies",
+        "meta": {
+          "title": "Marketing for real estate agencies in Paraguay | clientes.com.py",
+          "description": "Inquiries from portals, WhatsApp and social media in one list, with an owner and follow-up per prospect. That's how we help Paraguayan agencies close more."
+        },
+        "waPrefill": "Hi, I run a real estate agency and I'd like to book a diagnostic call.",
+        "header": {
+          "eyebrow": "Solutions · Real estate agencies",
+          "title": "Every inquiry with an owner, every showing with follow-up",
+          "lead": "Inquiries arrive through the portals, Instagram, WhatsApp and the sign on the property. The hard part isn't getting them: it's making sure each one has an owner and a next action.",
+          "body": "We work with agencies managing several agents and dozens of properties, where disorder costs sales — and owner listings too."
+        },
+        "pains": {
+          "eyebrow": "What we see in agencies",
+          "title": "Many inquiries, few closings",
+          "body": "An average prospect asks about several properties in several places at once. The agent who answers first and books the showing runs ahead — the rest compete for what's left.",
+          "bodyTwo": "And on the owner's side it's the same: whoever hands over their property chooses the agency that looks professional and responds. Winning listings is a sales process too.",
+          "symptomsTitle": "This will sound familiar",
+          "symptoms": [
+            "Portal inquiries answered hours later, when the prospect has already booked another showing",
+            "Each agent keeping contacts on their own phone — if they leave, the contacts leave with them",
+            "Showings held without a single note on what the client was looking for",
+            "Owners asking how the sale is going and getting silence"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your agency",
+          "title": "From inquiry to closed deal",
+          "lead": "The same four stages as always, in the vocabulary of your portfolio.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at where inquiries come in today, how long they take to be answered, and what happens after each showing."
+            },
+            {
+              "title": "Acquisition",
+              "body": "A presence that attracts both buyers and owners: clear listings, immediate response and a direct WhatsApp channel."
+            },
+            {
+              "title": "Follow-up",
+              "body": "Every prospect is assigned to an agent, with history and a next action. Whoever visited and didn't make an offer doesn't disappear."
+            },
+            {
+              "title": "Measurement",
+              "body": "Inquiries per channel and per property, showings booked and deals closed — per agent and per month."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your agency",
+          "lead": "A circuit that works for the team, not for a single phone.",
+          "items": [
+            {
+              "name": "Answering before the competition",
+              "body": "The first reply goes out instantly, at any hour, and the inquiry lands on the team's list."
+            },
+            {
+              "name": "The agency's portfolio, not the agent's",
+              "body": "Contacts, showings and notes stay with the company. Agents work on the same base."
+            },
+            {
+              "name": "Follow-up per prospect",
+              "body": "Whoever was looking for a house in a given area gets the new matching listing, without anyone having to remember."
+            },
+            {
+              "name": "Reports that retain owners",
+              "body": "You can tell the owner how many inquiries and showings their property had. That renews trust — and the exclusive."
+            }
+          ]
+        },
+        "statement": {
+          "text": "The showing is booked by whoever answers first.",
+          "sub": "With dozens of properties, only a system can sustain that."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What agencies ask us",
+          "items": [
+            {
+              "q": "Does it integrate with the portals we already use?",
+              "a": "We work with what you already use: inquiries that today land in inboxes or on phones move into one list with an owner. In the diagnosis we review channel by channel."
+            },
+            {
+              "q": "Does each agent lose “their” contacts?",
+              "a": "The opposite: each agent keeps working their own portfolio, but the base stays with the agency. If someone leaves, their prospects don't leave with the phone."
+            },
+            {
+              "q": "Does it help win owner listings, not just buyers?",
+              "a": "Yes. Winning listings is another sale — and the owner chooses the agency that responds and shows numbers."
+            },
+            {
+              "q": "How much work does it add for the team?",
+              "a": "The goal is the opposite: the inquiry comes in on its own, the first reply goes out on its own, and the agent only adds notes and next actions."
+            }
+          ]
+        }
+      },
+      "servicios-profesionales": {
+        "name": "Professional services",
+        "meta": {
+          "title": "More clients for firms and consultancies | clientes.com.py",
+          "description": "A client channel that doesn't depend on referrals: organized acquisition and serious follow-up for law, accounting and consulting firms in Paraguay."
+        },
+        "waPrefill": "Hi, I run a professional services firm and I'd like to book a diagnostic call.",
+        "header": {
+          "eyebrow": "Solutions · Professional services",
+          "title": "A client channel that doesn't depend on referrals",
+          "lead": "Firms and consultancies grow through recommendations — until recommendations stop being enough. The problem isn't the quality of the work: it's that nobody is in charge of acquisition.",
+          "body": "We work with law, accounting and architecture firms and consultancies that want to grow without depending on being recommended."
+        },
+        "pains": {
+          "eyebrow": "What we see in firms and consultancies",
+          "title": "The work buries the acquisition",
+          "body": "In a firm, the people who sell are the same ones who deliver. When there's work, there's no time to look for clients; when the work ends, the pipeline is empty and the dry spell begins.",
+          "bodyTwo": "Add the industry's commercial shyness: nobody wants to “sell”. But answering on time, following up on a proposal and showing the work you've done isn't aggressive selling — it's being serious.",
+          "symptomsTitle": "This will sound familiar",
+          "symptoms": [
+            "Full months and empty months, alternating forever",
+            "Fee proposals sent and never followed up",
+            "New inquiries answered between meetings, days later",
+            "Zero visibility into how many real opportunities there were last month"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your firm",
+          "title": "From inquiry to signed proposal",
+          "lead": "The same four stages as always, in the vocabulary of your fees.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at where your last twenty clients came from, what happened to the proposals that weren't signed, and where the cycle breaks."
+            },
+            {
+              "title": "Acquisition",
+              "body": "A presence that conveys judgment: a serious website, content that shows how you think, and a clear channel to inquire."
+            },
+            {
+              "title": "Follow-up",
+              "body": "Every inquiry and every proposal gets a next action. Following up stops feeling awkward because it's scheduled."
+            },
+            {
+              "title": "Measurement",
+              "body": "Inquiries, proposals, closings and average fees. The pipeline stops being a feeling."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your firm",
+          "lead": "Acquisition with a process, without turning the partners into salespeople.",
+          "items": [
+            {
+              "name": "A visible pipeline",
+              "body": "You know how many real opportunities are open and what state each one is in."
+            },
+            {
+              "name": "Proposals that get followed up",
+              "body": "Every proposal sent has a follow-up date. Most lost closings were here."
+            },
+            {
+              "name": "Acquisition stops being nobody's job",
+              "body": "It goes from being “everyone's” — that is, nobody's — to having a process, an owner and numbers."
+            },
+            {
+              "name": "Growth without stopping the billing",
+              "body": "The circuit runs during the full months too, so the dry spell doesn't come back."
+            }
+          ]
+        },
+        "statement": {
+          "text": "The referral brings you the inquiry. The process turns it into a client.",
+          "sub": "And the process, unlike the referral, can be repeated."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What firms ask us",
+          "items": [
+            {
+              "q": "In our field there's no advertising. What do you propose?",
+              "a": "Acquisition isn't just ads: it's being findable, giving a serious first reply, and letting no proposal die in silence. Ads only come in if your field allows them and the diagnosis justifies them."
+            },
+            {
+              "q": "How is client confidentiality maintained?",
+              "a": "The database is yours, with per-user access. Recording that an inquiry exists doesn't require disclosing its content."
+            },
+            {
+              "q": "We're partners with no time for sales. Who operates this?",
+              "a": "The system does the recording and the reminders; the important conversations remain with the partners. The diagnosis defines how much gets delegated."
+            },
+            {
+              "q": "When does it show?",
+              "a": "First in the open proposals that get followed up. Later, in a flow of inquiries that doesn't depend on who spoke well of you."
+            }
+          ]
+        }
+      },
+      "empresas-b2b": {
+        "name": "B2B companies",
+        "meta": {
+          "title": "B2B client generation in Paraguay | clientes.com.py",
+          "description": "B2B sales with long cycles and several decision-makers: an organized pipeline, scheduled follow-up and per-stage numbers for Paraguayan companies selling to companies."
+        },
+        "waPrefill": "Hi, my company sells to other companies and I'd like to book a diagnostic call.",
+        "header": {
+          "eyebrow": "Solutions · B2B companies",
+          "title": "B2B sales without losing the thread",
+          "lead": "Selling to companies is a game of months: several contacts, several meetings, several decision-makers. Losing the thread once can cost the quarter.",
+          "body": "We work with Paraguayan companies that sell to other companies — supplies, equipment, software, services — where every new client is worth a lot and is won little by little."
+        },
+        "pains": {
+          "eyebrow": "What we see in B2B sales",
+          "title": "The pipeline lives in the salesperson's head",
+          "body": "A B2B sale gathers quotes, meetings, emails and calls over months. If that lives in each salesperson's memory and phone, the company doesn't have a pipeline: it has versions.",
+          "bodyTwo": "And when a salesperson leaves, they leave with the contacts, the history and half the quarter. That's not bad luck: it's not having a system.",
+          "symptomsTitle": "This will sound familiar",
+          "symptoms": [
+            "Important quotes with no follow-up date",
+            "The manager asks how the month is going and gets estimates, not data",
+            "Opportunities going cold because the key contact changed jobs and nobody knew",
+            "Every salesperson with their own method, their own spreadsheet and their own phone"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your company",
+          "title": "From opportunity to contract",
+          "lead": "The same four stages as always, in the vocabulary of your pipeline.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We review your real cycle: where opportunities come from, how long they take, where they fall through, and what each salesperson records today."
+            },
+            {
+              "title": "Acquisition",
+              "body": "A constant intake of opportunities: a serious presence, organized prospecting and a clear channel for whoever arrives asking."
+            },
+            {
+              "title": "Follow-up",
+              "body": "Every opportunity with a stage, an owner, an amount and a next action. The history stays with the company, not on a phone."
+            },
+            {
+              "title": "Measurement",
+              "body": "Pipeline by stage, close rate, average cycle and a monthly forecast built on data, not optimism."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your company",
+          "lead": "A circuit that withstands long cycles and rotating teams.",
+          "items": [
+            {
+              "name": "One pipeline, not versions",
+              "body": "All salespeople on the same base, with comparable stages and amounts."
+            },
+            {
+              "name": "Follow-up that survives the day-to-day",
+              "body": "Open quotes resurface on their own when it's time to pick them back up."
+            },
+            {
+              "name": "Continuity when someone leaves",
+              "body": "Each account's history stays with the company. The transition is a reassignment, not a crisis."
+            },
+            {
+              "name": "A defensible forecast",
+              "body": "The number you present to the board comes from the pipeline, not from intuition."
+            }
+          ]
+        },
+        "statement": {
+          "text": "In B2B the cheapest doesn't win: the one who never dropped the thread does.",
+          "sub": "Through all the months the decision takes."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What B2B companies ask us",
+          "items": [
+            {
+              "q": "We already have a sales spreadsheet. Isn't that enough?",
+              "a": "It's enough until two people edit it, someone saves a copy, and nobody knows which version is the good one. The difference isn't the spreadsheet: it's automatic recording and reminders."
+            },
+            {
+              "q": "Will the salespeople actually enter data?",
+              "a": "Only if it costs less than not doing it. Inquiries come in on their own, WhatsApp is recorded, and the salesperson adds the minimum. Adoption is part of the work, not an assumption."
+            },
+            {
+              "q": "Our sales start at trade fairs and visits, not online. Does it still help?",
+              "a": "Yes: the system organizes whatever comes in through any channel. The fair gives you the business card; scheduled follow-up keeps it from dying in a drawer."
+            },
+            {
+              "q": "How do we start?",
+              "a": "With the diagnosis: half an hour on your current sales cycle. From there comes what to organize first and whether it makes sense to work together."
+            }
+          ]
+        }
+      }
+    },
+    "legal": {
+      "privacidad": {
+        "meta": {
+          "title": "Privacy policy | clientes.com.py",
+          "description": "What data clientes.com.py collects, what it is used for, and your rights over it."
+        },
+        "header": {
+          "eyebrow": "Legal",
+          "title": "Privacy policy",
+          "updated": "Last updated: September 2026"
+        },
+        "sections": [
+          {
+            "title": "What data we collect",
+            "body": "When you fill in the contact form we store what you send us: name, company, phone, email, industry and your message. The site also stores a first-party cookie that remembers which channel you arrived through (for example, an ad or a search), for a maximum of 90 days."
+          },
+          {
+            "title": "What we use it for",
+            "body": "Only to answer your inquiry and arrange the conversation you requested. We don't send unsolicited mass emails, we don't sell or rent data to third parties, and we don't use your data for any purpose other than the one that motivated the contact."
+          },
+          {
+            "title": "Where it is stored",
+            "body": "The data is stored on our own management platform, with access restricted to our team. The infrastructure providers we use to run the site process data only on our behalf."
+          },
+          {
+            "title": "Your rights",
+            "body": "You can ask us at any time to see the data we hold about you, correct it or delete it. Write to us through any of the site's contact channels and we'll resolve it, in accordance with Paraguayan personal data protection law."
+          }
+        ]
+      },
+      "terminos": {
+        "meta": {
+          "title": "Terms and conditions | clientes.com.py",
+          "description": "Conditions for using the clientes.com.py site and the information published on it."
+        },
+        "header": {
+          "eyebrow": "Legal",
+          "title": "Terms and conditions",
+          "updated": "Last updated: September 2026"
+        },
+        "sections": [
+          {
+            "title": "About this site",
+            "body": "clientes.com.py is the informational site of our business-growth service for Paraguayan companies. The content describes how we work; it does not constitute a contractual offer. The specific conditions of each service are agreed in writing with each client, after the diagnosis."
+          },
+          {
+            "title": "No promised results",
+            "body": "We work with a method and with measurement, but no commercial result can be guaranteed in advance: it depends on the industry, the offer and the joint work. Distrust anyone who guarantees otherwise — we don't."
+          },
+          {
+            "title": "Intellectual property",
+            "body": "The content of this site — texts, brand and design — is ours. You may quote it citing the source; copying it for commercial use without authorization is not allowed."
+          },
+          {
+            "title": "Governing law",
+            "body": "This site is governed by the laws of the Republic of Paraguay. Any dispute is submitted to the ordinary courts of the city of Asunción."
+          }
+        ]
+      }
+    },
     "footer": {
       "tagline": "We help established Paraguayan companies win more customers, with an orderly sales process.",
       "siteTitle": "The site",
       "contactTitle": "Contact",
       "loginNote": "Already a client?",
       "rights": "All rights reserved.",
-      "madeIn": "Made in Paraguay"
+      "madeIn": "Made in Paraguay",
+      "solucionesTitle": "Solutions",
+      "legalPrivacidad": "Privacy policy",
+      "legalTerminos": "Terms and conditions"
     }
   },
   "errors": {

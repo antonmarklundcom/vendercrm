@@ -12,6 +12,7 @@ import { VerticalCards, type VerticalItem } from "@/components/marketing/vertica
 import { Statement } from "@/components/marketing/statement";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { contact } from "@/lib/site-config";
+import { MARKETING_VERTICALS } from "./soluciones/verticals";
 
 // Same Node app answers both the apex marketing domain and the crm.*
 // subdomain (parked domain, shared document root — see hPanel Domains).
@@ -110,7 +111,16 @@ export default async function Home() {
         eyebrow={t("home.verticals.eyebrow")}
         title={t("home.verticals.title")}
         lead={t("home.verticals.lead")}
-        items={t.raw("home.verticals.items") as VerticalItem[]}
+        items={(t.raw("home.verticals.items") as VerticalItem[]).map(
+          // The copy list and the slug list share their order; zipping them
+          // here keeps the card copy in messages/ and the routing in code.
+          (item, index) => ({
+            ...item,
+            href: MARKETING_VERTICALS[index]
+              ? `/soluciones/${MARKETING_VERTICALS[index]}`
+              : undefined,
+          }),
+        )}
       />
 
       <Statement text={t("home.statement.text")} sub={t("home.statement.sub")} />

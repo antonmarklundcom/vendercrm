@@ -6,7 +6,10 @@ from the `web-design-system` skill, what the QA gate found, and what is still
 waiting on the owner.
 
 Covers build-sequence steps 1–3 (routing shell, design pass, core pages).
-Steps 4–6 (vertical pages, SEO plumbing and legal, `/recursos`) are not built.
+Steps 4–5 (vertical pages, SEO plumbing and legal, code-generated og-images)
+were built afterwards on the same system — current status and remaining work
+live in `MARKETING_NEXT_STEPS.md`. Step 6 (`/recursos`) is not built. The
+imagery fill and the social-proof sections remain pending as described below.
 
 ---
 
