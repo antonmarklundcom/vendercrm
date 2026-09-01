@@ -926,6 +926,100 @@
   border-radius: var(--mk-r-sm);
 }
 
+/* ---- content hub: article index rows and article body (§7, phase M2) ---- */
+.mk-articles {
+  list-style: none;
+  margin: var(--mk-s-6) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--mk-s-6);
+  max-width: var(--mk-measure);
+}
+.mk-articles li {
+  border-top: 1px solid var(--mk-hairline);
+  padding-top: var(--mk-s-4);
+}
+.mk-articles__title {
+  font-family: var(--mk-font-display);
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  line-height: 1.25;
+  display: block;
+}
+.mk-articles__desc {
+  color: var(--mk-ink-70);
+  margin: var(--mk-s-2) 0 0;
+}
+.mk-articles__meta {
+  display: block;
+  margin-top: var(--mk-s-2);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mk-ink-62);
+}
+.mk-articles__cta {
+  margin-top: var(--mk-s-6);
+}
+
+/* The article body is the one place on the site with long-form prose, so it
+   sets its own rhythm rather than inheriting the section spacing. */
+.mk-article {
+  max-width: var(--mk-measure);
+}
+.mk-article > * + * {
+  margin-top: var(--mk-s-4);
+}
+.mk-article h2 {
+  margin-top: var(--mk-s-8);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+.mk-article__callout {
+  border-left: 3px solid var(--mk-accent);
+  padding: var(--mk-s-2) 0 var(--mk-s-2) var(--mk-s-4);
+  font-family: var(--mk-font-display);
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  line-height: 1.45;
+}
+.mk-article__math {
+  border: 1px solid var(--mk-hairline-strong);
+  border-radius: var(--mk-r-sm);
+  padding: var(--mk-s-6);
+  background: var(--mk-surface);
+}
+.mk-article__math h3 {
+  margin: 0 0 var(--mk-s-4);
+  font-size: 1.05rem;
+}
+.mk-article__math dl {
+  margin: 0;
+  display: grid;
+  gap: var(--mk-s-2);
+}
+.mk-article__math dl > div {
+  /* Two columns rather than a wrapping flex row: on a 390px screen a long
+     label would push its value onto its own line and the pairing would be
+     lost, which is the one thing a worked example cannot afford. */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--mk-s-4);
+  border-bottom: 1px dotted var(--mk-hairline-strong);
+  padding-bottom: var(--mk-s-2);
+}
+.mk-article__math dt {
+  color: var(--mk-ink-70);
+}
+.mk-article__math dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.mk-article__math-note {
+  margin: var(--mk-s-4) 0 0;
+  color: var(--mk-ink-70);
+  font-size: 0.95rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mk *,
   .mk *::before,

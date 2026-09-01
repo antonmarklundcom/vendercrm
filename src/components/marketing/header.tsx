@@ -20,6 +20,7 @@ export async function MarketingHeader() {
 
         <nav className="mk-nav" aria-label={t("menu")}>
           <Link href="/metodo">{t("metodo")}</Link>
+          <Link href="/recursos">{t("recursos")}</Link>
           <Link href="/nosotros">{t("nosotros")}</Link>
           <Link href="/contacto">{t("contacto")}</Link>
         </nav>
