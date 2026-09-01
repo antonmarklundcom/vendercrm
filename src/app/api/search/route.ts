@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   if (!session.ok) return session.response;
   const { ctx } = session;
 
-  const limited = requireWithinRateLimit(`search:${ctx.userId}`, LIMIT, WINDOW_MS);
+  const limited = await requireWithinRateLimit(`search:${ctx.userId}`, LIMIT, WINDOW_MS);
   if (!limited.ok) return limited.response;
 
   const query = new URL(request.url).searchParams.get("q") ?? "";

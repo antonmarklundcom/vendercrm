@@ -15,7 +15,7 @@ export async function GET() {
   if (!session.ok) return session.response;
   const { ctx } = session;
 
-  const limited = requireWithinRateLimit(`export-products:${ctx.tenantId}`, 20, 60_000);
+  const limited = await requireWithinRateLimit(`export-products:${ctx.tenantId}`, 20, 60_000);
   if (!limited.ok) return limited.response;
 
   const csv = await exportProductsCsv(ctx);

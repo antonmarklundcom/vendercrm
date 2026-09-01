@@ -44,7 +44,7 @@ export async function submitContactAction(formData: FormData) {
   const requestHeaders = await headers();
   const ip = clientIp(requestHeaders);
 
-  if (checkRateLimit(`marketing:contacto:${ip}`, SUBMIT_LIMIT, SUBMIT_WINDOW_MS).limited) {
+  if ((await checkRateLimit(`marketing:contacto:${ip}`, SUBMIT_LIMIT, SUBMIT_WINDOW_MS)).limited) {
     // Same answer as the honeypot: a flood gets a thank-you page and no
     // lead, rather than a signal about what tripped.
     redirect("/contacto?enviado=1");

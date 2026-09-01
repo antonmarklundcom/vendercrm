@@ -207,11 +207,11 @@ export async function postVisitorMessage(
   const body = parsed.data;
 
   const ip = meta.ipKey ?? meta.ipAddress ?? "unknown";
-  if (checkRateLimit(`chat:ip:${widget.id}:${ip}`, MESSAGE_IP_LIMIT, WINDOW_MS).limited) {
+  if ((await checkRateLimit(`chat:ip:${widget.id}:${ip}`, MESSAGE_IP_LIMIT, WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
   if (
-    checkRateLimit(`chat:visitor:${body.visitorId}`, MESSAGE_VISITOR_LIMIT, WINDOW_MS).limited
+    (await checkRateLimit(`chat:visitor:${body.visitorId}`, MESSAGE_VISITOR_LIMIT, WINDOW_MS)).limited
   ) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
@@ -326,7 +326,7 @@ export async function postCapture(
   if (!parsed.success) return { ok: false, status: 422, error: "invalid_body" };
   const body = parsed.data;
 
-  if (checkRateLimit(`chat:capture:${body.visitorId}`, CAPTURE_VISITOR_LIMIT, WINDOW_MS).limited) {
+  if ((await checkRateLimit(`chat:capture:${body.visitorId}`, CAPTURE_VISITOR_LIMIT, WINDOW_MS)).limited) {
     return { ok: false, status: 429, error: "rate_limited" };
   }
 
@@ -360,7 +360,7 @@ export async function pollMessages(
 
   const pollIp = meta.ipKey ?? meta.ipAddress ?? "unknown";
   if (
-    checkRateLimit(`chat:poll:${visitorId}:${pollIp}`, POLL_VISITOR_LIMIT, WINDOW_MS).limited
+    (await checkRateLimit(`chat:poll:${visitorId}:${pollIp}`, POLL_VISITOR_LIMIT, WINDOW_MS)).limited
   ) {
     return { ok: false, status: 429, error: "rate_limited" };
   }

@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   if (token) {
     // Per-token limiter: a misconfigured sheet on a 1-minute refresh must not
     // be able to hammer the CRM.
-    const limited = requireWithinRateLimit(`export-feed:${token.slice(0, 16)}`, 30, 60_000);
+    const limited = await requireWithinRateLimit(`export-feed:${token.slice(0, 16)}`, 30, 60_000);
     if (!limited.ok) return limited.response;
 
     const guard = await requireToken(token, resolveTenantByContactsFeedToken);
@@ -63,7 +63,11 @@ export async function GET(request: Request) {
   if (!session.ok) return session.response;
   const { ctx } = session;
 
-  const downloadLimit = requireWithinRateLimit(`export-download:${ctx.tenantId}`, 20, 60_000);
+  const downloadLimit = await requireWithinRateLimit(
+    `export-download:${ctx.tenantId}`,
+    20,
+    60_000,
+  );
   if (!downloadLimit.ok) return downloadLimit.response;
 
   // Same parser the list page uses, so the download is exactly the filtered

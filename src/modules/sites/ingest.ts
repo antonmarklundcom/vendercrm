@@ -58,17 +58,17 @@ export type IngestOutcome =
 export type IngestLane = "key" | "hook";
 
 // Per-site fixed-window limiter (see lib/rate-limit for the shared
-// implementation and its documented single-process limitation).
+// implementation, now backed by MySQL rather than process memory).
 const RATE_LIMITS: Record<IngestLane, { limit: number; windowMs: number }> = {
   key: { limit: 60, windowMs: 60_000 },
   hook: { limit: 20, windowMs: 60_000 },
 };
 
-function rateLimited(lane: IngestLane, siteId: string): boolean {
+async function rateLimited(lane: IngestLane, siteId: string): Promise<boolean> {
   const { limit, windowMs } = RATE_LIMITS[lane];
   // Separate bucket per lane: a noisy webhook must not spend the site's own
   // backend's budget.
-  return checkRateLimit(`leads:${lane}:${siteId}`, limit, windowMs).limited;
+  return (await checkRateLimit(`leads:${lane}:${siteId}`, limit, windowMs)).limited;
 }
 
 export type SiteRow = typeof sites.$inferSelect;
@@ -133,7 +133,7 @@ async function runIngest(
 ): Promise<IngestOutcome> {
   if (!site.isActive) return { ok: false, status: 403, error: "Site is inactive" };
 
-  if (rateLimited(lane, site.id)) {
+  if (await rateLimited(lane, site.id)) {
     return { ok: false, status: 429, error: "Rate limit exceeded" };
   }
 

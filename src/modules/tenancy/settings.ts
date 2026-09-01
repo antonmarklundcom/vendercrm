@@ -1,4 +1,4 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { tenants } from "@/db/schema";
@@ -137,6 +137,12 @@ export async function updateTenantTimezone(ctx: TenantContext, timezone: string)
   return getTenant(ctx.tenantId);
 }
 
+/** The indexed lookup column's value. Same digest MySQL's own SHA2(x, 256)
+ * produces, which is what migration 0026 backfilled existing tokens with. */
+function contactsFeedTokenHash(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
 /**
  * Issues (or rotates) the contacts feed token. Rotation is the revoke path:
  * the previous URL stops resolving the moment this returns, so a link pasted
@@ -145,11 +151,22 @@ export async function updateTenantTimezone(ctx: TenantContext, timezone: string)
 export async function regenerateContactsFeedToken(ctx: TenantContext): Promise<string> {
   const token = randomBytes(24).toString("hex");
   await mergeTenantSettings(ctx, { exports: { contactsToken: token } });
+  // Written after the settings merge, never before: the hash is only a way
+  // to *find* the row that holds the token, so the token is the source of
+  // truth and the column follows it.
+  await db
+    .update(tenants)
+    .set({ contactsFeedTokenHash: contactsFeedTokenHash(token) })
+    .where(eq(tenants.id, ctx.tenantId));
   return token;
 }
 
 export async function clearContactsFeedToken(ctx: TenantContext) {
   await mergeTenantSettings(ctx, { exports: {} });
+  await db
+    .update(tenants)
+    .set({ contactsFeedTokenHash: null })
+    .where(eq(tenants.id, ctx.tenantId));
 }
 
 /**
@@ -158,24 +175,32 @@ export async function clearContactsFeedToken(ctx: TenantContext) {
  * token above and the public quote token (§8), so it lives here in the
  * tenancy module where raw `db` is sanctioned.
  *
- * Scans tenants rather than querying into the settings JSON: the row count
- * is tenants-per-platform (tens), and a timing-safe compare over that is
- * cheaper to reason about than a JSON path index. Revisit if the platform
- * ever grows past a few thousand tenants.
+ * One indexed equality match on the token's SHA-256 (PLAN.md §14 I1 #2),
+ * the same pattern `site_api_keys` uses. This used to scan every tenant and
+ * timing-safe compare each stored token, which cost the whole table per
+ * unauthenticated request. Hashing is what keeps the lookup constant-time
+ * with respect to the token: an attacker learns nothing from how long a
+ * miss takes, because every miss is the same single index probe.
  */
 export async function resolveTenantByContactsFeedToken(token: string) {
   if (token.length < 32) return null;
-  const provided = Buffer.from(token);
 
-  const rows = await db.select().from(tenants);
-  for (const tenant of rows) {
-    const stored = (tenant.settings as TenantSettings | null)?.exports?.contactsToken;
-    if (!stored) continue;
-    const expected = Buffer.from(stored);
-    if (expected.length !== provided.length) continue;
-    if (timingSafeEqual(expected, provided)) return tenant;
-  }
-  return null;
+  const [tenant] = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.contactsFeedTokenHash, contactsFeedTokenHash(token)))
+    .limit(1);
+  if (!tenant) return null;
+
+  // The hash found the row; the stored token still decides. Belt and braces
+  // against a stale or hand-edited hash column — and the compare stays
+  // timing-safe, as it was before.
+  const stored = (tenant.settings as TenantSettings | null)?.exports?.contactsToken;
+  if (!stored) return null;
+  const expected = Buffer.from(stored);
+  const provided = Buffer.from(token);
+  if (expected.length !== provided.length) return null;
+  return timingSafeEqual(expected, provided) ? tenant : null;
 }
 
 export async function updateTenantVertical(ctx: TenantContext, vertical: string) {

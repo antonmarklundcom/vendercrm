@@ -44,6 +44,11 @@ const eslintConfig = defineConfig([
       "src/db/**/*.{ts,tsx}",
       "src/worker/**/*.{ts,tsx}",
       "src/lib/queue/**/*.{ts,tsx}",
+      // Same rationale as lib/queue: the rate limiter is platform-level
+      // infrastructure with no tenant at all — it counts requests from
+      // unauthenticated callers *before* anyone is identified (PLAN.md §14
+      // I1 #1). Its one table holds no tenant data.
+      "src/lib/rate-limit/**/*.{ts,tsx}",
       "src/modules/tenancy/**/*.{ts,tsx}",
       // JUDGMENT CALL (flagged for Fable review): the WhatsApp webhook
       // receiver has no session and no tenant slug — it only has a Meta

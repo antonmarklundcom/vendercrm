@@ -53,12 +53,12 @@ export async function requireSession(): Promise<GuardResult<{ ctx: TenantContext
  * identity guards because it composes with all of them — a route can be
  * session-guarded *and* limited (the ⌘K search endpoint is both).
  */
-export function requireWithinRateLimit(
+export async function requireWithinRateLimit(
   key: string,
   limit: number,
   windowMs: number,
-): GuardResult<Record<string, never>> {
-  if (checkRateLimit(key, limit, windowMs).limited) {
+): Promise<GuardResult<Record<string, never>>> {
+  if ((await checkRateLimit(key, limit, windowMs)).limited) {
     return { ok: false, response: apiError("rate_limited", 429) };
   }
   return { ok: true } as GuardSuccess<Record<string, never>>;

@@ -22,11 +22,14 @@ export function isGuardedAuthPath(pathname: string): boolean {
   return GUARDED.some((path) => pathname.endsWith(path));
 }
 
-export function checkLoginAttempt(input: { ip: string; email?: string | null }): boolean {
-  const byIp = checkRateLimit(`auth:ip:${input.ip}`, IP_LIMIT, WINDOW_MS);
+export async function checkLoginAttempt(input: {
+  ip: string;
+  email?: string | null;
+}): Promise<boolean> {
+  const byIp = await checkRateLimit(`auth:ip:${input.ip}`, IP_LIMIT, WINDOW_MS);
   const email = input.email?.trim().toLowerCase();
   const byEmail = email
-    ? checkRateLimit(`auth:email:${email}`, EMAIL_LIMIT, WINDOW_MS)
+    ? await checkRateLimit(`auth:email:${email}`, EMAIL_LIMIT, WINDOW_MS)
     : { limited: false };
 
   return byIp.limited || byEmail.limited;
