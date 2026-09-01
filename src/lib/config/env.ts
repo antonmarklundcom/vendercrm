@@ -47,6 +47,17 @@ const envSchema = z
       .string()
       .min(32, "BETTER_AUTH_SECRET must be at least 32 characters"),
     WHATSAPP_APP_SECRET: z.string().min(1, "WHATSAPP_APP_SECRET is required"),
+    /**
+     * Meta Graph API version the WhatsApp module calls (PLAN.md §14 I2 #2).
+     * Defaults to the version this app was built against; overridable so a
+     * retirement can be answered with an env change and a restart instead of
+     * a deploy. modules/whatsapp/graph.ts documents when each version is due
+     * for review, and the superadmin health page warns once that date passes.
+     */
+    WHATSAPP_GRAPH_API_VERSION: z
+      .string()
+      .regex(/^v\d+\.\d+$/, "WHATSAPP_GRAPH_API_VERSION must look like v21.0")
+      .default("v21.0"),
     WHATSAPP_WEBHOOK_VERIFY_TOKEN: z
       .string()
       .min(1, "WHATSAPP_WEBHOOK_VERIFY_TOKEN is required"),

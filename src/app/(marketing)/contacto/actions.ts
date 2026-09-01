@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { clientIp } from "@/lib/http/client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/config/hosts";
 import { idempotencyKey, readAttribution, sendLead } from "@/lib/vendercrm-lead";
 
 /**

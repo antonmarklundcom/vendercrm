@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/site-config";
+import { SITE_URL } from "@/lib/config/hosts";
 import { MARKETING_VERTICALS } from "./(marketing)/soluciones/verticals";
 
 // The marketing site is a handful of static pages, so the sitemap is a

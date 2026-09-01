@@ -5,7 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { CRM_URL, SITE_URL, contact, siteConfig } from "@/lib/site-config";
+import { CRM_URL, SITE_URL } from "@/lib/config/hosts";
+import { contact, siteConfig } from "@/lib/site-config";
 
 // The marketing chrome, kept entirely separate from the app chrome. The `.mk`
 // wrapper is what scopes the marketing design tokens (globals.css) — nothing

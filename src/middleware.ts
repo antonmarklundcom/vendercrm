@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
-import { APEX_HOST, APP_HOST } from "@/lib/site-config";
+import { APEX_HOST, APP_HOST } from "@/lib/config/hosts";
 
 // Fast, edge-safe gate: presence of a session cookie only (no DB call, no
 // tenant context — mysql2 isn't edge-runtime safe). Real tenant-context

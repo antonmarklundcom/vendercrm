@@ -1731,7 +1731,9 @@
       "clearError": "Marcar como resuelto",
       "retryTenantJobs": "Reintentar {count} envío(s)",
       "sendFailures": "Envíos que fallaron",
-      "noSendFailures": "Ningún envío falló últimamente."
+      "noSendFailures": "Ningún envío falló últimamente.",
+      "graphVersionPastReview": "La versión {version} de la API de Meta pasó su fecha de revisión ({date}). Meta retira las versiones viejas y, cuando lo hace, WhatsApp deja de funcionar para todas las empresas. Revisá la versión disponible y actualizá WHATSAPP_GRAPH_API_VERSION.",
+      "graphVersionUndocumented": "La versión {version} de la API de Meta no tiene fecha de revisión documentada. Anotala en modules/whatsapp/graph.ts para que esta página pueda avisarte a tiempo."
     },
     "users": {
       "title": "Usuarios",

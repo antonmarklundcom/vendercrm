@@ -49,6 +49,16 @@ first deploy and every routine redeploy after it.
      encryption key
    - `WHATSAPP_APP_SECRET`, `WHATSAPP_WEBHOOK_VERIFY_TOKEN` — from the Meta
      developer app (PLAN.md §6.1)
+   - `APEX_HOST`, `APP_HOST` — optional; default to `clientes.com.py` and
+     `crm.clientes.com.py`. Set them only when a deployment answers on other
+     hostnames (a staging domain, a rename). `middleware.ts` routes on these,
+     so a wrong value sends the marketing site and the app to each other's
+     host (PLAN.md §14 I2 #3).
+   - `WHATSAPP_GRAPH_API_VERSION` — optional; defaults to the version the app
+     was built against. The superadmin WhatsApp health page warns once the
+     configured version is past its documented review date, which is the cue
+     to bump this rather than wait for Meta to retire it out from under every
+     tenant.
    - `RATE_LIMIT_DRIVER` — optional; leave unset. Unset means the rate-limit
      windows live in MySQL (PLAN.md §14 I1), which is what makes a limit
      survive a redeploy and hold if the app is ever run as more than one

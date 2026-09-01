@@ -2227,6 +2227,18 @@ is planned, not discovered:
 9. **Email**: is any current GHL email flow load-bearing for the Paraguay sites? If yes,
    §11's email gap needs scheduling; if it's WhatsApp-only follow-up, it doesn't.
 
+*Added with §14 I2 (config hygiene):*
+
+10. **The marketing site's own contact details** — `src/lib/site-config.ts` still
+    carries five `TODO(owner)` fields: the WhatsApp number, the phone (E.164 +
+    display form), the email, the address and the RUC. They are `null`, so every
+    component omits its element rather than printing a placeholder: the live site
+    currently shows **no** WhatsApp button, no phone link and no RUC. That is the
+    single biggest conversion gap on clientes.com.py and only the owner can close
+    it — it is a one-file edit, no deploy logic involved. The lead form is the
+    other half: it needs a `VENDERCRM_API_KEY` (a site row under Sitios) before a
+    submission lands in the owner's own pipeline.
+
 ---
 
 ## 13. Hardening & improvement batches (Fable review, 2026-08-18)
@@ -2454,7 +2466,7 @@ is tested to agree with); the timing-safe compare against the stored token
 stays as a second gate. Driver choice is `RATE_LIMIT_DRIVER`, unset =
 mysql outside tests.
 
-**I2 — Consistency & config hygiene (Sonnet 5).**
+**I2 — Consistency & config hygiene (Sonnet 5).** — ✅ done
 1. **One money renderer.** `formatMoney` (`src/lib/i18n/format.ts`) renders
    `"1 500 000 PYG"` (code suffixed, no Intl currency style) while
    `src/modules/renderable-document/format.ts` renders `"PYG 1.500.000"` —
@@ -2475,6 +2487,20 @@ mysql outside tests.
    fields to §12 as an owner question.
 **Exit criteria:** one grep-able money formatter; envs documented in
 `.env.example`; middleware behavior unchanged (host-routing tests green).
+
+**What shipped.** `formatMoney` is the one renderer: `Intl` currency style
+with `currencyDisplay: "code"`, so PYG gets no decimals and USD gets two, and
+the code sits where each language puts it ("PYG 1.500.000" in Spanish,
+"50 000 PYG" in Swedish). `renderable-document/format.ts#money` is now one
+line over it, so the UI, the PDFs and the public pages cannot drift apart
+again. The Graph API version is `WHATSAPP_GRAPH_API_VERSION` (default
+v21.0), and `graphVersionWarning()` puts a row at the top of the superadmin
+WhatsApp health page once the configured version passes its documented review
+date — or when it has no documented date at all. `lib/site-config.ts` keeps
+only marketing content; the hostnames moved to `lib/config/hosts.ts`, read
+from `process.env` with the production values as defaults (plain reads, not
+the zod `env` module, because `middleware.ts` runs on the edge runtime). The
+owner's five unfilled fields are now §12 question 10.
 
 **I3 — Dark mode toggle (Sonnet 5).** `globals.css` ships a complete dark
 OKLCH token set with documented contrast ratios, but no `.dark` toggle exists.

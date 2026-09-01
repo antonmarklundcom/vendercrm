@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { CRM_URL } from "@/lib/site-config";
+import { CRM_URL } from "@/lib/config/hosts";
 
 /**
  * Server-side client for our own public lead endpoint (`vendercrm-lead-capture`
