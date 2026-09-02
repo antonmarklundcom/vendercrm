@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   // db client (worker/instrumentation.ts already did in 1A; 1B adds many
   // more server components/actions that import it transitively).
   serverExternalPackages: ["mysql2", "better-auth", "@aws-sdk/client-s3"],
+  experimental: {
+    // Next defaults its build workers to `os.cpus().length - 1`, which on
+    // Hostinger's shared box is the physical core count of the host, not
+    // this account's share. Each worker is a Node process with ~11 threads,
+    // all counted against the account-wide 200 "Max Processes" cap that the
+    // running sites already share. One worker keeps a deploy from tipping
+    // the account over the cap (and failing its own build).
+    cpus: 1,
+  },
   webpack: (config, { nextRuntime, webpack }) => {
     // 1B adds middleware.ts (edge runtime), which makes Next build an Edge
     // variant of instrumentation.ts's register() too — even though its own

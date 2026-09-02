@@ -10,7 +10,7 @@ import { buildSystemTenantContext, type TenantContext } from "@/modules/tenancy/
 import { tenantDb } from "@/modules/tenancy/db";
 import { createContact, getContactByPhone } from "@/modules/crm/contacts";
 import { resolveAccountByPhoneNumberId, getDecryptedAccessToken } from "./accounts";
-import { GRAPH_API_BASE } from "./graph";
+import { GRAPH_API_BASE, GRAPH_TIMEOUT_MS, MEDIA_DOWNLOAD_TIMEOUT_MS } from "./graph";
 import { whatsappEvents } from "./events";
 import { inboundMessageTime, latest } from "./inbound-time";
 import { advanceNotificationForMessage } from "@/modules/booking/notifications";
@@ -292,11 +292,15 @@ async function downloadMedia(
 
   const metaRes = await fetch(`${GRAPH_API_BASE}/${mediaId}`, {
     headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
   });
   if (!metaRes.ok) throw new Error(`Media metadata fetch failed: ${metaRes.status}`);
   const meta = (await metaRes.json()) as { url: string; mime_type?: string };
 
-  const fileRes = await fetch(meta.url, { headers: { Authorization: `Bearer ${token}` } });
+  const fileRes = await fetch(meta.url, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(MEDIA_DOWNLOAD_TIMEOUT_MS),
+  });
   if (!fileRes.ok) throw new Error(`Media download failed: ${fileRes.status}`);
   const buffer = Buffer.from(await fileRes.arrayBuffer());
 
