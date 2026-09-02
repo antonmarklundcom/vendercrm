@@ -12,6 +12,8 @@ import {
 // §2.3's @react-pdf/renderer choice over headless Chrome).
 
 const DEFAULT_BASE_URL = "https://api.openai.com/v1";
+/** A model call that has not answered in a minute is not going to; release the process. */
+const REQUEST_TIMEOUT_MS = 60_000;
 const DEFAULT_MODEL = "gpt-4o-mini";
 
 export function createOpenAiDriver(
@@ -38,6 +40,7 @@ export function createOpenAiDriver(
             ...input.messages.map((turn) => ({ role: turn.role, content: turn.content })),
           ],
         }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
       if (!res.ok) {

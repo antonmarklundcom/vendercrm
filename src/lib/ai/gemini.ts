@@ -12,6 +12,8 @@ import {
 // role is spelled `model`.
 
 const DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
+/** A model call that has not answered in a minute is not going to; release the process. */
+const REQUEST_TIMEOUT_MS = 60_000;
 const DEFAULT_MODEL = "gemini-2.0-flash";
 
 export function createGeminiDriver(
@@ -41,6 +43,7 @@ export function createGeminiDriver(
             maxOutputTokens: input.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
           },
         }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
       if (!res.ok) {

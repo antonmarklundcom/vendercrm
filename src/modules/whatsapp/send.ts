@@ -6,7 +6,7 @@ import { enqueue } from "@/lib/queue";
 import { buildSystemTenantContext, type TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getAccount, getDecryptedAccessToken } from "./accounts";
-import { GRAPH_API_BASE } from "./graph";
+import { GRAPH_API_BASE, GRAPH_TIMEOUT_MS } from "./graph";
 
 // Outbound sends (PLAN.md §6.4). All outbound goes through this service —
 // the 24h window / template enforcement lives here so callers (inbox UI,
@@ -264,6 +264,7 @@ export async function deliverQueuedMessage(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
   });
 
   if (!res.ok) {

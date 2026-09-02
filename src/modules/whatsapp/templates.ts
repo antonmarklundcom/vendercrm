@@ -4,7 +4,7 @@ import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getAccount, getDecryptedAccessToken, markAccountError } from "./accounts";
-import { GRAPH_API_BASE } from "./graph";
+import { GRAPH_API_BASE, GRAPH_TIMEOUT_MS } from "./graph";
 
 // Template sync (PLAN.md §6.4): "fetch templates from Meta on connect +
 // manual sync button + nightly job; automations and inbox pick from synced,
@@ -41,7 +41,7 @@ export async function syncTemplates(ctx: TenantContext, accountId: string) {
   const token = getDecryptedAccessToken(account);
   const res = await fetch(
     `${GRAPH_API_BASE}/${account.wabaId}/message_templates?limit=200`,
-    { headers: { Authorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS) },
   );
 
   if (!res.ok) {
@@ -141,6 +141,7 @@ export async function submitTemplate(
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(submission),
+    signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
   });
 
   if (res.ok) return { status: "submitted", name: submission.name };

@@ -15,6 +15,16 @@ export const GRAPH_API_VERSION = env.WHATSAPP_GRAPH_API_VERSION;
 export const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 
 /**
+ * Ceilings on one Graph API round-trip. Node's fetch otherwise waits up to
+ * 300 s for a peer that accepts the socket and goes quiet; on shared hosting
+ * a request that does not resolve keeps its Node process alive, and processes
+ * count against an account-wide cap. Media downloads get longer because the
+ * body is a file, not JSON.
+ */
+export const GRAPH_TIMEOUT_MS = 15_000;
+export const MEDIA_DOWNLOAD_TIMEOUT_MS = 30_000;
+
+/**
  * When each version should be revisited — roughly Meta's own two-year
  * retirement horizon for that release, minus a month of margin. A version
  * missing from this map is not an error: it is simply undocumented here, and

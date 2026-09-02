@@ -21,6 +21,8 @@ import { tenantDb } from "@/modules/tenancy/db";
 
 const OAUTH_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
+/** Bound each Google round-trip so a quiet peer cannot hold a Node process (shared-host process cap). */
+const GOOGLE_TIMEOUT_MS = 10_000;
 const FREEBUSY_URL = "https://www.googleapis.com/calendar/v3/freeBusy";
 
 /** Read-only, and the narrowest scope that answers the freebusy question. */
@@ -79,6 +81,7 @@ async function requestToken(body: Record<string, string>): Promise<TokenResponse
       client_secret: env.GOOGLE_CLIENT_SECRET!,
       ...body,
     }),
+    signal: AbortSignal.timeout(GOOGLE_TIMEOUT_MS),
   });
   const json = (await res.json()) as TokenResponse;
   if (!res.ok || json.error) {
@@ -300,6 +303,7 @@ async function freeBusyFor(
       timeMax: to.toISOString(),
       items: [{ id: connection.calendarId }],
     }),
+    signal: AbortSignal.timeout(GOOGLE_TIMEOUT_MS),
   });
 
   if (!res.ok) throw new Error(`freeBusy ${res.status}: ${(await res.text()).slice(0, 200)}`);
