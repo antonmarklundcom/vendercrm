@@ -1853,6 +1853,7 @@
     "nav": {
       "home": "Home",
       "metodo": "Method",
+      "recursos": "Resources",
       "nosotros": "About",
       "contacto": "Contact",
       "login": "Sign in",
@@ -2802,6 +2803,29 @@
       "solucionesTitle": "Solutions",
       "legalPrivacidad": "Privacy policy",
       "legalTerminos": "Terms and conditions"
+    },
+    "recursos": {
+      "meta": {
+        "title": "Resources for selling better in Paraguay | clientes.com.py",
+        "description": "Practical articles on winning and following up clients for clinics, builders, real estate, professional services and B2B companies in Paraguay."
+      },
+      "header": {
+        "eyebrow": "Resources",
+        "title": "How client acquisition gets organised, by sector",
+        "lead": "Short, practical articles: sums you can run on your own numbers, and processes that hold without depending on anyone's memory.",
+        "body": "Each note is written for one sector and ends where the work starts: what to measure this week, and what to change next week."
+      },
+      "clusterEyebrow": "Sector",
+      "breadcrumb": "Resources",
+      "readingTime": "{minutes} min read",
+      "updated": "Updated {date}",
+      "verticalEyebrow": "For your sector",
+      "verticalLead": "All of this is part of what we do with {name} companies.",
+      "verticalLink": "See {name}",
+      "relatedEyebrow": "Keep reading",
+      "relatedTitle": "More on the same problem",
+      "backToHub": "See all resources",
+      "waPrefill": "Hi, I've been reading the resources and want to organise my company's client acquisition."
     }
   },
   "errors": {

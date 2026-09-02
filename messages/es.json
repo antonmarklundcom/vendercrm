@@ -1853,6 +1853,7 @@
     "nav": {
       "home": "Inicio",
       "metodo": "Método",
+      "recursos": "Recursos",
       "nosotros": "Nosotros",
       "contacto": "Contacto",
       "login": "Ingresar",
@@ -2802,6 +2803,29 @@
       "solucionesTitle": "Soluciones",
       "legalPrivacidad": "Política de privacidad",
       "legalTerminos": "Términos y condiciones"
+    },
+    "recursos": {
+      "meta": {
+        "title": "Recursos para vender mejor en Paraguay | clientes.com.py",
+        "description": "Artículos prácticos sobre captación y seguimiento de clientes para clínicas, constructoras, inmobiliarias, servicios profesionales y empresas B2B en Paraguay."
+      },
+      "header": {
+        "eyebrow": "Recursos",
+        "title": "Cómo se ordena la captación, por rubro",
+        "lead": "Artículos cortos y prácticos: cuentas que podés hacer con tus propios números y procesos que se sostienen sin depender de la memoria de nadie.",
+        "body": "Cada nota está escrita para un rubro y termina donde empieza el trabajo: qué medir esta semana y qué cambiar la que viene."
+      },
+      "clusterEyebrow": "Rubro",
+      "breadcrumb": "Recursos",
+      "readingTime": "{minutes} min de lectura",
+      "updated": "Actualizado {date}",
+      "verticalEyebrow": "Para tu rubro",
+      "verticalLead": "Todo esto es parte de lo que hacemos con empresas de {name}.",
+      "verticalLink": "Ver {name}",
+      "relatedEyebrow": "Seguir leyendo",
+      "relatedTitle": "Otras notas del mismo problema",
+      "backToHub": "Ver todos los recursos",
+      "waPrefill": "Hola, estuve leyendo los recursos y quiero ordenar la captación de mi empresa."
     }
   },
   "errors": {

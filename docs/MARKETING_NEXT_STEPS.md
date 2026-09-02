@@ -197,6 +197,25 @@ Design:
   phase (M1) starts after PR #79 merges; look first at §2 launch blockers and
   `src/lib/site-config.ts`.
 
+- 2026-09-01 — **M2 built out of order (Opus session, this repo's §14 batch
+  session), on Anton's instruction to keep coding while M1 stayed blocked.**
+  M1 is blocked on Anton alone (§2: contact details in `src/lib/site-config.ts`
+  and a `VENDERCRM_API_KEY`), and nothing in `/recursos` depends on it, so the
+  content hub shipped first. Built: `/recursos` hub grouped by rubro,
+  `/recursos/[slug]` with ten articles (two per vertical, Paraguayan Spanish,
+  voseo), Article + Breadcrumb + CollectionPage JSON-LD, per-article og-image,
+  sitemap entries, nav links in header and footer, and the `.mk-article*`
+  styles. Article bodies live in `src/content/recursos/*.ts`, **not** in
+  `messages/*.json`: they are Spanish-only by design, and the module's
+  load-time checks fail the build on a duplicate slug, a self-link, a broken
+  sibling link, or a cluster outside the 2–3 sibling rule. UI chrome strings
+  are in all three locales as usual. No fabricated statistics anywhere: every
+  worked example is arithmetic the reader redoes with their own numbers, and
+  the copy says so.
+  **Still open for M1:** §2's two owner items, then the imagery pass (§3.1),
+  CWV (§3.2) and GBP (§3.3). The article pages have no image slots, so the
+  imagery pass does not need to revisit them.
+
 ## 9. Backlog
 
 - P6 bleed-image overlap on the closing bands once `hero-bleed` exists

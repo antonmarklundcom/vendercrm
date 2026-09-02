@@ -58,6 +58,9 @@ export async function MarketingFooter() {
                 <Link href="/metodo">{t("nav.metodo")}</Link>
               </li>
               <li>
+                <Link href="/recursos">{t("nav.recursos")}</Link>
+              </li>
+              <li>
                 <Link href="/nosotros">{t("nav.nosotros")}</Link>
               </li>
               <li>

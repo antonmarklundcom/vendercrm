@@ -1853,6 +1853,7 @@
     "nav": {
       "home": "Start",
       "metodo": "Metod",
+      "recursos": "Resurser",
       "nosotros": "Om oss",
       "contacto": "Kontakt",
       "login": "Logga in",
@@ -2802,6 +2803,29 @@
       "solucionesTitle": "Lösningar",
       "legalPrivacidad": "Integritetspolicy",
       "legalTerminos": "Villkor"
+    },
+    "recursos": {
+      "meta": {
+        "title": "Resurser för att sälja bättre i Paraguay | clientes.com.py",
+        "description": "Praktiska artiklar om att få och följa upp kunder för kliniker, byggföretag, mäklare, konsulter och B2B-företag i Paraguay."
+      },
+      "header": {
+        "eyebrow": "Resurser",
+        "title": "Så ordnas kundanskaffningen, bransch för bransch",
+        "lead": "Korta, praktiska artiklar: uträkningar du kan göra på dina egna siffror, och processer som håller utan att hänga på någons minne.",
+        "body": "Varje text är skriven för en bransch och slutar där arbetet börjar: vad du mäter den här veckan och vad du ändrar nästa."
+      },
+      "clusterEyebrow": "Bransch",
+      "breadcrumb": "Resurser",
+      "readingTime": "{minutes} min läsning",
+      "updated": "Uppdaterad {date}",
+      "verticalEyebrow": "För din bransch",
+      "verticalLead": "Allt det här är en del av det vi gör med företag inom {name}.",
+      "verticalLink": "Se {name}",
+      "relatedEyebrow": "Läs vidare",
+      "relatedTitle": "Mer om samma problem",
+      "backToHub": "Se alla resurser",
+      "waPrefill": "Hej, jag har läst resurserna och vill ordna företagets kundanskaffning."
     }
   },
   "errors": {
