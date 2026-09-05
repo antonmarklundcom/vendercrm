@@ -15,7 +15,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
-import type { FlowGraph, TriggerType } from "@/modules/automations/graph";
+import { CONDITION_KINDS, type FlowGraph, type TriggerType } from "@/modules/automations/graph";
 import { saveDraftAction, publishFlowAction } from "../actions";
 import { Input, Select, Textarea } from "@/components/ui/form-fields";
 
@@ -38,10 +38,18 @@ const PALETTE: Array<{ type: "condition" | "action" | "delay"; kind: string }> =
   { type: "action", kind: "create_note" },
   { type: "action", kind: "ai_reply" },
   { type: "action", kind: "send_review_request" },
+  { type: "action", kind: "offer_slots" },
+  { type: "action", kind: "create_task" },
+  { type: "action", kind: "notify_user" },
+  { type: "action", kind: "send_email" },
   { type: "condition", kind: "has_tag" },
   { type: "condition", kind: "deal_in_stage" },
   { type: "condition", kind: "business_hours" },
   { type: "condition", kind: "has_replied_since" },
+  { type: "condition", kind: "deal_value" },
+  { type: "condition", kind: "lead_source" },
+  { type: "condition", kind: "site" },
+  { type: "condition", kind: "contact_field" },
   { type: "delay", kind: "wait_duration" },
   { type: "delay", kind: "wait_for_reply" },
 ];
@@ -261,7 +269,7 @@ function seededTypeOf(node: Node<NodeData>): "trigger" | "condition" | "action" 
   const kind = node.data.kind;
   if (!kind) return "trigger";
   if (["wait_duration", "wait_for_reply"].includes(kind)) return "delay";
-  if (["has_tag", "deal_in_stage", "business_hours", "has_replied_since"].includes(kind)) {
+  if (CONDITION_KINDS.includes(kind as (typeof CONDITION_KINDS)[number])) {
     return "condition";
   }
   return "action";
@@ -408,6 +416,191 @@ function NodeConfigPanel({
             className="px-2 py-1"
           />
         </label>
+      )}
+
+      {kind === "create_task" && (
+        <>
+          <label className="flex flex-1 flex-col gap-1">
+            {t("fields.taskTitle")}
+            <Input
+              value={String(config.title ?? "")}
+              onChange={(e) => set("title", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            {t("fields.dueInHours")}
+            <Input
+              type="number"
+              min={0}
+              value={Number(config.dueInHours ?? 24)}
+              onChange={(e) => set("dueInHours", Number(e.target.value))}
+              className="w-24 px-2 py-1"
+            />
+          </label>
+        </>
+      )}
+
+      {kind === "notify_user" && (
+        <>
+          <label className="flex flex-1 flex-col gap-1">
+            {t("fields.notifyTitle")}
+            <Input
+              value={String(config.title ?? "")}
+              onChange={(e) => set("title", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-1 flex-col gap-1">
+            {t("fields.notifyBody")}
+            <Textarea
+              value={String(config.body ?? "")}
+              onChange={(e) => set("body", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+        </>
+      )}
+
+      {(kind === "create_task" || kind === "notify_user") && (
+        <label className="flex flex-col gap-1">
+          {t("fields.assignee")}
+          <Select
+            value={String(config.assignee ?? "deal_owner")}
+            onChange={(e) => set("assignee", e.target.value)}
+            className="px-2 py-1"
+          >
+            <option value="deal_owner">{t("fields.assigneeDealOwner")}</option>
+            <option value="contact_owner">{t("fields.assigneeContactOwner")}</option>
+            <option value="specific">{t("fields.assigneeSpecific")}</option>
+          </Select>
+        </label>
+      )}
+
+      {(kind === "create_task" || kind === "notify_user") &&
+        String(config.assignee ?? "") === "specific" && (
+          <label className="flex flex-col gap-1">
+            {t("fields.userId")}
+            <Input
+              value={String(config.userId ?? "")}
+              onChange={(e) => set("userId", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+        )}
+
+      {kind === "send_email" && (
+        <>
+          <label className="flex flex-1 flex-col gap-1">
+            {t("fields.subject")}
+            <Input
+              value={String(config.subject ?? "")}
+              onChange={(e) => set("subject", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-1 flex-col gap-1">
+            {t("fields.emailBody")}
+            <Textarea
+              value={String(config.body ?? "")}
+              onChange={(e) => set("body", e.target.value)}
+              placeholder={t("fields.textPlaceholder", { tag: "{{contact.name}}" })}
+              className="px-2 py-1"
+            />
+          </label>
+          <span className="w-full text-xs text-muted-foreground">{t("fields.emailHint")}</span>
+        </>
+      )}
+
+      {kind === "offer_slots" && (
+        <label className="flex flex-col gap-1">
+          {t("fields.bookingTypeId")}
+          <Input
+            value={String(config.bookingTypeId ?? "")}
+            onChange={(e) => set("bookingTypeId", e.target.value)}
+            className="px-2 py-1"
+          />
+        </label>
+      )}
+
+      {kind === "deal_value" && (
+        <>
+          <label className="flex flex-col gap-1">
+            {t("fields.operator")}
+            <Select
+              value={String(config.operator ?? "gte")}
+              onChange={(e) => set("operator", e.target.value)}
+              className="px-2 py-1"
+            >
+              <option value="gte">{t("fields.operatorGte")}</option>
+              <option value="lt">{t("fields.operatorLt")}</option>
+            </Select>
+          </label>
+          <label className="flex flex-col gap-1">
+            {t("fields.amount")}
+            <Input
+              type="number"
+              min={0}
+              value={Number(config.amount ?? 0)}
+              onChange={(e) => set("amount", Number(e.target.value))}
+              className="w-32 px-2 py-1"
+            />
+          </label>
+        </>
+      )}
+
+      {kind === "lead_source" && (
+        <label className="flex flex-col gap-1">
+          {t("fields.leadSource")}
+          <Input
+            value={String(config.value ?? "")}
+            onChange={(e) => set("value", e.target.value)}
+            className="px-2 py-1"
+          />
+        </label>
+      )}
+
+      {kind === "site" && (
+        <label className="flex flex-col gap-1">
+          {t("fields.siteId")}
+          <Input
+            value={String(config.siteId ?? "")}
+            onChange={(e) => set("siteId", e.target.value)}
+            className="px-2 py-1"
+          />
+        </label>
+      )}
+
+      {kind === "contact_field" && (
+        <>
+          <label className="flex flex-col gap-1">
+            {t("fields.fieldKey")}
+            <Input
+              value={String(config.key ?? "")}
+              onChange={(e) => set("key", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            {t("fields.operator")}
+            <Select
+              value={String(config.operator ?? "equals")}
+              onChange={(e) => set("operator", e.target.value)}
+              className="px-2 py-1"
+            >
+              <option value="equals">{t("fields.operatorEquals")}</option>
+              <option value="contains">{t("fields.operatorContains")}</option>
+            </Select>
+          </label>
+          <label className="flex flex-col gap-1">
+            {t("fields.fieldValue")}
+            <Input
+              value={String(config.value ?? "")}
+              onChange={(e) => set("value", e.target.value)}
+              className="px-2 py-1"
+            />
+          </label>
+        </>
       )}
 
       {(kind === "wait_duration" || kind === "wait_for_reply" || kind === "has_replied_since") && (

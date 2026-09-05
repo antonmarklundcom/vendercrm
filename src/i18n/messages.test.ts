@@ -3,6 +3,11 @@ import messages from "../../messages/es.json";
 import en from "../../messages/en.json";
 import sv from "../../messages/sv.json";
 import { SUPPORTED_LOCALES } from "@/lib/i18n/locales";
+import {
+  ACTION_KINDS,
+  CONDITION_KINDS,
+  TRIGGER_TYPES,
+} from "@/modules/automations/graph";
 
 // Guards the Spanish copy file itself (PLAN.md §10 1H: "pass through UI for
 // Spanish copy consistency"). These are the three ways the file has actually
@@ -203,4 +208,41 @@ describe("customer-facing Spanish uses voseo", () => {
     );
     expect(offenders).toEqual([]);
   });
+});
+
+// Every automation node has a label, in every locale (PLAN.md §15.0 #4).
+//
+// Five trigger types shipped with no label at all and nothing caught it: the
+// create-flow select rendered the raw key path for months. The lists live in
+// modules/automations/graph.ts, so adding a trigger, a condition or an
+// action to the engine now fails here until the copy exists — which is the
+// only way a parity test helps a Spanish-only author who cannot see the
+// English file rot.
+describe("automation labels", () => {
+  const locales: Record<string, MessageNode> = { es: messages as MessageNode, ...LOCALES };
+
+  function labelAt(tree: MessageNode, path: string[]): unknown {
+    return path.reduce<unknown>(
+      (node, key) => (node as Record<string, unknown> | undefined)?.[key],
+      tree,
+    );
+  }
+
+  for (const [locale, tree] of Object.entries(locales)) {
+    it(`${locale} names every trigger type`, () => {
+      const missing = TRIGGER_TYPES.filter(
+        (trigger) =>
+          typeof labelAt(tree, ["app", "automations", "triggers", trigger]) !== "string",
+      );
+      expect(missing).toEqual([]);
+    });
+
+    it(`${locale} names every condition and action kind in the palette`, () => {
+      const missing = [...CONDITION_KINDS, ...ACTION_KINDS].filter(
+        (kind) =>
+          typeof labelAt(tree, ["app", "automations", "editor", "palette", kind]) !== "string",
+      );
+      expect(missing).toEqual([]);
+    });
+  }
 });

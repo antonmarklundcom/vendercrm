@@ -424,6 +424,161 @@ describe.skipIf(!hasDb)("automation engine (MySQL)", () => {
     expect(await countNotes()).toBe(1);
   });
 
+  /**
+   * J1's flagship sequence (PLAN.md §15.5): "presupuesto enviado → esperá 3
+   * días → si no contestó, mandale la plantilla". Driven through
+   * `dispatchTrigger` rather than by calling startRun, because the half that
+   * is new in P1 is the trigger — a flow listening on `quote_sent` has to be
+   * matched and started from the event, not just run once it exists.
+   */
+  it("runs quote sent → wait for reply → timeout → template", async () => {
+    const { dispatchTrigger } = await import("./triggers");
+    const { listStepsForRun } = await import("./engine");
+
+    const flow = await createFlow(ctx, { name: "Seguimiento presupuesto", triggerType: "quote_sent" });
+    await saveDraft(ctx, flow!.id, {
+      nodes: [
+        { id: "t1", type: "trigger", config: { triggerType: "quote_sent" } },
+        { id: "w1", type: "delay", config: { kind: "wait_for_reply", minutes: 4320 } },
+        {
+          id: "a1",
+          type: "action",
+          config: { kind: "send_template", templateName: "seguimiento", language: "es" },
+        },
+      ],
+      edges: [
+        { id: "e1", source: "t1", target: "w1", branch: "default" },
+        // The timeout branch is the one this flow is sold on; the replied
+        // branch deliberately ends the run.
+        { id: "e2", source: "w1", target: "a1", branch: "timeout" },
+      ],
+    });
+    const published = await publishFlow(ctx, flow!.id);
+    expect(published.ok).toBe(true);
+
+    const contact = await newContact();
+    await dispatchTrigger({
+      tenantId: ctx.tenantId,
+      triggerType: "quote_sent",
+      contactId: contact.id,
+      data: { quoteId: "q-test", number: "P-0001", total: 500000 },
+    });
+
+    const runs = await db
+      .select()
+      .from(schema.flowRuns)
+      .where(eq(schema.flowRuns.flowId, flow!.id));
+    expect(runs).toHaveLength(1);
+    const runId = runs[0].id;
+
+    // dispatchTrigger enqueues the advance job; the worker is not running in
+    // this suite, so the test plays that job itself.
+    await advanceRun(ctx, runId);
+    let run = await getRun(ctx, runId);
+    expect(run!.status).toBe("waiting");
+    expect(run!.waitFor).toBe("reply");
+
+    // Three days pass with no reply.
+    await timeoutWaitForReply(ctx, runId, "w1");
+    await advanceRun(ctx, runId);
+
+    run = await getRun(ctx, runId);
+    expect(run!.status).toBe("completed");
+
+    // The template step ran. With no WhatsApp account connected in this
+    // suite it records as skipped-with-a-reason rather than failing the run —
+    // which is itself the guarantee §7.2 asks for.
+    const steps = await listStepsForRun(ctx, runId);
+    const templateStep = steps.find((step) => step.nodeId === "a1");
+    expect(templateStep).toBeTruthy();
+    expect(["ok", "skipped"]).toContain(templateStep!.status);
+  });
+
+  /**
+   * The other J1 exit criterion: money arriving moves the deal. Covers both
+   * halves — that `recordPayment` emits `document.paid` exactly once when the
+   * ledger reaches the total, and that a flow on that trigger can close the
+   * deal.
+   */
+  it("fires document paid once and moves the deal to the won stage", async () => {
+    const { dispatchTrigger } = await import("./triggers");
+    const { documentEvents } = await import("@/modules/documents/events");
+    const { createDocument, issueDocument, recordPayment } = await import(
+      "@/modules/documents/documents"
+    );
+    const { seedDefaultPipeline, listStagesForPipeline } = await import(
+      "@/modules/crm/pipelines"
+    );
+    const { createDeal, getDeal } = await import("@/modules/crm/deals");
+
+    const pipeline = await seedDefaultPipeline(ctx);
+    const stages = await listStagesForPipeline(ctx, pipeline!.id);
+    const wonStage = stages.find((stage) => stage.isWon)!;
+    expect(wonStage).toBeTruthy();
+
+    const contact = await newContact();
+    const deal = await createDeal(ctx, {
+      contactId: contact.id,
+      pipelineId: pipeline!.id,
+      stageId: stages[0].id,
+      title: "Instalación",
+      value: 1_000_000,
+    });
+
+    const flow = await createFlow(ctx, { name: "Cobrado", triggerType: "document_paid" });
+    await saveDraft(ctx, flow!.id, {
+      nodes: [
+        { id: "t1", type: "trigger", config: { triggerType: "document_paid" } },
+        { id: "a1", type: "action", config: { kind: "move_deal_stage", stageId: wonStage.id } },
+      ],
+      edges: [{ id: "e1", source: "t1", target: "a1", branch: "default" }],
+    });
+    const published = await publishFlow(ctx, flow!.id);
+    expect(published.ok).toBe(true);
+
+    const paidEvents: string[] = [];
+    documentEvents.on("document.paid", async ({ documentId }) => {
+      paidEvents.push(documentId);
+    });
+
+    const document = await createDocument(ctx, {
+      contactId: contact.id,
+      dealId: deal!.id,
+      items: [{ description: "Instalación", qty: 1, unitPrice: 1_000_000 }],
+    });
+    await issueDocument(ctx, document!.id);
+
+    // Half now: no event, because the ledger has not reached the total.
+    await recordPayment(ctx, document!.id, { amount: 500_000 });
+    expect(paidEvents).toEqual([]);
+
+    // The rest: fires exactly once.
+    await recordPayment(ctx, document!.id, { amount: 500_000 });
+    expect(paidEvents).toEqual([document!.id]);
+
+    // And an extra payment on an already-settled document fires nothing —
+    // "cobrado → pedile la reseña" must not send a second message.
+    await recordPayment(ctx, document!.id, { amount: 10_000 });
+    expect(paidEvents).toEqual([document!.id]);
+
+    await dispatchTrigger({
+      tenantId: ctx.tenantId,
+      triggerType: "document_paid",
+      contactId: contact.id,
+      data: { documentId: document!.id, dealId: deal!.id },
+    });
+
+    const runs = await db
+      .select()
+      .from(schema.flowRuns)
+      .where(eq(schema.flowRuns.flowId, flow!.id));
+    expect(runs).toHaveLength(1);
+    await advanceRun(ctx, runs[0].id);
+
+    expect((await getRun(ctx, runs[0].id))!.status).toBe("completed");
+    expect((await getDeal(ctx, deal!.id))!.stageId).toBe(wonStage.id);
+  });
+
   it("flows and runs are isolated per tenant", async () => {
     const { listFlows } = await import("./flows");
     const tag = await createTag(ctx, { name: `iso-${newId()}` });

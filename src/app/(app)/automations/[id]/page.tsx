@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
@@ -88,7 +89,16 @@ export default async function FlowPage({ params }: { params: Promise<{ id: strin
                     )}
                   </td>
                   <td className="py-2">{run.currentNodeId ?? "—"}</td>
-                  <td className="py-2">{formatDateTime(run.createdAt, locale)}</td>
+                  <td className="py-2">
+                    {/* The date is the link, because "what happened in this
+                        run" is the question a row in this table raises. */}
+                    <Link
+                      href={`/automations/${flow.id}/runs/${run.id}`}
+                      className="underline"
+                    >
+                      {formatDateTime(run.createdAt, locale)}
+                    </Link>
+                  </td>
                   <td className="py-2 text-right">
                     {(run.status === "running" || run.status === "waiting") && (
                       <form action={cancelRunAction}>

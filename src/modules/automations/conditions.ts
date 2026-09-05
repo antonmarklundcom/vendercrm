@@ -4,7 +4,7 @@ import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { BusinessHours, TenantSettings } from "@/modules/tenancy/settings";
-import { listTagsForContact } from "@/modules/crm/contacts";
+import { getContact, listTagsForContact } from "@/modules/crm/contacts";
 import { listDealsForContact } from "@/modules/crm/deals";
 import type { FlowNode } from "./graph";
 
@@ -42,6 +42,52 @@ export async function evaluateCondition(
       const minutes = Number(config.minutes ?? 60);
       const since = Date.now() - minutes * 60_000;
       return hasInboundSince(ctx, contactId, since);
+    }
+
+    case "deal_value": {
+      // "Is this worth a person's time?" — the gate in front of notify_user
+      // and create_task. The largest open deal decides, because a contact
+      // with a 200.000 Gs job and a 20.000.000 Gs job is a big customer.
+      const amount = Number(config.amount ?? 0);
+      const operator = String(config.operator ?? "gte");
+      const deals = await listDealsForContact(ctx, contactId);
+      if (deals.length === 0) return false;
+      const value = Math.max(...deals.map((deal) => deal.value ?? 0));
+      return operator === "lt" ? value < amount : value >= amount;
+    }
+
+    case "lead_source": {
+      const expected = String(config.value ?? "").trim().toLowerCase();
+      if (!expected) return false;
+      const contact = await getContact(ctx, contactId);
+      return (contact?.source ?? "").trim().toLowerCase() === expected;
+    }
+
+    case "site": {
+      // First-touch attribution (§5.1): which site produced this customer,
+      // which is what a network of lead-gen sites branches on.
+      const siteId = String(config.siteId ?? "").trim();
+      if (!siteId) return false;
+      const contact = await getContact(ctx, contactId);
+      return contact?.firstSiteId === siteId;
+    }
+
+    case "contact_field": {
+      // Reads `contacts.custom` (§15.0 #2): the column exists and the
+      // definitions UI lands in P5, so a flow written today keeps working
+      // when the fields become editable.
+      const key = String(config.key ?? "").trim();
+      if (!key) return false;
+      const contact = await getContact(ctx, contactId);
+      const custom = (contact?.custom ?? {}) as Record<string, unknown>;
+      const actual = custom[key];
+      if (actual === undefined || actual === null) return false;
+
+      const expected = String(config.value ?? "").trim().toLowerCase();
+      const actualText = String(actual).trim().toLowerCase();
+      return String(config.operator ?? "equals") === "contains"
+        ? actualText.includes(expected)
+        : actualText === expected;
     }
 
     default:

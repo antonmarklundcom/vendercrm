@@ -1197,7 +1197,19 @@
         "lead_received": "Lead recibido (sitio o formulario)",
         "deal_stage_changed": "Negocio cambió de etapa",
         "contact_created": "Contacto creado",
-        "tag_added": "Etiqueta agregada"
+        "tag_added": "Etiqueta agregada",
+        "booking_created": "Reserva creada",
+        "booking_cancelled": "Reserva cancelada",
+        "booking_no_show": "No se presentó a la reserva",
+        "booking_completed": "Reserva completada",
+        "chat_lead_captured": "Lead capturado en el chat web",
+        "quote_sent": "Presupuesto enviado",
+        "quote_accepted": "Presupuesto aceptado",
+        "document_sent": "Nota de venta enviada",
+        "document_paid": "Nota de venta cobrada",
+        "deal_won": "Negocio ganado",
+        "deal_lost": "Negocio perdido",
+        "contract_accepted": "Contrato aceptado"
       },
       "statusValues": {
         "draft": "Borrador",
@@ -1237,7 +1249,15 @@
           "wait_duration": "Esperar",
           "wait_for_reply": "Esperar respuesta",
           "ai_reply": "Responder con IA",
-          "send_review_request": "Pedir reseña de Google"
+          "send_review_request": "Pedir reseña de Google",
+          "offer_slots": "Ofrecer horarios",
+          "create_task": "Crear tarea",
+          "notify_user": "Avisar a un usuario",
+          "send_email": "Enviar email",
+          "deal_value": "¿Monto del negocio?",
+          "lead_source": "¿Origen del lead?",
+          "site": "¿De qué sitio vino?",
+          "contact_field": "¿Campo del contacto?"
         },
         "fields": {
           "text": "Texto",
@@ -1255,10 +1275,45 @@
           "aiModeSend": "Envío automático",
           "aiModeHint": "El envío automático también requiere activarlo para toda la cuenta en Configuración. Mientras la cuenta esté en borrador, este nodo genera borradores.",
           "reviewTextPlaceholder": "¡Gracias por tu compra! Dejanos una reseña: {tag}",
-          "reviewTextHint": "Si lo dejás vacío, se envía un mensaje predeterminado con el enlace. Configurá el enlace de reseña en Configuración."
+          "reviewTextHint": "Si lo dejás vacío, se envía un mensaje predeterminado con el enlace. Configurá el enlace de reseña en Configuración.",
+          "taskTitle": "Título de la tarea",
+          "dueInHours": "Vence en (horas)",
+          "assignee": "Responsable",
+          "assigneeDealOwner": "Responsable del negocio",
+          "assigneeContactOwner": "Responsable del contacto",
+          "assigneeSpecific": "Un usuario en particular",
+          "notifyTitle": "Título del aviso",
+          "notifyBody": "Detalle del aviso",
+          "subject": "Asunto",
+          "emailBody": "Mensaje",
+          "emailHint": "Se envía al email del contacto. Si no tiene email cargado, el paso se saltea y queda registrado.",
+          "bookingTypeId": "ID del servicio a agendar",
+          "operator": "Comparación",
+          "operatorGte": "Mayor o igual que",
+          "operatorLt": "Menor que",
+          "operatorEquals": "Es igual a",
+          "operatorContains": "Contiene",
+          "amount": "Monto",
+          "leadSource": "Origen",
+          "siteId": "ID del sitio",
+          "fieldKey": "Campo",
+          "fieldValue": "Valor"
         },
         "mobileReadOnly": "El editor visual necesita una pantalla más grande. Desde el teléfono podés ver el flujo; para editarlo, abrilo en una computadora.",
         "mobileEmpty": "Este flujo todavía no tiene pasos."
+      },
+      "runDetailTitle": "Detalle de la ejecución",
+      "stepsTitle": "Pasos",
+      "noSteps": "Esta ejecución todavía no registró pasos",
+      "stepWhen": "Cuándo",
+      "stepNode": "Nodo",
+      "stepStatus": "Resultado",
+      "stepDetail": "Detalle",
+      "backToFlow": "Volver al flujo",
+      "stepStatusValues": {
+        "ok": "Ejecutado",
+        "skipped": "Salteado",
+        "failed": "Falló"
       }
     },
     "search": {
@@ -1694,6 +1749,11 @@
       "alreadyApplied": "Ya aplicaste el rubro «{name}».",
       "alreadyAppliedHelp": "Podés aplicar otro rubro cuando quieras: se agrega a lo que ya tenés, nunca reemplaza nada.",
       "additiveNote": "Aplicar un rubro solo agrega servicios, recursos, etapas y etiquetas. Nunca borra ni cambia lo que ya configuraste."
+    },
+    "notifications": {
+      "title": "Avisos",
+      "empty": "No tenés avisos",
+      "markAllRead": "Marcar todo como leído"
     }
   },
   "superadmin": {
@@ -2000,12 +2060,31 @@
         "preview": {
           "eyebrow": "El sistema en acción",
           "url": "app.clientes.com.py",
-          "tabs": ["Pipeline", "Contactos", "WhatsApp", "Reportes"],
-          "stages": ["Nuevo", "Contactado", "Propuesta enviada", "Cliente"],
+          "tabs": [
+            "Pipeline",
+            "Contactos",
+            "WhatsApp",
+            "Reportes"
+          ],
+          "stages": [
+            "Nuevo",
+            "Contactado",
+            "Propuesta enviada",
+            "Cliente"
+          ],
           "stats": [
-            { "label": "Consultas este mes", "value": "184" },
-            { "label": "Primera respuesta", "value": "4 min" },
-            { "label": "Tasa de cierre", "value": "34%" }
+            {
+              "label": "Consultas este mes",
+              "value": "184"
+            },
+            {
+              "label": "Primera respuesta",
+              "value": "4 min"
+            },
+            {
+              "label": "Tasa de cierre",
+              "value": "34%"
+            }
           ],
           "disclaimer": "Vista ilustrativa del panel."
         }

@@ -204,6 +204,13 @@
       "when": 1788638514819,
       "tag": "0028_add_business_memory",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1788642778138,
+      "tag": "0029_add_notifications",
+      "breakpoints": true
     }
   ]
 }

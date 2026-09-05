@@ -21,8 +21,75 @@ export const TRIGGER_TYPES = [
   // that is the moment a contact exists for a flow to act on — a trigger on
   // every visitor message would be a bill, not a feature.
   "chat_lead_captured",
+  // Sales-document moments (PLAN.md §15.5 J1). These are the events the
+  // follow-up sequences a business actually asks for hang off: "presupuesto
+  // enviado y nadie contestó", "ya cobré, pedile la reseña".
+  "quote_sent",
+  /** Emitted by the public accept page in P6; declared here so P6 adds no enum. */
+  "quote_accepted",
+  "document_sent",
+  /** Fires once, at the moment the payment ledger reaches the total. */
+  "document_paid",
+  // Derived from `deal.stage_changed` landing on a stage flagged won/lost
+  // (see triggers.ts), so dragging a card into "Ganado" fires it too — not
+  // only the explicit close button.
+  "deal_won",
+  "deal_lost",
+  /** Contracts are J5; the type exists now so a flow saved today survives it. */
+  "contract_accepted",
 ] as const;
 export type TriggerType = (typeof TRIGGER_TYPES)[number];
+
+/**
+ * Condition and action kinds as arrays rather than inline enums, because
+ * three things have to agree on them: the zod schema below, the editor
+ * palette, and the i18n parity test that fails when a new kind ships without
+ * a label in all three locales (PLAN.md §15.0 #4 — five triggers shipped
+ * without one, and nothing caught it).
+ */
+export const CONDITION_KINDS = [
+  "has_tag",
+  "deal_in_stage",
+  "business_hours",
+  "has_replied_since",
+  // J1 (§15.5): the three narrowings a lead-gen network asks for first —
+  // how big is the deal, where did the lead come from, which site — plus
+  // custom fields, whose UI lands in P5 and whose values already exist in
+  // `contacts.custom`.
+  "deal_value",
+  "lead_source",
+  "site",
+  "contact_field",
+] as const;
+export type ConditionKind = (typeof CONDITION_KINDS)[number];
+
+export const ACTION_KINDS = [
+  "send_whatsapp",
+  "send_template",
+  "add_tag",
+  "remove_tag",
+  "move_deal_stage",
+  "assign_user",
+  "create_note",
+  // AI auto-reply (PLAN.md §10 1O). An action node like any other — the
+  // engine change is this enum entry; the guards live in modules/ai/reply.ts.
+  "ai_reply",
+  // GBP review request (PLAN.md §10 1R #5 / §10 1P). No Google API — it
+  // sends the tenant's own review link over WhatsApp, same free-form-send
+  // guards as send_whatsapp.
+  "send_review_request",
+  // Offer the next free slots as tappable options in the thread
+  // (plan-booking.md §5.3). Free-form, so the same 24h-window guard as
+  // send_whatsapp applies — this answers someone who just wrote, it does
+  // not open a conversation.
+  "offer_slots",
+  // J1 (§15.5): the three actions that reach a *person on the team* rather
+  // than the customer.
+  "create_task",
+  "notify_user",
+  "send_email",
+] as const;
+export type ActionKind = (typeof ACTION_KINDS)[number];
 
 const nodeBase = { id: z.string().min(1).max(100) };
 
@@ -36,39 +103,14 @@ export const flowNodeSchema = z.discriminatedUnion("type", [
   z.object({
     ...nodeBase,
     type: z.literal("condition"),
-    config: z
-      .object({
-        kind: z.enum(["has_tag", "deal_in_stage", "business_hours", "has_replied_since"]),
-      })
-      .passthrough(),
+    config: z.object({ kind: z.enum(CONDITION_KINDS) }).passthrough(),
   }),
   z.object({
     ...nodeBase,
     type: z.literal("action"),
     config: z
       .object({
-        kind: z.enum([
-          "send_whatsapp",
-          "send_template",
-          "add_tag",
-          "remove_tag",
-          "move_deal_stage",
-          "assign_user",
-          "create_note",
-          // AI auto-reply (PLAN.md §10 1O). An action node like any other —
-          // the engine change is this enum entry; the guards live in
-          // modules/ai/reply.ts.
-          "ai_reply",
-          // GBP review request (PLAN.md §10 1R #5 / §10 1P). No Google API —
-          // it sends the tenant's own review link over WhatsApp, same
-          // free-form-send guards as send_whatsapp.
-          "send_review_request",
-          // Offer the next free slots as tappable options in the thread
-          // (plan-booking.md §5.3). Free-form, so the same 24h-window guard
-          // as send_whatsapp applies — this answers someone who just wrote,
-          // it does not open a conversation.
-          "offer_slots",
-        ]),
+        kind: z.enum(ACTION_KINDS),
         /**
          * Only meaningful on `ai_reply`. Absent means draft, and the tenant
          * setting is a ceiling over this either way (modules/ai/reply.ts

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getTenantContext } from "@/modules/tenancy/context";
 import { getUserById } from "@/modules/tenancy/users";
 import { resolveTheme } from "@/lib/theme-resolve";
@@ -10,8 +10,11 @@ import { UserMenu } from "@/components/user-menu";
 import { BusinessSwitcher, type SwitchableBusiness } from "@/components/business-switcher";
 import { Toaster } from "@/components/ui/sonner";
 import { CommandPalette } from "@/components/command-palette";
+import { NotificationBell, type NotificationItem } from "@/components/notification-bell";
+import { listNotifications, countUnread } from "@/modules/notifications/notifications";
+import { formatDateTime } from "@/lib/i18n/format";
 import { Button } from "@/components/ui/button";
-import { stopImpersonationAction } from "./actions";
+import { markAllNotificationsReadAction, stopImpersonationAction } from "./actions";
 
 // Tenant suspension/expiry enforcement (PLAN.md §10 1B: "grace → read-only
 // banner → locked"). Runs server-side, in the Node.js runtime, so it can
@@ -143,6 +146,24 @@ export default async function AppLayout({
 
   const visibleGroups = groups.filter((group) => group.items.length > 0);
 
+  // The in-app half of `notify_user` (PLAN.md §15.5 J1). Read here rather
+  // than in a client component so the bell costs one query on a page the
+  // layout is already rendering, and shows something the moment it appears.
+  const [notificationRows, unreadCount] = await Promise.all([
+    listNotifications(ctx, ctx.userId, 10),
+    countUnread(ctx, ctx.userId),
+  ]);
+  const tNotifications = await getTranslations("app.notifications");
+  const locale = await getLocale();
+  const notificationItems: NotificationItem[] = notificationRows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    url: row.url,
+    read: row.readAt !== null,
+    when: formatDateTime(row.createdAt, locale),
+  }));
+
   const identity = {
     name: user?.name ?? "",
     email: user?.email ?? "",
@@ -161,14 +182,26 @@ export default async function AppLayout({
           groups={visibleGroups}
           appName={tc("appName")}
           header={
-            <BusinessSwitcher
-              businesses={businesses}
-              activeId={ctx.tenantId}
-              labels={{
-                title: tBusiness("switcherTitle"),
-                current: tBusiness("switcherCurrent"),
-              }}
-            />
+            <>
+              <NotificationBell
+                items={notificationItems}
+                unread={unreadCount}
+                labels={{
+                  title: tNotifications("title"),
+                  empty: tNotifications("empty"),
+                  markAllRead: tNotifications("markAllRead"),
+                }}
+                onMarkAllRead={markAllNotificationsReadAction}
+              />
+              <BusinessSwitcher
+                businesses={businesses}
+                activeId={ctx.tenantId}
+                labels={{
+                  title: tBusiness("switcherTitle"),
+                  current: tBusiness("switcherCurrent"),
+                }}
+              />
+            </>
           }
           footer={<UserMenu {...identity} />}
           mobileHeader={<UserMenu {...identity} variant="bar" />}

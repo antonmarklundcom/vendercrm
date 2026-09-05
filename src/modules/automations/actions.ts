@@ -69,7 +69,20 @@ export async function executeAction(
     return sendReviewRequestAction(ctx, config, contactId, runId);
   }
 
+  if (kind === "send_email") {
+    if (await hasOptedOut(ctx, contactId)) {
+      return { skipped: true, detail: { reason: "contact_opted_out" } };
+    }
+    return sendEmailAction(ctx, config, contactId);
+  }
+
   switch (kind) {
+    case "create_task":
+      return createTaskAction(ctx, config, contactId, runId);
+
+    case "notify_user":
+      return notifyUserAction(ctx, config, contactId, runId);
+
     case "add_tag":
       await addTagToContact(ctx, contactId, String(config.tagId));
       return { skipped: false, detail: { tagId: config.tagId } };
@@ -105,6 +118,159 @@ export async function executeAction(
     default:
       return { skipped: true, detail: { reason: `unknown_action:${kind}` } };
   }
+}
+
+/**
+ * A task for a human (§15.5 J1). The assignee is resolved from the record
+ * rather than pinned in the graph wherever possible: "the deal owner" keeps
+ * meaning the right person after the deal is reassigned, which a hardcoded
+ * user id does not.
+ */
+async function createTaskAction(
+  ctx: TenantContext,
+  config: Record<string, unknown>,
+  contactId: string,
+  runId: string,
+): Promise<ActionResult> {
+  const { createTask } = await import("@/modules/crm/tasks");
+
+  const title = String(config.title ?? "").trim();
+  if (!title) return { skipped: true, detail: { reason: "no_title" } };
+
+  const dueInHours = Number(config.dueInHours ?? 24);
+  const hours = Number.isFinite(dueInHours) && dueInHours >= 0 ? dueInHours : 24;
+
+  const deals = await listDealsForContact(ctx, contactId);
+  const deal = deals[0] ?? null;
+  const assignedUserId = await resolveAssignee(ctx, config, contactId, deal);
+
+  const contact = await getContact(ctx, contactId);
+  const task = await createTask(ctx, {
+    contactId,
+    dealId: deal?.id,
+    title: renderTemplateVars(title, contact).slice(0, 300),
+    dueAt: new Date(Date.now() + hours * 60 * 60_000),
+    assignedUserId: assignedUserId ?? undefined,
+  });
+
+  return {
+    skipped: false,
+    detail: { taskId: task?.id, assignedUserId, dueInHours: hours, runId },
+  };
+}
+
+/**
+ * `assignee`: `deal_owner` (default) | `contact_owner` | `specific`.
+ * Unassigned is a legitimate outcome — a task nobody owns still shows up on
+ * the team's list, which beats inventing an owner.
+ */
+async function resolveAssignee(
+  ctx: TenantContext,
+  config: Record<string, unknown>,
+  contactId: string,
+  deal: { assignedUserId: string | null } | null,
+): Promise<string | null> {
+  const mode = String(config.assignee ?? "deal_owner");
+
+  if (mode === "specific") {
+    const userId = String(config.userId ?? "").trim();
+    return userId || null;
+  }
+
+  if (mode === "contact_owner") {
+    const contact = await getContact(ctx, contactId);
+    return contact?.ownerUserId ?? null;
+  }
+
+  // deal_owner, falling back to the contact's owner: a flow triggered by
+  // something with no deal (a form submission, an inbound message) should
+  // still land on somebody's list rather than nobody's.
+  if (deal?.assignedUserId) return deal.assignedUserId;
+  const contact = await getContact(ctx, contactId);
+  return contact?.ownerUserId ?? null;
+}
+
+/**
+ * An in-app notification for a team member (§15.5 J1). The row is written
+ * here and P2 delivers it by push; until then the bell in the nav is the
+ * whole delivery mechanism, which is why this writes a row rather than
+ * calling a notifier.
+ */
+async function notifyUserAction(
+  ctx: TenantContext,
+  config: Record<string, unknown>,
+  contactId: string,
+  runId: string,
+): Promise<ActionResult> {
+  const { createNotification } = await import("@/modules/notifications/notifications");
+
+  const deals = await listDealsForContact(ctx, contactId);
+  const userId = await resolveAssignee(ctx, config, contactId, deals[0] ?? null);
+  if (!userId) return { skipped: true, detail: { reason: "no_user" } };
+
+  const contact = await getContact(ctx, contactId);
+  const title = renderTemplateVars(String(config.title ?? ""), contact).trim();
+  if (!title) return { skipped: true, detail: { reason: "no_title" } };
+
+  const notification = await createNotification(ctx, {
+    userId,
+    kind: "automation",
+    title,
+    body: config.body ? renderTemplateVars(String(config.body), contact) : null,
+    // Straight to the person the flow is about; a notification you cannot
+    // act on from is a distraction.
+    url: `/contacts/${contactId}`,
+    flowRunId: runId,
+  });
+
+  return { skipped: false, detail: { notificationId: notification?.id, userId } };
+}
+
+/**
+ * Email to the contact (§15.5 J1). A missing address or an unconfigured
+ * Resend is a skipped step with a reason, never a failed run — the same
+ * treatment a closed 24h window gets on WhatsApp, and the reason
+ * lib/email's send never throws.
+ *
+ * P4 (§15.5 J3) gives tenants their own sending identity; this action calls
+ * the same `sendEmail`, so it inherits that without changing.
+ */
+async function sendEmailAction(
+  ctx: TenantContext,
+  config: Record<string, unknown>,
+  contactId: string,
+): Promise<ActionResult> {
+  const { sendEmail } = await import("@/lib/email");
+
+  const contact = await getContact(ctx, contactId);
+  if (!contact?.email) return { skipped: true, detail: { reason: "no_contact_email" } };
+
+  const subject = renderTemplateVars(String(config.subject ?? ""), contact).trim();
+  const body = renderTemplateVars(String(config.body ?? ""), contact).trim();
+  if (!subject || !body) return { skipped: true, detail: { reason: "no_content" } };
+
+  const sent = await sendEmail({ to: contact.email, subject, html: emailHtml(body) });
+  return sent
+    ? { skipped: false, detail: { to: contact.email, subject } }
+    : { skipped: true, detail: { reason: "email_not_configured", to: contact.email } };
+}
+
+/**
+ * The tenant writes plain text with the same `{{variables}}` WhatsApp uses;
+ * this is the minimum markup that keeps line breaks in an inbox. HTML in the
+ * input is escaped rather than passed through — the body is tenant copy, not
+ * a template, and an unescaped `<` from a price comparison should not eat
+ * the rest of the message.
+ */
+function emailHtml(body: string): string {
+  const escaped = body
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+  return `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.5">${escaped
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${paragraph.replaceAll("\n", "<br />")}</p>`)
+    .join("")}</div>`;
 }
 
 async function sendWhatsappAction(
