@@ -1,4 +1,5 @@
 import type { BusinessContext } from "@/lib/ai";
+import { getProfile, type BusinessProfile } from "@/modules/memory/profile";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantAiSettings, TenantSettings } from "@/modules/tenancy/settings";
 import type { TenantContext } from "@/modules/tenancy/context";
@@ -48,9 +49,21 @@ export type ResolvedAiConfig = {
   business: BusinessContext;
 };
 
+/**
+ * The business half of the config now comes from the memory (PLAN.md §16.4),
+ * not from `settings.ai`'s free text. `settings.ai` is still read as a
+ * fallback for one release — a tenant whose profile row the 0028 migration
+ * has not reached, or one created between the migration and their first
+ * visit to /settings/negocio, keeps exactly the prompt they had.
+ *
+ * The *rendered* memory block is not here: it depends on what the customer
+ * just asked, so it is built per call by buildMemoryContext and passed to
+ * buildSystemPrompt beside this.
+ */
 export function resolveAiConfig(
   tenantName: string,
   settings: TenantAiSettings | undefined,
+  profile?: BusinessProfile | null,
 ): ResolvedAiConfig {
   return {
     enabled: settings?.enabled === true,
@@ -68,11 +81,9 @@ export function resolveAiConfig(
     ),
     handoffKeyword: (settings?.handoffKeyword ?? DEFAULT_HANDOFF_KEYWORD).trim().toLowerCase(),
     business: {
-      businessName: settings?.businessName?.trim() || tenantName,
-      about: settings?.about,
-      tone: settings?.tone,
-      hours: settings?.hours,
-      neverPromise: settings?.neverPromise,
+      businessName:
+        profile?.displayName?.trim() || settings?.businessName?.trim() || tenantName,
+      neverPromise: profile?.neverPromise?.trim() || settings?.neverPromise,
     },
   };
 }
@@ -83,7 +94,7 @@ function clamp(value: number | undefined, fallback: number, ceiling: number): nu
 }
 
 export async function getAiConfig(ctx: TenantContext): Promise<ResolvedAiConfig> {
-  const tenant = await getTenant(ctx.tenantId);
+  const [tenant, profile] = await Promise.all([getTenant(ctx.tenantId), getProfile(ctx)]);
   const settings = (tenant?.settings ?? {}) as TenantSettings;
-  return resolveAiConfig(tenant?.name ?? "", settings.ai);
+  return resolveAiConfig(tenant?.name ?? "", settings.ai, profile);
 }

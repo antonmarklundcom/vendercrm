@@ -15,6 +15,7 @@ import {
   recordReply,
 } from "@/modules/ai/replies";
 import { isWithinBusinessHours } from "@/modules/automations/conditions";
+import { buildMemoryContext } from "@/modules/memory/retrieve";
 import {
   appendMessage,
   getConversation,
@@ -167,8 +168,17 @@ export async function generateChatReply(
       content: message.body ?? "",
     }));
 
+  // Same memory, same customer audience as WhatsApp (§16.4) — one source, so
+  // a visitor on the website and a customer on WhatsApp get the same answer
+  // to the same question.
+  const memory = await buildMemoryContext(ctx, {
+    query: input.visitorMessage,
+    audience: "customer",
+  });
+
   const system = buildSystemPrompt({
     ...config.business,
+    memory: memory.block,
     // The tenant's own words are *appended* to lib/ai's Spanish guardrail
     // block, never in place of it — a widget prompt cannot switch off "never
     // invent a price".

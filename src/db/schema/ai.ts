@@ -25,6 +25,19 @@ export const aiReplies = mysqlTable(
     channel: varchar("channel", { length: 10, enum: ["whatsapp", "chat"] })
       .notNull()
       .default("whatsapp"),
+    /**
+     * What the call was for (PLAN.md §16.2 rule 6). A generated customer
+     * reply is `reply`; the memory extractor and the setup-plan generator
+     * write their own kinds so the ledger explains a token bill that has no
+     * conversation attached to it. Defaulted, so every row written before
+     * the memory existed keeps its meaning.
+     */
+    kind: varchar("kind", {
+      length: 20,
+      enum: ["reply", "memory_extract", "setup_plan"],
+    })
+      .notNull()
+      .default("reply"),
     /** WhatsApp conversation. Null on the chat channel. */
     conversationId: char("conversation_id", { length: 26 }),
     /** Website chat conversation. Null on the whatsapp channel. */

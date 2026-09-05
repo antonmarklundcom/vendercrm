@@ -8,11 +8,17 @@ import type { AiGenerateInput, AiTurn } from "./types";
 
 export type BusinessContext = {
   businessName: string;
-  /** What the company sells, in the tenant's own words. */
-  about?: string;
-  tone?: string;
-  hours?: string;
-  /** Things the model must never promise: prices, delivery dates, discounts. */
+  /**
+   * The business memory, already rendered and budgeted
+   * (modules/memory/render.ts). Replaces the four free-text fields this
+   * used to carry (about/tone/hours plus the pasted-in rest): what the
+   * model needs to answer *this* message is selected per call now, so the
+   * prompt builder takes a block rather than a bag of settings.
+   */
+  memory?: string;
+  /** Things the model must never promise: prices, delivery dates, discounts.
+   * Lives in the memory too; kept as a field because the chat widget may
+   * override it per widget (docs/SPEC-CHAT-WIDGET.md §4). */
   neverPromise?: string;
   /** Extra per-node instructions from the flow's ai_reply node. */
   instructions?: string;
@@ -74,9 +80,7 @@ export function buildSystemPrompt(business: BusinessContext): string {
     `Sos el asistente de atención al cliente de "${business.businessName}" y respondés por WhatsApp.`,
   ];
 
-  if (business.about) lines.push(`Sobre el negocio: ${business.about}`);
-  if (business.tone) lines.push(`Tono de las respuestas: ${business.tone}`);
-  if (business.hours) lines.push(`Horario de atención: ${business.hours}`);
+  if (business.memory) lines.push("", business.memory, "");
   if (business.neverPromise) lines.push(`Nunca prometas: ${business.neverPromise}`);
   if (business.instructions) lines.push(`Instrucción de este flujo: ${business.instructions}`);
 
