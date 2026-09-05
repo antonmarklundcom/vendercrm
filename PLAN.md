@@ -2825,6 +2825,18 @@ list pagination and filters in SQL; opt-out respected on manual sends.
   notas, receipts and bookings (the public token pages, grouped).
 - Recurring appointments and a day view in the agenda.
 - Lift the worker into its own process on a VPS when the 2-second tick shows.
+- Two-factor login (TOTP via Better Auth's plugin) for admins, and a
+  "cerrar otras sesiones" control — a CRM holding customer phone numbers
+  should not be one password away. Small; candidate for wave 2.
+- GHL import preset: a column-mapping preset for GoHighLevel's contact CSV
+  export in `contacts/import`, so a client leaving GHL lands in one upload.
+- Unpaid nota de venta reminder: a scheduled `document_overdue` trigger
+  (issued N days ago, balance > 0) so "cobranza por WhatsApp" is one flow.
+- Tenant offboarding export: one ZIP with contacts, deals, conversations,
+  quotes and documents as CSV + PDFs, and a superadmin "purge tenant" that
+  audits what it deleted. Trust feature for hand-onboarded clients.
+- WhatsApp catalog messages (Meta product catalog) for tenants that sell
+  goods — send a product card instead of a text price. Idea only.
 
 ### 15.7 What the owner decides before the batches start
 
