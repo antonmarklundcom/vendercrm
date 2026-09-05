@@ -59,7 +59,7 @@ export default async function AppLayout({
   // the quick toggle in UserMenu needs a concrete side to render, same
   // simplification themeClass() already makes for the <html> class.
   const resolvedTheme = await resolveTheme();
-  const toggleTheme = resolvedTheme === "dark" ? "dark" : "light";
+  const toggleTheme: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
 
   const [user, tenant, memberships] = await Promise.all([
     getUserById(ctx.userId),
