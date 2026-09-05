@@ -2874,3 +2874,190 @@ the container, so integration suites run only in CI; run `npm run lint`,
 ### 15.9 Wave 1 build log index
 
 One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
+
+---
+
+## 16. Business memory and the AI setup assistant (Fable spec, 2026-09-05)
+
+> **Authored by Fable 5.1** from the owner's request: "AI should set up new
+> accounts with the pipeline, auto replies etc. that make sense for the
+> business, and we should be able to enter all business data / FAQ / opening
+> hours in a saved memory per business that AI responses and setup can use."
+> Same conventions as §13–§15. Nothing here reopens a §1.2 decision. The one
+> load-bearing rule is inherited from the vertical presets and restated in
+> §16.2: **the AI produces data in the preset shape; it never produces code
+> paths or bypasses the existing apply function.**
+
+### 16.1 What it is
+
+Two things that share one foundation:
+
+1. **Memoria del negocio** — one structured, per-tenant record of everything
+   a good employee knows on day one: what the business is, how it talks,
+   opening hours, address, services and prices, policies (señas, cancelación,
+   pagos, garantía), FAQs, promos with dates, and internal notes that must
+   never reach a customer. Today this exists as five free-text fields in
+   `settings.ai` (`businessName`, `about`, `tone`, `hours`, `neverPromise`)
+   plus `businessHours` and branding, all read by `resolveAiConfig`. The
+   memory replaces those five fields and becomes the **single source** for
+   AI replies (WhatsApp and widget), the setup assistant, template
+   variables, public pages and, later, the coach (§15.3).
+2. **Asistente de configuración** — a conversation on first login (and
+   re-runnable from settings, and available to the superadmin when creating
+   a tenant) that fills the memory by asking, then proposes a complete setup
+   for that business — pipeline stages, tags, booking types, quick replies,
+   automation flows, AI reply mode, business hours, widget copy — shows it as
+   a preview and applies it on confirm through the same machinery the
+   vertical presets already use.
+
+Why it matters commercially: the marketing ladder's "Puesta en orden" tier
+(docs/MARKETING_NEXT_STEPS.md) is exactly this setup, sold as a service.
+With the assistant the owner onboards a client in one call instead of an
+afternoon, and the client can keep the memory current without a ticket.
+
+### 16.2 Locked design rules
+
+1. **Memory is structured, not a blob.** Typed facts with a kind, so the
+   prompt builder can pick what a given reply needs and so the UI can show
+   "you have no cancellation policy" as a checklist row.
+2. **The AI suggests, a human confirms.** Facts the AI extracts from a pasted
+   text, a PDF or a website land as `source: ai_suggested, confirmed_at: null`
+   and are not used in prompts until an admin confirms them. The setup plan
+   is a preview until the admin taps "Aplicar". Nothing the assistant does is
+   invisible.
+3. **Setup output is a preset.** The assistant's plan is a `VerticalPreset`
+   (`modules/tenancy/verticals.ts`) — the same zod-validated data shape the
+   catalogue uses — applied by `applyVerticalPreset`, idempotent by name,
+   never removing anything. Where the shape lacks a field the assistant
+   needs (tags, quick replies, more flow triggers), the **shape** is extended
+   as data; no per-vertical or per-tenant code path is ever added.
+4. **Retrieval without a vector database.** Hostinger MySQL 8 supports
+   `FULLTEXT` indexes; FAQs and services are retrieved with
+   `MATCH … AGAINST` in natural-language mode against the customer's last
+   message, within a fixed token budget. Profile, hours and policies are
+   always included. Embeddings are an **idea** for later, not a prerequisite.
+5. **Internal never leaks.** `visibility: internal` facts are excluded from
+   every customer-facing prompt at the query, not by prompt instruction.
+6. **Existing caps apply.** Extraction and setup generation run through the
+   same driver, the same `ai_replies` ledger (new `kind` values) and the same
+   per-tenant daily caps. A setup conversation costs a few calls, not a
+   budget.
+7. **Audit.** Confirming, editing or deleting a fact and applying a plan write
+   `writeAuditLog` entries; the plan's preview JSON is stored with the apply.
+
+### 16.3 Data model
+
+`business_profiles` (one row per tenant): `tenant_id` unique, `display_name`,
+`legal_name`, `ruc`, `vertical_slug` (preset applied, if any), `about`,
+`tone` (enum: cercano | formal | directo, plus free note), `audience`,
+`differentiators`, `languages` (json, default `["es"]`), `website`,
+`address`, `maps_url`, `never_promise`, `payment_methods` (json),
+`updated_at`, `completed_pct` (derived, cached).
+
+`business_facts`: `id`, `tenant_id`, `kind` enum
+`faq | service | policy | location | contact | promo | note`, `title`,
+`body` (text), `structured` json (per kind: service → `{price, priceFrom,
+durationMinutes, bookingTypeId?}`; promo → `{validFrom, validUntil}`;
+policy → `{topic: cancellation|deposit|payment|warranty|other}`), `tags`
+json, `visibility` enum `customer | internal`, `source` enum
+`manual | imported | ai_suggested`, `confirmed_at`, `confirmed_by_user_id`,
+`review_after`, `created_at`, `updated_at`. Indexes: `(tenant_id, kind)`,
+`(tenant_id, visibility, confirmed_at)`, **FULLTEXT `(title, body)`**.
+
+`memory_imports`: `id`, `tenant_id`, `source_kind` enum `text | pdf | url`,
+`source_ref` (storage key or URL), `status` `pending | extracted | reviewed
+| failed`, `extracted_count`, `ai_reply_id` (ledger link), `created_by`,
+`created_at`.
+
+`setup_plans`: `id`, `tenant_id`, `status` `draft | applied | discarded`,
+`brief` (the conversation summary the plan was built from), `preset` json
+(the validated `VerticalPreset`), `outcome` json (`ApplyOutcome`),
+`created_by`, `applied_at`. Keeping the plan is what makes "what did the AI
+set up?" answerable later.
+
+Migration: copy `settings.ai.businessName/about/tone/hours/neverPromise`
+into `business_profiles` (hours → `businessHours` already structured; the
+free-text `hours` becomes a `location`-kind fact titled "Horario"), leave
+the old keys readable for one release, then drop them from the settings
+type.
+
+### 16.4 Where the memory is read
+
+| Consumer | What it takes | How |
+|---|---|---|
+| WhatsApp AI reply (`modules/ai/reply.ts`) | profile + hours + policies always; top-k FAQs/services by FULLTEXT against the last inbound message; promos in date | `buildMemoryContext(ctx, {query, budgetTokens})` replaces the five fields in `BusinessContext` |
+| Chat widget reply | same, per-widget overrides stay on top | same helper |
+| Setup assistant | everything, including internal | the brief |
+| Template variables | `{{negocio.nombre}}`, `{{negocio.horario}}`, `{{negocio.direccion}}`, `{{negocio.politica.cancelacion}}` | resolver added to the variable registry from §15.8 P1/P5 |
+| Public booking page, quote/nota PDF footer | address, maps link, payment methods, deposit policy | read at render |
+| Coach L1 (§15.3) | "memoria incompleta" and "hechos vencidos" rows | `completed_pct`, `review_after`, promo dates |
+
+### 16.5 The setup assistant, step by step
+
+1. **Entry points**: first login of a tenant with no applied plan (replaces the
+   current `/onboarding` rubro picker as the default; the picker stays as
+   "elegir un rubro sin el asistente"); `/settings/negocio → Reconfigurar con
+   el asistente`; superadmin tenant detail → "Configurar con IA" (runs as an
+   impersonation, so audit and caps are the tenant's).
+2. **Conversation**: the assistant asks in voseo, one topic at a time, in this
+   order — qué hacés y para quién; cómo te contactan hoy; horario y dirección;
+   servicios y precios (or "prefiero cargarlos después"); señas/cancelación/
+   pagos; las 5 preguntas que más te hacen; cómo querés que hable el asistente;
+   qué no debe prometer nunca. Each answer is written to the memory as
+   confirmed facts (the admin typed them) — the conversation *is* the form.
+   A "saltar" on any step is allowed; the checklist shows what is missing.
+   Text first; the voice lane (§15.3) plugs in here later.
+3. **Plan generation**: one JSON-mode call with the memory as input and the
+   catalogue's preset shape as the output schema (`generateStructured` on the
+   driver, zod-validated, one retry on invalid). The model may start from the
+   closest catalogue preset and adapt names, stages and copy to the business;
+   prices stay `null` unless the memory has them. The plan includes:
+   pipeline stages (5–7, one won, one lost), tags, booking types (if the
+   business takes appointments), 3–5 quick replies, flows (welcome on first
+   inbound message outside hours; no-reply follow-up after 2 days; review
+   request on won/completed; booking reminders are already the chain's), AI
+   reply mode `draft`, business hours, widget welcome copy.
+4. **Preview**: the existing onboarding preview component, extended for the
+   new preset fields: "Esto es lo que voy a crear — y nada de lo que ya tenés
+   se borra".
+5. **Apply**: `applyVerticalPreset` with the plan's preset; `setup_plans` row
+   updated with the outcome; audit entry; dashboard checklist items flip.
+6. **After**: the memory page shows the completion percentage and the coach
+   nags about gaps. Re-running the assistant later produces a new plan that
+   is applied idempotently by name (existing rows untouched, new ones added).
+
+Preset shape extensions (data only, in `verticals.ts` + zod):
+`tags: string[]`, `quickReplies: {name, body}[]`, `PresetFlow.trigger` widened
+to `wa_message_received | lead_received | deal_won | booking_no_show |
+booking_completed`, `PresetFlow.conditions?: ["outside_business_hours"]`,
+`stages` with `staleAfterDays`, `aiMode: "draft"`, `widget?: {welcome, capture
+AfterMessages}`. `verticals-apply.ts` grows one apply step per new field, each
+idempotent by name, each covered by the existing apply integration test
+pattern.
+
+### 16.6 Phases (wave K — can run beside the P-wave)
+
+K1 and K2 own files the P-wave does not touch (new module, new routes,
+`lib/ai/**`, `modules/ai/**`); they may run in parallel with §15.8. K3 needs
+P1/P5's variable registry and P7's coach module, so it runs after P8.
+
+| Phase | Lane | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|---|
+| K1 Business memory | 1 | Opus | `prompts/opus-k1-business-memory.md` | `src/modules/memory/**` (new), `src/db/schema/memory.ts` + migration, `src/lib/ai/prompt.ts`, `src/lib/ai/types.ts` (+`generateStructured`), `src/lib/ai/openai.ts`, `src/lib/ai/gemini.ts`, `src/modules/ai/config.ts`, `src/modules/ai/reply.ts` context call, `src/modules/chatwidget/reply.ts` context call, `src/app/(app)/settings/negocio/**` (new route), memory keys in `messages/*` | — |
+| K2 Setup assistant | 1 | Opus | `prompts/opus-k2-setup-assistant.md` | `src/modules/setup/**` (new), `src/modules/tenancy/verticals.ts` + `verticals-apply.ts` (shape extensions), `src/app/(app)/onboarding/**`, `src/app/(superadmin)/tenants/[id]/SetupWithAi*`, setup keys | K1 |
+| K3 Imports, variables, coach rows | 2 | Sonnet | `prompts/sonnet-k3-memory-imports.md` | `src/modules/memory/imports.ts` (new), `src/app/(app)/settings/negocio/importar/**`, variable resolver registration, coach rules file, public page/PDF reads, keys | K2, P8 |
+
+### 16.7 Owner decisions (none block K1)
+
+1. Whether the assistant is offered to every tenant on first login or only
+   run by the owner during "Puesta en orden" (default in the spec: every
+   tenant, because the memory is what makes AI replies good, and the plan is
+   preview-then-apply).
+2. Which AI driver handles JSON-mode setup generation (OpenAI and Gemini both
+   support structured output; K1 implements it on both).
+3. Whether PDF import is in K3 or parked (spec: in, using the storage driver
+   and a text extractor; a scanned PDF without text is reported, not OCR'd).
+
+### 16.8 Wave K build log index
+
+One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
