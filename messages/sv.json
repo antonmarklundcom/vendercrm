@@ -1890,7 +1890,19 @@
         ],
         "asideTitle": "Så börjar det",
         "asideBody": "Ett genomlysningssamtal på 30 minuter. Vi går igenom var dina kunder kommer ifrån i dag, vad som tappas på vägen och vad som kan ordnas först.",
-        "asideNote": "Kostnadsfritt och utan förpliktelser. Ser vi inte hur vi kan hjälpa dig säger vi det direkt i samtalet."
+        "asideNote": "Kostnadsfritt och utan förpliktelser. Ser vi inte hur vi kan hjälpa dig säger vi det direkt i samtalet.",
+        "preview": {
+          "eyebrow": "Systemet i drift",
+          "url": "app.clientes.com.py",
+          "tabs": ["Pipeline", "Kontakter", "WhatsApp", "Rapporter"],
+          "stages": ["Ny", "Kontaktad", "Offert skickad", "Kund"],
+          "stats": [
+            { "label": "Förfrågningar denna månad", "value": "184" },
+            { "label": "Första svar", "value": "4 min" },
+            { "label": "Avslutsgrad", "value": "34%" }
+          ],
+          "disclaimer": "Illustrativ vy av panelen."
+        }
       },
       "problem": {
         "eyebrow": "Utgångsläget",

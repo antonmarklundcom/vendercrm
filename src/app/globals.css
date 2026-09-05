@@ -411,6 +411,246 @@
   }
 }
 
+/* ---- Home hero: looping video field + browser-window pipeline preview
+   bleeding off the section's bottom edge. Adapted from a full-viewport
+   video-hero reference, scoped down to sit under the sitewide header rather
+   than replacing it (see hero-cinematic.tsx doc comment). ---- */
+.mk-hero-cine {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.mk-hero-cine__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.mk-hero-cine__media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 900ms var(--mk-ease-out);
+}
+.mk-hero-cine__media video[src] {
+  opacity: 1;
+}
+.mk-hero-cine__tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--mk-ink) 78%, transparent) 0%,
+    color-mix(in srgb, var(--mk-ink) 92%, transparent) 100%
+  );
+}
+.mk-hero-cine__content {
+  position: relative;
+  z-index: 1;
+  max-width: 46rem;
+  text-align: center;
+  margin-inline: auto;
+  padding-block: clamp(var(--mk-s-16), 10vw, var(--mk-s-32)) var(--mk-s-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mk-hero-cine__content .mk-eyebrow {
+  animation: mk-hero-in 700ms var(--mk-ease-out) both;
+}
+.mk-hero-cine__title {
+  font-family: var(--mk-font-display);
+  font-size: clamp(var(--mk-t-4), 6vw, var(--mk-t-6));
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--mk-s-6);
+  animation: mk-hero-in 700ms var(--mk-ease-out) 100ms both;
+}
+.mk-hero-cine__lead {
+  max-width: 34rem;
+  color: var(--mk-on-ink-70);
+  font-size: var(--mk-t-1);
+  margin: 0 0 var(--mk-s-8);
+  animation: mk-hero-in 700ms var(--mk-ease-out) 220ms both;
+}
+.mk-hero-cine__content .mk-cta-pair {
+  animation: mk-hero-in 700ms var(--mk-ease-out) 340ms both;
+}
+@keyframes mk-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.mk-hero-cine__preview-mount {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--mk-s-16);
+  padding-inline: var(--mk-gutter);
+}
+
+/* ---- Pipeline browser-window preview ---- */
+.mk-preview {
+  max-width: 880px;
+  margin-inline: auto;
+  transform: translateY(28%);
+}
+.mk-preview__eyebrow {
+  text-align: center;
+  font-size: var(--mk-t--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mk-accent-on-ink);
+  margin: 0 0 var(--mk-s-4);
+}
+.mk-preview__window {
+  /* Reset away from the dark section's light-on-ink text colour — this
+     window has its own near-white surface and needs the ink palette back.
+     Fully opaque rather than colour-mixed toward transparent: an
+     alpha-blended surface here compounds with the ink-6x text tones nested
+     inside it, washing them out well past the intended muted grey. */
+  color: var(--mk-ink);
+  background: var(--mk-surface);
+  border-radius: var(--mk-r-lg);
+  box-shadow: var(--mk-shadow-2);
+  overflow: hidden;
+  border: 1px solid var(--mk-hairline-strong);
+}
+.mk-preview__titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-s-2);
+  padding: var(--mk-s-3) var(--mk-s-4);
+  background: color-mix(in srgb, var(--mk-ink) 92%, var(--mk-base) 8%);
+}
+.mk-preview__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.mk-preview__dot--red {
+  background: #ee6a5f;
+}
+.mk-preview__dot--amber {
+  background: #f5bd4f;
+}
+.mk-preview__dot--green {
+  background: #61c454;
+}
+.mk-preview__url {
+  margin-left: var(--mk-s-3);
+  font-size: var(--mk-t--1);
+  color: var(--mk-on-ink-70);
+  font-family: var(--mk-font-text);
+}
+.mk-preview__tabs {
+  display: flex;
+  gap: var(--mk-s-6);
+  padding: var(--mk-s-3) var(--mk-s-6) 0;
+  font-size: var(--mk-t--1);
+  color: var(--mk-ink-62);
+}
+.mk-preview__tabs .is-active {
+  color: var(--mk-ink);
+  font-weight: 500;
+  border-bottom: 2px solid var(--mk-accent);
+  padding-bottom: var(--mk-s-2);
+}
+.mk-preview__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--mk-s-4);
+  padding: var(--mk-s-6);
+  border-bottom: 1px solid var(--mk-hairline);
+}
+.mk-preview__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mk-s-1);
+}
+.mk-preview__stat-value {
+  font-family: var(--mk-font-display);
+  font-size: var(--mk-t-2);
+  color: var(--mk-ink);
+}
+.mk-preview__stat-label {
+  font-size: var(--mk-t--1);
+  color: var(--mk-ink-62);
+}
+.mk-preview__board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--mk-s-4);
+  padding: var(--mk-s-6);
+}
+/* Specificity note: `.mk-section--ink p` (globals.css ink-section defaults)
+   outranks a single class selector, so every <p> in this window needs the
+   two-class form below to actually win — otherwise it inherits the ink
+   section's light-on-dark colour meant for the video backdrop, not this
+   window's own near-white surface. */
+.mk-preview__window .mk-preview__column-title {
+  font-size: var(--mk-t--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--mk-ink-70);
+  margin: 0 0 var(--mk-s-3);
+}
+.mk-preview__card {
+  position: relative;
+  background: var(--mk-surface);
+  border: 1px solid var(--mk-hairline);
+  border-radius: var(--mk-r-sm);
+  padding: var(--mk-s-2) var(--mk-s-3);
+  margin-bottom: var(--mk-s-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mk-preview__card-name {
+  font-size: var(--mk-t--1);
+  font-weight: 500;
+}
+.mk-preview__card-amount {
+  font-size: var(--mk-t--1);
+  color: var(--mk-ink-62);
+}
+.mk-preview__card-wa {
+  position: absolute;
+  top: var(--mk-s-2);
+  right: var(--mk-s-2);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #25d366;
+}
+.mk-preview__disclaimer {
+  /* Outside .mk-preview__window, back on the ink field — on-ink-70 here is
+     correct and intentional, unlike the column titles above. */
+  text-align: center;
+  font-size: var(--mk-t--1);
+  color: var(--mk-on-ink-70);
+  margin-top: var(--mk-s-4);
+}
+@media (max-width: 767px) {
+  .mk-preview {
+    transform: none;
+  }
+  .mk-preview__stats {
+    grid-template-columns: 1fr;
+  }
+  .mk-preview__board {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- P2 offset stack. Padding rather than margin: this class is applied to
    .mk-wrap, which is width:100%, and a left margin on it overflows the
    viewport instead of indenting the block. ---- */
