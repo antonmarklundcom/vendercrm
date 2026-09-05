@@ -17,7 +17,8 @@
       "submit": "Entrar",
       "error": "Correo o contraseña incorrectos",
       "forgotPassword": "¿Olvidaste tu contraseña?",
-      "rateLimited": "Demasiados intentos. Esperá unos minutos y probá de nuevo."
+      "rateLimited": "Demasiados intentos. Esperá unos minutos y probá de nuevo.",
+      "installApp": "Instalar app"
     },
     "acceptInvite": {
       "title": "Aceptar invitación",
@@ -587,6 +588,11 @@
           "light": "Claro",
           "dark": "Oscuro"
         }
+      },
+      "installApp": {
+        "title": "Instalar app",
+        "intro": "Instalá VenderCRM en tu teléfono Android para abrirlo como una app, sin el navegador.",
+        "button": "Instalar app"
       },
       "taskReminders": {
         "title": "Recordatorios de tareas",

@@ -17,7 +17,8 @@
       "submit": "Sign in",
       "error": "Wrong email or password",
       "forgotPassword": "Forgot your password?",
-      "rateLimited": "Too many attempts. Wait a few minutes and try again."
+      "rateLimited": "Too many attempts. Wait a few minutes and try again.",
+      "installApp": "Install app"
     },
     "acceptInvite": {
       "title": "Accept invitation",
@@ -853,6 +854,11 @@
           "light": "Light",
           "dark": "Dark"
         }
+      },
+      "installApp": {
+        "title": "Install app",
+        "intro": "Install VenderCRM on your Android phone to open it like an app, without the browser.",
+        "button": "Install app"
       },
       "taskReminders": {
         "title": "Task reminders",
