@@ -37,9 +37,12 @@ vi.mock("@/lib/auth/server", () => ({
 // `getActiveTenantUser` is the one boundary stubbed: in the real module it
 // joins the user row to the live membership and returns the membership's role
 // (see users.ts). Modelling it that way here keeps the test about what
-// `getTenantContext` does with the answer.
-vi.mock("./users", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./users")>()),
+// `getTenantContext` does with the answer. `context.ts` imports nothing else
+// from `./users`, so the mock stops there rather than spreading
+// `importOriginal()` — that would pull in the real module, which imports the
+// db client and throws on missing env vars, defeating the point of a suite
+// that touches no MySQL and no config.
+vi.mock("./users", () => ({
   getActiveTenantUser: async (userId: string, tenantId: string) =>
     membershipRole === null
       ? null
