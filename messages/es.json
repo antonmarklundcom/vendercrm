@@ -1890,7 +1890,19 @@
         ],
         "asideTitle": "Cómo empieza",
         "asideBody": "Una conversación de diagnóstico de 30 minutos. Revisamos de dónde vienen hoy tus clientes, qué se pierde en el camino y qué se puede ordenar primero.",
-        "asideNote": "Sin costo y sin compromiso. Si no vemos con qué ayudarte, te lo decimos en la misma llamada."
+        "asideNote": "Sin costo y sin compromiso. Si no vemos con qué ayudarte, te lo decimos en la misma llamada.",
+        "preview": {
+          "eyebrow": "El sistema en acción",
+          "url": "app.clientes.com.py",
+          "tabs": ["Pipeline", "Contactos", "WhatsApp", "Reportes"],
+          "stages": ["Nuevo", "Contactado", "Propuesta enviada", "Cliente"],
+          "stats": [
+            { "label": "Consultas este mes", "value": "184" },
+            { "label": "Primera respuesta", "value": "4 min" },
+            { "label": "Tasa de cierre", "value": "34%" }
+          ],
+          "disclaimer": "Vista ilustrativa del panel."
+        }
       },
       "problem": {
         "eyebrow": "El punto de partida",

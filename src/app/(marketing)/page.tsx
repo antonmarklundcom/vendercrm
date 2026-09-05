@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth/server";
-import { Hero } from "@/components/marketing/hero";
+import { HeroCinematic } from "@/components/marketing/hero-cinematic";
+import { HERO_VIDEO_SRC } from "@/lib/site-config";
 import { TrustRibbon } from "@/components/marketing/trust-ribbon";
 import { ProblemSection } from "@/components/marketing/problem-section";
 import { ServicesSection, type ServiceItem } from "@/components/marketing/services-section";
@@ -56,20 +57,24 @@ export default async function Home() {
 
   // Section → pattern map (web-design-system step 2), no two consecutive
   // sections sharing a pattern:
-  //   hero P1 · ribbon P8 · problem P4 · services hairline rail
+  //   hero cinematic (ink) · ribbon P8 · problem P4 · services hairline rail
   //   method P5 · verticals P3 · statement P9 · closing overlap + ink band
   return (
     <>
-      <Hero
+      <HeroCinematic
         eyebrow={t("home.hero.eyebrow")}
         title={t("home.hero.title")}
         lead={t("home.hero.lead")}
-        body={t("home.hero.body")}
-        points={t.raw("home.hero.points") as string[]}
-        asideTitle={t("home.hero.asideTitle")}
-        asideBody={t("home.hero.asideBody")}
-        asideNote={t("home.hero.asideNote")}
         cta={cta}
+        preview={{
+          eyebrow: t("home.hero.preview.eyebrow"),
+          url: t("home.hero.preview.url"),
+          tabs: t.raw("home.hero.preview.tabs") as string[],
+          stages: t.raw("home.hero.preview.stages") as string[],
+          stats: t.raw("home.hero.preview.stats") as Array<{ label: string; value: string }>,
+          disclaimer: t("home.hero.preview.disclaimer"),
+        }}
+        videoSrc={HERO_VIDEO_SRC}
       />
 
       <TrustRibbon

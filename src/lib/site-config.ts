@@ -22,6 +22,16 @@ export const siteConfig = {
   locale: "es-PY",
 } as const;
 
+/**
+ * Home hero background loop. TODO(owner): this points at the Higgsfield
+ * generation CDN — fine for review, but download it and serve it from
+ * /public/videos/hero-loop.mp4 before launch so the hero doesn't depend on a
+ * third party's URL staying valid indefinitely. (The sandbox this was built
+ * in couldn't reach that CDN to do the download itself — see build notes.)
+ */
+export const HERO_VIDEO_SRC =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_349VrHjTFIpx9q71lpfpAXcLXvR/hf_20260905_033405_0a8f4e5a-079f-4e9c-a77c-75a2a8ffa438.mp4";
+
 export const contact = {
   // TODO(owner): WhatsApp number in international format, digits only, no "+"
   // and no spaces — e.g. "595981123456". While this is null every WhatsApp CTA

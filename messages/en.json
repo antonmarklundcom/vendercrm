@@ -1890,7 +1890,19 @@
         ],
         "asideTitle": "How it starts",
         "asideBody": "A 30-minute diagnostic conversation. We look at where your customers come from today, what gets lost along the way, and what can be put in order first.",
-        "asideNote": "Free and with no commitment. If we can't see how to help you, we'll say so on the same call."
+        "asideNote": "Free and with no commitment. If we can't see how to help you, we'll say so on the same call.",
+        "preview": {
+          "eyebrow": "The system at work",
+          "url": "app.clientes.com.py",
+          "tabs": ["Pipeline", "Contacts", "WhatsApp", "Reports"],
+          "stages": ["New", "Contacted", "Proposal sent", "Customer"],
+          "stats": [
+            { "label": "Enquiries this month", "value": "184" },
+            { "label": "First response", "value": "4 min" },
+            { "label": "Close rate", "value": "34%" }
+          ],
+          "disclaimer": "Illustrative preview of the panel."
+        }
       },
       "problem": {
         "eyebrow": "The starting point",
