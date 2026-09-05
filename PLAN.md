@@ -2876,3 +2876,4 @@ the container, so integration suites run only in CI; run `npm run lint`,
 One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 
 - P1 Automation library — PR #96 — `docs/log/p1.md`
+- P2 Web push + notifications — PR #98 — `docs/log/p2.md`
