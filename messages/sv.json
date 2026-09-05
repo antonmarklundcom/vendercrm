@@ -17,7 +17,8 @@
       "submit": "Logga in",
       "error": "Fel e-post eller lösenord",
       "forgotPassword": "Glömt lösenordet?",
-      "rateLimited": "För många försök. Vänta några minuter och försök igen."
+      "rateLimited": "För många försök. Vänta några minuter och försök igen.",
+      "installApp": "Installera app"
     },
     "acceptInvite": {
       "title": "Acceptera inbjudan",
@@ -853,6 +854,11 @@
           "light": "Ljust",
           "dark": "Mörkt"
         }
+      },
+      "installApp": {
+        "title": "Installera app",
+        "intro": "Installera VenderCRM på din Android-telefon för att öppna den som en app, utan webbläsaren.",
+        "button": "Installera app"
       },
       "taskReminders": {
         "title": "Uppgiftspåminnelser",

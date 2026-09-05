@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { AuditTable } from "@/components/audit-table";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { InstallAppButton } from "@/components/install-app-button";
 import { getUserById } from "@/modules/tenancy/users";
 import { TaskReminderToggle } from "./TaskReminderToggle";
 import { listAuditLogForTenant } from "@/modules/tenancy/audit";
@@ -44,6 +45,8 @@ export default async function SettingsPage() {
         <LanguageSwitcher />
         <PageHeader title={t("theme.title")} description={t("theme.intro")} />
         <ThemeSwitcher />
+        <PageHeader title={t("installApp.title")} description={t("installApp.intro")} />
+        <InstallAppButton label={t("installApp.button")} />
         <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>
       </div>
     );
@@ -247,6 +250,12 @@ export default async function SettingsPage() {
         <h2 className="mb-2 text-lg font-semibold">{t("theme.title")}</h2>
         <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("theme.intro")}</p>
         <ThemeSwitcher />
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-lg font-semibold">{t("installApp.title")}</h2>
+        <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("installApp.intro")}</p>
+        <InstallAppButton label={t("installApp.button")} />
       </section>
 
       {/* Own tenant only — the cross-tenant feed lives in the superadmin
