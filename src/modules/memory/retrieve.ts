@@ -83,7 +83,7 @@ export async function buildMemoryContext(
     hours: resolveHours(always, settings.businessHours) ?? (profile ? null : legacy.hours),
     always,
     candidates: matched,
-    promos: promos.filter((promo) => isPromoActive(promo, now)),
+    promos: promos.filter((promo) => isPromoActive(promo, now, tenant?.timezone ?? undefined)),
     internal,
     budgetTokens,
   });

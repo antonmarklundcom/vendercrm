@@ -1,3 +1,5 @@
+import { todayIn } from "@/modules/calendar/zoned-time";
+import { DEFAULT_TIMEZONE } from "@/lib/i18n/format";
 import type { BusinessFact } from "./facts";
 import {
   estimateTokens,
@@ -13,10 +15,20 @@ import {
 // tested without a database — the budget order *is* the spec, and a spec
 // that can only be exercised against live MySQL does not get exercised.
 
-/** Promos are only true between their dates; an expired one is noise. */
-export function isPromoActive(fact: BusinessFact, now: Date): boolean {
+/**
+ * Promos are only true between their dates; an expired one is noise.
+ *
+ * "Today" is the tenant's today, not UTC's: a promo written "hasta el 30"
+ * would otherwise stop being mentioned at 21:00 on the 30th in Asunción,
+ * which is exactly the evening the business wanted it running.
+ */
+export function isPromoActive(
+  fact: BusinessFact,
+  now: Date,
+  timeZone: string = DEFAULT_TIMEZONE,
+): boolean {
   const structured = (fact.structured ?? {}) as { validFrom?: unknown; validUntil?: unknown };
-  const today = now.toISOString().slice(0, 10);
+  const today = todayIn(timeZone, now);
   if (typeof structured.validFrom === "string" && today < structured.validFrom) return false;
   if (typeof structured.validUntil === "string" && today > structured.validUntil) return false;
   return true;
