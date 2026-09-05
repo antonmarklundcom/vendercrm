@@ -61,17 +61,37 @@ self.addEventListener("notificationclick", (event) => {
       });
 
       // Focus a tab that is already on the app and take it there, rather than
-      // opening a second copy of an installed PWA. Matching on origin, not on
+      // opening a second copy of an installed PWA. Matched on origin, not on
       // the exact URL: a rep with the inbox open should land on the right
       // conversation in the window they already have.
       const absolute = new URL(target, self.location.origin);
-      for (const client of clientList) {
-        if (new URL(client.url).origin !== absolute.origin) continue;
-        await client.focus();
-        if ("navigate" in client) {
-          await client.navigate(absolute.href).catch(() => {});
+      const sameOrigin = clientList.filter((client) => {
+        try {
+          return new URL(client.url).origin === absolute.origin;
+        } catch {
+          return false;
         }
+      });
+
+      // Already looking at it — focus and change nothing.
+      const exact = sameOrigin.find((client) => client.url === absolute.href);
+      if (exact) {
+        await exact.focus();
         return;
+      }
+
+      for (const client of sameOrigin) {
+        // `navigate` needs the client to be controlled by this worker, which
+        // it is not on the very first load after registration. Falling
+        // through to openWindow then is better than focusing a tab and
+        // leaving it on the page the person was already reading.
+        try {
+          await client.focus();
+          const navigated = await client.navigate(absolute.href);
+          if (navigated !== null) return;
+        } catch {
+          continue;
+        }
       }
 
       await self.clients.openWindow(absolute.href);

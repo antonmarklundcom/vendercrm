@@ -1,6 +1,6 @@
 import { registerHandler } from "@/worker/handlers";
 import { buildSystemTenantContext } from "@/modules/tenancy/context";
-import { getUserById } from "@/modules/tenancy/users";
+import { getActiveTenantUser } from "@/modules/tenancy/users";
 import { isKindMuted } from "./prefs";
 import { deliverToTargets, isPushConfigured } from "./push";
 import { applyOutcomes, listSubscriptionsForUser, toTargets } from "./subscriptions";
@@ -32,9 +32,12 @@ export async function sendPush(tenantId: string, job: PushJob): Promise<void> {
   const ctx = await buildSystemTenantContext(tenantId);
   if (!ctx) return;
 
-  const user = await getUserById(job.userId);
-  // Gone, or banned from the platform since the job was queued. The push is
-  // dropped rather than delivered to a browser that can no longer sign in.
+  // The same check a request goes through (`getTenantContext`), for the same
+  // reason: deleted, banned platform-wide, or no live membership in *this*
+  // business. A salesperson who left last week still owns deals, so an
+  // automation can still resolve a notification onto them — and their phone
+  // must not go on receiving this business's customers.
+  const user = await getActiveTenantUser(job.userId, tenantId);
   if (!user || user.banned) return;
   if (isKindMuted(user.pushPrefs, job.kind)) return;
 

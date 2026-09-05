@@ -48,9 +48,9 @@ vi.mock("@/modules/tenancy/context", () => ({
   buildSystemTenantContext: (...args: unknown[]) => buildSystemTenantContext(...args),
 }));
 
-const getUserById = vi.fn();
+const getActiveTenantUser = vi.fn();
 vi.mock("@/modules/tenancy/users", () => ({
-  getUserById: (...args: unknown[]) => getUserById(...args),
+  getActiveTenantUser: (...args: unknown[]) => getActiveTenantUser(...args),
 }));
 
 const listSubscriptionsForUser = vi.fn();
@@ -88,7 +88,9 @@ beforeEach(() => {
   });
   sendNotification.mockReset().mockResolvedValue(undefined);
   buildSystemTenantContext.mockReset().mockResolvedValue(ctx);
-  getUserById.mockReset().mockResolvedValue({ id: "user-1", banned: false, pushPrefs: null });
+  getActiveTenantUser
+    .mockReset()
+    .mockResolvedValue({ id: "user-1", banned: false, pushPrefs: null });
   listSubscriptionsForUser.mockReset().mockResolvedValue([row]);
   applyOutcomes.mockReset().mockResolvedValue(undefined);
 });
@@ -122,7 +124,7 @@ describe("sendPush", () => {
   });
 
   it("stays quiet for a kind this user muted", async () => {
-    getUserById.mockResolvedValue({
+    getActiveTenantUser.mockResolvedValue({
       id: "user-1",
       banned: false,
       pushPrefs: { assignment: false },
@@ -134,7 +136,7 @@ describe("sendPush", () => {
   });
 
   it("still buzzes for a kind the user left alone", async () => {
-    getUserById.mockResolvedValue({
+    getActiveTenantUser.mockResolvedValue({
       id: "user-1",
       banned: false,
       pushPrefs: { inbound_message: false },
@@ -145,13 +147,17 @@ describe("sendPush", () => {
     expect(sendNotification).toHaveBeenCalledTimes(1);
   });
 
-  it("drops the push for a user who is gone or banned since it was queued", async () => {
+  it("drops the push for somebody who can no longer act in this business", async () => {
     const { sendPush } = await import("./jobs");
 
-    getUserById.mockResolvedValue(null);
+    // Deleted, banned platform-wide, or no longer a member here — all one
+    // answer from getActiveTenantUser, which is the point of using it.
+    getActiveTenantUser.mockResolvedValue(null);
     await sendPush("tenant-1", job);
+    expect(getActiveTenantUser).toHaveBeenCalledWith("user-1", "tenant-1");
 
-    getUserById.mockResolvedValue({ id: "user-1", banned: true, pushPrefs: null });
+    // Still a member, but deactivated in this business.
+    getActiveTenantUser.mockResolvedValue({ id: "user-1", banned: true, pushPrefs: null });
     await sendPush("tenant-1", job);
 
     expect(sendNotification).not.toHaveBeenCalled();
