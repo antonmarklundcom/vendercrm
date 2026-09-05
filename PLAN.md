@@ -2546,3 +2546,295 @@ Fixed to tokens. The QR code's white background is deliberate and stays.
 - **i18n guard gap:** only `es.json` key-parity is enforced; hardcoded strings
   in new tsx files slip through review. A lint rule for literal JSX text in
   `(app)`/`(public)` would close it — nice-to-have, low urgency.
+
+---
+
+## 15. Direction batch (Fable review, 2026-09-05 — the GHL comparison and the owner's idea round)
+
+> **Authored by Fable 5.1** after the full-repo competitive review against
+> GoHighLevel (published page: "VenderCRM contra GoHighLevel") and the owner's
+> follow-up questions on email, documents, coaching, voice and WhatsApp
+> onboarding. Same conventions as §13/§14: one PR per batch, branch off `main`,
+> no batch reopens a §1.2 locked decision unless this section says so
+> explicitly. Items are tagged **now** (build in the next sessions), **next**
+> (the quarter after), **later** (a bet that needs a prerequisite first) or
+> **idea** (parked, written down so it is not rediscovered).
+
+### 15.0 Baseline corrections the review found
+
+Four things the product is described as having are thinner in the code:
+
+1. **SIFEN is a foundation, not a feature.** `modules/sifen/` has the módulo-11
+   digit, the CDC and three code tables; the six facade functions throw
+   `SifenNotImplementedError`. No `sifen_*` tables, no XML, no signing, no
+   SET submission. §9 still blocks on `PLAN-SIFEN.md`. Marketing and plan
+   copy must keep saying "próximamente".
+2. **Custom fields have no UI.** `contacts.custom` (JSON) is written by nothing.
+3. **Embedded signup is not wired.** Manual connect is the only path (§6.2 #1).
+4. **Five trigger types have no label.** `booking_created/cancelled/no_show/
+   completed` and `chat_lead_captured` are in `TRIGGER_TYPES` and the
+   create-flow select, but `messages/*.json` names only six triggers. Fix in
+   the first automation PR (J1 below).
+
+### 15.1 Email — one platform account, per-tenant identity *(decision)*
+
+**Decision: every tenant sends through the platform's one Resend account.
+Tenants never bring their own Resend key.** A tenant that wants mail from its
+own domain gets that domain verified *inside* the platform account (Resend's
+Domains API supports many domains per account, each with its own DKIM and
+reputation). Reasons: one secret to rotate, one bounce/complaint webhook, one
+place to watch deliverability, and no support call that starts with "my
+Resend account got suspended". A bring-your-own-provider option is an
+**idea** only, for a client who contractually insists.
+
+Three sending identities, resolved by one function `senderFor(ctx)`:
+
+| Tier | From | Reply-To | Setup |
+|---|---|---|---|
+| **Default** (every tenant) | `Nombre del negocio <notificaciones@mail.clientes.com.py>` | tenant's own address | none |
+| **Own domain** (premium, or any tenant that asks) | `Nombre del negocio <ventas@cliente.com.py>` | same | tenant adds 3 DNS records, app verifies |
+| **Operator-assisted** | same as own domain | same | the owner does the DNS while impersonating, for clients who pay for it |
+
+Notes that shape the build:
+
+- **Use a dedicated sending subdomain for the default tier**
+  (`mail.clientes.com.py`, not the apex). The marketing site's own mail and
+  the platform's transactional mail must not share reputation with a
+  tenant's booking reminders.
+- **Own-domain flow** (`tenant_email_domains`: `domain`, `resend_domain_id`,
+  `status: pending|verified|failed`, `dns_records` json, `verified_at`,
+  `from_local_part`): admin types the domain → app calls
+  `resend.domains.create` → shows the DKIM/SPF/DMARC records with a copy
+  button → a `email.verify_domain` job polls `resend.domains.verify` every
+  10 min for 72 h, then marks failed → once `verified`, `senderFor(ctx)`
+  switches. Rate: Resend's plan limits are per account, so a per-tenant daily
+  email cap belongs in `plans.limits` from day one (`maxEmailsPerDay`).
+- **Where email is sent from** (all existing or planned): invites, password
+  reset, task reminders, booking chain rung 3, subscription warnings, site
+  alerts — plus the new surfaces in J3: quote/nota/contract delivery by email,
+  and the `send_email` automation action. No email inbox, no marketing
+  campaigns (review §1, "not doing").
+- **Compliance**: every non-transactional email (automation-sent) carries an
+  unsubscribe link that sets the same `optout` tag the WhatsApp keyword sets,
+  so one flag governs both channels.
+
+**J-batches for email**: J3 below.
+
+### 15.2 The document family — what exists, what is code, what is the owner's
+
+| Document | Status | Fiscal? | What it takes |
+|---|---|---|---|
+| Presupuesto (quote) | ✅ shipped (§8) | no | Online accept/reject is the missing half (J4) |
+| Nota de venta | ✅ shipped (1Q) | no | — |
+| Recibo (receipt for a payment) | **now**, small | no | Render from a `document_payments` row with the same `DocumentShell`; number `REC-`; public token + PDF; sent by WhatsApp/email |
+| Contrato (contract) | **next** (J5) | no | New module `modules/contracts/`: tenant-editable templates with variables, generated per deal/quote, public page, click-to-accept with evidence record |
+| Factura electrónica (SIFEN) | **later** (§9) | **yes** | Engine build is Opus work *after* `PLAN-SIFEN.md`; the owner's own list is below |
+
+**Contracts (J5) — the shape.** A contract is a non-fiscal document, so it may
+live beside quotes and notas and must obey the `schema/documents.ts` boundary
+comment (no fiscal fields). Tables: `contract_templates` (tenant, name, body as
+Markdown with `{{contacto.nombre}}`-style variables, clauses ordered),
+`contracts` (tenant, template snapshot, contact, deal?, quote?, rendered body,
+status `draft|sent|accepted|declined|voided`, `public_token`, `pdf_storage_key`),
+`contract_acceptances` (name typed, timestamp, IP, user agent, SHA-256 of the
+PDF shown, optional drawn-signature PNG in storage). Acceptance is a **firma
+electrónica simple** under Ley 4017/2010 — evidentiary, not the certified
+*firma digital*; the public page must say so in one line rather than imply a
+notarised signature. Vertical presets ship one template each (contrato de
+servicio, reserva de inmueble, orden de trabajo). Acceptance fires
+`contract_accepted` (trigger) and can move the deal.
+
+**Factura electrónica — the owner's side (nothing here is code):**
+1. RUC active and the business enrolled in **Marangatu** with e-Kuatia access.
+2. A **certificado de firma digital** from an accredited PSC (Documenta, eFirma
+   or similar), issued to the emitting business — one per tenant that invoices.
+3. **Timbrado electrónico** requested at the SET for the establishment/punto de
+   expedición that will emit.
+4. The **Manual Técnico** (current version) and the test-environment
+   credentials; §9 notes this session's egress cannot fetch them, so they
+   arrive from the owner's machine.
+5. A tenant willing to run the **habilitación** test cycle (send test DEs,
+   get them approved) before production.
+Once 1–5 exist for the owner's own business, Fable writes `PLAN-SIFEN.md`
+(persistence port, timbrado state machine, contingency) and Opus builds. The
+first customer of the engine is VenderCRM's own subscription invoice.
+
+### 15.3 The coach inside the system — three levels, then voice
+
+The idea: the system tells the owner what to do today, in order, and can be
+asked. Built in levels so each pays for itself before the next.
+
+**L1 — "Hoy" panel, rule-based, no AI (now, J6).** A ranked list on the
+dashboard, computed from data the tables already hold: conversations
+unanswered > 1 h in business hours; deals in a stage past its threshold
+(`stages.stale_after_days`, new column, preset per vertical); quotes sent 3+
+days ago with no reply and no follow-up task; leads without a deal; bookings
+tomorrow without a confirmed reminder; overdue tasks. Each row has the one
+action (open thread, call, move, send template). The same list is the body
+of the morning web push (J2) and of a WhatsApp template to the owner's own
+number ("Tenés 4 cosas pendientes hoy"). Deterministic, testable, free.
+
+**L2 — Weekly briefing, AI-written (next, J7).** Every Monday the worker
+builds the week's numbers (reports module) and asks the configured AI driver
+for a short narrative in voseo plus three recommendations, stored in a
+`coach_briefings` table, shown on the dashboard and sent by WhatsApp
+template + email. Uses the existing per-tenant AI caps and the same
+`ai_replies` ledger for cost visibility.
+
+**L3 — Conversational coach (later, J8).** A chat surface ("Asesor") where the
+owner asks questions in plain Spanish and the model answers with read-only
+tools over the tenant's data (`listStaleDeals`, `salesReport`, `openTasks`,
+`findContact`). Tool calls are the only data access; the model never sees
+raw tables. Text first; voice on top:
+
+**Voice — two lanes, ranked by value for this market.**
+- **Lane A — WhatsApp voice notes (now, small, J6b).** Inbound audio is
+  already stored in R2. Transcribe it (Gemini or OpenAI audio, behind the
+  existing driver seam) and show the text under the audio bubble in the
+  inbox; the AI auto-reply can then answer voice notes. Paraguayan customers
+  send audios constantly; a rep who reads instead of listening moves faster.
+  Second half: the owner sends a voice note to the coach and gets the L1
+  list back. Cost is bounded by the same daily caps.
+- **Lane B — talk to the app (later).** In the PWA: push-to-talk with the
+  browser's `SpeechRecognition` (free on Android Chrome; es-PY recognised as
+  es-419), the answer read by `speechSynthesis` or a provider voice. Ships
+  after L3 exists, because voice without a coach is a microphone.
+
+### 15.4 WhatsApp connection — today's procedure and the better path
+
+**What a tenant does today (manual connect, §6.2 #1).** One platform Meta app
+serves every tenant; the webhook is configured once (docs/DEPLOY.md §4).
+Per number:
+
+1. The business needs a **Meta Business Manager** (business.facebook.com),
+   ideally verified, and a phone number not currently on the WhatsApp
+   Business *app* (moving a number to the Cloud API disconnects it from the
+   phone app — §12 Q2; see coexistence below).
+2. In Business Manager → WhatsApp Accounts: create or pick the **WABA**, add
+   the phone number, verify it by SMS/call, set display name. Note the
+   **WABA ID** and the **Phone number ID** (WhatsApp Manager → API setup).
+3. Business Settings → Users → **System users**: create a system user
+   (admin), assign the WABA asset with full control, **and assign the
+   platform's Meta app** to it. This is the step that only works when the
+   platform app is reachable from the client's business — for the owner's
+   own business it is; for a third party it needs the partner sharing
+   below.
+4. Generate a **permanent token** for that system user with
+   `whatsapp_business_messaging` + `whatsapp_business_management`.
+5. In VenderCRM `/whatsapp`: paste WABA ID, Phone number ID, display number,
+   token. The app encrypts the token (§3.4), enqueues template sync and the
+   nightly chain, and the number is live; inbound routes by
+   `phone_number_id` automatically.
+6. Verify: send a template from the inbox; check `/whatsapp-health`
+   (superadmin) for the account row.
+
+Today this is done per tenant by the owner with the tenant on a call. It is
+acceptable for hand-onboarded clients and wrong for self-serve.
+
+**Interim path for third-party clients (no Tech Provider yet).** The client
+shares their WABA with the platform business as a **partner** (Business
+Settings → WhatsApp Accounts → Partners → add by Business ID), and the
+platform's own system user then holds the token for that WABA and subscribes
+the app to it (`POST /{waba-id}/subscribed_apps`). One system user, N
+client WABAs, no client-side token handling. To verify against Meta's
+current docs before writing it into `/whatsapp` as the recommended flow.
+
+**The better path (1N, still gated).** **Embedded signup**: the client clicks
+"Conectar WhatsApp", logs into Facebook, picks or creates the WABA and
+number in Meta's own dialog, and the app exchanges the code for a token
+server-side. Requires the platform's Meta Business verification and Tech
+Provider approval (§6.1) — a calendar item the owner starts, not code. Two
+things it unlocks that manual connect cannot: **coexistence** (since 2024
+Meta lets a number stay on the WhatsApp Business app *and* use the Cloud
+API, which removes the single biggest onboarding objection) and
+**multi-number per tenant** in the inbox, which the schema already allows
+and the UI does not (`getPrimaryAccount`). Build order: start verification
+now → J9 when approved.
+
+### 15.5 The batches
+
+Tags: **now / next / later**. Model per batch follows §1.3.
+
+**J1 — Automation library + trigger labels (now, Sonnet).** Triggers
+`quote_sent`, `document_sent`, `document_paid`, `deal_won`, `deal_lost`,
+`contract_accepted` (stub until J5); actions `create_task`, `notify_user`,
+`send_email`; conditions on deal value, lead source, site. Fix the five
+missing trigger labels. Per-run step log page from `flow_run_steps`.
+*Exit:* a flow "quote sent → wait 3 days → no reply → template" runs end to
+end in the integration suite; every `TRIGGER_TYPES` entry has a label in
+all three locales (extend the parity test to assert it).
+
+**J2 — Inbox ergonomics + web push (now, Opus for push, Sonnet for inbox).**
+Quick replies with variables, internal notes, filters mine/unassigned/unread,
+message search, web-chat rows in the same list with a channel chip. Service
+worker + VAPID + `push_subscriptions` + `push.send` job; fired on inbound
+message, assignment, task due, `notify_user`, and the L1 morning list.
+*Exit:* an installed PWA on Android receives a push within 10 s of an
+inbound message; opt-out on manual sends shows a confirm.
+
+**J3 — Email identity + delivery surfaces (now, Sonnet).** §15.1: sending
+subdomain, `senderFor(ctx)`, `tenant_email_domains` with the DNS panel and
+verify job, `maxEmailsPerDay` limit, "enviar por email" on quotes, notas and
+bookings, unsubscribe link → `optout`. *Exit:* a tenant with a verified
+domain sends a quote from its own address; an unverified one from the
+default; both logged on the timeline.
+
+**J4 — Pipeline polish, custom fields, online quote accept (now, Sonnet).**
+Column value totals, stale badge from `stages.stale_after_days`, expected
+close date, lost reason field; custom field definitions with UI, import,
+export, filters and template variables; accept/reject on the public quote
+page with `quote_accepted` trigger. Reopens the §11 "client-side quote
+acceptance" deferral on purpose.
+
+**J5 — Contracts + receipts (next, Sonnet).** §15.2 shape. *Exit:* a
+service contract generated from a won deal, accepted on a phone, PDF with
+the acceptance record in storage, deal moved by the trigger.
+
+**J6 — "Hoy" panel + voice-note transcription (now, Sonnet; J6b Opus for the
+audio driver).** §15.3 L1 and Lane A.
+
+**J7 — Weekly AI briefing (next, Sonnet).** §15.3 L2.
+
+**J8 — Conversational coach, text then voice (later, Opus).** §15.3 L3 and
+Lane B. Prerequisite: J6 and J7 in use for a month so the tools are the
+questions people actually asked.
+
+**J9 — Embedded signup + multi-number inbox (later, Opus).** Gated on Meta
+approval (§15.4).
+
+**J10 — Template campaigns to a saved view (next, Opus; Fable spec paragraph
+first).** Paced through the jobs table, opt-out aware, per-tenant daily cap,
+quality-rating check before each batch. Reopens §11's "broadcast" deferral
+deliberately, with the compliance rules written before the code.
+
+**J11 — Reporting v2, forms field editor, companies + merge (next, Sonnet).**
+From the review's "next" list; three separate PRs.
+
+**J12 — Corrections (now, Sonnet, one PR).** Quote auto-expiry job; contact
+list pagination and filters in SQL; opt-out respected on manual sends.
+
+### 15.6 Idea parking lot (not scheduled; keep adding here)
+
+- Payment link on the nota de venta (Bancard / Pagopar) with a webhook that
+  records the payment and fires `document_paid`.
+- Instagram and Messenger DMs in the same inbox (same Meta app, channel column).
+- Bring-your-own email provider for a client who insists contractually.
+- GBP reviews pulled into the CRM, AI-drafted replies (1P).
+- Self-serve signup, trial, gateway billing — when hand-renewal stops scaling.
+- Client portal: one link where a customer sees their quotes, contracts,
+  notas, receipts and bookings (the public token pages, grouped).
+- Recurring appointments and a day view in the agenda.
+- Lift the worker into its own process on a VPS when the 2-second tick shows.
+
+### 15.7 What the owner decides before the batches start
+
+1. Sending subdomain name and whether "own domain email" is a premium tier or
+   included.
+2. Start Meta Business verification + Tech Provider request now (weeks of
+   lead time; nothing in J1–J8 waits on it).
+3. Which AI provider handles audio transcription (Gemini and OpenAI both fit
+   the driver seam; pick by price per minute).
+4. The SIFEN prerequisites list in §15.2 for the owner's own business first.
+5. Whether contracts ship with a drawn signature or click-to-accept only
+   (click-to-accept is enough legally for a firma electrónica simple and is
+   simpler on a phone).
