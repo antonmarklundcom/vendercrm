@@ -20,7 +20,8 @@ import {
   MAX_PER_TENANT_PER_DAY_LIMIT,
 } from "@/modules/ai/config";
 import { COUNTRY_CODES } from "@/lib/phone";
-import { setUserTaskReminders } from "@/modules/tenancy/users";
+import { getUserById, setUserPushPrefs, setUserTaskReminders } from "@/modules/tenancy/users";
+import { PUSH_KINDS, applyPushPrefs } from "@/modules/notifications/prefs";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
@@ -259,6 +260,27 @@ export async function setTaskRemindersAction(formData: FormData) {
   if (!parsed.success) return;
 
   await setUserTaskReminders(ctx.userId, parsed.data.enabled === "true");
+  revalidatePath("/settings");
+}
+
+/**
+ * Which web pushes this person wants (PLAN.md §15.5 J2). An unchecked box is
+ * absent from the FormData, so the form's answer is read as "every kind that
+ * is not here is off" — which is why the whole set is rebuilt from
+ * PUSH_KINDS rather than from what arrived.
+ *
+ * Always the acting user's own row: like the language and theme settings,
+ * there is no id in the payload to point at somebody else.
+ */
+export async function setPushPrefsAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+
+  const enabled = Object.fromEntries(
+    PUSH_KINDS.map((kind) => [kind, formData.get(kind) !== null]),
+  );
+
+  const user = await getUserById(ctx.userId);
+  await setUserPushPrefs(ctx.userId, applyPushPrefs(user?.pushPrefs, enabled));
   revalidatePath("/settings");
 }
 

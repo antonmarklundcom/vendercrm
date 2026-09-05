@@ -211,6 +211,13 @@
       "when": 1788642778138,
       "tag": "0029_add_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1788644505079,
+      "tag": "0030_add_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }

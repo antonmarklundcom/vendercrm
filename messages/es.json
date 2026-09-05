@@ -707,6 +707,27 @@
           "error": "Hubo un problema al leer el calendario.",
           "revoked": "Se revocó el acceso: volvé a conectarlo."
         }
+      },
+      "push": {
+        "title": "Avisos en el celular",
+        "intro": "Activá los avisos en cada dispositivo donde quieras recibirlos. Todo lo que llega por aviso queda también en la campanita.",
+        "unsupported": "Este navegador no admite avisos. En iPhone, agregá la app a la pantalla de inicio y abrila desde ahí.",
+        "blocked": "Bloqueaste los avisos para este sitio. Cambialo en la configuración del navegador y volvé a intentar.",
+        "active": "Activo en este dispositivo",
+        "inactive": "Desactivado en este dispositivo",
+        "enable": "Activar en este dispositivo",
+        "disable": "Desactivar en este dispositivo",
+        "failed": "No pudimos activarlo. Probá de nuevo.",
+        "devices": "{count, plural, =0 {Ningún dispositivo activo} one {# dispositivo activo} other {# dispositivos activos}}",
+        "kindsTitle": "Qué avisos querés recibir",
+        "kindsNote": "Esto vale para todos tus dispositivos. Lo que desactivés acá igual aparece en la campanita.",
+        "save": "Guardar",
+        "kinds": {
+          "inbound_message": "Mensajes nuevos de clientes",
+          "assignment": "Cuando me asignan una conversación",
+          "task_due": "Tareas y citas del día",
+          "automation": "Avisos de automatizaciones"
+        }
       }
     },
     "whatsapp": {
@@ -1754,6 +1775,18 @@
       "title": "Avisos",
       "empty": "No tenés avisos",
       "markAllRead": "Marcar todo como leído"
+    },
+    "push": {
+      "bannerTitle": "Activá los avisos",
+      "bannerBody": "Recibí un aviso en el celular cuando entra un mensaje.",
+      "bannerEnable": "Activar",
+      "bannerDismiss": "Cerrar",
+      "inboundFallbackTitle": "Mensaje nuevo",
+      "inboundNoText": "Te enviaron un archivo",
+      "assignedTitle": "Te asignaron una conversación",
+      "assignedBody": "Ahora atendés a {contact}.",
+      "taskDueTitle": "Tu día",
+      "taskDueBody": "{tasks, plural, =0 {Sin tareas} one {# tarea} other {# tareas}} · {appointments, plural, =0 {sin citas} one {# cita} other {# citas}}"
     }
   },
   "superadmin": {

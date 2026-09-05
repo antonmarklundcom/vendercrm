@@ -24,4 +24,4 @@ Exit: nav shows every new surface; parity test green; HANDOFF Part written;
 lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Delete the watcher Routine, then STOP with the closing report. Spawn nothing.
+STOP with the closing report. Spawn nothing — wave 1 is done.

@@ -91,6 +91,16 @@ const eslintConfig = defineConfig([
       // is the only raw-db use here; conversations, messages and the AI
       // spend caps all go through tenantDb once the tenant is known.
       "src/modules/chatwidget/**/*.{ts,tsx}",
+      // Same rationale as the routing lookups above, from the other
+      // direction: a web push endpoint is the identity of a *browser*, and
+      // `push_subscriptions.endpoint` is unique platform-wide because a
+      // browser is one browser (PLAN.md §15.5 J2). Re-subscribing after
+      // switching business — or after somebody else signs in on the same
+      // phone — has to clear the row that endpoint already holds, which by
+      // definition may sit in a tenant the caller has no context for. That
+      // one delete-by-endpoint is the only raw-db use here; every other read
+      // and write in this module goes through tenantDb.
+      "src/modules/notifications/**/*.{ts,tsx}",
       // JUDGMENT CALL (flagged for Fable review, not explicit in PLAN.md
       // §3.3's exemption list): the Better Auth instance (src/lib/auth/server.ts)
       // is infra wiring handed the raw `db` client by the Drizzle adapter,

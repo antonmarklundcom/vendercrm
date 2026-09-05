@@ -101,6 +101,13 @@ export const users = mysqlTable(
     // the app was designed in, never the visitor's OS (lib/theme.ts says why).
     theme: varchar("theme", { length: 10 }),
     taskReminders: boolean("task_reminders").notNull().default(true),
+    // Which web pushes this person wants (PLAN.md §15.5 J2, §15.8 P2).
+    // `{ "inbound_message": false }` — only the muted kinds are stored, so
+    // NULL and `{}` both mean "everything on", and a kind added later is on
+    // for everyone without a backfill. Muting is about the *push*, never the
+    // `notifications` row: the bell keeps showing what the phone stayed
+    // quiet about (modules/notifications/prefs.ts).
+    pushPrefs: json("push_prefs"),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
