@@ -11,7 +11,9 @@ import { BusinessSwitcher, type SwitchableBusiness } from "@/components/business
 import { Toaster } from "@/components/ui/sonner";
 import { CommandPalette } from "@/components/command-palette";
 import { NotificationBell, type NotificationItem } from "@/components/notification-bell";
+import { PushRegistrar } from "@/components/push-registrar";
 import { listNotifications, countUnread } from "@/modules/notifications/notifications";
+import { pushPublicKey } from "@/modules/notifications/push";
 import { formatDateTime } from "@/lib/i18n/format";
 import { Button } from "@/components/ui/button";
 import { markAllNotificationsReadAction, stopImpersonationAction } from "./actions";
@@ -154,6 +156,11 @@ export default async function AppLayout({
     countUnread(ctx, ctx.userId),
   ]);
   const tNotifications = await getTranslations("app.notifications");
+  const tPush = await getTranslations("app.push");
+  // Null when the platform has no VAPID keys: the registrar then renders
+  // nothing and registers nothing, which is the whole of "absent keys =
+  // feature hidden" on this surface (§15.8 P2).
+  const vapidPublicKey = pushPublicKey();
   const locale = await getLocale();
   const notificationItems: NotificationItem[] = notificationRows.map((row) => ({
     id: row.id,
@@ -206,7 +213,22 @@ export default async function AppLayout({
           footer={<UserMenu {...identity} />}
           mobileHeader={<UserMenu {...identity} variant="bar" />}
         />
-        <div className="min-w-0 flex-1 p-6">{children}</div>
+        <div className="min-w-0 flex-1 p-6">
+          {/* Registers the service worker for anybody signed in, and asks once
+              on the inbox (PLAN.md §15.5 J2). Mounted here rather than on the
+              inbox page so the whole feature has one mount point, and so the
+              worker is registered on whatever page the app is opened at. */}
+          <PushRegistrar
+            publicKey={vapidPublicKey}
+            labels={{
+              bannerTitle: tPush("bannerTitle"),
+              bannerBody: tPush("bannerBody"),
+              enable: tPush("bannerEnable"),
+              dismiss: tPush("bannerDismiss"),
+            }}
+          />
+          {children}
+        </div>
       </div>
       {/* ⌘K from anywhere in the app (PLAN.md §13 H8). */}
       <CommandPalette

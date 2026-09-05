@@ -973,6 +973,27 @@
           "error": "Det gick inte att läsa kalendern.",
           "revoked": "Åtkomsten återkallades: koppla den igen."
         }
+      },
+      "push": {
+        "title": "Aviseringar i mobilen",
+        "intro": "Slå på aviseringar på varje enhet där du vill ha dem. Allt som skickas som avisering finns också i klockan.",
+        "unsupported": "Den här webbläsaren stöder inte aviseringar. På iPhone: lägg till appen på hemskärmen och öppna den därifrån.",
+        "blocked": "Du har blockerat aviseringar för den här sidan. Ändra det i webbläsarens inställningar och försök igen.",
+        "active": "På för den här enheten",
+        "inactive": "Av för den här enheten",
+        "enable": "Slå på för den här enheten",
+        "disable": "Stäng av för den här enheten",
+        "failed": "Vi kunde inte slå på det. Försök igen.",
+        "devices": "{count, plural, =0 {Inga aktiva enheter} one {# aktiv enhet} other {# aktiva enheter}}",
+        "kindsTitle": "Vilka aviseringar du vill ha",
+        "kindsNote": "Detta gäller alla dina enheter. Det du stänger av här visas ändå i klockan.",
+        "save": "Spara",
+        "kinds": {
+          "inbound_message": "Nya kundmeddelanden",
+          "assignment": "När en konversation tilldelas mig",
+          "task_due": "Uppgifter och bokningar för dagen",
+          "automation": "Aviseringar från automationer"
+        }
       }
     },
     "automations": {
@@ -1754,6 +1775,18 @@
       "title": "Aviseringar",
       "empty": "Du har inga aviseringar",
       "markAllRead": "Markera alla som lästa"
+    },
+    "push": {
+      "bannerTitle": "Slå på aviseringar",
+      "bannerBody": "Få en avisering i mobilen när ett meddelande kommer in.",
+      "bannerEnable": "Slå på",
+      "bannerDismiss": "Stäng",
+      "inboundFallbackTitle": "Nytt meddelande",
+      "inboundNoText": "De skickade en fil",
+      "assignedTitle": "Du har tilldelats en konversation",
+      "assignedBody": "Du sköter nu {contact}.",
+      "taskDueTitle": "Din dag",
+      "taskDueBody": "{tasks, plural, =0 {Inga uppgifter} one {# uppgift} other {# uppgifter}} · {appointments, plural, =0 {inga bokningar} one {# bokning} other {# bokningar}}"
     }
   },
   "superadmin": {

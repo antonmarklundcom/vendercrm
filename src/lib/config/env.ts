@@ -81,6 +81,22 @@ const envSchema = z
     // with no Google busy windows — rather than the app refusing to boot.
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+    // Web push (PLAN.md §15.5 J2, §15.8 P2). One VAPID keypair for the whole
+    // platform, generated once by `npm run generate-vapid`. Optional by the
+    // same rule as Resend and Sentry: unset means the feature is *hidden*
+    // rather than broken — no "activar notificaciones" control renders, the
+    // subscribe route answers 404, and `push.send` jobs no-op. The public key
+    // is not a secret (every subscribing browser receives it); it lives here
+    // rather than in NEXT_PUBLIC_ so a deploy cannot end up with the two
+    // halves of one keypair out of step, and the pages that need it pass it
+    // down as a prop.
+    WEB_PUSH_PUBLIC_KEY: z.string().min(1).optional(),
+    WEB_PUSH_PRIVATE_KEY: z.string().min(1).optional(),
+    /** `mailto:` or `https:` contact the push services can complain to. */
+    WEB_PUSH_SUBJECT: z
+      .string()
+      .regex(/^(mailto:|https:\/\/)/, "WEB_PUSH_SUBJECT must be a mailto: or https:// URL")
+      .optional(),
     AI_DRIVER: z.enum(["none", "openai", "gemini"]).default("none"),
     OPENAI_API_KEY: z.string().min(1).optional(),
     GEMINI_API_KEY: z.string().min(1).optional(),

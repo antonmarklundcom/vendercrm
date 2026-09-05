@@ -1,9 +1,11 @@
-import { buildSystemTenantContext } from "@/modules/tenancy/context";
+import { buildSystemTenantContext, type TenantContext } from "@/modules/tenancy/context";
 import { listTenants } from "@/modules/tenancy/tenants";
 import { listUsersForTenant } from "@/modules/tenancy/users";
 import { getContact } from "@/modules/crm/contacts";
 import { listOpenTasksDueBy } from "@/modules/crm/tasks";
 import { listCalendarEvents, type CalendarEvent } from "@/modules/calendar/events";
+import { createNotification } from "@/modules/notifications/notifications";
+import { getTranslator } from "@/lib/i18n/translator";
 import { sendEmail } from "@/lib/email";
 import { taskRemindersEmail } from "@/lib/email/templates";
 import { env } from "@/lib/config/env";
@@ -122,6 +124,12 @@ export async function sendTaskReminders(now: Date = new Date()): Promise<TaskRem
         if (sent) result.usersEmailed += 1;
         result.tasksListed += mine.length;
         result.appointmentsListed += appointments.length;
+
+        // The same reminder, on the phone (PLAN.md §15.5 J2). One row per run
+        // rather than one per task: this is the daily "here is your day", and
+        // a bell with eleven separate entries for eleven follow-ups is a bell
+        // nobody opens. The row is what carries it — the push comes off it.
+        await notifyDueWork(ctx, user, mine.length, appointments.length, tenant.locale);
       }
     } catch (err) {
       // One tenant's failure must not stop everyone else's reminders.
@@ -130,4 +138,37 @@ export async function sendTaskReminders(now: Date = new Date()): Promise<TaskRem
   }
 
   return result;
+}
+
+/**
+ * The in-app half of the daily reminder, added with web push (PLAN.md §15.5
+ * J2). Never allowed to break the mail run: a tenant whose notification write
+ * fails must still get its email, and the next tenant must still get its own.
+ */
+async function notifyDueWork(
+  ctx: TenantContext,
+  user: { id: string; locale: string | null },
+  taskCount: number,
+  appointmentCount: number,
+  tenantLocale: string | null,
+): Promise<void> {
+  // A suspended tenant is read-only (§10 1C), so there is no row to write —
+  // the email above still goes out, which is the half that matters.
+  if (ctx.accessStatus !== "active") return;
+
+  try {
+    const t = await getTranslator(user.locale ?? tenantLocale, "app.push");
+    await createNotification(ctx, {
+      userId: user.id,
+      kind: "task_due",
+      title: t("taskDueTitle"),
+      body: t("taskDueBody", { tasks: taskCount, appointments: appointmentCount }),
+      url: "/dashboard",
+    });
+  } catch (err) {
+    reportError(err, {
+      tags: { area: "task-reminders", step: "notification" },
+      extra: { tenantId: ctx.tenantId, userId: user.id },
+    });
+  }
 }

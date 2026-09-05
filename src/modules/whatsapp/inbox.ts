@@ -4,6 +4,7 @@ import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getActiveTenantUser } from "@/modules/tenancy/users";
+import { whatsappEvents } from "./events";
 
 // Unified inbox read paths (PLAN.md §6.5). Sending goes through ./send.ts;
 // this file is read-only (conversation list, message thread, mark-read).
@@ -70,6 +71,20 @@ export async function assignConversation(
   }
 
   await tenantDb(ctx).update(conversations).set({ assignedUserId: userId }).where(eq(conversations.id, id));
+
+  // Announced rather than notified directly: "somebody now owns this" is a
+  // fact about the conversation, and who wants telling about it is the
+  // notifications module's business, not the inbox's (PLAN.md §15.5 J2).
+  const conversation = await getConversation(ctx, id);
+  if (conversation) {
+    await whatsappEvents.emit("wa.conversation_assigned", {
+      tenantId: ctx.tenantId,
+      conversationId: id,
+      contactId: conversation.contactId,
+      assignedUserId: userId,
+      assignedByUserId: ctx.userId,
+    });
+  }
 }
 
 export async function markConversationRead(ctx: TenantContext, id: string) {

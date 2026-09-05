@@ -7,7 +7,13 @@ import { AuditTable } from "@/components/audit-table";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { InstallAppButton } from "@/components/install-app-button";
+import { PushToggle } from "@/components/push-toggle";
+import { PushPrefsForm } from "@/components/push-prefs-form";
 import { getUserById } from "@/modules/tenancy/users";
+import { pushPublicKey } from "@/modules/notifications/push";
+import { PUSH_KINDS, isKindMuted, type PushKind } from "@/modules/notifications/prefs";
+import { countSubscriptionsForUser } from "@/modules/notifications/subscriptions";
+import { setPushPrefsAction } from "./actions";
 import { TaskReminderToggle } from "./TaskReminderToggle";
 import { listAuditLogForTenant } from "@/modules/tenancy/audit";
 import { contactsFeedUrl } from "@/modules/crm/feed-url";
@@ -35,6 +41,13 @@ export default async function SettingsPage() {
   const ta = await getTranslations("audit");
   const locale = await getLocale();
 
+  // Web push (PLAN.md §15.5 J2). Personal, not tenant configuration — so it
+  // is built once here and rendered in both halves of this page, exactly like
+  // the language and theme controls below. `null` from pushPublicKey means the
+  // platform has no VAPID keys, and the whole section disappears rather than
+  // offering a switch that cannot work.
+  const pushSection = await renderPushSection(ctx, t);
+
   // Language is the one setting that isn't tenant configuration: it's the
   // user's own, so an agent gets this page for that alone rather than the
   // bare "admins only" line they used to hit (PLAN.md §13 H5 #2).
@@ -47,6 +60,7 @@ export default async function SettingsPage() {
         <ThemeSwitcher />
         <PageHeader title={t("installApp.title")} description={t("installApp.intro")} />
         <InstallAppButton label={t("installApp.button")} />
+        {pushSection}
         <p className="text-sm text-muted-foreground">{t("adminOnly")}</p>
       </div>
     );
@@ -258,6 +272,8 @@ export default async function SettingsPage() {
         <InstallAppButton label={t("installApp.button")} />
       </section>
 
+      {pushSection}
+
       {/* Own tenant only — the cross-tenant feed lives in the superadmin
           console. This is where an admin answers "who deactivated her?". */}
       <section>
@@ -266,5 +282,68 @@ export default async function SettingsPage() {
         <AuditTable entries={auditEntries} />
       </section>
     </div>
+  );
+}
+
+/**
+ * The push section, or nothing at all.
+ *
+ * Two halves that answer different questions. "Activar en este dispositivo" is
+ * about *this browser* and only the browser can answer it, so it is a client
+ * component. Which kinds are muted is a row on the user, the same for every
+ * device, so it is a server-rendered form. Keeping them visibly separate is
+ * what stops "activo" on a laptop from being read as "my phone will buzz".
+ */
+async function renderPushSection(
+  ctx: import("@/modules/tenancy/context").TenantContext,
+  t: Awaited<ReturnType<typeof getTranslations<"app.settings">>>,
+) {
+  const publicKey = pushPublicKey();
+  if (!publicKey) return null;
+
+  const devices = await countSubscriptionsForUser(ctx, ctx.userId);
+  const user = await getUserById(ctx.userId);
+  const enabled = Object.fromEntries(
+    PUSH_KINDS.map((kind) => [kind, !isKindMuted(user?.pushPrefs, kind)]),
+  ) as Record<PushKind, boolean>;
+
+  return (
+    <section>
+      <h2 className="mb-2 text-lg font-semibold">{t("push.title")}</h2>
+      <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("push.intro")}</p>
+
+      <PushToggle
+        publicKey={publicKey}
+        labels={{
+          unsupported: t("push.unsupported"),
+          blocked: t("push.blocked"),
+          active: t("push.active"),
+          inactive: t("push.inactive"),
+          enable: t("push.enable"),
+          disable: t("push.disable"),
+          failed: t("push.failed"),
+        }}
+      />
+
+      <p className="mt-3 text-sm text-muted-foreground">
+        {t("push.devices", { count: devices })}
+      </p>
+
+      <h3 className="mt-6 mb-2 text-sm font-semibold">{t("push.kindsTitle")}</h3>
+      <PushPrefsForm
+        enabled={enabled}
+        action={setPushPrefsAction}
+        labels={{
+          kinds: {
+            inbound_message: t("push.kinds.inbound_message"),
+            assignment: t("push.kinds.assignment"),
+            task_due: t("push.kinds.task_due"),
+            automation: t("push.kinds.automation"),
+          },
+          save: t("push.save"),
+          note: t("push.kindsNote"),
+        }}
+      />
+    </section>
   );
 }

@@ -380,3 +380,14 @@ export async function setUserTheme(userId: string, theme: string): Promise<void>
 export async function setUserTaskReminders(userId: string, enabled: boolean): Promise<void> {
   await db.update(users).set({ taskReminders: enabled }).where(eq(users.id, userId));
 }
+
+/**
+ * Which web pushes this person wants (PLAN.md §15.5 J2). Stored here beside
+ * the locale, the theme and the reminder opt-out because it is the same kind
+ * of thing: a property of the person, not of the business they are in. The
+ * *shape* of the value is modules/notifications/prefs.ts's business; this
+ * function only writes what it is given.
+ */
+export async function setUserPushPrefs(userId: string, prefs: unknown): Promise<void> {
+  await db.update(users).set({ pushPrefs: prefs }).where(eq(users.id, userId));
+}
