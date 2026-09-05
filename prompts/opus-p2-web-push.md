@@ -36,6 +36,6 @@ Exit: with keys set, a `push.send` job for a fake subscription reaches the
 settings toggle persists; lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Follow `prompts/_handoff-p.md`: create the watcher Routine from
-`prompts/_watcher-p.md`, then spawn P3, P4, P5, P6 now (Sonnet each) and let
-the watcher start P7.
+Follow `prompts/_handoff-p.md`: hand lane 2 over as ONE Sonnet session with
+the prompt `Read prompts/sonnet-wave1-lane2.md in this repo and execute it.`
+That session runs P3 → P8 in order, one PR per phase. Spawn nothing else.

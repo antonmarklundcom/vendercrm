@@ -2844,9 +2844,14 @@ list pagination and filters in SQL; opt-out respected on manual sends.
 The "now" batches of §15.5 as one phased, autonomous build (method: the
 `phased-autonomous-build` skill; autonomy protocol = `plan-booking.md` §4,
 which already governs this repo's phase prompts). Lane 1 is sequential Opus,
-because P1 and P2 create things every other phase calls. Lane 2 is Sonnet in
-parallel, file-disjoint by the **Owns** column. The link pass holds every
-cross-cutting edit. Fable is never a build model (§4.8 of that protocol).
+because P1 and P2 create things every other phase calls. Lane 2 is Sonnet,
+**sequential in one session** (`prompts/sonnet-wave1-lane2.md`) rather than
+four parallel ones: the **Owns** column is file-disjoint on code, but P3–P7
+all add keys to the same three `messages/*.json` files and all append to
+§15.9, so parallel branches conflict on the way in and the rebase costs more
+than the wall-clock it saved. One PR per phase, each merged before the next
+starts. The link pass holds every cross-cutting edit. Fable is never a build
+model (§4.8 of that protocol).
 
 | Phase | §15.5 | Lane | Model | Prompt | Owns | Depends on |
 |---|---|---|---|---|---|---|
