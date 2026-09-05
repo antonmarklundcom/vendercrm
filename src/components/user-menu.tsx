@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 
 import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { setThemeAction } from "@/app/theme-actions";
+import type { Theme } from "@/lib/theme";
 
 // Identity + sign out. Before 1I nothing in the app called signOut at all —
 // a session ran until its cookie expired, which is untenable on a shared
@@ -19,6 +21,8 @@ export function UserMenu({
   subtitle,
   signOutLabel,
   variant = "sidebar",
+  theme,
+  themeToggleLabel,
 }: {
   name: string;
   email: string;
@@ -27,10 +31,34 @@ export function UserMenu({
   signOutLabel: string;
   /** `sidebar` stacks under the nav; `bar` is the single-row mobile/top form. */
   variant?: "sidebar" | "bar";
+  /** Resolved appearance (never "system" — the server already picked a side
+   * to render). Omitted hides the toggle, e.g. on the mobile bar variant
+   * where there isn't room for it. */
+  theme?: Exclude<Theme, "system">;
+  themeToggleLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [failed, setFailed] = useState(false);
+
+  const nextTheme: Theme = theme === "dark" ? "light" : "dark";
+  const themeToggle = theme && (
+    <form action={setThemeAction}>
+      <input type="hidden" name="theme" value={nextTheme} />
+      <button
+        type="submit"
+        title={themeToggleLabel}
+        aria-label={themeToggleLabel}
+        className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      >
+        {theme === "dark" ? (
+          <Sun className="size-4" aria-hidden="true" />
+        ) : (
+          <Moon className="size-4" aria-hidden="true" />
+        )}
+      </button>
+    </form>
+  );
 
   function handleSignOut() {
     setFailed(false);
@@ -75,7 +103,10 @@ export function UserMenu({
             {subtitle ?? email}
           </span>
         </span>
-        {button}
+        <span className="flex shrink-0 items-center">
+          {themeToggle}
+          {button}
+        </span>
       </div>
     );
   }
@@ -89,7 +120,10 @@ export function UserMenu({
           <span className="truncate text-xs text-muted-foreground/80">{subtitle}</span>
         )}
       </div>
-      {button}
+      <div className="flex items-center justify-between gap-1">
+        {button}
+        {themeToggle}
+      </div>
     </div>
   );
 }

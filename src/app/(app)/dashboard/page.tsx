@@ -32,27 +32,43 @@ import { listSites } from "@/modules/sites/sites";
 // what to do first (the checklist). Every number comes from the tenant-scoped
 // read model in modules/dashboard — no raw db, no cross-tenant reads.
 
+const STAT_TONES = {
+  info: "bg-info-surface text-info",
+  warning: "bg-warning-surface text-warning",
+  destructive: "bg-destructive-surface text-destructive",
+  success: "bg-success-surface text-success",
+} as const;
+
 function StatCard({
   icon: Icon,
   label,
   value,
   hint,
   href,
+  tone,
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
   hint: string;
   href: string;
+  tone: keyof typeof STAT_TONES;
 }) {
   return (
     <Card className="gap-3 transition-colors hover:bg-accent/40">
       <Link href={href} className="flex flex-col gap-3">
-        <span className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Icon className="size-4" aria-hidden="true" />
-          {label}
+        <span className="flex items-center gap-2">
+          <span
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-lg",
+              STAT_TONES[tone],
+            )}
+          >
+            <Icon className="size-4" aria-hidden="true" />
+          </span>
+          <span className="text-sm font-medium text-muted-foreground">{label}</span>
         </span>
-        <span className="text-3xl font-semibold tabular-nums">{value}</span>
+        <span className="text-3xl font-semibold tracking-tight tabular-nums">{value}</span>
         <span className="text-xs text-muted-foreground">{hint}</span>
       </Link>
     </Card>
@@ -176,6 +192,7 @@ export default async function DashboardPage() {
             value: formatNumberL(stats.openDealsValuePyg),
           })}
           href="/pipeline"
+          tone="info"
         />
         <StatCard
           icon={MessagesSquare}
@@ -183,6 +200,7 @@ export default async function DashboardPage() {
           value={formatNumberL(stats.unreadMessages)}
           hint={t("stats.unreadHint", { count: stats.unreadConversations })}
           href="/inbox"
+          tone="warning"
         />
         <StatCard
           icon={FileText}
@@ -190,6 +208,7 @@ export default async function DashboardPage() {
           value={formatNumberL(stats.pendingQuotes)}
           hint={t("stats.pendingQuotesHint")}
           href="/quotes"
+          tone="destructive"
         />
         <StatCard
           icon={Users}
@@ -197,6 +216,7 @@ export default async function DashboardPage() {
           value={formatNumberL(stats.contacts)}
           hint={t("stats.contactsHint")}
           href="/contacts"
+          tone="success"
         />
       </section>
 

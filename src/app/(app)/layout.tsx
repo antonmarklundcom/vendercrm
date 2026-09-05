@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getTenantContext } from "@/modules/tenancy/context";
 import { getUserById } from "@/modules/tenancy/users";
+import { resolveTheme } from "@/lib/theme-resolve";
 import { listMembershipsForUser } from "@/modules/tenancy/memberships";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { AppNav, type NavGroup } from "@/components/app-nav";
@@ -51,7 +52,14 @@ export default async function AppLayout({
   const tSearch = await getTranslations("app.search");
   const tRoles = await getTranslations("app.users.roles");
   const tBusiness = await getTranslations("app.business");
+  const tTheme = await getTranslations("app.settings.theme");
   const isAdmin = ctx.role === "admin";
+
+  // "system" has no server-side answer (the OS preference is client-only) —
+  // the quick toggle in UserMenu needs a concrete side to render, same
+  // simplification themeClass() already makes for the <html> class.
+  const resolvedTheme = await resolveTheme();
+  const toggleTheme = resolvedTheme === "dark" ? "dark" : "light";
 
   const [user, tenant, memberships] = await Promise.all([
     getUserById(ctx.userId),
@@ -140,6 +148,8 @@ export default async function AppLayout({
     email: user?.email ?? "",
     subtitle: [tenant?.name, tRoles(ctx.role)].filter(Boolean).join(" · "),
     signOutLabel: tc("signOut"),
+    theme: toggleTheme,
+    themeToggleLabel: tTheme("toggle"),
   };
 
   return (

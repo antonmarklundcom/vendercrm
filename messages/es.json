@@ -581,6 +581,7 @@
         "intro": "Elegí cómo se ve la app para vos. No cambia lo que ven tus compañeros ni lo que reciben tus clientes.",
         "label": "Apariencia",
         "save": "Guardar",
+        "toggle": "Cambiar apariencia",
         "options": {
           "system": "Según el sistema",
           "light": "Claro",
