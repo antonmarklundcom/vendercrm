@@ -2838,3 +2838,39 @@ list pagination and filters in SQL; opt-out respected on manual sends.
 5. Whether contracts ship with a drawn signature or click-to-accept only
    (click-to-accept is enough legally for a firma electrónica simple and is
    simpler on a phone).
+
+### 15.8 Build wave 1 — phase table and prompts
+
+The "now" batches of §15.5 as one phased, autonomous build (method: the
+`phased-autonomous-build` skill; autonomy protocol = `plan-booking.md` §4,
+which already governs this repo's phase prompts). Lane 1 is sequential Opus,
+because P1 and P2 create things every other phase calls. Lane 2 is Sonnet in
+parallel, file-disjoint by the **Owns** column. The link pass holds every
+cross-cutting edit. Fable is never a build model (§4.8 of that protocol).
+
+| Phase | §15.5 | Lane | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|---|---|
+| P1 Automation library | J1 | 1 | Opus | `prompts/opus-p1-automation-library.md` | `src/modules/automations/**`, `src/modules/quotes/events.ts`, `src/modules/documents/events.ts`, emit lines in `quotes/delivery.ts`, `documents/delivery.ts`, `documents/documents.ts`, `src/db/schema/automations.ts`, `src/db/schema/notifications.ts` (new), migration, `src/app/(app)/automations/**`, automation keys in `messages/*` | — |
+| P2 Web push + notifications | J2 (push) | 1 | Opus | `prompts/opus-p2-web-push.md` | `src/modules/notifications/**` (new), `public/sw.js`, `src/app/manifest.ts`, `src/components/push-*`, `src/app/api/push/**`, push keys in `messages/*` | P1 |
+| P3 Inbox ergonomics | J2 (inbox) + J12c | 2 | Sonnet | `prompts/sonnet-p3-inbox.md` | `src/modules/whatsapp/inbox*.ts`, `src/modules/whatsapp/quick-replies.ts` (new), `src/modules/whatsapp/notes.ts` (new), `src/app/(app)/inbox/**`, `src/app/api/inbox/**`, inbox keys | P2 |
+| P4 Email identity | J3 | 2 | Sonnet | `prompts/sonnet-p4-email-identity.md` | `src/lib/email/**`, `src/modules/tenancy/email-domains.ts` (new), `src/db/schema/email.ts` (new), migration, settings page email section, `src/app/(app)/settings/EmailDomain*.tsx`, "enviar por email" buttons on quote/document/booking detail pages, email keys | P1 |
+| P5 Pipeline + custom fields | J4a + J12b | 2 | Sonnet | `prompts/sonnet-p5-pipeline-custom-fields.md` | `src/modules/crm/**` (except events.ts), `src/db/schema/crm.ts` additive columns + `custom_field_definitions` table, migration, `src/app/(app)/pipeline/**`, `src/app/(app)/contacts/**`, crm keys | P1 |
+| P6 Quote accept + receipts | J4b + recibo + J12a | 2 | Sonnet | `prompts/sonnet-p6-quote-accept-receipts.md` | `src/modules/quotes/**` (except events.ts), `src/modules/documents/receipts.ts` (new), `src/app/(public)/q/**`, `src/app/(app)/quotes/**`, receipt PDF/public page files, quote/receipt keys | P1 |
+| P7 "Hoy" panel | J6 (L1) | 2 | Sonnet | `prompts/sonnet-p7-hoy-panel.md` | `src/modules/dashboard/**`, `src/modules/coach/**` (new), `src/app/(app)/dashboard/**`, dashboard keys | P2 |
+| P8 Link pass | — | — | Sonnet | `prompts/sonnet-p8-link-pass.md` | nav, dashboard checklist rows, `docs/HANDOFF.md`, `KNOWN-ISSUES.md`, §15.9 index | all |
+
+Wave 2 (prompts written when wave 1 has merged): J5 contracts, J6b voice
+notes, J7 weekly briefing, J10 campaigns (after a Fable spec paragraph),
+J11 reporting v2 / forms editor / companies, J9 embedded signup (after Meta).
+
+Shared conventions every phase repeats (from docs/HANDOFF.md): services take
+`TenantContext` first and reach the DB only through `tenantDb`; zod in every
+server action; destructive actions are `requireTenantAdmin()` +
+`writeAuditLog`; every user-facing string through next-intl in
+`messages/es|en|sv.json` (parity test); tests beside the module; no MySQL in
+the container, so integration suites run only in CI; run `npm run lint`,
+`npm run typecheck`, `npm test`, `npm run build` locally before every push.
+
+### 15.9 Wave 1 build log index
+
+One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
