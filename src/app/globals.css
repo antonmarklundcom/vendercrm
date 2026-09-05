@@ -1034,6 +1034,88 @@
   justify-content: space-between;
 }
 
+/* ---- floating WhatsApp menu ----
+   Two independent trigger + panel pairs (top-right, bottom-right) sharing
+   one look. z-index sits above .mk-header (20) so the panel is never clipped
+   by the sticky header on the way down the page. */
+.mk-wa-float {
+  position: fixed;
+  right: var(--mk-s-4);
+  z-index: 30;
+}
+.mk-wa-float--top {
+  top: calc(72px + var(--mk-s-3));
+}
+.mk-wa-float--bottom {
+  bottom: var(--mk-s-4);
+}
+.mk-wa-float__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mk-s-2);
+  height: 48px;
+  padding: 0 var(--mk-s-4);
+  border: 0;
+  border-radius: 999px;
+  background: var(--mk-ink);
+  color: var(--mk-base);
+  box-shadow: var(--mk-shadow-2);
+  cursor: pointer;
+  transition: transform var(--mk-dur-fast) var(--mk-ease-io);
+}
+.mk-wa-float__trigger:hover {
+  transform: translateY(-2px);
+}
+.mk-wa-float__trigger svg {
+  fill: #25d366;
+  flex-shrink: 0;
+}
+.mk-wa-float__triggerLabel {
+  font-size: var(--mk-t--1);
+  font-weight: 500;
+}
+/* Icon-only below the breakpoint where the label would crowd the thumb zone. */
+@media (max-width: 480px) {
+  .mk-wa-float__trigger {
+    width: 48px;
+    padding: 0;
+  }
+  .mk-wa-float__triggerLabel {
+    display: none;
+  }
+}
+.mk-wa-float__panel {
+  position: absolute;
+  right: 0;
+  display: grid;
+  gap: var(--mk-s-1);
+  margin-top: var(--mk-s-2);
+  padding: var(--mk-s-2);
+  min-width: 220px;
+  background: var(--mk-surface);
+  color: var(--mk-ink);
+  border-radius: var(--mk-r-md);
+  border: 1px solid var(--mk-hairline-strong);
+  box-shadow: var(--mk-shadow-2);
+}
+.mk-wa-float--bottom .mk-wa-float__panel {
+  top: auto;
+  bottom: calc(100% + var(--mk-s-2));
+  margin-top: 0;
+}
+.mk-wa-float__option {
+  display: block;
+  padding: var(--mk-s-3);
+  border-radius: var(--mk-r-sm);
+  color: inherit;
+  text-decoration: none;
+  font-size: var(--mk-t--1);
+  transition: background var(--mk-dur-fast) var(--mk-ease-io);
+}
+.mk-wa-float__option:hover {
+  background: color-mix(in srgb, var(--mk-ink) 6%, transparent);
+}
+
 /* ---- lists ---- */
 .mk-list {
   list-style: none;

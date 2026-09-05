@@ -1866,6 +1866,14 @@
       "secondary": "See how we work",
       "waPrefill": "Hi, I came from clientes.com.py and I'd like to book a diagnostic."
     },
+    "waFloating": {
+      "ariaLabel": "Message us on WhatsApp",
+      "diagnostico": "Free diagnostic",
+      "question": "I have a question",
+      "questionPrefill": "Hi, I have a question about clientes.com.py.",
+      "existingClient": "I'm already a client",
+      "existingClientPrefill": "Hi, I'm already a client of clientes.com.py and need help."
+    },
     "ribbon": {
       "monthly": "Month to month, no lock-in",
       "measured": "Everything measured: you know what each enquiry cost",

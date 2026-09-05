@@ -33,10 +33,7 @@ export const HERO_VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_349VrHjTFIpx9q71lpfpAXcLXvR/hf_20260905_033405_0a8f4e5a-079f-4e9c-a77c-75a2a8ffa438.mp4";
 
 export const contact = {
-  // TODO(owner): WhatsApp number in international format, digits only, no "+"
-  // and no spaces — e.g. "595981123456". While this is null every WhatsApp CTA
-  // on the site falls back to the contact form instead of rendering a dead link.
-  whatsappNumber: null as string | null,
+  whatsappNumber: "595995628862" as string | null,
 
   // TODO(owner): landline / mobile shown in the header and footer.
   // `phoneE164` feeds the tel: href, `phoneDisplay` is what the visitor reads.
