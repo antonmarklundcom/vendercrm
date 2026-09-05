@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form-fields";
+import { PasswordInput } from "@/components/ui/password-input";
 
 // Client component: hits /api/auth/sign-in/email directly, no server action
 // (the module rule §2.2 applies to business logic, not to a thin wrapper
@@ -66,11 +67,7 @@ export function LoginForm() {
       </label>
       <label className="flex flex-col gap-1 text-sm">
         {t("password")}
-        <Input
-          type="password"
-          name="password"
-          required
-        />
+        <PasswordInput name="password" required />
       </label>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={pending}>
