@@ -60,6 +60,13 @@ export class ConversationPushThrottle {
     return true;
   }
 
+  /** How many conversations the throttle is currently holding. Exposed so the
+   * pruning above is testable — an unbounded Map on this path is a slow leak
+   * in a process that stays up for weeks. */
+  get size(): number {
+    return this.lastPushAt.size;
+  }
+
   /** Keeps the Map the size of "conversations active in the last two minutes"
    * rather than "every conversation since the last deploy" — this runs on
    * every inbound message, in a process that is expected to stay up. */

@@ -1,7 +1,12 @@
+import { eq } from "drizzle-orm";
 import { whatsappEvents } from "@/modules/whatsapp/events";
-import { buildSystemTenantContext } from "@/modules/tenancy/context";
+import { buildSystemTenantContext, type TenantContext } from "@/modules/tenancy/context";
 import { listUsersForTenant } from "@/modules/tenancy/users";
 import { getTenant } from "@/modules/tenancy/tenants";
+import { getContact } from "@/modules/crm/contacts";
+import { getConversation } from "@/modules/whatsapp/inbox";
+import { tenantDb } from "@/modules/tenancy/db";
+import { messages } from "@/db/schema";
 import { getTranslator } from "@/lib/i18n/translator";
 import { reportError } from "@/lib/observability";
 import { createNotification } from "./notifications";
@@ -56,11 +61,6 @@ async function pushInboundMessage(event: {
   const ctx = await buildSystemTenantContext(event.tenantId);
   if (!ctx) return;
 
-  const [{ getConversation, listMessagesForConversation }, { getContact }] = await Promise.all([
-    import("@/modules/whatsapp/inbox"),
-    import("@/modules/crm/contacts"),
-  ]);
-
   const conversation = await getConversation(ctx, event.conversationId);
   if (!conversation) return;
 
@@ -69,10 +69,12 @@ async function pushInboundMessage(event: {
   const recipients = recipientsForInbound(conversation.assignedUserId, activeUserIds);
   if (recipients.length === 0) return;
 
-  const contact = await getContact(ctx, event.contactId);
-  const messages = await listMessagesForConversation(ctx, event.conversationId);
-  const body = messages.find((message) => message.id === event.messageId)?.body ?? "";
-  const tenantLocale = (await getTenant(ctx.tenantId))?.locale ?? null;
+  const [contact, body, tenant] = await Promise.all([
+    getContact(ctx, event.contactId),
+    messageBody(ctx, event.messageId),
+    getTenant(ctx.tenantId),
+  ]);
+  const tenantLocale = tenant?.locale ?? null;
 
   const url = `/inbox/${event.conversationId}`;
   for (const userId of recipients) {
@@ -115,7 +117,6 @@ async function notifyAssignment(event: {
   const ctx = await buildSystemTenantContext(event.tenantId);
   if (!ctx) return;
 
-  const { getContact } = await import("@/modules/crm/contacts");
   const contact = await getContact(ctx, event.contactId);
 
   const users = await listUsersForTenant(event.tenantId);
@@ -131,6 +132,14 @@ async function notifyAssignment(event: {
     body: t("assignedBody", { contact: contact?.name?.trim() || t("inboundFallbackTitle") }),
     url: `/inbox/${event.conversationId}`,
   });
+}
+
+/** One row, not the thread. This runs on every inbound message, and loading a
+ * two-year-old conversation to read the line that just arrived is the kind of
+ * query that only hurts the tenants who use the product most. */
+async function messageBody(ctx: TenantContext, messageId: string): Promise<string> {
+  const [row] = await tenantDb(ctx).select(messages, eq(messages.id, messageId));
+  return row?.body ?? "";
 }
 
 const PREVIEW_LENGTH = 120;

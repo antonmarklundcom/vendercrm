@@ -44,7 +44,15 @@ export const PUBLIC_PREFIXES = [
 // failure but a widget that silently never appears. `w.js` was missing until
 // the booking widget was built beside it; the test below now checks this
 // list against `public/` rather than against memory.
-export const PUBLIC_EXACT = ["/vc-attribution.js", "/w.js", "/b.js"];
+// `/sw.js` is here for a different reason than the embed loaders: it is only
+// ever registered by a signed-in browser, so the *first* fetch always carries
+// a session. The browser re-fetches the worker script on its own schedule
+// though, and a session that has since lapsed would answer that with a 307 to
+// /login — which a browser reads as "this worker script is invalid" and
+// responds to by tearing the registration down. Push would then stop, silently
+// and permanently, for anyone who left the app closed over a weekend. The
+// script itself is public code with no tenant data in it (PLAN.md §15.5 J2).
+export const PUBLIC_EXACT = ["/vc-attribution.js", "/w.js", "/b.js", "/sw.js"];
 
 // One Node app answers both the apex marketing domain and the crm.* app
 // subdomain (parked domain, shared document root — see hPanel Domains).
