@@ -42,6 +42,5 @@ Exit: a tenant with an empty memory can go from first login to an applied plan
 `setup_plans` holds preset + outcome; lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Follow `prompts/_handoff-p.md`. K3 waits for the P-wave's P8: if PLAN.md §15.9
-shows P8 merged, spawn `prompts/sonnet-k3-memory-imports.md` (Sonnet); otherwise
-end with the phase report and note in the report that K3 is pending P8.
+Follow `prompts/_handoff-p.md`: merge your PR when green, spawn nothing. The
+watcher starts K3 once P8 and this PR are both merged.

@@ -37,5 +37,11 @@ Exit: integration test "quote sent → wait → no reply → template" and "docu
 paid → deal_won stage" green in CI; parity test asserts all labels; run detail
 page renders steps; lint/typecheck/test/build green; PR merged.
 
+## Before any code
+Create the watcher Routine exactly as `prompts/_handoff-p.md` says (skip if it
+already exists). Then start the phase.
+
 ## After this phase
-Follow `prompts/_handoff-p.md`. Next: `prompts/opus-p2-web-push.md`, model Opus.
+Follow `prompts/_handoff-p.md`: merge your PR when green, then spawn
+`prompts/opus-p2-web-push.md` (Opus) and `prompts/opus-k2-setup-assistant.md`
+(Opus) together.

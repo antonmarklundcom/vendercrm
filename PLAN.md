@@ -2871,6 +2871,13 @@ cross-cutting edit. Fable is never a build model (§4.8 of that protocol).
 | P7 "Hoy" panel | J6 (L1) | 2 | Sonnet | `prompts/sonnet-p7-hoy-panel.md` | `src/modules/dashboard/**`, `src/modules/coach/**` (new), `src/app/(app)/dashboard/**`, dashboard keys | P2 |
 | P8 Link pass | — | — | Sonnet | `prompts/sonnet-p8-link-pass.md` | nav, dashboard checklist rows, `docs/HANDOFF.md`, `KNOWN-ISSUES.md`, §15.9 index | all |
 
+**One paste, then a chain.** Anton starts P1 only. P1 creates the watcher
+Routine before writing code, merges its own PR when green, then spawns P2 and
+K2 (both Opus) together. P2 spawns P3–P6; the watcher starts P7, P8 and K3 as
+their dependencies merge, restarts any stalled phase (Opus or Sonnet) and
+deletes itself when P8 and K3 are merged. Every phase merges its own PR. The
+rules live in `prompts/_handoff-p.md` and `prompts/_watcher-p.md`.
+
 Wave 2 (prompts written when wave 1 has merged): J5 contracts, J6b voice
 notes, J7 weekly briefing, J10 campaigns (after a Fable spec paragraph),
 J11 reporting v2 / forms editor / companies, J9 embedded signup (after Meta).
@@ -3049,9 +3056,10 @@ pattern.
 
 ### 16.6 Phases (wave K — can run beside the P-wave)
 
-K1 and K2 own files the P-wave does not touch (new module, new routes,
-`lib/ai/**`, `modules/ai/**`); they may run in parallel with §15.8. K3 needs
-P1/P5's variable registry and P7's coach module, so it runs after P8.
+K1 shipped in PR #94 (built by Opus against `main` before this section
+merged). K2 is spawned by P1 together with P2 and runs beside the P-wave; K3
+needs P1/P5's variable registry and P7's coach module, so the watcher starts
+it after P8. See §15.8 "One paste, then a chain".
 
 | Phase | Lane | Model | Prompt | Owns | Depends on |
 |---|---|---|---|---|---|

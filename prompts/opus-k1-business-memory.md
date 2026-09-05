@@ -1,4 +1,4 @@
-# Phase K1 — Business memory. OPUS session. Lane 1 of wave K (may run beside the P-wave).
+# Phase K1 — Business memory. OPUS session. ✅ Built in PR #94 (2026-09-05); kept for re-runs only.
 
 Read ONLY: this file, PLAN.md §16.1–§16.4, §16.6 table, §10 1O (AI auto-reply),
 `plan-booking.md` §4 (autonomy protocol), `docs/HANDOFF.md` Part 2A conventions,

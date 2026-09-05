@@ -36,6 +36,5 @@ Exit: with keys set, a `push.send` job for a fake subscription reaches the
 settings toggle persists; lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Follow `prompts/_handoff-p.md`: create the watcher Routine from
-`prompts/_watcher-p.md`, then spawn P3, P4, P5, P6 now (Sonnet each) and let
-the watcher start P7.
+Follow `prompts/_handoff-p.md`: merge your PR when green, then spawn P3, P4,
+P5, P6 now (Sonnet each). The watcher (created by P1) starts P7 and P8.

@@ -34,4 +34,5 @@ test from K1 answers from one of them; variables render in a template
 preview; lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Follow `prompts/_handoff-p.md`. Spawn nothing; end with the closing report for wave K.
+Follow `prompts/_handoff-p.md`. Spawn nothing. If P8 is merged, delete the
+watcher Routine. End with the closing report for wave K.

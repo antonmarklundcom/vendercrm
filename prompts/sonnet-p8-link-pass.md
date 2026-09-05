@@ -24,4 +24,6 @@ Exit: nav shows every new surface; parity test green; HANDOFF Part written;
 lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Delete the watcher Routine, then STOP with the closing report. Spawn nothing.
+Follow `prompts/_handoff-p.md`: if K3 is already merged, delete the watcher
+Routine; otherwise leave it (it deletes itself after K3). STOP with the
+closing report. Spawn nothing.
