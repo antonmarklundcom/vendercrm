@@ -1866,6 +1866,14 @@
       "secondary": "Ver cómo trabajamos",
       "waPrefill": "Hola, vengo de clientes.com.py y quiero agendar un diagnóstico."
     },
+    "waFloating": {
+      "ariaLabel": "Escribinos por WhatsApp",
+      "diagnostico": "Diagnóstico gratuito",
+      "question": "Tengo una pregunta",
+      "questionPrefill": "Hola, tengo una pregunta sobre clientes.com.py.",
+      "existingClient": "Ya soy cliente",
+      "existingClientPrefill": "Hola, ya soy cliente de clientes.com.py y necesito ayuda."
+    },
     "ribbon": {
       "monthly": "Mes a mes, sin permanencia obligatoria",
       "measured": "Todo medido: sabés qué costó cada consulta",

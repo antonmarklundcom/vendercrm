@@ -4,6 +4,7 @@ import Script from "next/script";
 import { getTranslations } from "next-intl/server";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
+import { WhatsAppFloatingMenu } from "@/components/marketing/whatsapp-floating";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { CRM_URL, SITE_URL } from "@/lib/config/hosts";
 import { contact, siteConfig } from "@/lib/site-config";
@@ -59,7 +60,7 @@ export default async function MarketingLayout({
       <MarketingHeader />
       <main id="contenido">{children}</main>
       <MarketingFooter />
-
+      <WhatsAppFloatingMenu />
       {/* First-touch attribution: stores the first utm / gclid / fbclid the
           visitor ever arrived with in a 90-day cookie, read server-side by the
           contact action. Without it every lead looks like direct traffic. */}

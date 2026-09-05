@@ -1866,6 +1866,14 @@
       "secondary": "Se hur vi arbetar",
       "waPrefill": "Hej, jag kommer från clientes.com.py och vill boka en genomlysning."
     },
+    "waFloating": {
+      "ariaLabel": "Skriv till oss på WhatsApp",
+      "diagnostico": "Kostnadsfri genomlysning",
+      "question": "Jag har en fråga",
+      "questionPrefill": "Hej, jag har en fråga om clientes.com.py.",
+      "existingClient": "Jag är redan kund",
+      "existingClientPrefill": "Hej, jag är redan kund hos clientes.com.py och behöver hjälp."
+    },
     "ribbon": {
       "monthly": "Månad för månad, ingen bindningstid",
       "measured": "Allt mäts: du vet vad varje förfrågan kostade",
