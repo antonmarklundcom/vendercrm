@@ -847,6 +847,7 @@
         "intro": "Välj hur appen ser ut för dig. Det ändrar inte vad dina kollegor ser eller vad dina kunder får.",
         "label": "Utseende",
         "save": "Spara",
+        "toggle": "Byt utseende",
         "options": {
           "system": "Följ systemet",
           "light": "Ljust",

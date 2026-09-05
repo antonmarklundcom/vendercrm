@@ -847,6 +847,7 @@
         "intro": "Choose how the app looks for you. It doesn't change what your colleagues see or what your customers receive.",
         "label": "Appearance",
         "save": "Save",
+        "toggle": "Switch appearance",
         "options": {
           "system": "Match system",
           "light": "Light",
