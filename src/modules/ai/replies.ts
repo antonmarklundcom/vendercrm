@@ -21,6 +21,8 @@ export type RecordReplyInput = {
   chatConversationId?: string;
   /** Null until a website visitor gives a phone and becomes a contact. */
   contactId?: string;
+  /** What the call was for; absent means a customer reply (PLAN.md §16.2 rule 6). */
+  kind?: "reply" | "memory_extract" | "setup_plan";
   mode: "draft" | "send";
   status: "draft" | "sent" | "failed";
   prompt: string;
@@ -42,6 +44,7 @@ export async function recordReply(ctx: TenantContext, input: RecordReplyInput) {
     .values({
       id,
       channel: input.channel ?? "whatsapp",
+      kind: input.kind ?? "reply",
       conversationId: input.conversationId ?? null,
       chatConversationId: input.chatConversationId ?? null,
       contactId: input.contactId ?? null,

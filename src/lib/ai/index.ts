@@ -3,7 +3,17 @@ import { openAiDriverFromEnv } from "./openai";
 import { geminiDriverFromEnv } from "./gemini";
 import type { AiDriver } from "./types";
 
-export type { AiDriver, AiGenerateInput, AiGenerateResult, AiProvider, AiTurn } from "./types";
+export type {
+  AiDriver,
+  AiGenerateInput,
+  AiGenerateResult,
+  AiProvider,
+  AiStructuredInput,
+  AiStructuredResult,
+  AiTurn,
+} from "./types";
+export { DEFAULT_MAX_STRUCTURED_OUTPUT_TOKENS } from "./types";
+export { MAX_STRUCTURED_ATTEMPTS, parseJson, toGeminiSchema, toJsonSchema } from "./structured";
 export {
   buildReplyPrompt,
   buildSystemPrompt,

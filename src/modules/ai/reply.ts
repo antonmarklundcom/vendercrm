@@ -4,6 +4,7 @@ import { buildReplyPrompt, extractBookingIntent, getAiDriver, serialisePrompt } 
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getContact } from "@/modules/crm/contacts";
+import { buildMemoryContext } from "@/modules/memory/retrieve";
 import { getPrimaryAccount } from "@/modules/whatsapp/accounts";
 import {
   getConversation,
@@ -164,8 +165,20 @@ export async function generateAiReply(
   // Only when the tenant opted in: a tenant who has not gets byte-identical
   // prompts to the ones they had before booking existed.
   const bookableTypes = config.bookingEnabled ? await listBookableForAi(ctx) : [];
+  // The memory, selected against what the customer actually asked (§16.4).
+  // Customer audience, so internal facts and unconfirmed AI suggestions are
+  // excluded by the query rather than by the prompt asking nicely.
+  const memory = await buildMemoryContext(ctx, {
+    query: lastInboundBody(history),
+    audience: "customer",
+  });
   const prompt = buildReplyPrompt(
-    { ...config.business, instructions: input.instructions, bookableTypes },
+    {
+      ...config.business,
+      memory: memory.block,
+      instructions: input.instructions,
+      bookableTypes,
+    },
     history,
   );
   if (prompt.messages.length === 0) {
@@ -234,6 +247,21 @@ export async function generateAiReply(
   }
 
   return sent;
+}
+
+/**
+ * What the retrieval query is: the last thing the customer said. Not the
+ * whole thread — an old "¿hacen delivery?" would keep pulling the delivery
+ * FAQ into every later answer about something else.
+ */
+function lastInboundBody(
+  messages: Array<{ direction: "in" | "out"; body: string | null }>,
+): string {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.direction === "in" && (message.body ?? "").trim()) return message.body!.trim();
+  }
+  return "";
 }
 
 /** Active bookable types, in the shape the prompt needs. */

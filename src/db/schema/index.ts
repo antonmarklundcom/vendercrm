@@ -12,3 +12,4 @@ export * from "./whatsapp";
 export * from "./ai";
 export * from "./booking";
 export * from "./chatwidget";
+export * from "./memory";
