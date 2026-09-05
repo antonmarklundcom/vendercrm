@@ -261,6 +261,16 @@ describe("isPromoActive", () => {
     // No dates at all means "always on", which is what an undated offer is.
     expect(isPromoActive(promo({}), now)).toBe(true);
   });
+
+  it("uses the tenant's today, not UTC's", () => {
+    // 01:30 UTC on the 1st is still 21:30 on the 30th in Asunción, and the
+    // promo the business wrote "hasta el 30" is still running that evening.
+    const lateEvening = new Date("2026-10-01T01:30:00Z");
+    expect(isPromoActive(promo({ validUntil: "2026-09-30" }), lateEvening)).toBe(true);
+    expect(
+      isPromoActive(promo({ validUntil: "2026-09-30" }), lateEvening, "Europe/Stockholm"),
+    ).toBe(false);
+  });
 });
 
 describe("memoryChecklist", () => {
