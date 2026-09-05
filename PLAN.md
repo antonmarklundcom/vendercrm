@@ -2874,3 +2874,5 @@ the container, so integration suites run only in CI; run `npm run lint`,
 ### 15.9 Wave 1 build log index
 
 One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
+
+- P1 Automation library — PR #96 — `docs/log/p1.md`
