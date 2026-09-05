@@ -73,6 +73,19 @@ export async function listRunsForFlow(ctx: TenantContext, flowId: string) {
   return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
+/**
+ * Every step a run executed, oldest first — the answer to "why did my
+ * customer get that message?" (§15.5 J1's per-run step log). Ordered by
+ * execution time and then id, so two steps written inside the same second
+ * still read in the order they ran.
+ */
+export async function listStepsForRun(ctx: TenantContext, runId: string) {
+  const rows = await tenantDb(ctx).select(flowRunSteps, eq(flowRunSteps.runId, runId));
+  return rows.sort(
+    (a, b) => a.executedAt.getTime() - b.executedAt.getTime() || a.id.localeCompare(b.id),
+  );
+}
+
 export async function cancelRun(ctx: TenantContext, runId: string) {
   await tenantDb(ctx)
     .update(flowRuns)

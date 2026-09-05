@@ -15,6 +15,7 @@ import {
   listDocumentItems,
   setDocumentPdfKey,
 } from "./documents";
+import { documentEvents } from "./events";
 import { renderDocumentPdf } from "./pdf";
 import { balanceOf, paymentStateOf, type DocumentStatus } from "./types";
 
@@ -145,6 +146,16 @@ export async function sendDocumentToContact(
       whatsappError,
     },
     userId: ctx.userId,
+  });
+
+  await documentEvents.emit("document.sent", {
+    tenantId: ctx.tenantId,
+    contactId: document.contactId,
+    documentId: document.id,
+    dealId: document.dealId ?? null,
+    number: document.number,
+    total: document.total,
+    currency: document.currency,
   });
 
   return { messageId, publicUrl, whatsappError };

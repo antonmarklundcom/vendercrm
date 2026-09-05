@@ -56,3 +56,15 @@ export async function switchBusinessAction(formData: FormData) {
   revalidatePath("/", "layout");
   redirect(target);
 }
+
+/**
+ * Clears the bell (PLAN.md §15.5 J1). Scoped to the acting user inside the
+ * module, so this action carries no id a caller could point at somebody
+ * else's notifications.
+ */
+export async function markAllNotificationsReadAction() {
+  const ctx = await requireTenantContext();
+  const { markAllRead } = await import("@/modules/notifications/notifications");
+  await markAllRead(ctx, ctx.userId);
+  revalidatePath("/", "layout");
+}

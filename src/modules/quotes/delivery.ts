@@ -9,6 +9,7 @@ import {
   sendDocumentOverWhatsapp,
   storeDocumentPdf,
 } from "@/modules/renderable-document/delivery";
+import { quoteEvents } from "./events";
 import { getQuote, listQuoteItems, setQuotePdfKey, setQuoteStatus } from "./quotes";
 import { renderQuotePdf } from "./pdf";
 
@@ -122,6 +123,20 @@ export async function sendQuote(ctx: TenantContext, quoteId: string): Promise<Se
       whatsappError,
     },
     userId: ctx.userId,
+  });
+
+  // Fired after the activity, so a listener that reads the timeline sees the
+  // same history the rep does. Emitting is not delivery: the quote is "sent"
+  // whether or not WhatsApp took it, and a follow-up sequence keyed on this
+  // is exactly what a closed window needs (§15.5 J1).
+  await quoteEvents.emit("quote.sent", {
+    tenantId: ctx.tenantId,
+    contactId: quote.contactId,
+    quoteId: quote.id,
+    dealId: quote.dealId ?? null,
+    number: quote.number,
+    total: quote.total,
+    currency: quote.currency,
   });
 
   return { messageId, publicUrl, whatsappError };

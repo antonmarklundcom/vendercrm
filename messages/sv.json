@@ -1000,7 +1000,19 @@
         "lead_received": "Lead mottaget (webbplats eller formulär)",
         "deal_stage_changed": "Affären bytte steg",
         "contact_created": "Kontakt skapad",
-        "tag_added": "Tagg tillagd"
+        "tag_added": "Tagg tillagd",
+        "booking_created": "Bokning skapad",
+        "booking_cancelled": "Bokning avbokad",
+        "booking_no_show": "Uteblev från bokningen",
+        "booking_completed": "Bokning genomförd",
+        "chat_lead_captured": "Lead fångad i webbchatten",
+        "quote_sent": "Offert skickad",
+        "quote_accepted": "Offert accepterad",
+        "document_sent": "Säljnota skickad",
+        "document_paid": "Säljnota betald",
+        "deal_won": "Affär vunnen",
+        "deal_lost": "Affär förlorad",
+        "contract_accepted": "Avtal accepterat"
       },
       "statusValues": {
         "draft": "Utkast",
@@ -1040,7 +1052,15 @@
           "wait_duration": "Vänta",
           "wait_for_reply": "Vänta på svar",
           "ai_reply": "Svara med AI",
-          "send_review_request": "Be om en Google-recension"
+          "send_review_request": "Be om en Google-recension",
+          "offer_slots": "Erbjud tider",
+          "create_task": "Skapa uppgift",
+          "notify_user": "Meddela en användare",
+          "send_email": "Skicka e-post",
+          "deal_value": "Affärens värde?",
+          "lead_source": "Leadets källa?",
+          "site": "Vilken sajt?",
+          "contact_field": "Kontaktfält?"
         },
         "fields": {
           "text": "Text",
@@ -1058,10 +1078,45 @@
           "aiModeSend": "Skicka automatiskt",
           "aiModeHint": "Automatisk sändning måste också vara påslagen för hela kontot under Inställningar. Så länge kontot står i utkastläge skapar den här noden utkast.",
           "reviewTextPlaceholder": "Tack för ditt köp! Lämna gärna en recension: {tag}",
-          "reviewTextHint": "Lämnar du fältet tomt skickas ett standardmeddelande med länken. Ange recensionslänken under Inställningar."
+          "reviewTextHint": "Lämnar du fältet tomt skickas ett standardmeddelande med länken. Ange recensionslänken under Inställningar.",
+          "taskTitle": "Uppgiftens rubrik",
+          "dueInHours": "Förfaller om (timmar)",
+          "assignee": "Ansvarig",
+          "assigneeDealOwner": "Affärens ansvariga",
+          "assigneeContactOwner": "Kontaktens ansvariga",
+          "assigneeSpecific": "En viss användare",
+          "notifyTitle": "Aviseringens rubrik",
+          "notifyBody": "Aviseringens text",
+          "subject": "Ämne",
+          "emailBody": "Meddelande",
+          "emailHint": "Skickas till kontaktens e-post. Saknas e-post hoppas steget över och loggas.",
+          "bookingTypeId": "Boknings-ID",
+          "operator": "Jämförelse",
+          "operatorGte": "Större än eller lika med",
+          "operatorLt": "Mindre än",
+          "operatorEquals": "Är lika med",
+          "operatorContains": "Innehåller",
+          "amount": "Belopp",
+          "leadSource": "Källa",
+          "siteId": "Sajt-ID",
+          "fieldKey": "Fält",
+          "fieldValue": "Värde"
         },
         "mobileReadOnly": "Den visuella redigeraren behöver en större skärm. På mobilen kan du läsa flödet; för att redigera det, öppna det på en dator.",
         "mobileEmpty": "Flödet har inga steg ännu."
+      },
+      "runDetailTitle": "Körningens detaljer",
+      "stepsTitle": "Steg",
+      "noSteps": "Den här körningen har inga steg än",
+      "stepWhen": "När",
+      "stepNode": "Nod",
+      "stepStatus": "Resultat",
+      "stepDetail": "Detalj",
+      "backToFlow": "Tillbaka till flödet",
+      "stepStatusValues": {
+        "ok": "Utfört",
+        "skipped": "Överhoppat",
+        "failed": "Misslyckades"
       }
     },
     "sites": {
@@ -1694,6 +1749,11 @@
       "alreadyApplied": "Du har redan tillämpat branschen \\u201c{name}\\u201d.",
       "alreadyAppliedHelp": "Du kan tillämpa en annan när du vill: den läggs till det du har och ersätter aldrig något.",
       "additiveNote": "Att tillämpa en bransch lägger bara till tjänster, resurser, steg och etiketter. Den tar aldrig bort eller ändrar det du redan konfigurerat."
+    },
+    "notifications": {
+      "title": "Aviseringar",
+      "empty": "Du har inga aviseringar",
+      "markAllRead": "Markera alla som lästa"
     }
   },
   "superadmin": {
@@ -2000,12 +2060,31 @@
         "preview": {
           "eyebrow": "Systemet i drift",
           "url": "app.clientes.com.py",
-          "tabs": ["Pipeline", "Kontakter", "WhatsApp", "Rapporter"],
-          "stages": ["Ny", "Kontaktad", "Offert skickad", "Kund"],
+          "tabs": [
+            "Pipeline",
+            "Kontakter",
+            "WhatsApp",
+            "Rapporter"
+          ],
+          "stages": [
+            "Ny",
+            "Kontaktad",
+            "Offert skickad",
+            "Kund"
+          ],
           "stats": [
-            { "label": "Förfrågningar denna månad", "value": "184" },
-            { "label": "Första svar", "value": "4 min" },
-            { "label": "Avslutsgrad", "value": "34%" }
+            {
+              "label": "Förfrågningar denna månad",
+              "value": "184"
+            },
+            {
+              "label": "Första svar",
+              "value": "4 min"
+            },
+            {
+              "label": "Avslutsgrad",
+              "value": "34%"
+            }
           ],
           "disclaimer": "Illustrativ vy av panelen."
         }

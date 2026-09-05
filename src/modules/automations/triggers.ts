@@ -4,6 +4,8 @@ import { crmEvents } from "@/modules/crm/events";
 import { leadEvents } from "@/modules/leads/events";
 import { bookingEvents } from "@/modules/booking/events";
 import { chatEvents } from "@/modules/chatwidget/events";
+import { quoteEvents } from "@/modules/quotes/events";
+import { documentEvents } from "@/modules/documents/events";
 import { whatsappEvents } from "@/modules/whatsapp/events";
 import { listActiveFlowsForTrigger } from "./flows";
 import { startRun } from "./engine";
@@ -99,7 +101,69 @@ export function registerAutomationTriggers() {
       contactId,
       data: { dealId, fromStageId, toStageId },
     });
+
+    // Won/lost is derived from where the deal landed rather than emitted by
+    // `closeDeal` (§15.5 J1). The stage flags are the definition of won and
+    // lost in this product, so a card dragged into "Ganado" on the board
+    // fires exactly what the close button fires — and one listener covers
+    // both paths instead of two emit sites that can drift.
+    const outcome = await outcomeOfStage(ctx, toStageId);
+    if (outcome) {
+      await fireTrigger({
+        tenantId,
+        triggerType: outcome === "won" ? "deal_won" : "deal_lost",
+        contactId,
+        data: { dealId, fromStageId, toStageId },
+      });
+    }
   });
+
+  // Sales documents (§15.5 J1). Each event already carries the contact, so
+  // unlike the deal events above these need no lookup.
+  quoteEvents.on("quote.sent", async ({ tenantId, contactId, quoteId, dealId, number, total }) => {
+    await fireTrigger({
+      tenantId,
+      triggerType: "quote_sent",
+      contactId,
+      data: { quoteId, dealId, number, total },
+    });
+  });
+
+  quoteEvents.on(
+    "quote.accepted",
+    async ({ tenantId, contactId, quoteId, dealId, number, total }) => {
+      await fireTrigger({
+        tenantId,
+        triggerType: "quote_accepted",
+        contactId,
+        data: { quoteId, dealId, number, total },
+      });
+    },
+  );
+
+  documentEvents.on(
+    "document.sent",
+    async ({ tenantId, contactId, documentId, dealId, number, total }) => {
+      await fireTrigger({
+        tenantId,
+        triggerType: "document_sent",
+        contactId,
+        data: { documentId, dealId, number, total },
+      });
+    },
+  );
+
+  documentEvents.on(
+    "document.paid",
+    async ({ tenantId, contactId, documentId, dealId, number, total }) => {
+      await fireTrigger({
+        tenantId,
+        triggerType: "document_paid",
+        contactId,
+        data: { documentId, dealId, number, total },
+      });
+    },
+  );
 
   leadEvents.on("lead.received", async ({ tenantId, contactId, formId, siteId }) => {
     // A hosted-form lead fires both triggers so a flow can target either
@@ -199,6 +263,22 @@ export function registerAutomationTriggers() {
       data: { messageId, body },
     });
   });
+}
+
+/**
+ * Whether a stage is the pipeline's won or lost column. Null for an ordinary
+ * stage — most stage changes are neither, and this runs on every one of them.
+ */
+async function outcomeOfStage(
+  ctx: TenantContext,
+  stageId: string,
+): Promise<"won" | "lost" | null> {
+  const { getStage } = await import("@/modules/crm/pipelines");
+  const stage = await getStage(ctx, stageId);
+  if (!stage) return null;
+  if (stage.isWon) return "won";
+  if (stage.isLost) return "lost";
+  return null;
 }
 
 async function contactForDeal(ctx: TenantContext, dealId: string): Promise<string | null> {

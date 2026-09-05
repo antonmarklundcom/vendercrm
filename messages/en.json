@@ -1000,7 +1000,19 @@
         "lead_received": "Lead received (site or form)",
         "deal_stage_changed": "Deal changed stage",
         "contact_created": "Contact created",
-        "tag_added": "Tag added"
+        "tag_added": "Tag added",
+        "booking_created": "Booking created",
+        "booking_cancelled": "Booking cancelled",
+        "booking_no_show": "Booking no-show",
+        "booking_completed": "Booking completed",
+        "chat_lead_captured": "Lead captured in web chat",
+        "quote_sent": "Quote sent",
+        "quote_accepted": "Quote accepted",
+        "document_sent": "Sales note sent",
+        "document_paid": "Sales note paid",
+        "deal_won": "Deal won",
+        "deal_lost": "Deal lost",
+        "contract_accepted": "Contract accepted"
       },
       "statusValues": {
         "draft": "Draft",
@@ -1040,7 +1052,15 @@
           "wait_duration": "Wait",
           "wait_for_reply": "Wait for reply",
           "ai_reply": "Reply with AI",
-          "send_review_request": "Ask for a Google review"
+          "send_review_request": "Ask for a Google review",
+          "offer_slots": "Offer time slots",
+          "create_task": "Create task",
+          "notify_user": "Notify a user",
+          "send_email": "Send email",
+          "deal_value": "Deal value?",
+          "lead_source": "Lead source?",
+          "site": "Which site?",
+          "contact_field": "Contact field?"
         },
         "fields": {
           "text": "Text",
@@ -1058,10 +1078,45 @@
           "aiModeSend": "Send automatically",
           "aiModeHint": "Automatic sending also has to be enabled for the whole account in Settings. While the account is in draft mode, this node produces drafts.",
           "reviewTextPlaceholder": "Thanks for your purchase! Leave us a review: {tag}",
-          "reviewTextHint": "Leave it empty and a default message with the link is sent. Set the review link in Settings."
+          "reviewTextHint": "Leave it empty and a default message with the link is sent. Set the review link in Settings.",
+          "taskTitle": "Task title",
+          "dueInHours": "Due in (hours)",
+          "assignee": "Assignee",
+          "assigneeDealOwner": "Deal owner",
+          "assigneeContactOwner": "Contact owner",
+          "assigneeSpecific": "A specific user",
+          "notifyTitle": "Notification title",
+          "notifyBody": "Notification detail",
+          "subject": "Subject",
+          "emailBody": "Message",
+          "emailHint": "Sent to the contact's email. With no email on file the step is skipped and logged.",
+          "bookingTypeId": "Booking type ID",
+          "operator": "Comparison",
+          "operatorGte": "Greater than or equal to",
+          "operatorLt": "Less than",
+          "operatorEquals": "Equals",
+          "operatorContains": "Contains",
+          "amount": "Amount",
+          "leadSource": "Source",
+          "siteId": "Site ID",
+          "fieldKey": "Field",
+          "fieldValue": "Value"
         },
         "mobileReadOnly": "The visual editor needs a bigger screen. On a phone you can read the flow; to edit it, open it on a computer.",
         "mobileEmpty": "This flow has no steps yet."
+      },
+      "runDetailTitle": "Run detail",
+      "stepsTitle": "Steps",
+      "noSteps": "This run has no steps yet",
+      "stepWhen": "When",
+      "stepNode": "Node",
+      "stepStatus": "Result",
+      "stepDetail": "Detail",
+      "backToFlow": "Back to the flow",
+      "stepStatusValues": {
+        "ok": "Executed",
+        "skipped": "Skipped",
+        "failed": "Failed"
       }
     },
     "sites": {
@@ -1694,6 +1749,11 @@
       "alreadyApplied": "You already applied the \\u201c{name}\\u201d industry.",
       "alreadyAppliedHelp": "You can apply another one whenever you like: it adds to what you have and never replaces anything.",
       "additiveNote": "Applying an industry only adds services, resources, stages and tags. It never deletes or changes what you already configured."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "You have no notifications",
+      "markAllRead": "Mark all as read"
     }
   },
   "superadmin": {
@@ -2000,12 +2060,31 @@
         "preview": {
           "eyebrow": "The system at work",
           "url": "app.clientes.com.py",
-          "tabs": ["Pipeline", "Contacts", "WhatsApp", "Reports"],
-          "stages": ["New", "Contacted", "Proposal sent", "Customer"],
+          "tabs": [
+            "Pipeline",
+            "Contacts",
+            "WhatsApp",
+            "Reports"
+          ],
+          "stages": [
+            "New",
+            "Contacted",
+            "Proposal sent",
+            "Customer"
+          ],
           "stats": [
-            { "label": "Enquiries this month", "value": "184" },
-            { "label": "First response", "value": "4 min" },
-            { "label": "Close rate", "value": "34%" }
+            {
+              "label": "Enquiries this month",
+              "value": "184"
+            },
+            {
+              "label": "First response",
+              "value": "4 min"
+            },
+            {
+              "label": "Close rate",
+              "value": "34%"
+            }
           ],
           "disclaimer": "Illustrative preview of the panel."
         }
