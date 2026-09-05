@@ -1,50 +1,26 @@
 import { NextResponse } from "next/server";
-import { inArray } from "drizzle-orm";
-import { contacts } from "@/db/schema";
-import { tenantDb } from "@/modules/tenancy/db";
-import { listConversations } from "@/modules/whatsapp/inbox";
 import { requireSession } from "@/lib/api/guards";
+import { getInboxRows, INBOX_FILTERS } from "@/app/(app)/inbox/rows";
+import type { InboxListFilter } from "@/modules/whatsapp/inbox";
 
 // Backs the inbox list's 5s poll (PLAN.md §6.5). Session-authenticated,
-// same-origin only — no API key path, unlike /api/v1/leads.
-//
-// The contacts are fetched in ONE query keyed by the conversations already
-// loaded, not one query per conversation. This route runs every 5 seconds
-// for every rep with the inbox open, so an N+1 here is the single most
-// repeated query pattern in the product: a tenant with 200 conversations
-// was issuing 201 statements per poll, per open tab, against Hostinger's
-// single MySQL (§2.1).
-export async function GET() {
+// same-origin only — no API key path, unlike /api/v1/leads. Accepts the same
+// `filter`/`q` query params as the page itself, so the poll shows the exact
+// list the rep filtered to rather than silently reverting to "all" every 5s
+// (PLAN.md §15.8 P3).
+export async function GET(request: Request) {
   const guard = await requireSession();
   if (!guard.ok) return guard.response;
   const { ctx } = guard;
 
-  const conversations = await listConversations(ctx);
+  const url = new URL(request.url);
+  const filterParam = url.searchParams.get("filter");
+  const filter: InboxListFilter = INBOX_FILTERS.includes(filterParam as InboxListFilter)
+    ? (filterParam as InboxListFilter)
+    : "all";
+  const q = url.searchParams.get("q") ?? undefined;
 
-  const contactIds = [...new Set(conversations.map((c) => c.contactId))];
-  const contactRows = contactIds.length
-    ? await tenantDb(ctx).select(contacts, inArray(contacts.id, contactIds))
-    : [];
-  const contactById = new Map(contactRows.map((row) => [row.id, row]));
+  const conversations = await getInboxRows(ctx, { filter, q });
 
-  const withContacts = conversations.map((conversation) => {
-    const contact = contactById.get(conversation.contactId);
-    return {
-      id: conversation.id,
-      contactId: conversation.contactId,
-      contactName: contact?.name ?? conversation.contactId,
-      contactPhone: contact?.phone ?? "",
-      unreadCount: conversation.unreadCount,
-      // Just the id: the tenant's user list is passed once from the page and
-      // does not change between polls, so resolving names here would add a
-      // second query to the most repeated request in the product.
-      assignedUserId: conversation.assignedUserId,
-      lastMessageAt: conversation.lastMessageAt,
-    };
-  });
-
-  return NextResponse.json(
-    { conversations: withContacts },
-    { headers: { "Cache-Control": "no-store" } },
-  );
+  return NextResponse.json({ conversations }, { headers: { "Cache-Control": "no-store" } });
 }

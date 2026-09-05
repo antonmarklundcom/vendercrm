@@ -6,6 +6,7 @@ import {
   listConversationsForContact,
   listMessagesForConversation,
 } from "@/modules/whatsapp/inbox";
+import { listNotesForContact } from "@/modules/whatsapp/notes";
 import { listActivitiesForContact, type ActivityType } from "./activities";
 
 // Unified contact timeline (PLAN.md §5: "activities + WhatsApp messages +
@@ -61,6 +62,15 @@ export type TimelineEntry =
       siteId: string | null;
       campaign?: string;
       pageUrl: string | null;
+    }
+  | {
+      // An inbox internal note (§15.8 P3) — never sent, distinct from the
+      // "note" ActivityType a rep types straight onto the contact record.
+      kind: "conversationNote";
+      id: string;
+      at: Date;
+      body: string;
+      authorUserId: string;
     };
 
 type Utm = { campaign?: string };
@@ -77,13 +87,14 @@ export async function getContactTimeline(
   ctx: TenantContext,
   contactId: string,
 ): Promise<TimelineEntry[]> {
-  const [activities, conversations, contactQuotes, contactDocuments, leads] =
+  const [activities, conversations, contactQuotes, contactDocuments, leads, notes] =
     await Promise.all([
       listActivitiesForContact(ctx, contactId),
       listConversationsForContact(ctx, contactId),
       tenantDb(ctx).select(quotes, eq(quotes.contactId, contactId)),
       tenantDb(ctx).select(documents, eq(documents.contactId, contactId)),
       tenantDb(ctx).select(leadSubmissions, eq(leadSubmissions.contactId, contactId)),
+      listNotesForContact(ctx, contactId),
     ]);
 
   const messages = (
@@ -149,6 +160,15 @@ export async function getContactTimeline(
         siteId: lead.siteId,
         campaign: (lead.utm as Utm | null)?.campaign,
         pageUrl: lead.pageUrl,
+      }),
+    ),
+    ...notes.map(
+      (note): TimelineEntry => ({
+        kind: "conversationNote",
+        id: note.id,
+        at: note.createdAt,
+        body: note.body,
+        authorUserId: note.authorUserId,
       }),
     ),
   ];

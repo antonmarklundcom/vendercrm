@@ -638,7 +638,8 @@
           "nameTaken": "A view with that name already exists",
           "unknown": "The view couldn't be saved"
         }
-      }
+      },
+      "timelineConversationNote": "Internal note"
     },
     "inbox": {
       "title": "Inbox",
@@ -685,7 +686,36 @@
       },
       "actionFailed": "We couldn't complete the action. Try again.",
       "offerSlots": "Offer slots",
-      "offerSlotsSent": "Sent {count} slots"
+      "offerSlotsSent": "Sent {count} slots",
+      "filter": {
+        "all": "All",
+        "mine": "Mine",
+        "unassigned": "Unassigned",
+        "unread": "Unread"
+      },
+      "searchPlaceholder": "Search by name, phone or message…",
+      "channelWhatsapp": "WhatsApp",
+      "channelWebchat": "Web chat",
+      "unknownContact": "Visitor",
+      "markUnread": "Mark as unread",
+      "addNote": "Add note",
+      "notePlaceholder": "Write an internal note (not sent to the customer)…",
+      "saveNote": "Save note",
+      "noteRequired": "Write something before saving the note.",
+      "noteAuthor": "Note from {name}",
+      "quickReplyName": "Name",
+      "quickReplyBody": "Message",
+      "quickReplyBodyHint": "You can include the contact's name automatically in the message.",
+      "quickReplyCreate": "Create quick reply",
+      "quickReplyInvalid": "Fill in the name and the message.",
+      "quickRepliesTitle": "Quick replies",
+      "quickRepliesIntro": "Saved messages your team can insert by typing \"/\" in the conversation.",
+      "quickReplySave": "Save",
+      "quickReplyDelete": "Delete",
+      "quickRepliesEmpty": "No quick replies yet.",
+      "manageQuickReplies": "Manage quick replies",
+      "optoutConfirm": "This contact asked not to receive more messages (tagged \"optout\"). Send anyway?",
+      "optoutConfirmSend": "Send anyway"
     },
     "whatsapp": {
       "title": "WhatsApp",

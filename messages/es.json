@@ -441,7 +441,8 @@
           "nameTaken": "Ya existe una vista con ese nombre",
           "unknown": "No se pudo guardar la vista"
         }
-      }
+      },
+      "timelineConversationNote": "Nota interna"
     },
     "pipeline": {
       "title": "Pipeline",
@@ -814,7 +815,36 @@
       },
       "actionFailed": "No pudimos completar la acción. Probá de nuevo.",
       "offerSlots": "Ofrecer horarios",
-      "offerSlotsSent": "Se enviaron {count} horarios"
+      "offerSlotsSent": "Se enviaron {count} horarios",
+      "filter": {
+        "all": "Todas",
+        "mine": "Mías",
+        "unassigned": "Sin asignar",
+        "unread": "No leídas"
+      },
+      "searchPlaceholder": "Buscar por nombre, teléfono o mensaje…",
+      "channelWhatsapp": "WhatsApp",
+      "channelWebchat": "Chat web",
+      "unknownContact": "Visitante",
+      "markUnread": "Marcar como no leída",
+      "addNote": "Agregar nota",
+      "notePlaceholder": "Escribí una nota interna (no se envía al cliente)…",
+      "saveNote": "Guardar nota",
+      "noteRequired": "Escribí algo antes de guardar la nota.",
+      "noteAuthor": "Nota de {name}",
+      "quickReplyName": "Nombre",
+      "quickReplyBody": "Mensaje",
+      "quickReplyBodyHint": "Podés incluir el nombre del contacto automáticamente en el mensaje.",
+      "quickReplyCreate": "Crear respuesta rápida",
+      "quickReplyInvalid": "Completá el nombre y el mensaje.",
+      "quickRepliesTitle": "Respuestas rápidas",
+      "quickRepliesIntro": "Mensajes guardados que tu equipo puede insertar escribiendo \"/\" en la conversación.",
+      "quickReplySave": "Guardar",
+      "quickReplyDelete": "Eliminar",
+      "quickRepliesEmpty": "Todavía no hay respuestas rápidas.",
+      "manageQuickReplies": "Gestionar respuestas rápidas",
+      "optoutConfirm": "Este contacto pidió no recibir más mensajes (etiqueta \"optout\"). ¿Enviar de todos modos?",
+      "optoutConfirmSend": "Enviar igual"
     },
     "sites": {
       "title": "Sitios",

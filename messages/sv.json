@@ -638,7 +638,8 @@
           "nameTaken": "Det finns redan en vy med det namnet",
           "unknown": "Vyn kunde inte sparas"
         }
-      }
+      },
+      "timelineConversationNote": "Intern anteckning"
     },
     "inbox": {
       "title": "Inkorg",
@@ -685,7 +686,36 @@
       },
       "actionFailed": "Vi kunde inte slutföra åtgärden. Försök igen.",
       "offerSlots": "Erbjud tider",
-      "offerSlotsSent": "Skickade {count} tider"
+      "offerSlotsSent": "Skickade {count} tider",
+      "filter": {
+        "all": "Alla",
+        "mine": "Mina",
+        "unassigned": "Otilldelade",
+        "unread": "Olästa"
+      },
+      "searchPlaceholder": "Sök på namn, telefon eller meddelande…",
+      "channelWhatsapp": "WhatsApp",
+      "channelWebchat": "Webbchatt",
+      "unknownContact": "Besökare",
+      "markUnread": "Markera som oläst",
+      "addNote": "Lägg till anteckning",
+      "notePlaceholder": "Skriv en intern anteckning (skickas inte till kunden)…",
+      "saveNote": "Spara anteckning",
+      "noteRequired": "Skriv något innan du sparar anteckningen.",
+      "noteAuthor": "Anteckning från {name}",
+      "quickReplyName": "Namn",
+      "quickReplyBody": "Meddelande",
+      "quickReplyBodyHint": "Du kan inkludera kontaktens namn automatiskt i meddelandet.",
+      "quickReplyCreate": "Skapa snabbsvar",
+      "quickReplyInvalid": "Fyll i namn och meddelande.",
+      "quickRepliesTitle": "Snabbsvar",
+      "quickRepliesIntro": "Sparade meddelanden som ditt team kan infoga genom att skriva \"/\" i konversationen.",
+      "quickReplySave": "Spara",
+      "quickReplyDelete": "Ta bort",
+      "quickRepliesEmpty": "Inga snabbsvar än.",
+      "manageQuickReplies": "Hantera snabbsvar",
+      "optoutConfirm": "Den här kontakten bad om att inte få fler meddelanden (taggad \"optout\"). Skicka ändå?",
+      "optoutConfirmSend": "Skicka ändå"
     },
     "whatsapp": {
       "title": "WhatsApp",
