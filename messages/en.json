@@ -294,6 +294,19 @@
           "subtitle": "Arrived {hours, plural, one {# hour} other {# hours}} ago",
           "action": "View contact"
         }
+      },
+      "briefing": {
+        "title": "Weekly briefing",
+        "notificationTitle": "Your weekly briefing is ready",
+        "viewAll": "View all briefings",
+        "listTitle": "Weekly briefings",
+        "empty": "No briefing yet. The first one arrives on Monday.",
+        "recommendationsTitle": "Recommendations",
+        "weekOf": "Week of {date}",
+        "sourceValues": {
+          "ai": "AI-generated",
+          "template": "Automatic"
+        }
       }
     },
     "pipeline": {
@@ -3351,6 +3364,11 @@
       "appointmentsSubject": "You have {count} appointment(s) today",
       "appointmentsBody": "On your calendar for the next 24 hours: {count} appointment(s).",
       "allDay": "All day"
+    },
+    "weeklyBriefing": {
+      "subject": "{business}'s weekly briefing",
+      "title": "Your weekly briefing",
+      "cta": "View the full briefing"
     }
   },
   "pdf": {

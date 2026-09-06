@@ -294,6 +294,19 @@
           "subtitle": "Kom in för {hours, plural, one {# timme} other {# timmar}} sedan",
           "action": "Visa kontakt"
         }
+      },
+      "briefing": {
+        "title": "Veckans briefing",
+        "notificationTitle": "Din veckobriefing är klar",
+        "viewAll": "Se alla briefingar",
+        "listTitle": "Veckobriefingar",
+        "empty": "Ingen briefing ännu. Den första kommer på måndag.",
+        "recommendationsTitle": "Rekommendationer",
+        "weekOf": "Veckan från {date}",
+        "sourceValues": {
+          "ai": "AI-genererad",
+          "template": "Automatisk"
+        }
       }
     },
     "pipeline": {
@@ -3351,6 +3364,11 @@
       "appointmentsSubject": "Du har {count} bokning(ar) idag",
       "appointmentsBody": "I din kalender de närmaste 24 timmarna: {count} bokning(ar).",
       "allDay": "Heldag"
+    },
+    "weeklyBriefing": {
+      "subject": "{business}s veckobriefing",
+      "title": "Din veckobriefing",
+      "cta": "Se hela briefingen"
     }
   },
   "pdf": {

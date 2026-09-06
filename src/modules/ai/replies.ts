@@ -22,7 +22,7 @@ export type RecordReplyInput = {
   /** Null until a website visitor gives a phone and becomes a contact. */
   contactId?: string;
   /** What the call was for; absent means a customer reply (PLAN.md §16.2 rule 6). */
-  kind?: "reply" | "memory_extract" | "setup_plan";
+  kind?: "reply" | "memory_extract" | "setup_plan" | "weekly_briefing";
   mode: "draft" | "send";
   status: "draft" | "sent" | "failed";
   prompt: string;

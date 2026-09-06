@@ -16,6 +16,8 @@ import { requireTenantContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { getDashboardSummary } from "@/modules/dashboard/summary";
 import { buildHoy, type HoyItem } from "@/modules/coach/hoy";
+import { getLatestBriefing } from "@/modules/coach/briefing";
+import { BriefingCard } from "./BriefingCard";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { TaskList, type TaskListLabels } from "@/components/task-list";
@@ -149,7 +151,7 @@ function HoyPanel({ items, title, empty }: { items: HoyItem[]; title: string; em
                   </div>
                 </div>
                 <Link
-                  href={item.url}
+                  href={`/dashboard/hoy-redirect?kind=${encodeURIComponent(item.kind)}&severity=${item.severity}&origin=panel&to=${encodeURIComponent(item.url)}`}
                   className="flex shrink-0 items-center gap-1 text-sm font-medium whitespace-nowrap underline-offset-4 hover:underline"
                 >
                   {item.action}
@@ -176,11 +178,12 @@ export default async function DashboardPage() {
   const tenant = await getTenant(ctx.tenantId);
   const timeZone = tenant?.timezone || DEFAULT_TIMEZONE;
 
-  const [summary, leadStats, sites, hoy] = await Promise.all([
+  const [summary, leadStats, sites, hoy, briefing] = await Promise.all([
     getDashboardSummary(ctx, { timeZone }),
     getLeadStats(ctx),
     listSites(ctx),
     buildHoy(ctx),
+    getLatestBriefing(ctx),
   ]);
 
   // Sites are shown by name; the stats module groups by id because that is
@@ -192,6 +195,7 @@ export default async function DashboardPage() {
   const tTasks = await getTranslations("app.contacts.tasks");
   const tLeads = await getTranslations("app.dashboard.leads");
   const tHoy = await getTranslations("app.dashboard.hoy");
+  const tBriefing = await getTranslations("app.dashboard.briefing");
   const taskLabels: TaskListLabels = {
     complete: tTasks("complete"),
     reopen: tTasks("reopen"),
@@ -236,6 +240,18 @@ export default async function DashboardPage() {
       />
 
       <HoyPanel items={hoy} title={tHoy("title")} empty={tHoy("empty")} />
+
+      {briefing && (
+        <BriefingCard
+          briefing={briefing}
+          locale={locale}
+          labels={{
+            title: tBriefing("title"),
+            viewAll: tBriefing("viewAll"),
+            recommendationsTitle: tBriefing("recommendationsTitle"),
+          }}
+        />
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

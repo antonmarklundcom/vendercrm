@@ -53,12 +53,17 @@ export async function sendMorningDigests(now: Date = new Date()): Promise<number
       if (items.length === 0) continue;
 
       const topThree = items.slice(0, 3).map((item) => item.title).join(" · ");
+      // The tap-through is the top-ranked item's own action, tracked the same
+      // way the dashboard panel's button is (§17.5, §17.2 P14) — the digest
+      // names three, but the link is one deep-link, not a menu.
+      const top = items[0];
+      const trackedUrl = `/dashboard/hoy-redirect?kind=${encodeURIComponent(top.kind)}&severity=${top.severity}&origin=push&to=${encodeURIComponent(top.url)}`;
       await createNotification(ctx, {
         userId: user.id,
         kind: "system",
         title: t("digest.title", { count: items.length }),
         body: topThree,
-        url: "/dashboard",
+        url: trackedUrl,
       });
       sent += 1;
     }

@@ -294,6 +294,19 @@
           "subtitle": "Llegó hace {hours, plural, one {# hora} other {# horas}}",
           "action": "Ver contacto"
         }
+      },
+      "briefing": {
+        "title": "Briefing semanal",
+        "notificationTitle": "Tu briefing semanal está listo",
+        "viewAll": "Ver todos los briefings",
+        "listTitle": "Briefings semanales",
+        "empty": "Todavía no hay un briefing. El primero llega el lunes.",
+        "recommendationsTitle": "Recomendaciones",
+        "weekOf": "Semana del {date}",
+        "sourceValues": {
+          "ai": "Generado con IA",
+          "template": "Automático"
+        }
       }
     },
     "contacts": {
@@ -3351,6 +3364,11 @@
       "appointmentsSubject": "Tenés {count} cita(s) para hoy",
       "appointmentsBody": "En tu agenda para las próximas 24 horas: {count} cita(s).",
       "allDay": "Todo el día"
+    },
+    "weeklyBriefing": {
+      "subject": "Briefing semanal de {business}",
+      "title": "Tu briefing semanal",
+      "cta": "Ver el briefing completo"
     }
   },
   "pdf": {
