@@ -293,6 +293,10 @@
           "title": "{name} todavía sin negocio",
           "subtitle": "Llegó hace {hours, plural, one {# hora} other {# horas}}",
           "action": "Ver contacto"
+        },
+        "voice": {
+          "intro": "Tenés {count, plural, one {# cosa pendiente} other {# cosas pendientes}} hoy:",
+          "empty": "No tenés nada urgente por ahora. Buen trabajo."
         }
       }
     },
@@ -709,7 +713,8 @@
         "reviewLinkInvalid": "Ese enlace no parece válido.",
         "aiLimitInvalid": "Ese límite no es un número válido.",
         "aiHandoffKeywordRequired": "Poné una palabra para pasar a un humano.",
-        "unknown": "No se pudo guardar. Intentá de nuevo."
+        "unknown": "No se pudo guardar. Intentá de nuevo.",
+        "coachPhoneInvalid": "Escribí un número de teléfono válido."
       },
       "language": {
         "title": "Idioma",
@@ -798,7 +803,9 @@
         "resendNotConfigured": "El envío de email por dominio propio no está configurado en esta plataforma todavía.",
         "fromLocalPartLabel": "Nombre de usuario del remitente (antes del @)",
         "fromLocalPartSave": "Guardar"
-      }
+      },
+      "coachPhoneTitle": "Tu número para el asistente",
+      "coachPhoneIntro": "Tu celular personal. Mandá un audio a tu número de WhatsApp Business preguntando qué tenés hoy y te responde con la lista de pendientes. Dejalo vacío para desactivarlo."
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -913,7 +920,21 @@
       "quickRepliesEmpty": "Todavía no hay respuestas rápidas.",
       "manageQuickReplies": "Gestionar respuestas rápidas",
       "optoutConfirm": "Este contacto pidió no recibir más mensajes (etiqueta \"optout\"). ¿Enviar de todos modos?",
-      "optoutConfirmSend": "Enviar igual"
+      "optoutConfirmSend": "Enviar igual",
+      "audio": {
+        "label": "Nota de voz",
+        "pending": "Transcribiendo la nota de voz…",
+        "failed": "No se pudo transcribir esta nota de voz",
+        "skipped": "Nota de voz sin transcripción",
+        "reason": {
+          "too_large": "el audio es demasiado grande",
+          "tenant_daily_cap": "se alcanzó el límite diario de IA",
+          "ai_not_configured": "la transcripción no está activada",
+          "no_media": "el audio no se pudo descargar",
+          "not_audio": "el mensaje no es un audio",
+          "provider": "el proveedor no respondió"
+        }
+      }
     },
     "sites": {
       "title": "Sitios",

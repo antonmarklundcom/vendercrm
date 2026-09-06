@@ -241,27 +241,49 @@ export function registerAutomationTriggers() {
     });
   });
 
-  whatsappEvents.on("wa.message_received", async ({ tenantId, contactId, messageId }) => {
-    const ctx = await buildSystemTenantContext(tenantId);
-    if (!ctx) return;
+  // A voice note whose transcription is still queued is handled on
+  // `wa.message_transcribed` instead (§15.10 W1) — the same work, once the
+  // message has words in it. Both paths run onInboundMessage below, so the
+  // opt-out check, the handoff keyword and every flow see the transcript
+  // rather than an empty body.
+  whatsappEvents.on("wa.message_received", async (event) => {
+    if (event.transcriptPending) return;
+    await onInboundMessage(event);
+  });
 
-    const body = await messageBody(ctx, messageId);
+  whatsappEvents.on("wa.message_transcribed", async (event) => {
+    await onInboundMessage(event);
+  });
+}
 
-    // An inbound reply resumes any run parked on wait-for-reply *before*
-    // new flows are matched, so a reply advances the conversation the
-    // contact is already in rather than only starting another one.
-    const { resumeOnReply } = await import("./engine");
-    await resumeOnReply(ctx, contactId);
+async function onInboundMessage({
+  tenantId,
+  contactId,
+  messageId,
+}: {
+  tenantId: string;
+  contactId: string;
+  messageId: string;
+}): Promise<void> {
+  const ctx = await buildSystemTenantContext(tenantId);
+  if (!ctx) return;
 
-    await maybeOptOut(ctx, contactId, body);
-    await maybeAiHandoff(ctx, contactId, body);
+  const body = await messageBody(ctx, messageId);
 
-    await fireTrigger({
-      tenantId,
-      triggerType: "wa_message_received",
-      contactId,
-      data: { messageId, body },
-    });
+  // An inbound reply resumes any run parked on wait-for-reply *before*
+  // new flows are matched, so a reply advances the conversation the
+  // contact is already in rather than only starting another one.
+  const { resumeOnReply } = await import("./engine");
+  await resumeOnReply(ctx, contactId);
+
+  await maybeOptOut(ctx, contactId, body);
+  await maybeAiHandoff(ctx, contactId, body);
+
+  await fireTrigger({
+    tenantId,
+    triggerType: "wa_message_received",
+    contactId,
+    data: { messageId, body },
   });
 }
 
@@ -287,12 +309,18 @@ async function contactForDeal(ctx: TenantContext, dealId: string): Promise<strin
   return deal?.contactId ?? null;
 }
 
+/** The text of a message — the transcript when it is a voice note (§15.10
+ *  W1), so "BAJA" said out loud opts a contact out exactly like "BAJA"
+ *  typed, and a flow's wait-for-reply hears an audio the same way. */
 async function messageBody(ctx: TenantContext, messageId: string): Promise<string> {
   const { eq } = await import("drizzle-orm");
   const { messages } = await import("@/db/schema");
   const { tenantDb } = await import("@/modules/tenancy/db");
   const [row] = await tenantDb(ctx).select(messages, eq(messages.id, messageId));
-  return row?.body ?? "";
+  if (!row) return "";
+  const body = (row.body ?? "").trim();
+  if (body) return body;
+  return row.transcriptStatus === "done" ? (row.transcript ?? "") : "";
 }
 
 /**

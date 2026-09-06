@@ -112,6 +112,13 @@ const envSchema = z
     /** Overrides the driver's default model. Optional — see lib/ai/*.ts. */
     AI_MODEL: z.string().min(1).optional(),
     /**
+     * Overrides the driver's default *audio* model (PLAN.md §15.10 W1).
+     * Separate from AI_MODEL because transcription is a different model on
+     * OpenAI (`gpt-4o-mini-transcribe`) even when the chat model is set, and
+     * because §15.7 item 3 leaves the provider choice open on price.
+     */
+    AI_TRANSCRIBE_MODEL: z.string().min(1).optional(),
+    /**
      * Overrides the driver's API base URL. Needed for OpenAI-compatible
      * gateways (Azure OpenAI, a self-hosted proxy) and for pointing a
      * staging deploy at a stub instead of a billable endpoint.

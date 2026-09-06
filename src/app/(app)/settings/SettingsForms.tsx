@@ -10,6 +10,7 @@ import {
   updateBusinessHoursAction,
   updateDefaultCountryAction,
   updateReviewLinkAction,
+  updateCoachPhoneAction,
   updateTimezoneAction,
   type SettingsFormState,
 } from "./actions";
@@ -160,6 +161,29 @@ export function ReviewLinkForm({ reviewLink }: { reviewLink: string }) {
           name="reviewLink"
           defaultValue={state.values.reviewLink ?? reviewLink}
           placeholder="https://g.page/r/.../review"
+          className="flex-1"
+        />
+        <Button type="submit" variant="outline" disabled={pending}>
+          {tc("save")}
+        </Button>
+      </div>
+      <ErrorOrSaved state={state} tc={tc} t={t} />
+    </form>
+  );
+}
+
+export function CoachPhoneForm({ coachPhone }: { coachPhone: string }) {
+  const t = useTranslations("app.settings");
+  const tc = useTranslations("common");
+  const [state, formAction, pending] = useActionState(updateCoachPhoneAction, initialState);
+
+  return (
+    <form action={formAction} className="flex max-w-md flex-col gap-2">
+      <div className="flex gap-2">
+        <Input
+          name="coachPhone"
+          defaultValue={state.values.coachPhone ?? coachPhone}
+          placeholder="+595981123456"
           className="flex-1"
         />
         <Button type="submit" variant="outline" disabled={pending}>

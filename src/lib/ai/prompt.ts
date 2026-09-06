@@ -110,22 +110,39 @@ export function buildSystemPrompt(business: BusinessContext): string {
  * sees the thread the way the customer does. Empty bodies (media-only
  * messages) are dropped rather than sent as blank turns.
  */
-export function toTurns(
-  messages: Array<{ direction: "in" | "out"; body: string | null }>,
-  limit = 20,
-): AiTurn[] {
+/**
+ * A message's text for the model: its body, or — for a voice note — its
+ * transcript once one exists (PLAN.md §15.10 W1). An audio still being
+ * transcribed contributes nothing rather than an empty turn, which is what
+ * makes the deferred reply in automations/triggers.ts worth deferring.
+ */
+export function messageText(message: PromptMessage): string {
+  const body = (message.body ?? "").trim();
+  if (body) return body;
+  return message.transcriptStatus === "done" ? (message.transcript ?? "").trim() : "";
+}
+
+export type PromptMessage = {
+  direction: "in" | "out";
+  body: string | null;
+  transcript?: string | null;
+  transcriptStatus?: string | null;
+};
+
+export function toTurns(messages: PromptMessage[], limit = 20): AiTurn[] {
   return messages
-    .filter((message) => (message.body ?? "").trim().length > 0)
+    .map((message) => ({ message, content: messageText(message) }))
+    .filter((entry) => entry.content.length > 0)
     .slice(-limit)
-    .map((message) => ({
-      role: message.direction === "in" ? ("user" as const) : ("assistant" as const),
-      content: (message.body ?? "").trim(),
+    .map((entry) => ({
+      role: entry.message.direction === "in" ? ("user" as const) : ("assistant" as const),
+      content: entry.content,
     }));
 }
 
 export function buildReplyPrompt(
   business: BusinessContext,
-  messages: Array<{ direction: "in" | "out"; body: string | null }>,
+  messages: PromptMessage[],
 ): AiGenerateInput {
   return { system: buildSystemPrompt(business), messages: toTurns(messages) };
 }

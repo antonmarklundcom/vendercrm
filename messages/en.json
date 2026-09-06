@@ -293,6 +293,10 @@
           "title": "{name} still has no deal",
           "subtitle": "Arrived {hours, plural, one {# hour} other {# hours}} ago",
           "action": "View contact"
+        },
+        "voice": {
+          "intro": "You have {count, plural, one {# thing} other {# things}} pending today:",
+          "empty": "Nothing urgent right now. Good work."
         }
       }
     },
@@ -763,7 +767,21 @@
       "quickRepliesEmpty": "No quick replies yet.",
       "manageQuickReplies": "Manage quick replies",
       "optoutConfirm": "This contact asked not to receive more messages (tagged \"optout\"). Send anyway?",
-      "optoutConfirmSend": "Send anyway"
+      "optoutConfirmSend": "Send anyway",
+      "audio": {
+        "label": "Voice note",
+        "pending": "Transcribing the voice note…",
+        "failed": "This voice note could not be transcribed",
+        "skipped": "Voice note without a transcript",
+        "reason": {
+          "too_large": "the audio is too large",
+          "tenant_daily_cap": "the daily AI limit was reached",
+          "ai_not_configured": "transcription is not enabled",
+          "no_media": "the audio could not be downloaded",
+          "not_audio": "the message is not audio",
+          "provider": "the provider did not answer"
+        }
+      }
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -1013,7 +1031,8 @@
         "reviewLinkInvalid": "That link doesn't look valid.",
         "aiLimitInvalid": "That limit isn't a valid number.",
         "aiHandoffKeywordRequired": "Enter a word that hands over to a human.",
-        "unknown": "We couldn't save it. Try again."
+        "unknown": "We couldn't save it. Try again.",
+        "coachPhoneInvalid": "Enter a valid phone number."
       },
       "language": {
         "title": "Language",
@@ -1102,7 +1121,9 @@
         "resendNotConfigured": "Sending from your own domain isn't configured on this platform yet.",
         "fromLocalPartLabel": "Sender username (before the @)",
         "fromLocalPartSave": "Save"
-      }
+      },
+      "coachPhoneTitle": "Your number for the assistant",
+      "coachPhoneIntro": "Your personal phone. Send a voice note to your WhatsApp Business number asking what you have today and it answers with your pending list. Leave it empty to turn it off."
     },
     "automations": {
       "title": "Automations",

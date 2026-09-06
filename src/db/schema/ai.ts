@@ -27,14 +27,15 @@ export const aiReplies = mysqlTable(
       .default("whatsapp"),
     /**
      * What the call was for (PLAN.md §16.2 rule 6). A generated customer
-     * reply is `reply`; the memory extractor and the setup-plan generator
-     * write their own kinds so the ledger explains a token bill that has no
-     * conversation attached to it. Defaulted, so every row written before
-     * the memory existed keeps its meaning.
+     * reply is `reply`; the memory extractor, the setup-plan generator and
+     * the voice-note transcriber (§15.10 W1) write their own kinds so the
+     * ledger explains a token bill that has no conversation attached to it.
+     * Defaulted, so every row written before the memory existed keeps its
+     * meaning.
      */
     kind: varchar("kind", {
       length: 20,
-      enum: ["reply", "memory_extract", "setup_plan"],
+      enum: ["reply", "memory_extract", "setup_plan", "transcription"],
     })
       .notNull()
       .default("reply"),

@@ -22,7 +22,7 @@ export type RecordReplyInput = {
   /** Null until a website visitor gives a phone and becomes a contact. */
   contactId?: string;
   /** What the call was for; absent means a customer reply (PLAN.md §16.2 rule 6). */
-  kind?: "reply" | "memory_extract" | "setup_plan";
+  kind?: "reply" | "memory_extract" | "setup_plan" | "transcription";
   mode: "draft" | "send";
   status: "draft" | "sent" | "failed";
   prompt: string;
@@ -100,6 +100,12 @@ export function startOfDay(now: Date = new Date()): Date {
  * — including failures — so this counts *attempts*, which is what a cost cap
  * has to bound. Guard-rejected generations never reach the provider and
  * never write a row, so they correctly don't consume the allowance.
+ *
+ * Narrowed to `kind = reply` (§15.10 W1): this is the *per-conversation
+ * reply* cap, three a day by default, and a customer who sends three voice
+ * notes must not thereby use up the thread's whole allowance to be answered.
+ * Transcriptions still count against the per-tenant budget below, which is
+ * the one that bounds spend.
  */
 export async function countRepliesTodayForConversation(
   ctx: TenantContext,
@@ -110,6 +116,7 @@ export async function countRepliesTodayForConversation(
     aiReplies,
     and(
       eq(aiReplies.conversationId, conversationId),
+      eq(aiReplies.kind, "reply"),
       gte(aiReplies.createdAt, startOfDay(now)),
     ),
   );

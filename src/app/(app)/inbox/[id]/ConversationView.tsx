@@ -46,7 +46,12 @@ export type ConversationData = {
   messages: Array<{
     id: string;
     direction: "in" | "out";
+    type: string;
     body: string | null;
+    transcript: string | null;
+    transcriptStatus: string | null;
+    transcriptError: string | null;
+    audioUrl: string | null;
     status: string;
     createdAt: string;
   }>;
@@ -64,6 +69,55 @@ export type ConversationData = {
 };
 
 type QuickReply = { id: string; name: string; body: string };
+
+/**
+ * A voice note (PLAN.md §15.3 Lane A, §15.10 W1): the audio itself, and
+ * under it the transcript in a quieter type — what a rep reads instead of
+ * listening. A message still being transcribed says so; one that could not
+ * be says why, because an empty bubble under an audio is worse than a
+ * sentence explaining it.
+ */
+function AudioBubble({
+  message,
+  t,
+}: {
+  message: ConversationData["messages"][number];
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const reason = message.transcriptError;
+  // A skip reason is one of a known set of codes; a provider failure is
+  // free text from the driver, which is not something to show a rep.
+  const reasonKeys = [
+    "too_large",
+    "tenant_daily_cap",
+    "ai_not_configured",
+    "no_media",
+    "not_audio",
+  ];
+  const reasonText = reason && reasonKeys.includes(reason) ? t(`audio.reason.${reason}`) : null;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-xs font-medium text-muted-foreground">{t("audio.label")}</p>
+      {message.audioUrl && (
+        <audio controls preload="none" src={message.audioUrl} className="w-full max-w-xs" />
+      )}
+      {message.body && <p>{message.body}</p>}
+      {message.transcriptStatus === "done" && message.transcript && (
+        <p className="text-sm text-muted-foreground">{message.transcript}</p>
+      )}
+      {message.transcriptStatus === "pending" && (
+        <p className="animate-pulse text-xs text-muted-foreground">{t("audio.pending")}</p>
+      )}
+      {(message.transcriptStatus === "failed" || message.transcriptStatus === "skipped") && (
+        <p className="text-xs text-muted-foreground">
+          {message.transcriptStatus === "failed" ? t("audio.failed") : t("audio.skipped")}
+          {reasonText ? ` — ${reasonText}` : ""}
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** Merges messages and internal notes into one chronological thread — a note
  *  is rendered inline where it happened, in a distinct style, never as a
@@ -371,7 +425,11 @@ export function ConversationView({
                 item.message.direction === "out" ? "ml-auto bg-accent" : ""
               }`}
             >
-              <p>{item.message.body}</p>
+              {item.message.type === "audio" ? (
+                <AudioBubble message={item.message} t={t} />
+              ) : (
+                <p>{item.message.body}</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 {formatDateTime(item.message.createdAt, locale)} · {item.message.status}
               </p>

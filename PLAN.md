@@ -2960,3 +2960,5 @@ before every push.
 ### 15.11 Wave 2 build log index
 
 One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
+
+- W1 Voice notes — `docs/log/w1.md`

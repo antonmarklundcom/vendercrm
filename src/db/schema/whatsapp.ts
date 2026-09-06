@@ -152,6 +152,33 @@ export const messages = mysqlTable(
     body: text("body"),
     mediaId: varchar("media_id", { length: 200 }),
     storageKey: varchar("storage_key", { length: 500 }),
+    /**
+     * What Meta said the attachment is (e.g. `audio/ogg; codecs=opus`).
+     * Stored because `StorageAdapter.get` returns bytes only, and the
+     * transcription call has to tell the provider what it is sending —
+     * re-asking the Graph API is not an option, the media URL has expired
+     * by then (§6.3 rule 3).
+     */
+    mediaMimeType: varchar("media_mime_type", { length: 120 }),
+    /**
+     * Voice-note transcription (PLAN.md §15.3 Lane A, §15.10 W1). Null for
+     * every non-audio message and for audio received while no AI driver was
+     * configured — the feature is opt-in and absent, never half-applied.
+     */
+    transcript: text("transcript"),
+    transcriptStatus: varchar("transcript_status", {
+      length: 10,
+      // pending — enqueued, not answered yet
+      // done    — text in `transcript`
+      // failed  — the provider call errored after its retries
+      // skipped — too long, too large, or over the tenant's daily AI cap
+      enum: ["pending", "done", "failed", "skipped"],
+    }),
+    transcriptModel: varchar("transcript_model", { length: 100 }),
+    transcriptAt: datetime("transcript_at"),
+    /** Why a `failed`/`skipped` row is what it is — shown to the rep as one
+     * line under the audio, so "no transcript" is never unexplained. */
+    transcriptError: varchar("transcript_error", { length: 500 }),
     status: varchar("status", {
       length: 20,
       enum: ["queued", "sent", "delivered", "read", "failed"],

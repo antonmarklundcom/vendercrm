@@ -12,6 +12,7 @@ import {
   updateTenantDefaultCountry,
   updateTenantReviewLink,
   updateTenantContactEmail,
+  updateTenantCoachPhone,
   regenerateContactsFeedToken,
   updateTenantAiSettings,
   type BusinessHours,
@@ -174,6 +175,43 @@ export async function updateReviewLinkAction(
 
   try {
     await updateTenantReviewLink(ctx, parsed.data);
+  } catch {
+    return { error: "unknown", saved: false, values };
+  }
+
+  revalidatePath("/settings");
+  return { error: null, saved: true, values };
+}
+
+// The owner's own WhatsApp number for the voice coach (§15.3 Lane A, §15.10
+// W1). Stored as typed and normalised at comparison time, so a number saved
+// as "0981 123 456" still matches the "+595981123456" WhatsApp sends.
+const coachPhoneSchema = z.string().trim().min(6).max(30);
+
+export async function updateCoachPhoneAction(
+  _prevState: SettingsFormState,
+  formData: FormData,
+): Promise<SettingsFormState> {
+  const ctx = await requireTenantAdmin();
+  const values = submitted(formData);
+  const raw = formData.get("coachPhone");
+  // Empty is a valid answer: it turns the coach half off again.
+  const parsed = coachPhoneSchema.safeParse(raw);
+  if (typeof raw === "string" && raw.trim() === "") {
+    try {
+      await updateTenantCoachPhone(ctx, "");
+    } catch {
+      return { error: "unknown", saved: false, values };
+    }
+    revalidatePath("/settings");
+    return { error: null, saved: true, values };
+  }
+  if (!parsed.success) {
+    return { error: "coachPhoneInvalid", saved: false, values };
+  }
+
+  try {
+    await updateTenantCoachPhone(ctx, parsed.data);
   } catch {
     return { error: "unknown", saved: false, values };
   }

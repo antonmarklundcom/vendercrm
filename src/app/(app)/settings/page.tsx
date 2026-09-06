@@ -33,6 +33,7 @@ import {
   TimezoneForm,
   DefaultCountryForm,
   ReviewLinkForm,
+  CoachPhoneForm,
   AiSettingsForm,
 } from "./SettingsForms";
 
@@ -135,6 +136,12 @@ export default async function SettingsPage() {
         <h2 className="mb-4 text-lg font-semibold">{t("reviewLinkTitle")}</h2>
         <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("reviewLinkIntro")}</p>
         <ReviewLinkForm reviewLink={settings.reviewLink ?? ""} />
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">{t("coachPhoneTitle")}</h2>
+        <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("coachPhoneIntro")}</p>
+        <CoachPhoneForm coachPhone={settings.coachPhone ?? ""} />
       </section>
 
       <EmailDomainSection ctx={ctx} settings={settings} t={t} />

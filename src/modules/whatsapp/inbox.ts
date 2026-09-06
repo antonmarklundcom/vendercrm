@@ -3,6 +3,7 @@ import { contacts, conversations, messages } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import { storage } from "@/lib/storage";
 import { getActiveTenantUser } from "@/modules/tenancy/users";
 import { whatsappEvents } from "./events";
 
@@ -48,7 +49,13 @@ export async function searchConversations(ctx: TenantContext, query: string, lim
   ).select(contacts, or(like(contacts.name, term), like(contacts.phone, term)) as SQL);
   const contactIds = new Set(matchingContacts.map((c) => c.id));
 
-  const matchingMessages = await tenantDb(ctx).select(messages, like(messages.body, term));
+  // Transcripts are searched alongside bodies (§15.10 W1): to a rep looking
+  // for "el presupuesto del portón", whether the customer typed it or said
+  // it in a voice note is not a distinction worth losing the result over.
+  const matchingMessages = await tenantDb(ctx).select(
+    messages,
+    or(like(messages.body, term), like(messages.transcript, term)) as SQL,
+  );
   const conversationIdsFromMessages = new Set(matchingMessages.map((m) => m.conversationId));
 
   const all = await tenantDb(ctx).select(conversations);
@@ -85,6 +92,52 @@ export async function getConversation(ctx: TenantContext, id: string) {
 export async function listMessagesForConversation(ctx: TenantContext, conversationId: string) {
   const rows = await tenantDb(ctx).select(messages, eq(messages.conversationId, conversationId));
   return rows.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+}
+
+export type ThreadMessage = {
+  id: string;
+  direction: "in" | "out";
+  type: string;
+  body: string | null;
+  transcript: string | null;
+  transcriptStatus: string | null;
+  transcriptError: string | null;
+  /** Signed, expiring URL for an audio bubble's player; null otherwise. */
+  audioUrl: string | null;
+  status: string;
+  createdAt: string;
+};
+
+/**
+ * The thread as the inbox renders it (PLAN.md §15.10 W1). One mapper for
+ * both readers — the page's first render and the 5s poll route — because a
+ * voice note that plays on load and not on the next poll is a bug nobody
+ * would think to look for.
+ *
+ * Audio URLs are minted per read rather than stored: they expire, and the
+ * object they point at is tenant media that must never be guessable
+ * (lib/storage/signed-url.ts).
+ */
+export async function toThreadMessages(
+  rows: Array<typeof messages.$inferSelect>,
+): Promise<ThreadMessage[]> {
+  return Promise.all(
+    rows.map(async (row) => ({
+      id: row.id,
+      direction: row.direction as "in" | "out",
+      type: row.type,
+      body: row.body,
+      transcript: row.transcript,
+      transcriptStatus: row.transcriptStatus,
+      transcriptError: row.transcriptError,
+      audioUrl:
+        row.type === "audio" && row.storageKey
+          ? await storage.getSignedUrl(row.storageKey).catch(() => null)
+          : null,
+      status: row.status,
+      createdAt: row.createdAt.toISOString(),
+    })),
+  );
 }
 
 /** Raised rather than silently ignored: an assignment that names a user who

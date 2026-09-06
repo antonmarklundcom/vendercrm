@@ -1,6 +1,13 @@
 import { eq } from "drizzle-orm";
 import { messages } from "@/db/schema";
-import { buildReplyPrompt, extractBookingIntent, getAiDriver, serialisePrompt } from "@/lib/ai";
+import {
+  buildReplyPrompt,
+  extractBookingIntent,
+  getAiDriver,
+  messageText,
+  serialisePrompt,
+  type PromptMessage,
+} from "@/lib/ai";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { getContact } from "@/modules/crm/contacts";
@@ -254,12 +261,13 @@ export async function generateAiReply(
  * whole thread — an old "¿hacen delivery?" would keep pulling the delivery
  * FAQ into every later answer about something else.
  */
-function lastInboundBody(
-  messages: Array<{ direction: "in" | "out"; body: string | null }>,
-): string {
+function lastInboundBody(messages: PromptMessage[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
-    if (message.direction === "in" && (message.body ?? "").trim()) return message.body!.trim();
+    // messageText, not `body`: the memory query for a voice note is what the
+    // customer said in it (§15.10 W1).
+    const text = messageText(message);
+    if (message.direction === "in" && text) return text;
   }
   return "";
 }

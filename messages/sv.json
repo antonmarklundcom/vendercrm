@@ -293,6 +293,10 @@
           "title": "{name} saknar fortfarande affär",
           "subtitle": "Kom in för {hours, plural, one {# timme} other {# timmar}} sedan",
           "action": "Visa kontakt"
+        },
+        "voice": {
+          "intro": "Du har {count, plural, one {# sak} other {# saker}} kvar idag:",
+          "empty": "Inget brådskande just nu. Bra jobbat."
         }
       }
     },
@@ -763,7 +767,21 @@
       "quickRepliesEmpty": "Inga snabbsvar än.",
       "manageQuickReplies": "Hantera snabbsvar",
       "optoutConfirm": "Den här kontakten bad om att inte få fler meddelanden (taggad \"optout\"). Skicka ändå?",
-      "optoutConfirmSend": "Skicka ändå"
+      "optoutConfirmSend": "Skicka ändå",
+      "audio": {
+        "label": "Röstmeddelande",
+        "pending": "Transkriberar röstmeddelandet…",
+        "failed": "Röstmeddelandet kunde inte transkriberas",
+        "skipped": "Röstmeddelande utan transkription",
+        "reason": {
+          "too_large": "ljudet är för stort",
+          "tenant_daily_cap": "den dagliga AI-gränsen nåddes",
+          "ai_not_configured": "transkribering är inte aktiverad",
+          "no_media": "ljudet kunde inte hämtas",
+          "not_audio": "meddelandet är inte ljud",
+          "provider": "leverantören svarade inte"
+        }
+      }
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -1013,7 +1031,8 @@
         "reviewLinkInvalid": "Länken ser inte giltig ut.",
         "aiLimitInvalid": "Gränsen är inte ett giltigt tal.",
         "aiHandoffKeywordRequired": "Ange ett ord som lämnar över till en människa.",
-        "unknown": "Vi kunde inte spara. Försök igen."
+        "unknown": "Vi kunde inte spara. Försök igen.",
+        "coachPhoneInvalid": "Ange ett giltigt telefonnummer."
       },
       "language": {
         "title": "Språk",
@@ -1102,7 +1121,9 @@
         "resendNotConfigured": "Att skicka från egen domän är inte konfigurerat på den här plattformen än.",
         "fromLocalPartLabel": "Avsändarens användarnamn (före @)",
         "fromLocalPartSave": "Spara"
-      }
+      },
+      "coachPhoneTitle": "Ditt nummer för assistenten",
+      "coachPhoneIntro": "Din personliga telefon. Skicka ett röstmeddelande till ditt WhatsApp Business-nummer och fråga vad du har idag, så svarar den med dina öppna punkter. Lämna tomt för att stänga av."
     },
     "automations": {
       "title": "Automationer",

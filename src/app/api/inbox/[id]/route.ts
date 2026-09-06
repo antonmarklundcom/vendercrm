@@ -4,6 +4,7 @@ import {
   listMessagesForConversation,
   markConversationRead,
   isWithinFreeFormWindow,
+  toThreadMessages,
 } from "@/modules/whatsapp/inbox";
 import { listNotesForConversation } from "@/modules/whatsapp/notes";
 import { getContact } from "@/modules/crm/contacts";
@@ -51,13 +52,7 @@ export async function GET(
         assignedUserId: conversation.assignedUserId,
       },
       contact: contact ? { name: contact.name, phone: contact.phone } : null,
-      messages: messages.map((m) => ({
-        id: m.id,
-        direction: m.direction,
-        body: m.body,
-        status: m.status,
-        createdAt: m.createdAt,
-      })),
+      messages: await toThreadMessages(messages),
       notes: notes.map((n) => ({
         id: n.id,
         body: n.body,

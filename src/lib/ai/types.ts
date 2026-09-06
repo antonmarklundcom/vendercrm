@@ -53,11 +53,37 @@ export type AiStructuredResult<T> = {
   attempts: number;
 };
 
+/**
+ * Audio in, text out (PLAN.md §15.3 Lane A, §15.10 W1). Deliberately the
+ * same shape as the two calls above — bytes and a mime type instead of a
+ * prompt, token counts back the same way — so a voice note is metered by the
+ * `ai_replies` ledger and the per-tenant daily cap with no second accounting
+ * path. `languageHint` is a hint, never a filter: a Paraguayan voice note
+ * mixes Spanish and Guaraní inside one sentence and a provider told to
+ * expect only `es` still has to transcribe what it hears.
+ */
+export type AiTranscribeInput = {
+  audio: Buffer;
+  /** e.g. `audio/ogg; codecs=opus` — what WhatsApp stored, passed through. */
+  mimeType: string;
+  /** BCP-47-ish, e.g. `es`. Optional. */
+  languageHint?: string;
+};
+
+export type AiTranscribeResult = {
+  text: string;
+  model: string;
+  /** Zero from providers that do not meter audio; the row is still written. */
+  promptTokens: number;
+  completionTokens: number;
+};
+
 export interface AiDriver {
   readonly provider: AiProvider;
   readonly model: string;
   generateReply(input: AiGenerateInput): Promise<AiGenerateResult>;
   generateStructured<T>(input: AiStructuredInput<T>): Promise<AiStructuredResult<T>>;
+  transcribeAudio(input: AiTranscribeInput): Promise<AiTranscribeResult>;
 }
 
 /** Shared ceiling — a WhatsApp reply that runs long is a bug, not a feature. */
