@@ -146,6 +146,43 @@ signature verifies; a forged one and an expired one are rejected) and, if
 signed URL over HTTP against it — without that variable the HTTP leg is
 skipped.
 
+## 9. Wave 1 — automations, push, inbox, email, pipeline, quotes, coach (P1–P7)
+
+- [ ] The bell (top nav) shows unread automation/task/assignment
+      notifications; "mark all read" clears the count
+- [ ] With `WEB_PUSH_*` set, install the PWA on an Android phone and confirm
+      a push arrives with the app closed (see `docs/HANDOFF.md` Part 3.3 —
+      needs a real device, not just this checklist)
+- [ ] `/inbox/quick-replies` — create one, then insert it from the composer
+      in a real conversation; `{{contacto.nombre}}` resolves
+- [ ] A conversation note (distinct from a message) appears inline in the
+      thread and on the contact's timeline
+- [ ] `/inbox?filter=unread` and `?q=` search both narrow the list; web-chat
+      rows appear under `all` with a channel chip
+- [ ] As admin, add a sending domain on `/settings` and confirm it moves
+      pending → verified in Resend (Part 3.3) — then send a quote by email
+      and see it arrive from that domain
+- [ ] `/contacts/campos` — create a custom field, set it on a contact, and
+      confirm it round-trips through CSV export/import and filters the
+      contact list
+- [ ] On `/pipeline/etapas`, set a stage's "días antes de marcar
+      estancado"; a deal left there past that many days shows a stale badge
+      on the board
+- [ ] Drag a deal on the board — the column's value total and each card's
+      days-in-stage update immediately, without a reload
+- [ ] Send a quote, open its public link in a private window, and accept it
+      — the quote's status flips to accepted and a name/comment is recorded;
+      try deciding it a second time and confirm it's refused
+- [ ] Record a payment on an issued nota de venta, then "Ver recibo" — the
+      public `/r/[token]` receipt view and its PDF both load with no session
+- [ ] Set a quote's "válido hasta" in the past and confirm the daily
+      `quotes.expire` job (or a manual trigger — `docs/DEPLOY.md` §5) moves
+      it to expired; "Duplicar como nuevo borrador" creates a fresh draft
+      with the same lines
+- [ ] `/dashboard` shows the "Hoy" panel above the stat cards, one row per
+      thing needing attention today, each with a working deep link; with
+      nothing pending it shows the empty state instead
+
 ## If anything fails
 
 Don't leave a failing smoke test unresolved before calling a deploy done —
