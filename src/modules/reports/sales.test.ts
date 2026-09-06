@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { computeResponseTimes, reportWindow } from "./sales";
+import {
+  computeResponseBuckets,
+  computeResponseTimes,
+  computeStageFunnel,
+  previousWindow,
+  reportWindow,
+} from "./sales";
 
 // First-response time is the one number here that is a judgement rather than
 // a count, so its rules are pinned down: which message starts the clock,
@@ -91,5 +97,97 @@ describe("reportWindow", () => {
     expect(window.to).toEqual(now);
     expect(window.from.toISOString()).toBe("2026-07-25T12:00:00.000Z");
     expect(window.days).toBe(30);
+  });
+
+  it("straddles a month boundary without losing a day", () => {
+    // 2026-08-01 minus 5 days lands in July — the from/to pair must cross
+    // the boundary cleanly, not clamp to the 1st.
+    const now = at("2026-08-01T00:00:00Z");
+    const window = reportWindow(5, now);
+    expect(window.from.toISOString()).toBe("2026-07-27T00:00:00.000Z");
+  });
+});
+
+describe("previousWindow", () => {
+  it("is the same length, immediately before the window starts", () => {
+    const window = { from: at("2026-08-01T00:00:00Z"), to: at("2026-08-31T00:00:00Z"), days: 30 };
+    const previous = previousWindow(window);
+
+    expect(previous.to).toEqual(window.from);
+    expect(previous.from.toISOString()).toBe("2026-07-02T00:00:00.000Z");
+    expect(previous.days).toBe(30);
+  });
+});
+
+describe("computeResponseBuckets", () => {
+  it("buckets answered conversations and always returns every bucket", () => {
+    const buckets = computeResponseBuckets([
+      message("fast", "in", "2026-08-24T12:00:00Z"),
+      message("fast", "out", "2026-08-24T12:05:00Z"),
+      message("medium", "in", "2026-08-24T12:00:00Z"),
+      message("medium", "out", "2026-08-24T12:30:00Z"),
+      message("slow", "in", "2026-08-24T12:00:00Z"),
+      message("slow", "out", "2026-08-25T18:00:00Z"),
+      message("unanswered", "in", "2026-08-24T12:00:00Z"),
+    ]);
+
+    expect(buckets).toEqual([
+      { bucket: "under15m", count: 1 },
+      { bucket: "15mTo1h", count: 1 },
+      { bucket: "1hTo24h", count: 0 },
+      { bucket: "over24h", count: 1 },
+    ]);
+  });
+
+  it("is empty-window safe", () => {
+    expect(computeResponseBuckets([])).toEqual([
+      { bucket: "under15m", count: 0 },
+      { bucket: "15mTo1h", count: 0 },
+      { bucket: "1hTo24h", count: 0 },
+      { bucket: "over24h", count: 0 },
+    ]);
+  });
+});
+
+describe("computeStageFunnel", () => {
+  const stage = (id: string, pipelineId: string, position: number, name = id) => ({
+    id,
+    pipelineId,
+    position,
+    name,
+  });
+  const deal = (id: string, pipelineId: string, stageId: string) => ({ id, pipelineId, stageId });
+
+  it("is cumulative: a deal further along counts for every earlier stage too", () => {
+    const stages = [
+      stage("s1", "p1", 0, "Nuevo"),
+      stage("s2", "p1", 1, "Contactado"),
+      stage("s3", "p1", 2, "Ganado"),
+    ];
+    const deals = [
+      deal("d1", "p1", "s1"),
+      deal("d2", "p1", "s2"),
+      deal("d3", "p1", "s3"),
+    ];
+
+    const funnel = computeStageFunnel(deals as never, stages as never, "p1");
+
+    expect(funnel).toEqual([
+      { stageId: "s1", name: "Nuevo", position: 0, reachedOrPast: 3 },
+      { stageId: "s2", name: "Contactado", position: 1, reachedOrPast: 2 },
+      { stageId: "s3", name: "Ganado", position: 2, reachedOrPast: 1 },
+    ]);
+  });
+
+  it("ignores deals from a different pipeline", () => {
+    const stages = [stage("s1", "p1", 0), stage("s2", "p2", 0)];
+    const deals = [deal("d1", "p1", "s1"), deal("d2", "p2", "s2")];
+
+    const funnel = computeStageFunnel(deals as never, stages as never, "p1");
+    expect(funnel).toEqual([{ stageId: "s1", name: "s1", position: 0, reachedOrPast: 1 }]);
+  });
+
+  it("is empty-window safe", () => {
+    expect(computeStageFunnel([], [], "p1")).toEqual([]);
   });
 });
