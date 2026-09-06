@@ -14,3 +14,4 @@ export * from "./booking";
 export * from "./chatwidget";
 export * from "./memory";
 export * from "./notifications";
+export * from "./email";

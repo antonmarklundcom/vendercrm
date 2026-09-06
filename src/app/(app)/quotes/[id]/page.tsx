@@ -7,7 +7,12 @@ import { publicQuoteUrl } from "@/modules/quotes/delivery";
 import { getDocumentByQuote } from "@/modules/documents/documents";
 import { getContact } from "@/modules/crm/contacts";
 import { Button } from "@/components/ui/button";
-import { sendQuoteAction, setQuoteStatusAction, convertQuoteToDocumentAction } from "../actions";
+import {
+  sendQuoteAction,
+  sendQuoteByEmailAction,
+  setQuoteStatusAction,
+  convertQuoteToDocumentAction,
+} from "../actions";
 import { formatMoney } from "@/lib/i18n/format";
 import { getLocale } from "next-intl/server";
 
@@ -46,10 +51,20 @@ export default async function QuoteDetailPage({
             {t(`statusValues.${quote.status}` as "statusValues.draft")}
           </p>
         </div>
-        <form action={sendQuoteAction}>
-          <input type="hidden" name="quoteId" value={quote.id} />
-          <Button type="submit">{t("sendWhatsapp")}</Button>
-        </form>
+        <div className="flex gap-2">
+          <form action={sendQuoteAction}>
+            <input type="hidden" name="quoteId" value={quote.id} />
+            <Button type="submit">{t("sendWhatsapp")}</Button>
+          </form>
+          {contact?.email && (
+            <form action={sendQuoteByEmailAction}>
+              <input type="hidden" name="quoteId" value={quote.id} />
+              <Button type="submit" variant="outline">
+                {t("sendEmail")}
+              </Button>
+            </form>
+          )}
+        </div>
       </header>
 
       <div className="overflow-x-auto">

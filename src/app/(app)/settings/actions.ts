@@ -11,6 +11,7 @@ import {
   updateTenantTimezone,
   updateTenantDefaultCountry,
   updateTenantReviewLink,
+  updateTenantContactEmail,
   regenerateContactsFeedToken,
   updateTenantAiSettings,
   type BusinessHours,
@@ -22,6 +23,13 @@ import {
 import { COUNTRY_CODES } from "@/lib/phone";
 import { getUserById, setUserPushPrefs, setUserTaskReminders } from "@/modules/tenancy/users";
 import { PUSH_KINDS, applyPushPrefs } from "@/modules/notifications/prefs";
+import {
+  createTenantEmailDomain,
+  refreshTenantEmailDomain,
+  removeTenantEmailDomain,
+  setTenantEmailFromLocalPart,
+} from "@/modules/tenancy/email-domains";
+import { scheduleDomainVerification } from "@/modules/tenancy/email-jobs";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
@@ -300,5 +308,69 @@ export async function connectGcalAction(): Promise<void> {
 export async function disconnectGcalAction(): Promise<void> {
   const ctx = await requireTenantContext();
   await disconnectGcal(ctx, ctx.userId);
+  revalidatePath("/settings");
+}
+
+// --- Email identity (PLAN.md §15.1, §15.8 P4) ---------------------------
+
+const contactEmailSchema = z.string().email();
+
+/** Plain bound action, not useActionState-shaped: this section is a short
+ *  list of admin-only forms (PLAN.md §15.8 P4), and a bad value here is the
+ *  tampered-form case every other hidden-id action in the app already
+ *  handles by silently no-op'ing rather than throwing. */
+export async function updateContactEmailAction(formData: FormData) {
+  const ctx = await requireTenantAdmin();
+  const parsed = contactEmailSchema.safeParse(formData.get("contactEmail"));
+  if (!parsed.success) return;
+  await updateTenantContactEmail(ctx, parsed.data);
+  revalidatePath("/settings");
+}
+
+const domainSchema = z
+  .string()
+  .min(3)
+  .max(255)
+  .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i);
+
+export async function addEmailDomainAction(formData: FormData) {
+  const ctx = await requireTenantAdmin();
+  const parsed = domainSchema.safeParse(formData.get("domain"));
+  if (!parsed.success) return;
+
+  try {
+    const created = await createTenantEmailDomain(ctx, parsed.data.toLowerCase());
+    if (created) await scheduleDomainVerification(ctx.tenantId, created.id);
+  } catch (err) {
+    // Resend rejected the domain (already claimed, malformed, rate-limited).
+    // No field to point the error at in this plain-bound-action section
+    // (§15.8 P4's own scope, not the useActionState treatment the rest of
+    // this page uses) — logged so it's visible in the deploy's logs rather
+    // than silently doing nothing.
+    console.error("[email] createTenantEmailDomain failed:", err);
+  }
+  revalidatePath("/settings");
+}
+
+export async function retryEmailDomainAction(domainId: string) {
+  const ctx = await requireTenantAdmin();
+  await refreshTenantEmailDomain(ctx, domainId);
+  revalidatePath("/settings");
+}
+
+export async function removeEmailDomainAction(domainId: string) {
+  const ctx = await requireTenantAdmin();
+  await removeTenantEmailDomain(ctx, domainId);
+  revalidatePath("/settings");
+}
+
+export async function setEmailFromLocalPartAction(domainId: string, formData: FormData) {
+  const ctx = await requireTenantAdmin();
+  const localPart = String(formData.get("fromLocalPart") ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "");
+  if (!localPart) return;
+  await setTenantEmailFromLocalPart(ctx, domainId, localPart);
   revalidatePath("/settings");
 }

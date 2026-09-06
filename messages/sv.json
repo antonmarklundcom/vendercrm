@@ -802,7 +802,9 @@
         "itemInvalid": "Kontrollera raderna: antalet börjar på 1 och priset anges i hela guaraní, utan decimaler eller tecken.",
         "discountInvalid": "Rabatten anges i hela guaraní, utan decimaler eller tecken.",
         "unknown": "Vi kunde inte skapa offerten. Försök igen."
-      }
+      },
+      "sendEmail": "Skicka via e-post",
+      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress."
     },
     "documents": {
       "title": "Försäljningsnotor",
@@ -883,7 +885,9 @@
         "voidReasonRequired": "Ange orsaken till makuleringen.",
         "amountInvalid": "Beloppet anges i hela guaraní, större än noll.",
         "unknown": "Vi kunde inte spara. Försök igen."
-      }
+      },
+      "sendEmail": "Skicka via e-post",
+      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress."
     },
     "settings": {
       "title": "Inställningar",
@@ -1024,6 +1028,27 @@
           "task_due": "Uppgifter och bokningar för dagen",
           "automation": "Aviseringar från automationer"
         }
+      },
+      "email": {
+        "emailTitle": "E-postidentitet",
+        "emailIntro": "Vilken adress det här företagets e-post skickas från (offerter, kvitton, påminnelser).",
+        "contactEmailLabel": "Kontakt-e-post (tar emot svar)",
+        "contactEmailSave": "Spara",
+        "domainsTitle": "Egen domän",
+        "domainsIntro": "Verifiera din egen domän så att e-post skickas från ditt-företag.se istället för standardadressen.",
+        "addDomainLabel": "Domän",
+        "addDomainAction": "Verifiera domän",
+        "domainStatusValues": {
+          "pending": "Väntar på verifiering",
+          "verified": "Verifierad",
+          "failed": "Verifiering misslyckades"
+        },
+        "dnsRecordsIntro": "Lägg till dessa poster hos din DNS-leverantör:",
+        "retryVerification": "Försök verifiera igen",
+        "removeDomain": "Ta bort",
+        "resendNotConfigured": "Att skicka från egen domän är inte konfigurerat på den här plattformen än.",
+        "fromLocalPartLabel": "Avsändarens användarnamn (före @)",
+        "fromLocalPartSave": "Spara"
       }
     },
     "automations": {
@@ -3346,6 +3371,10 @@
       "error": "Vi kunde inte skicka ditt meddelande. Försök igen.",
       "rateLimited": "Du skriver väldigt snabbt. Vänta ett ögonblick.",
       "offline": "Ingen är online just nu, men lämna dina uppgifter så återkommer vi."
+    },
+    "unsubscribe": {
+      "title": "Klart — du har avanmält dig",
+      "body": "{name}, du kommer inte längre få automatiska e-postmeddelanden från det här företaget."
     }
   }
 }

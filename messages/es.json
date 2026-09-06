@@ -729,6 +729,27 @@
           "task_due": "Tareas y citas del día",
           "automation": "Avisos de automatizaciones"
         }
+      },
+      "email": {
+        "emailTitle": "Identidad de email",
+        "emailIntro": "Desde qué dirección salen los emails de este negocio (presupuestos, notas de venta, recordatorios).",
+        "contactEmailLabel": "Email de contacto (recibe las respuestas)",
+        "contactEmailSave": "Guardar",
+        "domainsTitle": "Dominio propio",
+        "domainsIntro": "Verificá tu propio dominio para que los emails salgan de tu-negocio.com en vez de la dirección por defecto.",
+        "addDomainLabel": "Dominio",
+        "addDomainAction": "Verificar dominio",
+        "domainStatusValues": {
+          "pending": "Pendiente de verificación",
+          "verified": "Verificado",
+          "failed": "Verificación fallida"
+        },
+        "dnsRecordsIntro": "Agregá estos registros en tu proveedor de DNS:",
+        "retryVerification": "Reintentar verificación",
+        "removeDomain": "Eliminar",
+        "resendNotConfigured": "El envío de email por dominio propio no está configurado en esta plataforma todavía.",
+        "fromLocalPartLabel": "Nombre de usuario del remitente (antes del @)",
+        "fromLocalPartSave": "Guardar"
       }
     },
     "whatsapp": {
@@ -1140,7 +1161,9 @@
         "itemInvalid": "Revisá los ítems: la cantidad va desde 1 y el precio en guaraníes enteros, sin decimales ni signos.",
         "discountInvalid": "El descuento va en guaraníes enteros, sin decimales ni signos.",
         "unknown": "No se pudo crear el presupuesto. Intentá de nuevo."
-      }
+      },
+      "sendEmail": "Enviar por email",
+      "sendEmailNoContactEmail": "El contacto no tiene un email cargado."
     },
     "documents": {
       "title": "Notas de venta",
@@ -1221,7 +1244,9 @@
         "voidReasonRequired": "Poné el motivo de la anulación.",
         "amountInvalid": "El monto va en guaraníes enteros, mayor que cero.",
         "unknown": "No se pudo guardar. Intentá de nuevo."
-      }
+      },
+      "sendEmail": "Enviar por email",
+      "sendEmailNoContactEmail": "El contacto no tiene un email cargado."
     },
     "automations": {
       "title": "Automatizaciones",
@@ -3346,6 +3371,10 @@
       "error": "No pudimos enviar tu mensaje. Probá de nuevo.",
       "rateLimited": "Estás escribiendo muy rápido. Esperá un momento.",
       "offline": "Ahora no hay nadie en línea, pero dejanos tus datos y te contactamos."
+    },
+    "unsubscribe": {
+      "title": "Listo, te sacamos de la lista",
+      "body": "{name}, no vas a recibir más emails automáticos de este negocio."
     }
   }
 }

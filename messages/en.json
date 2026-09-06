@@ -802,7 +802,9 @@
         "itemInvalid": "Check the items: quantity starts at 1 and the price is in whole guaraníes, no decimals or signs.",
         "discountInvalid": "The discount is in whole guaraníes, no decimals or signs.",
         "unknown": "We couldn't create the quote. Try again."
-      }
+      },
+      "sendEmail": "Send by email",
+      "sendEmailNoContactEmail": "The contact has no email on file."
     },
     "documents": {
       "title": "Sales notes",
@@ -883,7 +885,9 @@
         "voidReasonRequired": "Give the reason for voiding it.",
         "amountInvalid": "The amount is in whole guaraníes, greater than zero.",
         "unknown": "We couldn't save it. Try again."
-      }
+      },
+      "sendEmail": "Send by email",
+      "sendEmailNoContactEmail": "The contact has no email on file."
     },
     "settings": {
       "title": "Settings",
@@ -1024,6 +1028,27 @@
           "task_due": "Tasks and appointments for the day",
           "automation": "Automation notices"
         }
+      },
+      "email": {
+        "emailTitle": "Email identity",
+        "emailIntro": "Which address this business's emails come from (quotes, notas de venta, reminders).",
+        "contactEmailLabel": "Contact email (receives replies)",
+        "contactEmailSave": "Save",
+        "domainsTitle": "Own domain",
+        "domainsIntro": "Verify your own domain so emails come from your-business.com instead of the default address.",
+        "addDomainLabel": "Domain",
+        "addDomainAction": "Verify domain",
+        "domainStatusValues": {
+          "pending": "Pending verification",
+          "verified": "Verified",
+          "failed": "Verification failed"
+        },
+        "dnsRecordsIntro": "Add these records at your DNS provider:",
+        "retryVerification": "Retry verification",
+        "removeDomain": "Remove",
+        "resendNotConfigured": "Sending from your own domain isn't configured on this platform yet.",
+        "fromLocalPartLabel": "Sender username (before the @)",
+        "fromLocalPartSave": "Save"
       }
     },
     "automations": {
@@ -3346,6 +3371,10 @@
       "error": "We could not send your message. Please try again.",
       "rateLimited": "You are typing very fast. Give it a moment.",
       "offline": "Nobody is online right now, but leave your details and we will get back to you."
+    },
+    "unsubscribe": {
+      "title": "Done — you're unsubscribed",
+      "body": "{name}, you won't receive more automated emails from this business."
     }
   }
 }

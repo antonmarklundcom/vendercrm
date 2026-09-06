@@ -4,9 +4,13 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { createQuote, setQuoteStatus } from "@/modules/quotes/quotes";
-import { sendQuote } from "@/modules/quotes/delivery";
+import { createQuote, getQuote, setQuoteStatus } from "@/modules/quotes/quotes";
+import { sendQuote, generateQuotePdf, publicQuoteUrl } from "@/modules/quotes/delivery";
 import { createDocumentFromQuote } from "@/modules/documents/documents";
+import { sendLinkEmail } from "@/lib/email/document-delivery";
+import { createActivity } from "@/modules/crm/activities";
+import { getTenant } from "@/modules/tenancy/tenants";
+import { getTranslator } from "@/lib/i18n/translator";
 
 const lineSchema = z.object({
   description: z.string().min(1).max(500),
@@ -121,6 +125,49 @@ export async function sendQuoteAction(formData: FormData) {
   const parsed = z.string().min(1).safeParse(formData.get("quoteId"));
   if (!parsed.success) return;
   await sendQuote(ctx, parsed.data);
+  revalidatePath(`/quotes/${parsed.data}`);
+}
+
+/**
+ * "Enviar por email" (PLAN.md §15.1, §15.8 P4) — the quote's public link and
+ * PDF to the contact's own email address, through senderFor(ctx)'s identity.
+ * Deliberately does not touch `quotes.status` or write a `quote_sent`
+ * activity: those belong to modules/quotes (P6's Owns column). The button
+ * only renders when the contact has an email (quotes/[id]/page.tsx), so a
+ * silent no-op here is the tampered-form case, same as the other hidden-id
+ * actions in this file.
+ */
+export async function sendQuoteByEmailAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = z.string().min(1).safeParse(formData.get("quoteId"));
+  if (!parsed.success) return;
+
+  const quote = await getQuote(ctx, parsed.data);
+  if (!quote) return;
+
+  const [pdf, tenant] = await Promise.all([generateQuotePdf(ctx, quote.id), getTenant(ctx.tenantId)]);
+  const t = await getTranslator(tenant?.locale, "pdf.quote");
+  const url = publicQuoteUrl(quote.publicToken);
+
+  const result = await sendLinkEmail(ctx, {
+    contactId: quote.contactId,
+    subject: `${t("caption")} ${quote.number}`,
+    lines: [`${t("caption")} ${quote.number}.`],
+    linkLabel: url,
+    linkUrl: url,
+    attachment: { filename: `${quote.number}.pdf`, content: pdf },
+  });
+
+  if (result.sent) {
+    await createActivity(ctx, {
+      contactId: quote.contactId,
+      dealId: quote.dealId ?? undefined,
+      type: "system",
+      payload: { kind: "quote_emailed", quoteId: quote.id, number: quote.number },
+      userId: ctx.userId,
+    });
+  }
+
   revalidatePath(`/quotes/${parsed.data}`);
 }
 
