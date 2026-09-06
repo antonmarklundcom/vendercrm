@@ -942,6 +942,51 @@
       "viewReceipt": "Kvitto",
       "sendReceiptWhatsapp": "Skicka kvitto via WhatsApp"
     },
+    "contracts": {
+      "title": "Avtal",
+      "intro": "Skapa ett avtal från en mall, skicka det via WhatsApp eller e-post, och kunden godkänner det med ett klick från mobilen.",
+      "emptyTitle": "Inga avtal ännu",
+      "emptyBody": "Välj en kontakt och en mall för att skapa det första avtalet.",
+      "createTitle": "Nytt avtal",
+      "needContact": "Du behöver minst en kontakt först.",
+      "goToContacts": "Gå till kontakter",
+      "needTemplate": "Du behöver minst en aktiv mall först.",
+      "manageTemplates": "Hantera mallar",
+      "number": "Nummer",
+      "contact": "Kontakt",
+      "template": "Mall",
+      "status": "Status",
+      "statusValues": {
+        "draft": "Utkast",
+        "sent": "Skickat",
+        "accepted": "Godkänt",
+        "declined": "Avböjt",
+        "voided": "Ogiltigförklarat"
+      },
+      "sendWhatsapp": "Skicka via WhatsApp",
+      "sendEmail": "Skicka via e-post",
+      "publicLink": "Offentlig länk",
+      "downloadPdf": "Ladda ner PDF",
+      "decisionAccepted": "Kunden godkände avtalet.",
+      "decisionDeclined": "Kunden avböjde avtalet.",
+      "voidTitle": "Ogiltigförklara",
+      "voidReason": "Anledning",
+      "voidWarning": "Att ogiltigförklara ett avtal är permanent.",
+      "voidAction": "Ogiltigförklara avtal",
+      "voidedNotice": "Ogiltigförklarat: {reason}",
+      "templatesTitle": "Avtalsmallar",
+      "templatesIntro": "Skriv innehållet i vanlig text. Använd # för en rubrik och en tom rad för att separera stycken. Tillgängliga variabler, inom dubbla klamrar: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Namn",
+      "templateBody": "Innehåll",
+      "templateBodyHint": "Vanlig text — ingen Markdown eller HTML. # Rubrik för ett avsnitt, tom rad mellan stycken.",
+      "templateActive": "Aktiv",
+      "templateSave": "Spara ändringar",
+      "templateCreate": "Skapa mall",
+      "errors": {
+        "invalid": "Kunde inte spara. Kontrollera uppgifterna och försök igen.",
+        "unknownVariable": "Mallen använder en okänd variabel"
+      }
+    },
     "settings": {
       "title": "Inställningar",
       "intro": "Företagsuppgifterna som resten av systemet använder: varumärket som syns på offert-PDF:erna och öppettiderna som automationerna respekterar.",
@@ -3358,6 +3403,23 @@
         "check": "Check",
         "other": "Annat"
       }
+    },
+    "contract": {
+      "title": "AVTAL",
+      "client": "Kund",
+      "legalNotice": "Enkel elektronisk signatur enligt Ley 4017/2010 — inte en certifierad digital signatur.",
+      "footer": "Icke-skattemässigt dokument",
+      "caption": "Avtal",
+      "acceptancePageTitle": "Godkännanderegistrering",
+      "decisionLabel": "Beslut",
+      "decisionValues": {
+        "accepted": "Godkänt",
+        "declined": "Avböjt"
+      },
+      "nameLabel": "Namn",
+      "dateLabel": "Datum",
+      "ipLabel": "IP-adress",
+      "userAgentLabel": "Webbläsare"
     }
   },
   "public": {
@@ -3501,6 +3563,27 @@
         "card": "Kort",
         "check": "Check",
         "other": "Annat"
+      }
+    },
+    "contract": {
+      "title": "Avtal",
+      "downloadPdf": "Ladda ner PDF",
+      "legalNotice": "Det här dokumentet godkänns med en enkel elektronisk signatur, enligt Ley 4017/2010 — inte en certifierad digital signatur.",
+      "decisionPrompt": "Godkänner du det här avtalet?",
+      "decisionNameLabel": "Ditt namn",
+      "decisionNamePlaceholder": "För- och efternamn",
+      "decisionAccept": "Godkänn",
+      "decisionDecline": "Avböj",
+      "decisionAcceptedGeneric": "Klart! Vi har registrerat ditt godkännande.",
+      "decisionDeclinedGeneric": "Klart, vi har registrerat ditt svar.",
+      "decisionAccepted": "Godkänt av {name}",
+      "decisionDeclined": "Avböjt av {name}",
+      "decisionErrors": {
+        "nameRequired": "Skriv ditt namn innan du fortsätter.",
+        "rateLimited": "För många förfrågningar. Försök igen om en stund.",
+        "alreadyDecided": "Det här avtalet har redan besvarats.",
+        "notSent": "Det här avtalet har inte skickats än.",
+        "invalid": "Vi kunde inte behandla ditt svar. Försök igen."
       }
     }
   }

@@ -6,6 +6,7 @@ import { bookingEvents } from "@/modules/booking/events";
 import { chatEvents } from "@/modules/chatwidget/events";
 import { quoteEvents } from "@/modules/quotes/events";
 import { documentEvents } from "@/modules/documents/events";
+import { contractEvents } from "@/modules/contracts/events";
 import { whatsappEvents } from "@/modules/whatsapp/events";
 import { listActiveFlowsForTrigger } from "./flows";
 import { startRun } from "./engine";
@@ -164,6 +165,17 @@ export function registerAutomationTriggers() {
       });
     },
   );
+
+  // Contracts (§17.2 P13) — closes the `contract_accepted` entry P1 left
+  // unemitted (docs/log/p1.md "Known issues").
+  contractEvents.on("contract.accepted", async ({ tenantId, contactId, contractId, dealId, number }) => {
+    await fireTrigger({
+      tenantId,
+      triggerType: "contract_accepted",
+      contactId,
+      data: { contractId, dealId, number },
+    });
+  });
 
   leadEvents.on("lead.received", async ({ tenantId, contactId, formId, siteId }) => {
     // A hosted-form lead fires both triggers so a flow can target either
