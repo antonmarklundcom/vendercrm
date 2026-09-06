@@ -73,6 +73,7 @@
     "nav": {
       "dashboard": "Start",
       "contacts": "Kontakter",
+      "companies": "Företag",
       "pipeline": "Pipeline",
       "inbox": "Inkorg",
       "forms": "Formulär",
@@ -556,7 +557,9 @@
         "conversacion": "Konversation",
         "actividad": "Aktivitet",
         "datos": "Uppgifter",
-        "tareas": "Uppgifter att göra"
+        "tareas": "Uppgifter att göra",
+        "contratos": "Avtal",
+        "fusionar": "Slå ihop"
       },
       "searchLabel": "Sök",
       "tag": "Tagg",
@@ -676,6 +679,34 @@
         "submissions": "inkomna leads",
         "automationRuns": "körda automationer"
       },
+      "company": {
+        "title": "Företag",
+        "none": "Inget företag",
+        "save": "Spara"
+      },
+      "merge": {
+        "intro": "Slå ihop den här kontakten med en annan som är samma person. Den här kontakten behåller sin identitet, telefonnummer och historik; den andra tas bort vid bekräftelse. Går inte att ångra.",
+        "otherContact": "Slå ihop med",
+        "chooseContact": "Välj den andra kontakten",
+        "keepThis": "Den här kontakten",
+        "keepOther": "Den andra",
+        "countsWillMove": "Affärer, offerter, dokument, konversationer, uppgifter och allt annat på den andra kontakten flyttas till den här.",
+        "confirm": "Slå ihop kontakter",
+        "warning": "Den här åtgärden går inte att ångra.",
+        "adminOnly": "Bara en administratör kan slå ihop kontakter.",
+        "errors": {
+          "invalid": "Kunde inte slå ihop. Kontrollera uppgifterna och försök igen.",
+          "sameContact": "Du kan inte slå ihop en kontakt med sig själv.",
+          "notFound": "En av de två kontakterna hittades inte."
+        }
+      },
+      "duplicates": {
+        "title": "Möjliga dubbletter",
+        "empty": "Inga möjliga dubbletter hittades.",
+        "reasonEmail": "Samma e-post",
+        "reasonNameAndPhone": "Samma namn och liknande telefonnummer",
+        "review": "Granska"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "Alla pipelines",
       "stage": "Steg",
@@ -701,6 +732,37 @@
       "customFilterEquals": "Är lika med",
       "customFilterContains": "Innehåller",
       "customFilterValue": "Värde"
+    },
+    "companies": {
+      "title": "Företag",
+      "intro": "Kontona bakom dina kontakter: RUC, telefon och delade anteckningar, plus vilka som jobbar där och vilka affärer som är öppna.",
+      "emptyTitle": "Inga företag än",
+      "emptyBody": "Lägg till ett företag för att gruppera kontakterna som jobbar där och se deras affärer på ett ställe.",
+      "createTitle": "Nytt företag",
+      "editTitle": "Redigera företag",
+      "save": "Spara",
+      "name": "Namn",
+      "ruc": "RUC",
+      "phone": "Telefon",
+      "email": "E-post",
+      "address": "Adress",
+      "notes": "Anteckningar",
+      "table": {
+        "name": "Namn",
+        "contacts": "Kontakter",
+        "openDeals": "Öppna affärer"
+      },
+      "contactsTitle": "Kontakter",
+      "contactsEmpty": "Inga kontakter på detta företag än",
+      "dealsTitle": "Affärer",
+      "dealsEmpty": "Inga affärer för detta företag än",
+      "delete": "Ta bort företag",
+      "deleteConfirm": "Ta bort detta företag? Det går inte att ångra.",
+      "deleteBlocked": "Kan inte ta bort: har fortfarande kontakter.",
+      "errors": {
+        "invalid": "Kontrollera fälten: namn krävs.",
+        "nameTaken": "Du har redan ett företag med det namnet."
+      }
     },
     "inbox": {
       "title": "Inkorg",

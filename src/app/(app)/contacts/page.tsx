@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowDown, ArrowUp, Download, Upload, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { listTags } from "@/modules/crm/contacts";
+import { listContacts, listTags } from "@/modules/crm/contacts";
+import { findDuplicateCandidates } from "@/modules/crm/duplicates";
 import {
   contactsWithOpenDeals,
   listContactSources,
@@ -56,7 +57,7 @@ export default async function ContactsPage({
   const defaultCountry =
     ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
-  const [page, tags, sources, users, openDeals, pipelines, views, customFields] =
+  const [page, tags, sources, users, openDeals, pipelines, views, customFields, allContactRows] =
     await Promise.all([
       queryContacts(ctx, query, options),
       listTags(ctx),
@@ -66,7 +67,12 @@ export default async function ContactsPage({
       listPipelines(ctx),
       listContactViews(ctx),
       listCustomFieldDefinitions(ctx),
+      // For the "posibles duplicados" panel below — a pure computation over
+      // every contact's name/phone/email, not itself paginated or filtered.
+      listContacts(ctx),
     ]);
+
+  const duplicatePairs = findDuplicateCandidates(allContactRows);
 
   // Stages, kept grouped by pipeline: the filter's <optgroup>s need the
   // grouping, and the bulk "add to pipeline" picker needs the same list
@@ -167,6 +173,33 @@ export default async function ContactsPage({
             </div>
           }
         />
+
+        {duplicatePairs.length > 0 && (
+          <section className="flex flex-col gap-2 rounded-md border p-4">
+            <h2 className="text-sm font-semibold">{t("duplicates.title")}</h2>
+            <ul className="flex flex-col gap-2 text-sm">
+              {duplicatePairs.map((pair) => (
+                <li
+                  key={`${pair.a.id}-${pair.b.id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-b-0"
+                >
+                  <span>
+                    {pair.a.name} ({pair.a.phone}) · {pair.b.name} ({pair.b.phone})
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {t(pair.reason === "email" ? "duplicates.reasonEmail" : "duplicates.reasonNameAndPhone")}
+                    </span>
+                  </span>
+                  <Link
+                    href={`/contacts/${pair.a.id}?tab=fusionar&otherId=${pair.b.id}`}
+                    className="text-sm underline underline-offset-4"
+                  >
+                    {t("duplicates.review")}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {!isFirstTime && (
           <SavedViews

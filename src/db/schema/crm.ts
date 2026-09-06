@@ -82,6 +82,10 @@ export const contacts = mysqlTable(
     firstSiteId: char("first_site_id", { length: 26 }),
     firstTouchUtm: json("first_touch_utm"),
     custom: json("custom").notNull().default({}),
+    // The business this person belongs to (§17.3 P16) — optional, and not
+    // itself a merge target: a contact keeps its own history regardless of
+    // which company it's filed under.
+    companyId: char("company_id", { length: 26 }),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -93,6 +97,37 @@ export const contacts = mysqlTable(
     index("contacts_tenant_id_idx").on(table.tenantId),
     uniqueIndex("contacts_tenant_phone_idx").on(table.tenantId, table.phone),
     index("contacts_tenant_owner_idx").on(table.tenantId, table.ownerUserId),
+    index("contacts_tenant_company_idx").on(table.tenantId, table.companyId),
+  ],
+);
+
+/**
+ * Companies (PLAN.md §17.2/§17.3 P16) — the small half of the phase.
+ * Custom-field definitions (P5) are not extended here; that stays a
+ * contact-only concept until asked for.
+ */
+export const companies = mysqlTable(
+  "companies",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    name: varchar("name", { length: 200 }).notNull(),
+    ruc: varchar("ruc", { length: 30 }),
+    phone: varchar("phone", { length: 20 }),
+    email: varchar("email", { length: 320 }),
+    address: varchar("address", { length: 500 }),
+    custom: json("custom").notNull().default({}),
+    notes: text("notes"),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("companies_tenant_id_idx").on(table.tenantId),
+    uniqueIndex("companies_tenant_name_idx").on(table.tenantId, table.name),
   ],
 );
 

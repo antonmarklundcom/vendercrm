@@ -73,6 +73,7 @@
     "nav": {
       "dashboard": "Home",
       "contacts": "Contacts",
+      "companies": "Companies",
       "pipeline": "Pipeline",
       "inbox": "Inbox",
       "forms": "Forms",
@@ -556,7 +557,9 @@
         "conversacion": "Conversation",
         "actividad": "Activity",
         "datos": "Details",
-        "tareas": "Tasks"
+        "tareas": "Tasks",
+        "contratos": "Contracts",
+        "fusionar": "Merge"
       },
       "searchLabel": "Search",
       "tag": "Tag",
@@ -676,6 +679,34 @@
         "submissions": "captured leads",
         "automationRuns": "automation runs"
       },
+      "company": {
+        "title": "Company",
+        "none": "No company",
+        "save": "Save"
+      },
+      "merge": {
+        "intro": "Merge this contact with another one that's the same person. This contact keeps its identity, phone and history; the other is deleted on confirm. This can't be undone.",
+        "otherContact": "Merge with",
+        "chooseContact": "Pick the other contact",
+        "keepThis": "This contact",
+        "keepOther": "The other",
+        "countsWillMove": "Deals, quotes, documents, conversations, tasks and everything else on the other contact move to this one.",
+        "confirm": "Merge contacts",
+        "warning": "This action can't be undone.",
+        "adminOnly": "Only an admin can merge contacts.",
+        "errors": {
+          "invalid": "Couldn't merge. Check the data and try again.",
+          "sameContact": "You can't merge a contact with itself.",
+          "notFound": "One of the two contacts wasn't found."
+        }
+      },
+      "duplicates": {
+        "title": "Possible duplicates",
+        "empty": "No possible duplicates found.",
+        "reasonEmail": "Same email",
+        "reasonNameAndPhone": "Same name and similar phone",
+        "review": "Review"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "All pipelines",
       "stage": "Stage",
@@ -701,6 +732,37 @@
       "customFilterEquals": "Equals",
       "customFilterContains": "Contains",
       "customFilterValue": "Value"
+    },
+    "companies": {
+      "title": "Companies",
+      "intro": "The accounts behind your contacts: RUC, phone, and shared notes, plus who works there and what deals are open.",
+      "emptyTitle": "No companies yet",
+      "emptyBody": "Add a company to group the contacts who work there and see their deals in one place.",
+      "createTitle": "New company",
+      "editTitle": "Edit company",
+      "save": "Save",
+      "name": "Name",
+      "ruc": "RUC",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "notes": "Notes",
+      "table": {
+        "name": "Name",
+        "contacts": "Contacts",
+        "openDeals": "Open deals"
+      },
+      "contactsTitle": "Contacts",
+      "contactsEmpty": "No contacts at this company yet",
+      "dealsTitle": "Deals",
+      "dealsEmpty": "No deals for this company yet",
+      "delete": "Delete company",
+      "deleteConfirm": "Delete this company? This can't be undone.",
+      "deleteBlocked": "Can't delete: it still has contacts.",
+      "errors": {
+        "invalid": "Check the fields: name is required.",
+        "nameTaken": "You already have a company with that name."
+      }
     },
     "inbox": {
       "title": "Inbox",
