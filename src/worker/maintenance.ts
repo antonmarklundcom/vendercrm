@@ -61,6 +61,10 @@ export async function ensureMaintenanceScheduled(): Promise<void> {
   // P7) — same seeding as every other daily/hourly chain above.
   const { COACH_MORNING_JOB_TYPE } = await import("@/modules/coach/jobs");
   await ensureChainScheduled(COACH_MORNING_JOB_TYPE);
+  // modules/coach/briefing-jobs.ts's hourly Monday-briefing check (§15.3 L2,
+  // §17.2 P14) — same seeding as every other daily/hourly chain above.
+  const { COACH_WEEKLY_JOB_TYPE } = await import("@/modules/coach/briefing-jobs");
+  await ensureChainScheduled(COACH_WEEKLY_JOB_TYPE);
 }
 
 async function ensureChainScheduled(type: string): Promise<void> {

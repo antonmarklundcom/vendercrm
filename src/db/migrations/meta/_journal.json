@@ -253,6 +253,13 @@
       "when": 1788699693003,
       "tag": "0035_add_contracts",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1788701517544,
+      "tag": "0036_add_coach_briefings",
+      "breakpoints": true
     }
   ]
 }

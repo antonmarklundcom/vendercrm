@@ -34,7 +34,11 @@ export const aiReplies = mysqlTable(
      */
     kind: varchar("kind", {
       length: 20,
-      enum: ["reply", "memory_extract", "setup_plan"],
+      // `weekly_briefing` — P14 (§17.2): the Monday narrative's structured
+      // call, audited and capped through this same table (§10 1W's
+      // "activities.type needed no migration" precedent — varchar enum, no
+      // ALTER).
+      enum: ["reply", "memory_extract", "setup_plan", "weekly_briefing"],
     })
       .notNull()
       .default("reply"),
