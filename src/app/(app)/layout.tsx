@@ -92,6 +92,7 @@ export default async function AppLayout({
       items: [
         { href: "/contacts", label: t("contacts"), icon: "contacts" },
         { href: "/companies", label: t("companies"), icon: "companies" },
+        { href: "/contracts", label: t("contracts"), icon: "contracts" },
         { href: "/pipeline", label: t("pipeline"), icon: "pipeline" },
         { href: "/inbox", label: t("inbox"), icon: "inbox" },
         // A surface of its own rather than a tab inside /inbox: the WhatsApp
@@ -132,6 +133,7 @@ export default async function AppLayout({
               { href: "/whatsapp", label: t("whatsapp"), icon: "whatsapp" as const },
               { href: "/users", label: t("users"), icon: "users" as const },
               { href: "/settings", label: t("settings"), icon: "settings" as const },
+              { href: "/settings/negocio", label: t("negocio"), icon: "negocio" as const },
             ]
           : []),
         // Phase 2 (§9). Present but inert so the roadmap is visible in the

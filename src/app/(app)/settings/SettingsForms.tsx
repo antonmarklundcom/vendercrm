@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { BusinessHours } from "@/modules/tenancy/settings";
 import {
@@ -225,9 +226,6 @@ export function AiSettingsForm({
   mode,
   businessName,
   businessNamePlaceholder,
-  about,
-  tone,
-  hours,
   neverPromise,
   maxRepliesPerConversationPerDay,
   maxRepliesPerTenantPerDay,
@@ -238,9 +236,6 @@ export function AiSettingsForm({
   mode: string;
   businessName: string;
   businessNamePlaceholder: string;
-  about: string;
-  tone: string;
-  hours: string;
   neverPromise: string;
   maxRepliesPerConversationPerDay: number;
   maxRepliesPerTenantPerDay: number;
@@ -284,32 +279,18 @@ export function AiSettingsForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm">
-        {t("aiAbout")}
-        <Textarea
-          name="about"
-          rows={3}
-          defaultValue={state.values.about ?? about}
-          placeholder={t("aiAboutPlaceholder")}
-        />
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        {t("aiTone")}
-        <Input
-          name="tone"
-          defaultValue={state.values.tone ?? tone}
-          placeholder={t("aiTonePlaceholder")}
-        />
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        {t("aiHours")}
-        <Input
-          name="hours"
-          defaultValue={state.values.hours ?? hours}
-        />
-      </label>
+      {/* "Sobre el negocio", "Tono" and "Horario" used to live here as free
+          text; they are now inert (resolveAiConfig never reads them — the
+          memory profile at /settings/negocio is the one source for all
+          three, PLAN.md §16.4). Link there instead of duplicating a form
+          the reply engine has already stopped listening to (K1's open item,
+          closed by the wave 2 link pass, P18). */}
+      <p className="text-sm text-muted-foreground">
+        {t("aiBusinessProfileIntro")}{" "}
+        <Link href="/settings/negocio" className="underline">
+          {t("aiBusinessProfileLink")}
+        </Link>
+      </p>
 
       <label className="flex flex-col gap-1 text-sm">
         {t("aiNeverPromise")}

@@ -163,9 +163,6 @@ export default async function SettingsPage() {
           mode={ai.mode}
           businessName={settings.ai?.businessName ?? ""}
           businessNamePlaceholder={tenant?.name ?? ""}
-          about={settings.ai?.about ?? ""}
-          tone={settings.ai?.tone ?? ""}
-          hours={settings.ai?.hours ?? ""}
           neverPromise={settings.ai?.neverPromise ?? ""}
           maxRepliesPerConversationPerDay={ai.maxRepliesPerConversationPerDay}
           maxRepliesPerTenantPerDay={ai.maxRepliesPerTenantPerDay}
