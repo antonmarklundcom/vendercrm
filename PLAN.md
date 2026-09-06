@@ -3534,6 +3534,7 @@ J8's 2026-12-01 decision, if it comes to that, is recorded here too.
 - P13 Contracts — PR #106 — `docs/log/p13.md`
 - P14 Weekly AI briefing — PR #108 — `docs/log/p14.md`
 - P15 Reporting v2 — PR #110 — `docs/log/p15.md`
+- P16 Companies + contact merge — PR #112 — `docs/log/p16.md`
 
 ### 17.8 What remains for Fable, and nothing else
 
