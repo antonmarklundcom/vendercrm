@@ -2887,3 +2887,76 @@ One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 - P5 Pipeline polish + custom fields — PR #101 — `docs/log/p5.md`
 - P6 Quote accept/reject, receipts, quote expiry — PR #102 — `docs/log/p6.md`
 - P7 "Hoy" panel — PR #103 — `docs/log/p7.md`
+- P8 Link pass — PR #104 — `docs/log/p8.md`
+
+### 15.10 Build wave 2 — phase table and prompts
+
+Wave 1 is merged (§15.9). Wave 2 is what §15.8 deferred: J5 contracts, J6b
+voice notes, J7 weekly briefing, J10 campaigns, J11 reporting v2 / forms
+editor / companies. Same method as wave 1 (`phased-autonomous-build`,
+autonomy protocol `plan-booking.md` §4, handoff gates
+`prompts/_handoff-p.md`), same two-lane shape and the same reason for it:
+lane 1 is sequential Opus because both of its phases add a driver seam and a
+job kind that later phases call; lane 2 is Sonnet, **sequential in one
+session**, because W3–W7 again all add keys to the same three `messages/*`
+files and all append to §15.11.
+
+| Phase | §15.5 | Lane | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|---|---|
+| W1 Voice notes | J6b | 1 | Opus | `prompts/opus-w1-voice-notes.md` | `src/lib/ai/transcribe.ts` (new) + `transcribeAudio` on both drivers, `src/modules/whatsapp/transcription.ts` (new), `whatsapp_messages` transcript columns + migration, audio bubble in `src/app/(app)/inbox/**`, `src/modules/coach/voice.ts` (new), job kind `whatsapp.transcribe`, transcription keys in `messages/*` | — |
+| W2 Campaigns | J10 | 1 | Opus | `prompts/opus-w2-campaigns.md` | `src/modules/campaigns/**` (new), `src/db/schema/campaigns.ts` (new) + migration, `src/app/(app)/campaigns/**`, job kinds `campaign.tick` / `campaign.send`, campaign keys in `messages/*` | W1 (session order only) |
+| W3 Contracts | J5 | 2 | Sonnet | `prompts/sonnet-w3-contracts.md` | `src/modules/contracts/**` (new), `src/db/schema/contracts.ts` (new) + migration, `src/app/(app)/contratos/**`, `src/app/(public)/c/**`, contract PDF renderer, `contract_accepted` emitter, contract keys | — |
+| W4 Weekly briefing | J7 | 2 | Sonnet | `prompts/sonnet-w4-weekly-briefing.md` | `src/modules/coach/briefing.ts` (new), `coach_briefings` table + migration, job kind `coach.briefing`, dashboard briefing card, briefing keys | W1 (AI ledger caps), W3 (order only) |
+| W5 Reporting v2 | J11a | 2 | Sonnet | `prompts/sonnet-w5-reporting.md` | `src/modules/reports/**`, `src/app/(app)/reportes/**`, report keys | — |
+| W6 Forms field editor | J11b | 2 | Sonnet | `prompts/sonnet-w6-forms-editor.md` | `src/modules/forms/**`, `src/app/(app)/formularios/**`, form keys | — |
+| W7 Companies + merge | J11c | 2 | Sonnet | `prompts/sonnet-w7-companies-merge.md` | `src/db/schema/crm.ts` (`companies`, `contacts.company_id`) + migration, `src/modules/crm/companies.ts` + `merge.ts` (new), `src/app/(app)/empresas/**`, contact detail company field, company keys | W5 (order only) |
+| W8 Link pass | — | — | Sonnet | `prompts/sonnet-w8-link-pass.md` | nav, `docs/HANDOFF.md`, `docs/SMOKE_TEST.md`, `KNOWN-ISSUES.md`, §15.11 index | all |
+
+Lane 1 runs first and as one Opus session (`prompts/opus-wave2-lane1.md`);
+when W2 has merged it hands lane 2 over as one Sonnet session
+(`prompts/sonnet-wave2-lane2.md`) that runs W3 → W8 in order, one PR per
+phase, each merged before the next starts. Fable is never a build model
+(`plan-booking.md` §4.8).
+
+**Not in wave 2, and why.** J8 (conversational coach L3) waits on J6/J7
+being in real use for a month — §15.5 says so and nothing here changes it.
+J9 (embedded signup, multi-number inbox) is gated on Meta Business
+verification and Tech Provider approval (§15.4), which is a calendar item
+for the owner, not code. SIFEN waits on `PLAN-SIFEN.md`, which waits on the
+five owner prerequisites in §15.2.
+
+**Campaign compliance rules (the spec paragraph J10 asked for, written
+before the code).** Standing in for the Fable paragraph §15.5 called for —
+Fable is never spawned by a build session, so these rules are written here
+and flagged in `docs/decisions-needed.md` for the owner to amend rather
+than left unwritten. A campaign may only send a WhatsApp **template**
+message, never free text, because a campaign audience is by definition
+outside the 24-hour service window. The audience is a saved contact view,
+resolved **at send time, not at create time**, so a contact that opts out
+between scheduling and sending is never messaged. Every recipient is
+filtered against the same `optout` state manual sends already respect, and
+against a per-contact cooldown (no contact receives two campaign messages
+within 7 days, across all campaigns of the tenant). Sends are paced through
+the jobs table — one `campaign.send` job per recipient, released by a
+`campaign.tick` job at a fixed rate (default 20/min, tenant-configurable
+downwards only) — so a campaign never bursts and never blocks the worker's
+other kinds. Before **each** batch the tenant's WABA quality rating and
+messaging limit are re-read from the Graph API: a rating of `RED`, or a
+campaign that would exceed the number's messaging limit for the day, pauses
+the campaign with a reason on its row rather than sending and hoping. A
+per-tenant daily campaign cap (`maxCampaignMessagesPerDay`, same settings
+shape as `maxEmailsPerDay` from P4) applies on top. Every send, skip and
+pause is a row a human can read: which contact, which template, which
+reason. Nothing about this is a technical convenience — a number that gets
+blocked by Meta is the tenant's whole WhatsApp channel, not one campaign.
+
+Shared conventions are unchanged from §15.8: `TenantContext` first,
+`tenantDb` only, zod in every server action, `requireTenantAdmin()` +
+`writeAuditLog` on destructive actions, every string through next-intl in
+`messages/es|en|sv.json`, tests beside the module, and
+`npm run lint && npm run typecheck && npm test && npm run build` green
+before every push.
+
+### 15.11 Wave 2 build log index
+
+One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
