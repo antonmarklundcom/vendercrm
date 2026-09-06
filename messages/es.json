@@ -257,6 +257,43 @@
         "title": "Hoy en la agenda",
         "viewAll": "Ver la agenda",
         "allDay": "Todo el día"
+      },
+      "hoy": {
+        "title": "Hoy",
+        "empty": "Nada urgente por ahora. Buen trabajo.",
+        "digest": {
+          "title": "Tenés {count, plural, one {# cosa} other {# cosas}} pendientes hoy"
+        },
+        "unread_conversation": {
+          "title": "{name} está esperando respuesta",
+          "subtitle": "Sin respuesta hace {minutes, plural, one {# minuto} other {# minutos}}",
+          "action": "Abrir conversación"
+        },
+        "overdue_task": {
+          "title": "{title}",
+          "subtitle": "{name} · vencida hace {days, plural, one {# día} other {# días}}",
+          "action": "Ver contacto"
+        },
+        "upcoming_booking": {
+          "title": "Turno con {name}",
+          "subtitle": "En {hours, plural, one {# hora} other {# horas}}, sin recordatorio enviado",
+          "action": "Ver turno"
+        },
+        "unreplied_quote": {
+          "title": "Presupuesto {number} sin respuesta",
+          "subtitle": "Enviado hace {days, plural, one {# día} other {# días}}",
+          "action": "Ver presupuesto"
+        },
+        "stale_deal": {
+          "title": "{title}",
+          "subtitle": "{days, plural, one {# día} other {# días}} en la misma etapa",
+          "action": "Ver negocio"
+        },
+        "lead_without_deal": {
+          "title": "{name} todavía sin negocio",
+          "subtitle": "Llegó hace {hours, plural, one {# hora} other {# horas}}",
+          "action": "Ver contacto"
+        }
       }
     },
     "contacts": {

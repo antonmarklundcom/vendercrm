@@ -57,6 +57,10 @@ export async function ensureMaintenanceScheduled(): Promise<void> {
   // chain so a fresh deploy starts it without a manual trigger.
   const { QUOTE_EXPIRE_JOB_TYPE } = await import("@/modules/quotes/jobs");
   await ensureChainScheduled(QUOTE_EXPIRE_JOB_TYPE);
+  // modules/coach/jobs.ts's hourly morning-digest check (§15.3 L1, §15.8
+  // P7) — same seeding as every other daily/hourly chain above.
+  const { COACH_MORNING_JOB_TYPE } = await import("@/modules/coach/jobs");
+  await ensureChainScheduled(COACH_MORNING_JOB_TYPE);
 }
 
 async function ensureChainScheduled(type: string): Promise<void> {

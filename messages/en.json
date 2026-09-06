@@ -257,6 +257,43 @@
         "title": "Today's agenda",
         "viewAll": "Open the calendar",
         "allDay": "All day"
+      },
+      "hoy": {
+        "title": "Today",
+        "empty": "Nothing urgent right now. Nice work.",
+        "digest": {
+          "title": "You have {count, plural, one {# thing} other {# things}} pending today"
+        },
+        "unread_conversation": {
+          "title": "{name} is waiting on a reply",
+          "subtitle": "No reply for {minutes, plural, one {# minute} other {# minutes}}",
+          "action": "Open conversation"
+        },
+        "overdue_task": {
+          "title": "{title}",
+          "subtitle": "{name} · overdue by {days, plural, one {# day} other {# days}}",
+          "action": "View contact"
+        },
+        "upcoming_booking": {
+          "title": "Appointment with {name}",
+          "subtitle": "In {hours, plural, one {# hour} other {# hours}}, no reminder sent yet",
+          "action": "View appointment"
+        },
+        "unreplied_quote": {
+          "title": "Quote {number} has no reply",
+          "subtitle": "Sent {days, plural, one {# day} other {# days}} ago",
+          "action": "View quote"
+        },
+        "stale_deal": {
+          "title": "{title}",
+          "subtitle": "{days, plural, one {# day} other {# days}} in the same stage",
+          "action": "View deal"
+        },
+        "lead_without_deal": {
+          "title": "{name} still has no deal",
+          "subtitle": "Arrived {hours, plural, one {# hour} other {# hours}} ago",
+          "action": "View contact"
+        }
       }
     },
     "pipeline": {

@@ -257,6 +257,43 @@
         "title": "Dagens kalender",
         "viewAll": "Öppna kalendern",
         "allDay": "Heldag"
+      },
+      "hoy": {
+        "title": "Idag",
+        "empty": "Inget akut just nu. Bra jobbat.",
+        "digest": {
+          "title": "Du har {count, plural, one {# sak} other {# saker}} kvar idag"
+        },
+        "unread_conversation": {
+          "title": "{name} väntar på svar",
+          "subtitle": "Inget svar på {minutes, plural, one {# minut} other {# minuter}}",
+          "action": "Öppna konversation"
+        },
+        "overdue_task": {
+          "title": "{title}",
+          "subtitle": "{name} · försenad med {days, plural, one {# dag} other {# dagar}}",
+          "action": "Visa kontakt"
+        },
+        "upcoming_booking": {
+          "title": "Bokning med {name}",
+          "subtitle": "Om {hours, plural, one {# timme} other {# timmar}}, ingen påminnelse skickad",
+          "action": "Visa bokning"
+        },
+        "unreplied_quote": {
+          "title": "Offert {number} utan svar",
+          "subtitle": "Skickad för {days, plural, one {# dag} other {# dagar}} sedan",
+          "action": "Visa offert"
+        },
+        "stale_deal": {
+          "title": "{title}",
+          "subtitle": "{days, plural, one {# dag} other {# dagar}} i samma steg",
+          "action": "Visa affär"
+        },
+        "lead_without_deal": {
+          "title": "{name} saknar fortfarande affär",
+          "subtitle": "Kom in för {hours, plural, one {# timme} other {# timmar}} sedan",
+          "action": "Visa kontakt"
+        }
       }
     },
     "pipeline": {
