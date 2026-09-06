@@ -8,6 +8,7 @@ import { getContact, listTags, listTagsForContact } from "@/modules/crm/contacts
 import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
 import { getContactTimeline, type TimelineEntry } from "@/modules/crm/timeline";
 import { listDealsForContact } from "@/modules/crm/deals";
+import { listContractsForContact } from "@/modules/contracts/contracts";
 import { listTasksForContact } from "@/modules/crm/tasks";
 import { listEventsForContact } from "@/modules/calendar/events";
 import { findContactDeleteBlockers, type ContactBlocker } from "@/modules/crm/deletion";
@@ -51,7 +52,7 @@ import { Input, Select, Textarea } from "@/components/ui/form-fields";
 // own data. Tabs are URL state rather than client state so each one is a
 // plain server render — no client bundle for what is fundamentally reading.
 
-const TABS = ["conversacion", "tareas", "actividad", "datos"] as const;
+const TABS = ["conversacion", "tareas", "actividad", "contratos", "datos"] as const;
 type Tab = (typeof TABS)[number];
 
 
@@ -80,6 +81,7 @@ export default async function ContactDetailPage({
   const locale = await getLocale();
   const tq = await getTranslations("app.quotes");
   const td = await getTranslations("app.documents");
+  const tc = await getTranslations("app.contracts");
   const ti = await getTranslations("app.inbox");
   const tcal = await getTranslations("app.calendar");
 
@@ -105,6 +107,7 @@ export default async function ContactDetailPage({
     users,
     deleteBlockers,
     customFields,
+    contracts,
   ] =
     await Promise.all([
       getContactTimeline(ctx, id),
@@ -124,6 +127,7 @@ export default async function ContactDetailPage({
         ? findContactDeleteBlockers(ctx, id)
         : Promise.resolve<ContactBlocker[]>([]),
       listCustomFieldDefinitions(ctx),
+      listContractsForContact(ctx, id),
     ]);
 
   const assignableUsers = users
@@ -424,6 +428,33 @@ export default async function ContactDetailPage({
               <li className="text-muted-foreground">{t("timelineEmpty")}</li>
             )}
           </ul>
+        </div>
+      )}
+
+      {tab === "contratos" && (
+        <div className="flex flex-col gap-4">
+          <Link
+            href={`/contracts?contactId=${id}#nuevo-contrato`}
+            className="w-fit text-sm underline underline-offset-4"
+          >
+            {tc("createTitle")}
+          </Link>
+          {contracts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{tc("emptyBody")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2 text-sm">
+              {contracts.map((contract) => (
+                <li key={contract.id} className="rounded-md border px-3 py-2">
+                  <Link href={`/contracts/${contract.id}`} className="underline underline-offset-4">
+                    {contract.number}
+                  </Link>
+                  <span className="ml-2 text-muted-foreground">
+                    {tc(`statusValues.${contract.status}` as "statusValues.draft")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

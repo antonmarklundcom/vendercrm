@@ -246,6 +246,13 @@
       "when": 1788658283083,
       "tag": "0034_add_quote_acceptances_and_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1788699693003,
+      "tag": "0035_add_contracts",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ import { listActivitiesForContact } from "@/modules/crm/activities";
 import { listTasksForContact } from "@/modules/crm/tasks";
 import { listQuotesForContact } from "@/modules/quotes/quotes";
 import { listDocumentsForContact } from "@/modules/documents/documents";
+import { listContractsForContact } from "@/modules/contracts/contracts";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
@@ -38,6 +39,7 @@ export default async function DealPage({
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.deal");
   const tp = await getTranslations("app.pipeline");
+  const tc = await getTranslations("app.contracts");
   const locale = await getLocale();
 
   const deal = await getDeal(ctx, dealId);
@@ -55,6 +57,7 @@ export default async function DealPage({
     tasks,
     quotes,
     documents,
+    contracts,
     activities,
     deleteBlockers,
   ] =
@@ -66,6 +69,7 @@ export default async function DealPage({
       listTasksForContact(ctx, deal.contactId),
       listQuotesForContact(ctx, deal.contactId),
       listDocumentsForContact(ctx, deal.contactId),
+      listContractsForContact(ctx, deal.contactId),
       listActivitiesForContact(ctx, deal.contactId),
       // Only an admin can delete, so only an admin pays for the scan.
       ctx.role === "admin"
@@ -292,6 +296,34 @@ export default async function DealPage({
                   </Link>
                   <span className="ml-2 text-muted-foreground">
                     {formatMoney(document.total, document.currency, locale)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">{tc("title")}</h2>
+            <Link
+              href={`/contracts?contactId=${deal.contactId}&dealId=${deal.id}#nuevo-contrato`}
+              className="text-sm underline underline-offset-4"
+            >
+              {tc("createTitle")}
+            </Link>
+          </div>
+          {contracts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{tc("emptyBody")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2 text-sm">
+              {contracts.map((contract) => (
+                <li key={contract.id} className="rounded-md border px-3 py-2">
+                  <Link href={`/contracts/${contract.id}`} className="underline underline-offset-4">
+                    {contract.number}
+                  </Link>
+                  <span className="ml-2 text-muted-foreground">
+                    {tc(`statusValues.${contract.status}` as "statusValues.draft")}
                   </span>
                 </li>
               ))}

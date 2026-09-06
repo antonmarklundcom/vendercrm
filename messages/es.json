@@ -1301,6 +1301,51 @@
       "viewReceipt": "Recibo",
       "sendReceiptWhatsapp": "Enviar recibo por WhatsApp"
     },
+    "contracts": {
+      "title": "Contratos",
+      "intro": "Generá un contrato desde una plantilla, mandalo por WhatsApp o email, y el cliente lo acepta con un clic desde el celular.",
+      "emptyTitle": "Todavía no hay contratos",
+      "emptyBody": "Elegí un contacto y una plantilla para generar el primer contrato.",
+      "createTitle": "Nuevo contrato",
+      "needContact": "Primero necesitás al menos un contacto.",
+      "goToContacts": "Ir a contactos",
+      "needTemplate": "Primero necesitás al menos una plantilla activa.",
+      "manageTemplates": "Administrar plantillas",
+      "number": "Número",
+      "contact": "Contacto",
+      "template": "Plantilla",
+      "status": "Estado",
+      "statusValues": {
+        "draft": "Borrador",
+        "sent": "Enviado",
+        "accepted": "Aceptado",
+        "declined": "Rechazado",
+        "voided": "Anulado"
+      },
+      "sendWhatsapp": "Enviar por WhatsApp",
+      "sendEmail": "Enviar por email",
+      "publicLink": "Enlace público",
+      "downloadPdf": "Descargar PDF",
+      "decisionAccepted": "El cliente aceptó el contrato.",
+      "decisionDeclined": "El cliente rechazó el contrato.",
+      "voidTitle": "Anular",
+      "voidReason": "Motivo",
+      "voidWarning": "Anular un contrato es definitivo.",
+      "voidAction": "Anular contrato",
+      "voidedNotice": "Anulado: {reason}",
+      "templatesTitle": "Plantillas de contrato",
+      "templatesIntro": "Escribí el cuerpo en texto plano. Usá # para un título de sección y una línea en blanco para separar párrafos. Variables disponibles entre llaves dobles: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Nombre",
+      "templateBody": "Cuerpo",
+      "templateBodyHint": "Texto plano — sin Markdown ni HTML. # Título para una sección, línea en blanco entre párrafos.",
+      "templateActive": "Activa",
+      "templateSave": "Guardar cambios",
+      "templateCreate": "Crear plantilla",
+      "errors": {
+        "invalid": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
+        "unknownVariable": "La plantilla usa una variable desconocida"
+      }
+    },
     "automations": {
       "title": "Automatizaciones",
       "adminOnly": "Solo los administradores pueden ver esta página",
@@ -3358,6 +3403,23 @@
         "check": "Cheque",
         "other": "Otro"
       }
+    },
+    "contract": {
+      "title": "CONTRATO",
+      "client": "Cliente",
+      "legalNotice": "Firma electrónica simple bajo la Ley 4017/2010 — no es una firma digital certificada.",
+      "footer": "Documento no fiscal",
+      "caption": "Contrato",
+      "acceptancePageTitle": "Registro de aceptación",
+      "decisionLabel": "Decisión",
+      "decisionValues": {
+        "accepted": "Aceptado",
+        "declined": "Rechazado"
+      },
+      "nameLabel": "Nombre",
+      "dateLabel": "Fecha",
+      "ipLabel": "Dirección IP",
+      "userAgentLabel": "Navegador"
     }
   },
   "public": {
@@ -3501,6 +3563,27 @@
         "card": "Tarjeta",
         "check": "Cheque",
         "other": "Otro"
+      }
+    },
+    "contract": {
+      "title": "Contrato",
+      "downloadPdf": "Descargar PDF",
+      "legalNotice": "Este documento se acepta mediante firma electrónica simple, bajo la Ley 4017/2010 — no es una firma digital certificada.",
+      "decisionPrompt": "¿Aceptás este contrato?",
+      "decisionNameLabel": "Tu nombre",
+      "decisionNamePlaceholder": "Nombre y apellido",
+      "decisionAccept": "Aceptar",
+      "decisionDecline": "Rechazar",
+      "decisionAcceptedGeneric": "¡Listo! Registramos tu aceptación.",
+      "decisionDeclinedGeneric": "Listo, registramos tu respuesta.",
+      "decisionAccepted": "Aceptado por {name}",
+      "decisionDeclined": "Rechazado por {name}",
+      "decisionErrors": {
+        "nameRequired": "Escribí tu nombre antes de continuar.",
+        "rateLimited": "Demasiadas solicitudes. Probá de nuevo en un momento.",
+        "alreadyDecided": "Este contrato ya fue respondido antes.",
+        "notSent": "Este contrato todavía no fue enviado.",
+        "invalid": "No pudimos procesar tu respuesta. Probá de nuevo."
       }
     }
   }

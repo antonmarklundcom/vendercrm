@@ -942,6 +942,51 @@
       "viewReceipt": "Receipt",
       "sendReceiptWhatsapp": "Send receipt by WhatsApp"
     },
+    "contracts": {
+      "title": "Contracts",
+      "intro": "Generate a contract from a template, send it by WhatsApp or email, and the customer accepts it with one tap from their phone.",
+      "emptyTitle": "No contracts yet",
+      "emptyBody": "Pick a contact and a template to generate the first contract.",
+      "createTitle": "New contract",
+      "needContact": "You need at least one contact first.",
+      "goToContacts": "Go to contacts",
+      "needTemplate": "You need at least one active template first.",
+      "manageTemplates": "Manage templates",
+      "number": "Number",
+      "contact": "Contact",
+      "template": "Template",
+      "status": "Status",
+      "statusValues": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "voided": "Voided"
+      },
+      "sendWhatsapp": "Send by WhatsApp",
+      "sendEmail": "Send by email",
+      "publicLink": "Public link",
+      "downloadPdf": "Download PDF",
+      "decisionAccepted": "The customer accepted the contract.",
+      "decisionDeclined": "The customer declined the contract.",
+      "voidTitle": "Void",
+      "voidReason": "Reason",
+      "voidWarning": "Voiding a contract is permanent.",
+      "voidAction": "Void contract",
+      "voidedNotice": "Voided: {reason}",
+      "templatesTitle": "Contract templates",
+      "templatesIntro": "Write the body in plain text. Use # for a section heading and a blank line to separate paragraphs. Available variables, in double curly braces: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Name",
+      "templateBody": "Body",
+      "templateBodyHint": "Plain text — no Markdown or HTML. # Heading for a section, blank line between paragraphs.",
+      "templateActive": "Active",
+      "templateSave": "Save changes",
+      "templateCreate": "Create template",
+      "errors": {
+        "invalid": "Couldn't save. Check the data and try again.",
+        "unknownVariable": "The template uses an unknown variable"
+      }
+    },
     "settings": {
       "title": "Settings",
       "intro": "Your company details that the rest of the system uses: the branding that appears on quote PDFs, and the business hours automations respect.",
@@ -3358,6 +3403,23 @@
         "check": "Check",
         "other": "Other"
       }
+    },
+    "contract": {
+      "title": "CONTRACT",
+      "client": "Client",
+      "legalNotice": "Simple electronic signature under Ley 4017/2010 — not a certified digital signature.",
+      "footer": "Non-fiscal document",
+      "caption": "Contract",
+      "acceptancePageTitle": "Acceptance record",
+      "decisionLabel": "Decision",
+      "decisionValues": {
+        "accepted": "Accepted",
+        "declined": "Declined"
+      },
+      "nameLabel": "Name",
+      "dateLabel": "Date",
+      "ipLabel": "IP address",
+      "userAgentLabel": "Browser"
     }
   },
   "public": {
@@ -3501,6 +3563,27 @@
         "card": "Card",
         "check": "Check",
         "other": "Other"
+      }
+    },
+    "contract": {
+      "title": "Contract",
+      "downloadPdf": "Download PDF",
+      "legalNotice": "This document is accepted by a simple electronic signature, under Ley 4017/2010 — not a certified digital signature.",
+      "decisionPrompt": "Do you accept this contract?",
+      "decisionNameLabel": "Your name",
+      "decisionNamePlaceholder": "Full name",
+      "decisionAccept": "Accept",
+      "decisionDecline": "Decline",
+      "decisionAcceptedGeneric": "Done! We recorded your acceptance.",
+      "decisionDeclinedGeneric": "Done, we recorded your response.",
+      "decisionAccepted": "Accepted by {name}",
+      "decisionDeclined": "Declined by {name}",
+      "decisionErrors": {
+        "nameRequired": "Type your name before continuing.",
+        "rateLimited": "Too many requests. Try again in a moment.",
+        "alreadyDecided": "This contract was already answered.",
+        "notSent": "This contract hasn't been sent yet.",
+        "invalid": "We couldn't process your response. Try again."
       }
     }
   }

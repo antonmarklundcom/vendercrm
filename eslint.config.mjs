@@ -109,6 +109,13 @@ const eslintConfig = defineConfig([
       // through src/modules/tenancy or src/modules/auth (which holds no raw
       // db import of its own).
       "src/lib/auth/**/*.{ts,tsx}",
+      // Same rationale as quotes and documents: the public contract view
+      // /c/[token] resolves an unguessable token to its contract — and
+      // therefore its tenant — before any TenantContext exists (PLAN.md
+      // §17.3 P13). That single lookup is the only raw-db use here; the
+      // acceptance record and everything else are read back through
+      // tenantDb once the tenant is known.
+      "src/modules/contracts/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

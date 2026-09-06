@@ -28,6 +28,7 @@ export default async function QuoteDetailPage({
   const t = await getTranslations("app.quotes");
   const locale = await getLocale();
   const td = await getTranslations("app.documents");
+  const tc = await getTranslations("app.contracts");
 
   const quote = await getQuote(ctx, id);
   if (!quote) notFound();
@@ -170,6 +171,13 @@ export default async function QuoteDetailPage({
             </Button>
           </form>
         )}
+
+        <Link
+          href={`/contracts?contactId=${quote.contactId}&quoteId=${quote.id}#nuevo-contrato`}
+          className="text-sm underline underline-offset-4"
+        >
+          {tc("createTitle")}
+        </Link>
       </section>
     </div>
   );
