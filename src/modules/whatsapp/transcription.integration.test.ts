@@ -149,6 +149,21 @@ describe.skipIf(!hasDb)("voice-note transcription (MySQL integration)", () => {
     expect(row.transcriptError).toMatch(/503/);
   });
 
+  it("skips, rather than retrying forever, when the stored object will not read", async () => {
+    const { db } = await import("@/db/client");
+    const schema = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+
+    const messageId = await audioMessage(conversationId, Buffer.from("opus"));
+    await db
+      .update(schema.messages)
+      .set({ storageKey: `whatsapp-media/${ctx.tenantId}/gone-${newId()}` })
+      .where(eq(schema.messages.id, messageId));
+
+    const outcome = await transcription.transcribeMessage(ctx, messageId);
+    expect(outcome).toEqual({ status: "skipped", reason: "no_media" });
+  });
+
   it("skips an audio larger than the cap without calling the provider", async () => {
     const messageId = await audioMessage(
       conversationId,

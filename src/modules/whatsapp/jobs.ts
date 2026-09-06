@@ -53,9 +53,6 @@ registerHandler(TRANSCRIBE_JOB_TYPE, async (payload, tenantId) => {
     contactId: string;
   };
 
-  const ctx = await buildSystemTenantContext(tenantId);
-  if (!ctx) return;
-
   const announce = () =>
     whatsappEvents.emit("wa.message_transcribed", {
       tenantId,
@@ -63,6 +60,15 @@ registerHandler(TRANSCRIBE_JOB_TYPE, async (payload, tenantId) => {
       contactId,
       messageId,
     });
+
+  const ctx = await buildSystemTenantContext(tenantId);
+  // A tenant that cannot be built (deleted, suspended mid-flight) still has
+  // a message parked on this event — release the chain rather than stranding
+  // it, exactly as a failed transcription does.
+  if (!ctx) {
+    await announce();
+    return;
+  }
 
   try {
     await transcribeMessage(ctx, messageId);

@@ -94,7 +94,14 @@ export async function transcribeMessage(
     return skip(ctx, row, "tenant_daily_cap");
   }
 
-  const audio = await storage.get(row.storageKey);
+  // A stored object that will not read is not a provider problem and retrying
+  // it forever helps nobody: the media URL it came from expired long ago.
+  let audio: Buffer;
+  try {
+    audio = await storage.get(row.storageKey);
+  } catch {
+    return skip(ctx, row, "no_media");
+  }
   if (audio.byteLength > MAX_AUDIO_BYTES) return skip(ctx, row, "too_large");
 
   const mimeType = row.mediaMimeType ?? "audio/ogg";
