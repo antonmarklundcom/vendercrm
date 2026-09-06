@@ -2,41 +2,75 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { getSalesReport, reportWindow } from "@/modules/reports/sales";
+import { getSalesReport, previousWindow } from "@/modules/reports/sales";
+import { withComparison } from "@/modules/reports/compare";
 import { listTenantUsers } from "@/modules/tenancy/users";
+import { listPipelines } from "@/modules/crm/pipelines";
 import { listSites } from "@/modules/sites/sites";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { Select } from "@/components/ui/form-fields";
 import { cn } from "@/lib/utils";
 import { formatMoney, formatNumber } from "@/lib/i18n/format";
+import { DAY_PRESETS, parseReportFilters, parseReportsWindow, type ReportsSearchParams } from "./query";
+import { SortableTable, type SortableColumn } from "./SortableTable";
 
-// Lead-to-sale reporting for the business (PLAN.md §10 1J). Open to agente as
-// well as admin: the pipeline is shared (§1.2), so the numbers over it are
-// too, and a rep who cannot see their own conversion rate cannot improve it.
+// Lead-to-sale reporting for the business (PLAN.md §10 1J, §17.3 P15 "v2").
+// Open to agente as well as admin: the pipeline is shared (§1.2), so the
+// numbers over it are too, and a rep who cannot see their own conversion
+// rate cannot improve it.
 //
 // Not web analytics — pageviews and traffic funnels are deliberately not in
 // this repo (§1.2). Everything here is something the CRM already owns.
+//
+// Every filter lives in the URL (§10 1R #1) — the CSV export
+// (/api/exports/reports/[table]) reads the exact same params through the
+// same parser, so "exportar" always means "what's on screen".
 
-const PERIODS = [30, 90, 365] as const;
+function buildHref(base: ReportsSearchParams, overrides: Partial<ReportsSearchParams>): string {
+  const merged = { ...base, ...overrides };
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(merged)) {
+    if (value) params.set(key, String(value));
+  }
+  const qs = params.toString();
+  return qs ? `/reports?${qs}` : "/reports";
+}
+
+function toQueryString(params: ReportsSearchParams): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) search.set(key, String(value));
+  }
+  return search.toString();
+}
+
+function delta(current: number, previous: number): string | null {
+  if (previous === 0) return current === 0 ? null : "+100%";
+  const pct = Math.round(((current - previous) / previous) * 100);
+  return `${pct >= 0 ? "+" : ""}${pct}%`;
+}
 
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ days?: string }>;
+  searchParams: Promise<ReportsSearchParams>;
 }) {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.reports");
   const locale = await getLocale();
-  const { days: rawDays } = await searchParams;
+  const params = await searchParams;
 
-  const days = PERIODS.includes(Number(rawDays) as (typeof PERIODS)[number])
-    ? Number(rawDays)
-    : 30;
+  const window = parseReportsWindow(params);
+  const filters = parseReportFilters(params);
+  const previous = previousWindow(window);
 
-  const [report, users, sites] = await Promise.all([
-    getSalesReport(ctx, reportWindow(days)),
+  const [report, previousReport, users, pipelines, sites] = await Promise.all([
+    getSalesReport(ctx, window, filters),
+    getSalesReport(ctx, previous, filters),
     listTenantUsers(ctx),
+    listPipelines(ctx),
     listSites(ctx),
   ]);
 
@@ -45,49 +79,176 @@ export default async function ReportsPage({
   const siteNames = new Map(sites.map((site) => [site.id, site.name]));
 
   const { funnel, response } = report;
-  /** Whole percent — a conversion rate to one decimal place implies a
-   * precision these sample sizes do not have. */
   const rate = (part: number, whole: number) =>
     whole === 0 ? "—" : `${Math.round((part / whole) * 100)}%`;
 
   const funnelSteps = [
-    { key: "leads", value: funnel.leads, hint: null },
+    { key: "leads", value: funnel.leads, previous: previousReport.funnel.leads, hint: null },
     {
       key: "dealsOpened",
       value: funnel.dealsOpened,
+      previous: previousReport.funnel.dealsOpened,
       hint: rate(funnel.leadsWithDeal, funnel.leads),
     },
     {
       key: "dealsWon",
       value: funnel.dealsWon,
+      previous: previousReport.funnel.dealsWon,
       hint: rate(funnel.dealsWon, funnel.dealsOpened),
     },
-    { key: "dealsLost", value: funnel.dealsLost, hint: null },
+    {
+      key: "dealsLost",
+      value: funnel.dealsLost,
+      previous: previousReport.funnel.dealsLost,
+      hint: null,
+    },
   ] as const;
 
-  const maxMonth = Math.max(1, ...report.byMonth.map((month) => month.won + month.lost));
+  const agentColumns: SortableColumn<(typeof report.byAgent)[number]>[] = [
+    { key: "agent", label: t("table.agent"), value: (row) => userNames.get(row.userId) ?? row.userId },
+    { key: "leads", label: t("table.leads"), align: "right", value: (row) => row.leads },
+    { key: "opened", label: t("table.opened"), align: "right", value: (row) => row.dealsOpened },
+    { key: "won", label: t("table.won"), align: "right", value: (row) => row.dealsWon },
+    { key: "lost", label: t("table.lost"), align: "right", value: (row) => row.dealsLost },
+    {
+      key: "wonValue",
+      label: t("table.wonValue"),
+      align: "right",
+      value: (row) => row.wonValue,
+      format: (row) => formatMoney(row.wonValue, funnel.currency, locale),
+    },
+    {
+      key: "response",
+      label: t("table.responseMedian"),
+      align: "right",
+      value: (row) => row.responseMedianMinutes ?? -1,
+      format: (row) => (row.responseMedianMinutes === null ? "—" : t("minutes", { count: Math.round(row.responseMedianMinutes) })),
+    },
+  ];
+
+  const sourceRows = withComparison(report.bySource, previousReport.bySource, (r) => r.key, (r) => r.leads);
+  const siteRows = withComparison(
+    report.bySite.map((row) => ({ ...row, key: siteNames.get(row.key) ?? row.key })),
+    previousReport.bySite.map((row) => ({ ...row, key: siteNames.get(row.key) ?? row.key })),
+    (r) => r.key,
+    (r) => r.leads,
+  );
+
+  function sourceColumns(labelKey: string): SortableColumn<(typeof sourceRows)[number]>[] {
+    return [
+      { key: "key", label: t(labelKey as "table.source"), value: (row) => row.key },
+      { key: "leads", label: t("table.leads"), align: "right", value: (row) => row.leads },
+      { key: "deals", label: t("table.deals"), align: "right", value: (row) => row.deals },
+      { key: "won", label: t("table.won"), align: "right", value: (row) => row.won },
+      {
+        key: "wonValue",
+        label: t("table.wonValue"),
+        align: "right",
+        value: (row) => row.wonValue,
+        format: (row) => formatMoney(row.wonValue, funnel.currency, locale),
+      },
+      {
+        key: "previous",
+        label: t("vsPrevious"),
+        align: "right",
+        value: (row) => row.previous,
+        format: (row) => delta(row.leads, row.previous) ?? "—",
+      },
+    ];
+  }
+
+  const stageColumns: SortableColumn<(typeof report.stageConversion)[number]>[] = [
+    { key: "stage", label: t("table.stage"), value: (row) => row.position, format: (row) => row.name },
+    {
+      key: "reachedOrPast",
+      label: t("table.reachedOrPast"),
+      align: "right",
+      value: (row) => row.reachedOrPast,
+    },
+  ];
+
+  const responseColumns: SortableColumn<(typeof report.responseDistribution)[number]>[] = [
+    {
+      key: "bucket",
+      label: t("table.bucket"),
+      value: (row) => row.bucket,
+      format: (row) => t(`responseBuckets.${row.bucket}` as "responseBuckets.under15m"),
+    },
+    { key: "count", label: t("table.conversations"), align: "right", value: (row) => row.count },
+  ];
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader
-        title={t("title")}
-        description={t("intro")}
-        action={
-          <div className="flex flex-wrap gap-2">
-            {PERIODS.map((period) => (
+      <PageHeader title={t("title")} description={t("intro")} />
+
+      <form method="get" className="flex flex-wrap items-end gap-3 rounded-md border p-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">{t("customRange")}</span>
+          <div className="flex gap-2">
+            {DAY_PRESETS.map((preset) => (
               <Link
-                key={period}
-                href={`/reports?days=${period}`}
+                key={preset}
+                href={buildHref(params, { days: String(preset), from: undefined, to: undefined })}
                 className={cn(
-                  buttonVariants({ variant: period === days ? "default" : "outline", size: "sm" }),
+                  buttonVariants({
+                    variant: !params.from && Number(params.days ?? 30) === preset ? "default" : "outline",
+                    size: "sm",
+                  }),
                 )}
               >
-                {t("period", { days: period })}
+                {t("period", { days: preset })}
               </Link>
             ))}
           </div>
-        }
-      />
+        </div>
+
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {t("from")}
+          <input
+            type="date"
+            name="from"
+            defaultValue={params.from ?? ""}
+            className="h-8 rounded-md border bg-card px-2 text-sm text-foreground"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {t("to")}
+          <input
+            type="date"
+            name="to"
+            defaultValue={params.to ?? ""}
+            className="h-8 rounded-md border bg-card px-2 text-sm text-foreground"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {t("pipeline")}
+          <Select name="pipelineId" defaultValue={params.pipelineId ?? ""} className="h-8">
+            <option value="">{t("allPipelines")}</option>
+            {pipelines.map((pipeline) => (
+              <option key={pipeline.id} value={pipeline.id}>
+                {pipeline.name}
+              </option>
+            ))}
+          </Select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {t("agent")}
+          <Select name="agentUserId" defaultValue={params.agentUserId ?? ""} className="h-8">
+            <option value="">{t("allAgents")}</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </Select>
+        </label>
+
+        <button type="submit" className={cn(buttonVariants({ size: "sm" }))}>
+          {t("apply")}
+        </button>
+      </form>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {funnelSteps.map((step) => (
@@ -96,11 +257,12 @@ export default async function ReportsPage({
               {t(`funnel.${step.key}` as "funnel.leads")}
             </span>
             <span className="text-3xl font-semibold tabular-nums">{n(step.value)}</span>
-            {step.hint && (
-              <span className="text-xs text-muted-foreground">
-                {t("conversion", { rate: step.hint })}
-              </span>
-            )}
+            <span className="text-xs text-muted-foreground">
+              {step.hint && `${t("conversion", { rate: step.hint })} · `}
+              {delta(step.value, step.previous)
+                ? `${delta(step.value, step.previous)} ${t("vsPrevious")}`
+                : t("vsPrevious")}
+            </span>
           </Card>
         ))}
       </section>
@@ -129,138 +291,112 @@ export default async function ReportsPage({
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold">{t("byMonthTitle")}</h2>
           <ul className="flex flex-col gap-2">
-            {report.byMonth.map((month) => (
-              <li key={month.month} className="flex items-center gap-3 text-sm">
-                <span className="w-20 tabular-nums text-muted-foreground">{month.month}</span>
-                {/* Bars rather than a chart library: two numbers per row do
-                    not justify a dependency, and this reads the same in an
-                    email screenshot. */}
-                <span className="flex h-4 flex-1 overflow-hidden rounded-sm bg-muted">
-                  <span
-                    className="bg-success"
-                    style={{ width: `${(month.won / maxMonth) * 100}%` }}
-                  />
-                  <span
-                    className="bg-destructive/60"
-                    style={{ width: `${(month.lost / maxMonth) * 100}%` }}
-                  />
-                </span>
-                <span className="w-32 text-right tabular-nums">
-                  {t("wonLost", { won: month.won, lost: month.lost })}
-                </span>
-              </li>
-            ))}
+            {report.byMonth.map((month) => {
+              const maxMonth = Math.max(1, ...report.byMonth.map((m) => m.won + m.lost));
+              return (
+                <li key={month.month} className="flex items-center gap-3 text-sm">
+                  <span className="w-20 tabular-nums text-muted-foreground">{month.month}</span>
+                  <span className="flex h-4 flex-1 overflow-hidden rounded-sm bg-muted">
+                    <span className="bg-success" style={{ width: `${(month.won / maxMonth) * 100}%` }} />
+                    <span
+                      className="bg-destructive/60"
+                      style={{ width: `${(month.lost / maxMonth) * 100}%` }}
+                    />
+                  </span>
+                  <span className="w-32 text-right tabular-nums">
+                    {t("wonLost", { won: month.won, lost: month.lost })}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
 
       <section className="grid gap-8 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">{t("bySourceTitle")}</h2>
-          <SourceTable
-            rows={report.bySource}
-            labels={{
-              key: t("table.source"),
-              leads: t("table.leads"),
-              deals: t("table.deals"),
-              won: t("table.won"),
-              empty: t("table.empty"),
-            }}
-            format={n}
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">{t("bySourceTitle")}</h2>
+            <a href={`/api/exports/reports/sources?${toQueryString(params)}`} className="text-sm underline underline-offset-4">
+              {t("exportCsv")}
+            </a>
+          </div>
+          <SortableTable
+            rows={sourceRows}
+            rowKey={(row) => row.key}
+            columns={sourceColumns("table.source")}
+            empty={t("table.empty")}
           />
         </div>
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">{t("bySiteTitle")}</h2>
-          <SourceTable
-            rows={report.bySite.map((row) => ({
-              ...row,
-              key: siteNames.get(row.key) ?? row.key,
-            }))}
-            labels={{
-              key: t("table.site"),
-              leads: t("table.leads"),
-              deals: t("table.deals"),
-              won: t("table.won"),
-              empty: t("table.empty"),
-            }}
-            format={n}
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">{t("bySiteTitle")}</h2>
+            <a href={`/api/exports/reports/sites?${toQueryString(params)}`} className="text-sm underline underline-offset-4">
+              {t("exportCsv")}
+            </a>
+          </div>
+          <SortableTable
+            rows={siteRows}
+            rowKey={(row) => row.key}
+            columns={sourceColumns("table.site")}
+            empty={t("table.empty")}
           />
         </div>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{t("byAgentTitle")}</h2>
-        {report.byAgent.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("table.empty")}</p>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{t("byAgentTitle")}</h2>
+          <a href={`/api/exports/reports/agents?${toQueryString(params)}`} className="text-sm underline underline-offset-4">
+            {t("exportCsv")}
+          </a>
+        </div>
+        <SortableTable
+          rows={report.byAgent}
+          rowKey={(row) => row.userId}
+          columns={agentColumns}
+          empty={t("table.empty")}
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{t("stageConversionTitle")}</h2>
+          {filters.pipelineId && (
+            <a href={`/api/exports/reports/stages?${toQueryString(params)}`} className="text-sm underline underline-offset-4">
+              {t("exportCsv")}
+            </a>
+          )}
+        </div>
+        {filters.pipelineId ? (
+          <SortableTable
+            rows={report.stageConversion}
+            rowKey={(row) => row.stageId}
+            columns={stageColumns}
+            defaultSort={{ key: "stage", direction: "asc" }}
+            empty={t("table.empty")}
+          />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2 pr-4 font-medium">{t("table.agent")}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t("table.won")}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t("table.wonValue")}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t("table.open")}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t("table.messages")}</th>
-                  <th className="px-3 py-2 text-right font-medium">{t("table.tasks")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.byAgent.map((agent) => (
-                  <tr key={agent.userId} className="border-b">
-                    <td className="py-2 pr-4">{userNames.get(agent.userId) ?? agent.userId}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{n(agent.dealsWon)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">
-                      {formatMoney(agent.wonValue, funnel.currency, locale)}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums">{n(agent.dealsOpen)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{n(agent.messagesSent)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{n(agent.tasksCompleted)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <p className="text-sm text-muted-foreground">{t("stageConversionHint")}</p>
         )}
       </section>
-    </div>
-  );
-}
 
-function SourceTable({
-  rows,
-  labels,
-  format,
-}: {
-  rows: Array<{ key: string; leads: number; deals: number; won: number }>;
-  labels: { key: string; leads: string; deals: string; won: string; empty: string };
-  format: (value: number) => string;
-}) {
-  if (rows.length === 0) return <p className="text-sm text-muted-foreground">{labels.empty}</p>;
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2 pr-4 font-medium">{labels.key}</th>
-            <th className="px-3 py-2 text-right font-medium">{labels.leads}</th>
-            <th className="px-3 py-2 text-right font-medium">{labels.deals}</th>
-            <th className="px-3 py-2 text-right font-medium">{labels.won}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.key} className="border-b">
-              <td className="py-2 pr-4">{row.key}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{format(row.leads)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{format(row.deals)}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{format(row.won)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{t("responseDistributionTitle")}</h2>
+          <a href={`/api/exports/reports/response?${toQueryString(params)}`} className="text-sm underline underline-offset-4">
+            {t("exportCsv")}
+          </a>
+        </div>
+        <SortableTable
+          rows={report.responseDistribution}
+          rowKey={(row) => row.bucket}
+          columns={responseColumns}
+          defaultSort={{ key: "bucket", direction: "asc" }}
+          empty={t("table.empty")}
+        />
+      </section>
     </div>
   );
 }
