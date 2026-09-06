@@ -218,6 +218,13 @@
       "when": 1788644505079,
       "tag": "0030_add_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1788651534534,
+      "tag": "0031_add_quick_replies_and_notes",
+      "breakpoints": true
     }
   ]
 }

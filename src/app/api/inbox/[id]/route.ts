@@ -5,6 +5,7 @@ import {
   markConversationRead,
   isWithinFreeFormWindow,
 } from "@/modules/whatsapp/inbox";
+import { listNotesForConversation } from "@/modules/whatsapp/notes";
 import { getContact } from "@/modules/crm/contacts";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
 import { listPendingDrafts } from "@/modules/ai/replies";
@@ -26,11 +27,12 @@ export async function GET(
   const conversation = await getConversation(ctx, id);
   if (!conversation) return apiError("not_found", 404);
 
-  const [contact, messages, templates, aiDrafts] = await Promise.all([
+  const [contact, messages, templates, aiDrafts, notes] = await Promise.all([
     getContact(ctx, conversation.contactId),
     listMessagesForConversation(ctx, id),
     listApprovedTemplates(ctx, conversation.waAccountId),
     listPendingDrafts(ctx, id),
+    listNotesForConversation(ctx, id),
   ]);
 
   if (conversation.unreadCount > 0) {
@@ -55,6 +57,12 @@ export async function GET(
         body: m.body,
         status: m.status,
         createdAt: m.createdAt,
+      })),
+      notes: notes.map((n) => ({
+        id: n.id,
+        body: n.body,
+        authorUserId: n.authorUserId,
+        createdAt: n.createdAt,
       })),
       templates: templates.map((t) => ({ id: t.id, name: t.name, language: t.language })),
       aiDrafts: aiDrafts.map((d) => ({

@@ -5,7 +5,16 @@ import { revalidatePath } from "next/cache";
 import { offerSlots } from "@/modules/booking/whatsapp-booking";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
-import { assignConversation, markConversationRead } from "@/modules/whatsapp/inbox";
+import {
+  assignConversation,
+  getConversation,
+  markConversationRead,
+  markConversationUnread,
+} from "@/modules/whatsapp/inbox";
+import { addNote } from "@/modules/whatsapp/notes";
+import { createQuickReply, deleteQuickReply, updateQuickReply } from "@/modules/whatsapp/quick-replies";
+import { hasOptedOut } from "@/modules/automations/actions";
+import { createActivity } from "@/modules/crm/activities";
 import { deliverReply, type AiReplyOutcome } from "@/modules/ai/reply";
 import { markReplyDiscarded, setConversationAiEnabled } from "@/modules/ai/replies";
 
@@ -22,6 +31,10 @@ import { markReplyDiscarded, setConversationAiEnabled } from "@/modules/ai/repli
 const sendTextSchema = z.object({
   conversationId: z.string().min(1),
   body: z.string().min(1).max(4096),
+  // Set once the rep has clicked through the opt-out confirm dialog
+  // (§15.8 P3). Absent/false on the first submit for every conversation —
+  // whether it is actually needed is decided server-side below.
+  confirmed: z.boolean(),
 });
 
 export type SendTextState = {
@@ -30,6 +43,9 @@ export type SendTextState = {
    *  clears the box only once the server actually accepted it. */
   sent: boolean;
   values: { body: string };
+  /** True when the contact is tagged `optout`: the client shows a confirm
+   *  dialog naming the tag and resubmits with `confirmed=true`. */
+  needsOptoutConfirm: boolean;
 };
 
 export async function sendTextAction(
@@ -42,16 +58,42 @@ export async function sendTextAction(
   const parsed = sendTextSchema.safeParse({
     conversationId: formData.get("conversationId"),
     body,
+    confirmed: formData.get("confirmed") === "true",
   });
   if (!parsed.success) {
     const tooLong = parsed.error.issues.some(
       (issue) => issue.path[0] === "body" && issue.code === "too_big",
     );
-    return { error: tooLong ? "bodyTooLong" : "bodyRequired", sent: false, values: { body } };
+    return {
+      error: tooLong ? "bodyTooLong" : "bodyRequired",
+      sent: false,
+      values: { body },
+      needsOptoutConfirm: false,
+    };
+  }
+
+  if (!parsed.data.confirmed) {
+    const conversation = await getConversation(ctx, parsed.data.conversationId);
+    if (conversation && (await hasOptedOut(ctx, conversation.contactId))) {
+      return { error: null, sent: false, values: { body }, needsOptoutConfirm: true };
+    }
+  } else {
+    // Confirmed past the dialog: the override itself is worth a record on
+    // the contact, since it means someone chose to write to a person who
+    // asked not to hear from the business again.
+    const conversation = await getConversation(ctx, parsed.data.conversationId);
+    if (conversation) {
+      await createActivity(ctx, {
+        contactId: conversation.contactId,
+        type: "system",
+        payload: { kind: "optout_override_send" },
+        userId: ctx.userId,
+      });
+    }
   }
 
   try {
-    await sendText(ctx, parsed.data);
+    await sendText(ctx, { conversationId: parsed.data.conversationId, body: parsed.data.body });
   } catch (err) {
     // sendText throws when the 24h window has closed (§6.4). That guard is
     // not weakened here — it is only reported, instead of reaching Next's
@@ -61,11 +103,12 @@ export async function sendTextAction(
       error: message.includes("ventana de 24 horas") ? "windowClosed" : "sendFailed",
       sent: false,
       values: { body },
+      needsOptoutConfirm: false,
     };
   }
 
   revalidatePath(`/inbox/${parsed.data.conversationId}`);
-  return { error: null, sent: true, values: { body: "" } };
+  return { error: null, sent: true, values: { body: "" }, needsOptoutConfirm: false };
 }
 
 // The picker submits "name|language" as one value — the pair is the
@@ -207,6 +250,89 @@ export async function markReadAction(conversationId: string) {
   const ctx = await requireTenantContext();
   await markConversationRead(ctx, conversationId);
   revalidatePath("/inbox");
+}
+
+export async function markUnreadAction(conversationId: string) {
+  const ctx = await requireTenantContext();
+  await markConversationUnread(ctx, conversationId);
+  revalidatePath("/inbox");
+  revalidatePath(`/inbox/${conversationId}`);
+}
+
+// --- Internal notes (PLAN.md §15.8 P3) -----------------------------------
+// Never a `messages` row, never sent — a note rendered inline in the thread
+// and on the contact timeline (modules/crm/timeline.ts).
+
+const addNoteSchema = z.object({
+  conversationId: z.string().min(1),
+  contactId: z.string().min(1),
+  body: z.string().min(1).max(2000),
+});
+
+export type AddNoteState = { error: string | null };
+
+export async function addNoteAction(
+  _prevState: AddNoteState,
+  formData: FormData,
+): Promise<AddNoteState> {
+  const ctx = await requireTenantContext();
+  const parsed = addNoteSchema.safeParse({
+    conversationId: formData.get("conversationId"),
+    contactId: formData.get("contactId"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return { error: "noteRequired" };
+
+  await addNote(ctx, parsed.data);
+  revalidatePath(`/inbox/${parsed.data.conversationId}`);
+  return { error: null };
+}
+
+// --- Quick replies (PLAN.md §15.8 P3) ------------------------------------
+// Tenant-level, managed from /inbox/quick-replies (admin-only, enforced by
+// the page itself — these actions trust the caller the way the rest of the
+// module's agent-accessible actions do, since nothing here is destructive
+// beyond a canned-response text).
+
+const quickReplySchema = z.object({
+  name: z.string().min(1).max(100),
+  body: z.string().min(1).max(4096),
+});
+
+export type QuickReplyFormState = { error: string | null };
+
+export async function createQuickReplyAction(
+  _prevState: QuickReplyFormState,
+  formData: FormData,
+): Promise<QuickReplyFormState> {
+  const ctx = await requireTenantContext();
+  const parsed = quickReplySchema.safeParse({
+    name: formData.get("name"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return { error: "quickReplyInvalid" };
+
+  await createQuickReply(ctx, parsed.data);
+  revalidatePath("/inbox/quick-replies");
+  return { error: null };
+}
+
+export async function updateQuickReplyAction(id: string, formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = quickReplySchema.safeParse({
+    name: formData.get("name"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return;
+
+  await updateQuickReply(ctx, id, parsed.data);
+  revalidatePath("/inbox/quick-replies");
+}
+
+export async function deleteQuickReplyAction(id: string) {
+  const ctx = await requireTenantContext();
+  await deleteQuickReply(ctx, id);
+  revalidatePath("/inbox/quick-replies");
 }
 
 // --- Ownership (PLAN.md §6.5) --------------------------------------------

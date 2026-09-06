@@ -1,5 +1,5 @@
-import { and, eq } from "drizzle-orm";
-import { conversations, messages } from "@/db/schema";
+import { and, eq, isNull, like, or, type SQL } from "drizzle-orm";
+import { contacts, conversations, messages } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
@@ -9,13 +9,60 @@ import { whatsappEvents } from "./events";
 // Unified inbox read paths (PLAN.md §6.5). Sending goes through ./send.ts;
 // this file is read-only (conversation list, message thread, mark-read).
 
-export async function listConversations(ctx: TenantContext) {
-  const rows = await tenantDb(ctx).select(conversations);
-  return rows.sort((a, b) => {
+/** List filters as URL params (§15.8 P3): `mine`, `unassigned`, `unread`. */
+export type InboxListFilter = "mine" | "unassigned" | "unread" | "all";
+
+export async function listConversations(
+  ctx: TenantContext,
+  filters: { filter?: InboxListFilter } = {},
+) {
+  const extra: SQL | undefined =
+    filters.filter === "mine"
+      ? eq(conversations.assignedUserId, ctx.userId)
+      : filters.filter === "unassigned"
+        ? isNull(conversations.assignedUserId)
+        : undefined;
+
+  const rows = await tenantDb(ctx).select(conversations, extra);
+  const filtered =
+    filters.filter === "unread" ? rows.filter((row) => row.unreadCount > 0) : rows;
+
+  return filtered.sort((a, b) => {
     const at = a.lastMessageAt?.getTime() ?? 0;
     const bt = b.lastMessageAt?.getTime() ?? 0;
     return bt - at;
   });
+}
+
+/**
+ * `/inbox?q=` message + contact search (§15.8 P3). Matches message body or
+ * the contact's name/phone, LIKE with a limit, scoped by `tenantDb`. Contact
+ * matches are resolved first (a search is almost always "find So-and-so"
+ * rather than a phrase match), then message-body matches fill the rest.
+ */
+export async function searchConversations(ctx: TenantContext, query: string, limit = 50) {
+  const term = `%${query}%`;
+
+  const matchingContacts = await tenantDb(
+    ctx,
+  ).select(contacts, or(like(contacts.name, term), like(contacts.phone, term)) as SQL);
+  const contactIds = new Set(matchingContacts.map((c) => c.id));
+
+  const matchingMessages = await tenantDb(ctx).select(messages, like(messages.body, term));
+  const conversationIdsFromMessages = new Set(matchingMessages.map((m) => m.conversationId));
+
+  const all = await tenantDb(ctx).select(conversations);
+  const matched = all.filter(
+    (row) => contactIds.has(row.contactId) || conversationIdsFromMessages.has(row.id),
+  );
+
+  return matched
+    .sort((a, b) => {
+      const at = a.lastMessageAt?.getTime() ?? 0;
+      const bt = b.lastMessageAt?.getTime() ?? 0;
+      return bt - at;
+    })
+    .slice(0, limit);
 }
 
 /** Conversations belonging to one contact — the contact detail's
@@ -89,6 +136,14 @@ export async function assignConversation(
 
 export async function markConversationRead(ctx: TenantContext, id: string) {
   await tenantDb(ctx).update(conversations).set({ unreadCount: 0 }).where(eq(conversations.id, id));
+}
+
+/** "Mark as unread" (§15.8 P3): there is no true unread count to restore, so
+ *  this sets the flag to 1 — enough to bring the conversation back into the
+ *  `unread` filter and put a badge on the row, which is the whole point of
+ *  the action (send it back to the top of triage). */
+export async function markConversationUnread(ctx: TenantContext, id: string) {
+  await tenantDb(ctx).update(conversations).set({ unreadCount: 1 }).where(eq(conversations.id, id));
 }
 
 /**

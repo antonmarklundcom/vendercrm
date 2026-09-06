@@ -198,6 +198,11 @@ export default async function ContactDetailPage({
           title: t("timelineLead"),
           detail: entry.campaign ?? entry.pageUrl ?? undefined,
         };
+      case "conversationNote":
+        return {
+          title: t("timelineConversationNote"),
+          detail: entry.body,
+        };
     }
   }
 

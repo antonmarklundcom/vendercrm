@@ -175,6 +175,49 @@ export const messages = mysqlTable(
   ],
 );
 
+// Tenant-level canned responses (PLAN.md §15.5 J2 inbox half, §15.8 P3).
+// `{{contacto.nombre}}`-style variables are resolved at send time in
+// modules/whatsapp/quick-replies.ts — this table stores the template only.
+export const quickReplies = mysqlTable(
+  "quick_replies",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    name: varchar("name", { length: 100 }).notNull(),
+    body: text("body").notNull(),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index("quick_replies_tenant_id_idx").on(table.tenantId)],
+);
+
+// Internal notes on a conversation (§15.8 P3): rendered inline in the thread
+// but never sent — no `messages` row, no `wa_message_id`, invisible to the
+// customer. Also surfaced on the contact timeline (modules/crm/timeline.ts).
+export const conversationNotes = mysqlTable(
+  "conversation_notes",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    conversationId: char("conversation_id", { length: 26 }).notNull(),
+    contactId: char("contact_id", { length: 26 }).notNull(),
+    authorUserId: char("author_user_id", { length: 26 }).notNull(),
+    body: text("body").notNull(),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("conversation_notes_tenant_id_idx").on(table.tenantId),
+    index("conversation_notes_conversation_id_idx").on(table.conversationId),
+    index("conversation_notes_contact_id_idx").on(table.contactId),
+  ],
+);
+
 // Platform-level (no tenant_id) — routing by phone_number_id happens after
 // this raw persist, so an unrecognized number still lands here for replay/
 // debugging (§6.3 rule 4) rather than being silently dropped.
