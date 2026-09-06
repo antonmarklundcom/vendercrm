@@ -826,7 +826,10 @@ without the Manual Técnico**, so that no fiscal field is guessed:
 No tables, no migration, no CRM wiring — `modules/invoicing/` does not exist
 yet, and nothing in the app calls this module.
 
-**🔍 Blocked on Fable: `PLAN-SIFEN.md` does not exist.** §9 says Fable authors
+**🔍 Blocked on Fable: `PLAN-SIFEN.md` does not exist.** *(Resolved 2026-09-06:
+`PLAN-SIFEN.md` exists; both questions below are answered in its §2 and §3
+and summarised in §17.4; S2 is scheduled as wave 2 phase P11. The fiscal
+field-level detail still waits on the Manual Técnico — see §17.4.)* §9 says Fable authors
 it "when Phase 2 starts" — Phase 2 has now started. Everything past this
 foundation needs it first, and two questions in particular are architecture
 rather than fiscal detail, so they belong to Fable and not to a build model:
@@ -2568,7 +2571,8 @@ Four things the product is described as having are thinner in the code:
    digit, the CDC and three code tables; the six facade functions throw
    `SifenNotImplementedError`. No `sifen_*` tables, no XML, no signing, no
    SET submission. §9 still blocks on `PLAN-SIFEN.md`. Marketing and plan
-   copy must keep saying "próximamente".
+   copy must keep saying "próximamente". *(2026-09-06: `PLAN-SIFEN.md` now
+   exists — §17.4. The copy rule is unchanged until S7 passes habilitación.)*
 2. **Custom fields have no UI.** `contacts.custom` (JSON) is written by nothing.
 3. **Embedded signup is not wired.** Manual connect is the only path (§6.2 #1).
 4. **Five trigger types have no label.** `booking_created/cancelled/no_show/
@@ -2755,7 +2759,7 @@ now → J9 when approved.
 
 Tags: **now / next / later**. Model per batch follows §1.3.
 
-**J1 — Automation library + trigger labels (now, Sonnet).** Triggers
+**J1 — Automation library + trigger labels (now, Sonnet).** — ✅ done, P1 (PR #96). Triggers
 `quote_sent`, `document_sent`, `document_paid`, `deal_won`, `deal_lost`,
 `contract_accepted` (stub until J5); actions `create_task`, `notify_user`,
 `send_email`; conditions on deal value, lead source, site. Fix the five
@@ -2764,7 +2768,7 @@ missing trigger labels. Per-run step log page from `flow_run_steps`.
 end in the integration suite; every `TRIGGER_TYPES` entry has a label in
 all three locales (extend the parity test to assert it).
 
-**J2 — Inbox ergonomics + web push (now, Opus for push, Sonnet for inbox).**
+**J2 — Inbox ergonomics + web push (now, Opus for push, Sonnet for inbox).** — ✅ done, P2 (PR #98) + P3 (PR #99).
 Quick replies with variables, internal notes, filters mine/unassigned/unread,
 message search, web-chat rows in the same list with a channel chip. Service
 worker + VAPID + `push_subscriptions` + `push.send` job; fired on inbound
@@ -2772,45 +2776,45 @@ message, assignment, task due, `notify_user`, and the L1 morning list.
 *Exit:* an installed PWA on Android receives a push within 10 s of an
 inbound message; opt-out on manual sends shows a confirm.
 
-**J3 — Email identity + delivery surfaces (now, Sonnet).** §15.1: sending
+**J3 — Email identity + delivery surfaces (now, Sonnet).** — ✅ done, P4 (PR #100). §15.1: sending
 subdomain, `senderFor(ctx)`, `tenant_email_domains` with the DNS panel and
 verify job, `maxEmailsPerDay` limit, "enviar por email" on quotes, notas and
 bookings, unsubscribe link → `optout`. *Exit:* a tenant with a verified
 domain sends a quote from its own address; an unverified one from the
 default; both logged on the timeline.
 
-**J4 — Pipeline polish, custom fields, online quote accept (now, Sonnet).**
+**J4 — Pipeline polish, custom fields, online quote accept (now, Sonnet).** — ✅ done, P5 (PR #101) + P6 (PR #102).
 Column value totals, stale badge from `stages.stale_after_days`, expected
 close date, lost reason field; custom field definitions with UI, import,
 export, filters and template variables; accept/reject on the public quote
 page with `quote_accepted` trigger. Reopens the §11 "client-side quote
 acceptance" deferral on purpose.
 
-**J5 — Contracts + receipts (next, Sonnet).** §15.2 shape. *Exit:* a
+**J5 — Contracts + receipts (next, Sonnet).** — receipts ✅ done in P6; contracts → wave 2 P13 (§17.2, §17.3). §15.2 shape. *Exit:* a
 service contract generated from a won deal, accepted on a phone, PDF with
 the acceptance record in storage, deal moved by the trigger.
 
 **J6 — "Hoy" panel + voice-note transcription (now, Sonnet; J6b Opus for the
-audio driver).** §15.3 L1 and Lane A.
+audio driver).** — L1 ✅ done, P7 (PR #103); J6b → wave 2 P9 (§17.2, §17.3). §15.3 L1 and Lane A.
 
-**J7 — Weekly AI briefing (next, Sonnet).** §15.3 L2.
+**J7 — Weekly AI briefing (next, Sonnet).** — wave 2 P14 (§17.2, §17.3). §15.3 L2.
 
-**J8 — Conversational coach, text then voice (later, Opus).** §15.3 L3 and
+**J8 — Conversational coach, text then voice (later, Opus).** — trigger condition in §17.5. §15.3 L3 and
 Lane B. Prerequisite: J6 and J7 in use for a month so the tools are the
 questions people actually asked.
 
-**J9 — Embedded signup + multi-number inbox (later, Opus).** Gated on Meta
+**J9 — Embedded signup + multi-number inbox (later, Opus).** — wave 2 P12, owner-started the day Meta approval lands (§17.2, §17.3). Gated on Meta
 approval (§15.4).
 
 **J10 — Template campaigns to a saved view (next, Opus; Fable spec paragraph
-first).** Paced through the jobs table, opt-out aware, per-tenant daily cap,
+first).** — spec written, §17.3; wave 2 P10. Paced through the jobs table, opt-out aware, per-tenant daily cap,
 quality-rating check before each batch. Reopens §11's "broadcast" deferral
 deliberately, with the compliance rules written before the code.
 
-**J11 — Reporting v2, forms field editor, companies + merge (next, Sonnet).**
+**J11 — Reporting v2, forms field editor, companies + merge (next, Sonnet).** — wave 2 P15 / P17 / P16, three PRs (§17.2).
 From the review's "next" list; three separate PRs.
 
-**J12 — Corrections (now, Sonnet, one PR).** Quote auto-expiry job; contact
+**J12 — Corrections (now, Sonnet, one PR).** — ✅ done inside P3, P5 and P6 (§17.0 #7). Quote auto-expiry job; contact
 list pagination and filters in SQL; opt-out respected on manual sends.
 
 ### 15.6 Idea parking lot (not scheduled; keep adding here)
@@ -2827,6 +2831,9 @@ list pagination and filters in SQL; opt-out respected on manual sends.
 - Lift the worker into its own process on a VPS when the 2-second tick shows.
 
 ### 15.7 What the owner decides before the batches start
+
+*(2026-09-06: which wave 2 phase each of these actually blocks is worked out
+in §17.1 — only #2 and #4 gate a build.)*
 
 1. Sending subdomain name and whether "own domain email" is a premium tier or
    included.
@@ -2867,6 +2874,7 @@ model (§4.8 of that protocol).
 Wave 2 (prompts written when wave 1 has merged): J5 contracts, J6b voice
 notes, J7 weekly briefing, J10 campaigns (after a Fable spec paragraph),
 J11 reporting v2 / forms editor / companies, J9 embedded signup (after Meta).
+*→ Planned in §17 (2026-09-06), together with wave K's K2/K3 (§16) and SIFEN S2.*
 
 Shared conventions every phase repeats (from docs/HANDOFF.md): services take
 `TenantContext` first and reach the DB only through `tenantDb`; zod in every
@@ -2887,3 +2895,659 @@ One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 - P5 Pipeline polish + custom fields — PR #101 — `docs/log/p5.md`
 - P6 Quote accept/reject, receipts, quote expiry — PR #102 — `docs/log/p6.md`
 - P7 "Hoy" panel — PR #103 — `docs/log/p7.md`
+- P8 Link pass — PR #104 — `docs/log/p8.md`
+
+---
+
+## 16. Business memory and the AI setup assistant (Fable spec, 2026-09-05; restored 2026-09-06)
+
+> **Restored verbatim on 2026-09-06** from PR #93, which added this section
+> and the three wave K prompts but never reached `main`'s history even
+> though K1 (PRs #94, #95) was built against it — see §17.0 #1. K1 is done;
+> K2 and K3 are scheduled in §17.2 (lane 1 and lane 2 of wave 2). The text
+> below is unchanged apart from the status marks in §16.6 and the index in
+> §16.8.
+
+> **Authored by Fable 5.1** from the owner's request: "AI should set up new
+> accounts with the pipeline, auto replies etc. that make sense for the
+> business, and we should be able to enter all business data / FAQ / opening
+> hours in a saved memory per business that AI responses and setup can use."
+> Same conventions as §13–§15. Nothing here reopens a §1.2 decision. The one
+> load-bearing rule is inherited from the vertical presets and restated in
+> §16.2: **the AI produces data in the preset shape; it never produces code
+> paths or bypasses the existing apply function.**
+
+### 16.1 What it is
+
+Two things that share one foundation:
+
+1. **Memoria del negocio** — one structured, per-tenant record of everything
+   a good employee knows on day one: what the business is, how it talks,
+   opening hours, address, services and prices, policies (señas, cancelación,
+   pagos, garantía), FAQs, promos with dates, and internal notes that must
+   never reach a customer. Today this exists as five free-text fields in
+   `settings.ai` (`businessName`, `about`, `tone`, `hours`, `neverPromise`)
+   plus `businessHours` and branding, all read by `resolveAiConfig`. The
+   memory replaces those five fields and becomes the **single source** for
+   AI replies (WhatsApp and widget), the setup assistant, template
+   variables, public pages and, later, the coach (§15.3).
+2. **Asistente de configuración** — a conversation on first login (and
+   re-runnable from settings, and available to the superadmin when creating
+   a tenant) that fills the memory by asking, then proposes a complete setup
+   for that business — pipeline stages, tags, booking types, quick replies,
+   automation flows, AI reply mode, business hours, widget copy — shows it as
+   a preview and applies it on confirm through the same machinery the
+   vertical presets already use.
+
+Why it matters commercially: the marketing ladder's "Puesta en orden" tier
+(docs/MARKETING_NEXT_STEPS.md) is exactly this setup, sold as a service.
+With the assistant the owner onboards a client in one call instead of an
+afternoon, and the client can keep the memory current without a ticket.
+
+### 16.2 Locked design rules
+
+1. **Memory is structured, not a blob.** Typed facts with a kind, so the
+   prompt builder can pick what a given reply needs and so the UI can show
+   "you have no cancellation policy" as a checklist row.
+2. **The AI suggests, a human confirms.** Facts the AI extracts from a pasted
+   text, a PDF or a website land as `source: ai_suggested, confirmed_at: null`
+   and are not used in prompts until an admin confirms them. The setup plan
+   is a preview until the admin taps "Aplicar". Nothing the assistant does is
+   invisible.
+3. **Setup output is a preset.** The assistant's plan is a `VerticalPreset`
+   (`modules/tenancy/verticals.ts`) — the same zod-validated data shape the
+   catalogue uses — applied by `applyVerticalPreset`, idempotent by name,
+   never removing anything. Where the shape lacks a field the assistant
+   needs (tags, quick replies, more flow triggers), the **shape** is extended
+   as data; no per-vertical or per-tenant code path is ever added.
+4. **Retrieval without a vector database.** Hostinger MySQL 8 supports
+   `FULLTEXT` indexes; FAQs and services are retrieved with
+   `MATCH … AGAINST` in natural-language mode against the customer's last
+   message, within a fixed token budget. Profile, hours and policies are
+   always included. Embeddings are an **idea** for later, not a prerequisite.
+5. **Internal never leaks.** `visibility: internal` facts are excluded from
+   every customer-facing prompt at the query, not by prompt instruction.
+6. **Existing caps apply.** Extraction and setup generation run through the
+   same driver, the same `ai_replies` ledger (new `kind` values) and the same
+   per-tenant daily caps. A setup conversation costs a few calls, not a
+   budget.
+7. **Audit.** Confirming, editing or deleting a fact and applying a plan write
+   `writeAuditLog` entries; the plan's preview JSON is stored with the apply.
+
+### 16.3 Data model
+
+`business_profiles` (one row per tenant): `tenant_id` unique, `display_name`,
+`legal_name`, `ruc`, `vertical_slug` (preset applied, if any), `about`,
+`tone` (enum: cercano | formal | directo, plus free note), `audience`,
+`differentiators`, `languages` (json, default `["es"]`), `website`,
+`address`, `maps_url`, `never_promise`, `payment_methods` (json),
+`updated_at`, `completed_pct` (derived, cached).
+
+`business_facts`: `id`, `tenant_id`, `kind` enum
+`faq | service | policy | location | contact | promo | note`, `title`,
+`body` (text), `structured` json (per kind: service → `{price, priceFrom,
+durationMinutes, bookingTypeId?}`; promo → `{validFrom, validUntil}`;
+policy → `{topic: cancellation|deposit|payment|warranty|other}`), `tags`
+json, `visibility` enum `customer | internal`, `source` enum
+`manual | imported | ai_suggested`, `confirmed_at`, `confirmed_by_user_id`,
+`review_after`, `created_at`, `updated_at`. Indexes: `(tenant_id, kind)`,
+`(tenant_id, visibility, confirmed_at)`, **FULLTEXT `(title, body)`**.
+
+`memory_imports`: `id`, `tenant_id`, `source_kind` enum `text | pdf | url`,
+`source_ref` (storage key or URL), `status` `pending | extracted | reviewed
+| failed`, `extracted_count`, `ai_reply_id` (ledger link), `created_by`,
+`created_at`.
+
+`setup_plans`: `id`, `tenant_id`, `status` `draft | applied | discarded`,
+`brief` (the conversation summary the plan was built from), `preset` json
+(the validated `VerticalPreset`), `outcome` json (`ApplyOutcome`),
+`created_by`, `applied_at`. Keeping the plan is what makes "what did the AI
+set up?" answerable later.
+
+Migration: copy `settings.ai.businessName/about/tone/hours/neverPromise`
+into `business_profiles` (hours → `businessHours` already structured; the
+free-text `hours` becomes a `location`-kind fact titled "Horario"), leave
+the old keys readable for one release, then drop them from the settings
+type.
+
+### 16.4 Where the memory is read
+
+| Consumer | What it takes | How |
+|---|---|---|
+| WhatsApp AI reply (`modules/ai/reply.ts`) | profile + hours + policies always; top-k FAQs/services by FULLTEXT against the last inbound message; promos in date | `buildMemoryContext(ctx, {query, budgetTokens})` replaces the five fields in `BusinessContext` |
+| Chat widget reply | same, per-widget overrides stay on top | same helper |
+| Setup assistant | everything, including internal | the brief |
+| Template variables | `{{negocio.nombre}}`, `{{negocio.horario}}`, `{{negocio.direccion}}`, `{{negocio.politica.cancelacion}}` | resolver added to the variable registry from §15.8 P1/P5 |
+| Public booking page, quote/nota PDF footer | address, maps link, payment methods, deposit policy | read at render |
+| Coach L1 (§15.3) | "memoria incompleta" and "hechos vencidos" rows | `completed_pct`, `review_after`, promo dates |
+
+### 16.5 The setup assistant, step by step
+
+1. **Entry points**: first login of a tenant with no applied plan (replaces the
+   current `/onboarding` rubro picker as the default; the picker stays as
+   "elegir un rubro sin el asistente"); `/settings/negocio → Reconfigurar con
+   el asistente`; superadmin tenant detail → "Configurar con IA" (runs as an
+   impersonation, so audit and caps are the tenant's).
+2. **Conversation**: the assistant asks in voseo, one topic at a time, in this
+   order — qué hacés y para quién; cómo te contactan hoy; horario y dirección;
+   servicios y precios (or "prefiero cargarlos después"); señas/cancelación/
+   pagos; las 5 preguntas que más te hacen; cómo querés que hable el asistente;
+   qué no debe prometer nunca. Each answer is written to the memory as
+   confirmed facts (the admin typed them) — the conversation *is* the form.
+   A "saltar" on any step is allowed; the checklist shows what is missing.
+   Text first; the voice lane (§15.3) plugs in here later.
+3. **Plan generation**: one JSON-mode call with the memory as input and the
+   catalogue's preset shape as the output schema (`generateStructured` on the
+   driver, zod-validated, one retry on invalid). The model may start from the
+   closest catalogue preset and adapt names, stages and copy to the business;
+   prices stay `null` unless the memory has them. The plan includes:
+   pipeline stages (5–7, one won, one lost), tags, booking types (if the
+   business takes appointments), 3–5 quick replies, flows (welcome on first
+   inbound message outside hours; no-reply follow-up after 2 days; review
+   request on won/completed; booking reminders are already the chain's), AI
+   reply mode `draft`, business hours, widget welcome copy.
+4. **Preview**: the existing onboarding preview component, extended for the
+   new preset fields: "Esto es lo que voy a crear — y nada de lo que ya tenés
+   se borra".
+5. **Apply**: `applyVerticalPreset` with the plan's preset; `setup_plans` row
+   updated with the outcome; audit entry; dashboard checklist items flip.
+6. **After**: the memory page shows the completion percentage and the coach
+   nags about gaps. Re-running the assistant later produces a new plan that
+   is applied idempotently by name (existing rows untouched, new ones added).
+
+Preset shape extensions (data only, in `verticals.ts` + zod):
+`tags: string[]`, `quickReplies: {name, body}[]`, `PresetFlow.trigger` widened
+to `wa_message_received | lead_received | deal_won | booking_no_show |
+booking_completed`, `PresetFlow.conditions?: ["outside_business_hours"]`,
+`stages` with `staleAfterDays`, `aiMode: "draft"`, `widget?: {welcome, capture
+AfterMessages}`. `verticals-apply.ts` grows one apply step per new field, each
+idempotent by name, each covered by the existing apply integration test
+pattern.
+
+### 16.6 Phases (wave K — can run beside the P-wave)
+
+K1 and K2 own files the P-wave does not touch (new module, new routes,
+`lib/ai/**`, `modules/ai/**`); they may run in parallel with §15.8. K3 needs
+P1/P5's variable registry and P7's coach module, so it runs after P8.
+*(2026-09-06: the P-wave has merged, so that condition holds; K2's prompt no
+longer spawns K3 itself — wave 2's lane 2 session runs it, §17.2.)*
+
+| Phase | Lane | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|---|
+| K1 Business memory — ✅ done (PRs #94, #95) | 1 | Opus | `prompts/opus-k1-business-memory.md` (not restored — the phase is merged) | `src/modules/memory/**` (new), `src/db/schema/memory.ts` + migration, `src/lib/ai/prompt.ts`, `src/lib/ai/types.ts` (+`generateStructured`), `src/lib/ai/openai.ts`, `src/lib/ai/gemini.ts`, `src/modules/ai/config.ts`, `src/modules/ai/reply.ts` context call, `src/modules/chatwidget/reply.ts` context call, `src/app/(app)/settings/negocio/**` (new route), memory keys in `messages/*` | — |
+| K2 Setup assistant — scheduled §17.2 (wave 2 lane 1, first) | 1 | Opus | `prompts/opus-k2-setup-assistant.md` (restored) | `src/modules/setup/**` (new), `src/modules/tenancy/verticals.ts` + `verticals-apply.ts` (shape extensions), `src/app/(app)/onboarding/**`, `src/app/(superadmin)/tenants/[id]/SetupWithAi*`, setup keys | K1 |
+| K3 Imports, variables, coach rows — scheduled §17.2 (wave 2 lane 2, after P17) | 2 | Sonnet | `prompts/sonnet-k3-memory-imports.md` (restored) | `src/modules/memory/imports.ts` (new), `src/app/(app)/settings/negocio/importar/**`, variable resolver registration, coach rules file, public page/PDF reads, keys | K2, P8 |
+
+### 16.7 Owner decisions (none block K1)
+
+1. Whether the assistant is offered to every tenant on first login or only
+   run by the owner during "Puesta en orden" (default in the spec: every
+   tenant, because the memory is what makes AI replies good, and the plan is
+   preview-then-apply).
+2. Which AI driver handles JSON-mode setup generation (OpenAI and Gemini both
+   support structured output; K1 implements it on both).
+3. Whether PDF import is in K3 or parked (spec: in, using the storage driver
+   and a text extractor; a scanned PDF without text is reported, not OCR'd).
+
+### 16.8 Wave K build log index
+
+One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
+
+- K1 Business memory — PRs #94, #95 — `docs/log/k1.md`
+
+---
+
+## 17. Wave 2 and after (Fable plan, 2026-09-06 — everything past §15.8's wave 1)
+
+> **Authored by Fable 5.1** after wave 1 (§15.8 P1–P8, PRs #96–#104) merged.
+> This section plans everything that comes next: the §15.5 batches tagged
+> **next** and **later**, the two unbuilt phases of wave K (§16), Phase 2
+> SIFEN's first buildable slice, and the trigger for the conversational
+> coach. Same conventions as §13–§16 — one PR per phase, `phase/<id>` off
+> `main`, no phase reopens a §1.2 decision, Fable specs and reviews and is
+> never a build model (`phased-autonomous-build` §4.8, `plan-booking.md`
+> §4.8). Phase prompts follow the §15.8 mechanics and `prompts/_handoff-p.md`.
+
+### 17.0 Baseline corrections this planning pass found
+
+1. **PLAN.md §16 had vanished from `main`.** PR #93 added §16 (business
+   memory + setup assistant, wave K) with three prompt files, and K1 (PRs
+   #94, #95) built against it — `src/modules/memory/**`, `lib/ai/structured.ts`
+   and `ai_replies.kind` all cite "§16.x" in their comments — but #93 is not
+   in `main`'s ancestry and the section was absent from every `main` commit
+   since. Restored below verbatim as §16 (K1 marked done, K2/K3 rescheduled
+   here), and `prompts/opus-k2-setup-assistant.md` /
+   `prompts/sonnet-k3-memory-imports.md` restored beside it. This is why wave
+   2 is **§17**, not §16.
+2. **§15.9 never indexed P8** (PR #104). Added.
+3. **A campaign cannot call `sendTemplate` as it stands**: `SendTemplateInput`
+   takes a `conversationId`, and a contact who has never messaged the
+   business has no conversation row. J10 needs one exported
+   `ensureConversation(ctx, accountId, contactId)` in `whatsapp/inbox.ts`
+   (§17.3 P10).
+4. **`getPrimaryAccount` has six callers** (`ai/reply.ts`, `renderable-document/delivery.ts`, `booking/notifications.ts`, `booking/notification-registration.ts`, `automations/actions.ts`, `(app)/booking/[id]/page.tsx`). §15.4 says the schema allows
+   several numbers per tenant "and the UI does not"; it is the service layer
+   too. That is the real scope of J9's multi-number half (§17.3 P12).
+5. **§15.3 Lane A's second half ("the owner sends a voice note to the coach
+   and gets the L1 list back") needs an owner-facing conversational entry
+   point that only exists with L3.** It moves from J6b to J8 (§17.5). J6b is
+   transcription in the inbox plus AI replies to audios — the half with no
+   prerequisite.
+6. **J5 is contracts only.** Its receipt half shipped in P6 (`/r/[token]`,
+   `document_payments.receipt_number`). §15.5's title is left as written and
+   the phase below carries the correction.
+7. **J12's three items all landed inside wave 1**: quote auto-expiry (P6),
+   contact list pagination/filters in SQL (P5), opt-out on manual sends (P3).
+   Nothing of J12 remains.
+
+### 17.1 The §15.7 owner decisions — what each one actually blocks
+
+The owner is gathering these in parallel with this plan. The short answer:
+**only J9 (Meta approval) and SIFEN S3 onward (the fiscal prerequisites)
+are genuinely blocked. Every other wave 2 phase can start today**, because
+each remaining decision resolves to a deploy-day env value, a plan-row edit,
+or a small additive follow-up rather than to a build input.
+
+| §15.7 | Decision | Phases that can start without it | What it actually gates |
+|---|---|---|---|
+| 1 | Sending-subdomain name; own-domain email as premium or included | all | The *name* is `EMAIL_DEFAULT_DOMAIN` at deploy (`docs/HANDOFF.md` Part 3.2), already built by P4. The *tier* is a `plans.limits` / `plans.features` row edit under §13 H6's rule: no speculative feature flag until a real differentiated plan exists. No wave 2 phase reads it. |
+| 2 | Meta Business verification + Tech Provider | every phase except P12 | **P12 (J9) entirely.** Its prompt is written so the owner starts it the day approval lands, in its own session, regardless of where the two lanes are (§17.2). |
+| 3 | Gemini vs OpenAI for audio | P9 (J6b) builds `transcribe()` on **both** drivers, exactly as K1 built `generateStructured` on both | Only the deploy value. Today `AI_DRIVER` picks one provider for everything; P9 adds an optional `AI_AUDIO_DRIVER` override so audio and text may differ if the price-per-minute comparison says so. The *live* check (a real voice note transcribed) waits for the pick; the build and its mocked-driver tests do not. |
+| 4 | SIFEN prerequisites (RUC/timbrado, Manual Técnico, certificate, numbering-range rules) | **S2** (`PLAN-SIFEN.md` §5) — ports, tables, the timbrado state machine, certificate storage, the invoicing skeleton — all verifiable without a single fiscal field | **S3–S7**: DE XML, signing against a real certificate, SOAP against the test environment, KuDE, events, habilitación. Each is named in `PLAN-SIFEN.md` §5 with the exact prerequisite it waits on. |
+| 5 | Click-to-accept vs drawn signature on contracts | P13 (J5) | Nothing in the build: §15.2's `contract_acceptances` already carries an *optional* `signature_storage_key`. P13 ships click-to-accept (the spec's stated lean) and creates the column; a drawn-signature pad is one additive follow-up in the same module if the owner asks. Legally both are *firma electrónica simple* under Ley 4017/2010 — the public page says so either way. |
+
+Where a decision arrives mid-wave, it goes into `docs/decisions-needed.md`
+as an *answer* (the protocol's file, read by every phase at start), never as
+a message to a running session.
+
+### 17.2 Wave 2 — phase table
+
+Method: `phased-autonomous-build`, one PR per phase, `prompts/_handoff-p.md`
+for every handoff. Two lanes, **run concurrently** this time — wave 1's
+"lane 2 waits for lane 1" rule existed because P1/P2 created things every
+later phase called; no lane 2 phase here depends on a lane 1 output except
+the two cases handled by ordering below (P17 → P10's consent column, K3 →
+K2). Lane 1 is Opus, one session per phase, spawned by the previous phase's
+handoff. Lane 2 is Sonnet, **sequential in one session**
+(`prompts/sonnet-wave2-lane2.md`) for the reason §15.8 gave: every phase adds
+keys to the same three `messages/*.json` files and appends to §17.7.
+
+| Phase | §15.5 / §16 | Lane | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|---|---|
+| K2 Setup assistant | §16.5–16.6 | 1 | Opus | `prompts/opus-k2-setup-assistant.md` (restored) | per §16.6: `src/modules/setup/**` (new), `tenancy/verticals.ts` + `verticals-apply.ts` shape extensions, `src/app/(app)/onboarding/**`, superadmin `SetupWithAi*`, setup keys | K1 ✅ |
+| P9 Voice-note transcription | J6b | 1 | Opus | `prompts/opus-p9-voice-notes.md` | `src/lib/ai/**` (`transcribe()` on the driver interface, both drivers, `AI_AUDIO_DRIVER`), `src/modules/ai/transcription.ts` (new), `messages.transcript` + `transcribed_at` (schema/whatsapp.ts, migration), `ai_replies.kind` +`transcription`, the enqueue after `downloadMedia` in `whatsapp/webhook.ts`, `whatsapp/jobs.ts` (one job kind), the audio bubble in `src/app/(app)/inbox/[id]/**`, transcript-as-turn in `modules/ai/reply.ts`, the toggle in the AI settings card, keys | — |
+| P10 Template campaigns | J10 | 1 | Opus | `prompts/opus-p10-campaigns.md` | `src/modules/campaigns/**` (new), `src/db/schema/campaigns.ts` (new), `contacts.wa_marketing_consent_at/_source` (schema/crm.ts additive), `messages.campaign_id`, migration, `src/app/(app)/campaigns/**` (new), `ensureConversation` in `whatsapp/inbox.ts`, `refreshQualityRating` in `whatsapp/health.ts`, `maxCampaignMessagesPerDay` in `tenancy/limits.ts`, superadmin health rows, campaign keys | — (spec: §17.3) |
+| P11 SIFEN S2 — ports, tables, timbrado machine | §9, `PLAN-SIFEN.md` §5 S2 | 1 | Opus | `prompts/opus-p11-sifen-s2.md` | `src/modules/sifen/**`, `src/modules/invoicing/**` (new), `src/db/schema/sifen.ts` (new), `contacts.ruc` (schema/crm.ts additive), migration, `src/app/(app)/invoicing/settings/**` (new: certificate + timbrado admin only, no issuing UI), invoicing keys | — (no fiscal detail; `PLAN-SIFEN.md` §2–§4) |
+| P12 Embedded signup + multi-number inbox | J9 | **owner-started**, the day Meta approval lands | Opus | `prompts/opus-p12-embedded-signup.md` | `whatsapp/accounts.ts`, `whatsapp/embedded.ts` (new), `src/app/api/whatsapp/embedded/**` (new), `src/app/(app)/whatsapp/**`, the six `getPrimaryAccount` callers, `tenants.settings.defaultWaAccountId`, `META_APP_ID`/`META_EMBEDDED_CONFIG_ID` in env, whatsapp keys | Meta approval (§17.1 #2) |
+| P13 Contracts | J5 (contracts half) | 2 | Sonnet | in `sonnet-wave2-lane2.md` | `src/modules/contracts/**` (new), `src/db/schema/contracts.ts` (new), migration, `NumberedDocumentType` +`contrato` (documents/types.ts, numbering.ts prefix `CON`), `src/app/(app)/contracts/**` (new), `src/app/(public)/c/**` (new), "Contratos" tab on `contacts/[id]`, "generar contrato" on deal and quote detail, one listener line in `automations/triggers.ts`, contract keys | P1 ✅ (`contract_accepted` trigger exists) |
+| P14 Weekly AI briefing | J7 | 2 | Sonnet | same session | `src/modules/coach/briefing.ts`, `briefing-jobs.ts`, `narrative.ts` (new), `src/db/schema/coach.ts` (new: `coach_briefings`), migration, `ai_replies.kind` +`weekly_briefing`, `src/app/(app)/dashboard/Briefing*.tsx`, `/dashboard/briefings/[id]`, Hoy-action instrumentation (`coach.hoy_action` audit rows), keys | K1 ✅, P7 ✅, P4 ✅ |
+| P15 Reporting v2 | J11a | 2 | Sonnet | same session | `src/modules/reports/**`, `src/app/(app)/reports/**`, `src/app/api/exports/reports/**` (new), reports keys | — |
+| P16 Companies + contact merge | J11c | 2 | Sonnet | same session | `crm/companies.ts`, `crm/merge.ts`, `crm/duplicates.ts` (new), `companies` table + `contacts.company_id` (schema/crm.ts), migration, `src/app/(app)/companies/**` (new), company picker + merge dialog on `contacts/[id]`, "posibles duplicados" on `/contacts`, keys | — (spec: §17.3) |
+| P17 Forms field editor | J11b | 2 | Sonnet | same session | `src/modules/forms/**`, `src/app/(app)/forms/**`, `src/app/(public)/f/**`, forms keys | P10 merged for the `consent` field type; if not merged when reached, build without it and log the gap |
+| K3 Imports, variables, coach rows | §16.6 | 2 | Sonnet | `prompts/sonnet-k3-memory-imports.md` (restored) | per §16.6 | K2 merged; if not merged when reached, skip and log |
+| P18 Link pass | — | 2 | Sonnet | same session, last | nav (`Contratos`, `Campañas`, `Empresas`, and the `/settings/negocio` entry K1 left for the link pass), the three inert `settings.ai` text fields in the AI card → link to `/settings/negocio` (K1's open item), `docs/HANDOFF.md` Part 4, `docs/SMOKE_TEST.md` §10, `KNOWN-ISSUES.md`, §17.7 | all lane 2 merged; lane 1 as far as merged |
+
+Order inside lane 1: K2 → P9 → P10 → P11. Order inside lane 2: P13 → P14 →
+P15 → P16 → P17 → K3 → P18. P12 is outside both: its prompt is complete now,
+and the owner opens one Opus session for it the day the approval e-mail
+arrives. It is file-disjoint from every other row (P10 takes its account
+from `campaigns.wa_account_id`, never from `getPrimaryAccount`, so P12's
+call-site sweep does not reach into P10).
+
+**Real cross-phase file conflicts**, named the way §15.8 named
+`messages/*.json`, all append-only and all resolved by keeping both sides
+on the rebase every phase does before merging:
+
+- `messages/es|en|sv.json` — every phase. The reason lane 2 is one session.
+- `src/worker/index.ts` and `src/worker/maintenance.ts` — P9 (transcription
+  job), P10 (`campaign.tick`), P14 (`coach.weekly`), K3 (none). Every wave 1
+  phase that added a chain touched these too (P1/P2/P4/P6/P7 precedent); a
+  few import lines, never a rewrite.
+- `src/db/schema/crm.ts` — P10 (consent columns), P11 (`contacts.ruc`), P16
+  (`companies`, `company_id`). Additive columns and one new table; the
+  migration numbers are taken in merge order, so a phase that generated
+  `0036` and finds `0036` on `main` regenerates as `0037` rather than editing
+  the merged one.
+- `src/db/schema/ai.ts` (`ai_replies.kind`) — P9 adds `transcription`, P14
+  adds `weekly_briefing`. Same enum, two values, drizzle-level varchar enum
+  (no ALTER, see §10 1W "activities.type needed no migration").
+- `src/app/(app)/contacts/[id]/**` — P13 (Contratos tab) and P16 (company
+  picker, merge). Both lane 2, sequential, no conflict by construction.
+- `src/app/(app)/settings/**` (the AI card) — P9 adds one toggle, P18
+  replaces three fields. P9 is lane 1 and will normally be merged first;
+  P18 is last either way.
+- `KNOWN-ISSUES.md`, §17.7 — every phase appends a line.
+
+Not a conflict, stated so nobody looks for it: `src/modules/automations/**`
+is touched by exactly one wave 2 phase (P13, one listener line in
+`triggers.ts`). K2's prompt already forbids edits there; P10 does not add
+a campaign trigger (see §17.3).
+
+Estimate, same basis as wave 1 (one session, ≤ 90 min, per phase): 12
+phases, plus P12 when it lands. Fable's remaining involvement is §17.8.
+
+### 17.3 Phase specs — the decisions that are Fable's, not the build model's
+
+Each paragraph below is what the phase prompt will quote. Where a phase's
+shape is already fully stated (§15.2 for contracts, §15.3 for the coach,
+§16 for wave K), only the delta is here.
+
+**P10 — Template campaigns: compliance and pacing (the spec §15.5 asked for).**
+A campaign is a Meta-approved template sent to a *saved contact view*
+(`contact_views`, P5) — never free text, never to an ad-hoc list pasted in.
+Rules, all enforced in `modules/campaigns` and none of them a UI convention:
+
+1. *Audience is a snapshot.* Launching resolves the view's query once and
+   writes one `campaign_recipients` row per contact (`pending`), so what was
+   sent to whom is auditable after the view changes. Excluded at the query,
+   with the count shown before confirm and stored on the campaign: contacts
+   tagged `optout` (§7.2's tag — the WhatsApp keyword, the email unsubscribe
+   link and this feature all read one flag), contacts with no valid E.164
+   phone, duplicates by phone, and — for a template of category `MARKETING`
+   — contacts with no `wa_marketing_consent_at`. Consent is a column with a
+   `source` (`form | import | manual | inbound`): a hosted-form consent
+   checkbox (P17's `consent` field), a CSV import column, a rep ticking it
+   on the contact after the customer asked, or an inbound message that
+   itself is consent under Meta's policy for a customer-initiated thread.
+   `UTILITY` templates (an appointment reminder, a payment receipt) do not
+   require the column but do still exclude `optout`.
+2. *Paced through the jobs table, not a loop.* One `campaign.tick` job per
+   running campaign claims the next batch of `pending` recipients with
+   `SELECT … FOR UPDATE SKIP LOCKED` (§2.1), sends each through the existing
+   `sendTemplate` — so every message is a `messages` row carrying
+   `campaign_id`, visible in the inbox, with delivery statuses flowing from
+   the existing webhook — and reschedules itself. Defaults: **50 per batch,
+   10 minutes between batches**, tenant-editable downward only. Meta's
+   messaging tiers start at 250 unique customers per rolling 24 h for a new
+   number and grow with quality; a per-tenant daily ceiling
+   `plans.limits.maxCampaignMessagesPerDay` (default **200** — under the
+   first tier, leaving room for the conversational sends the business
+   actually lives on) is checked before every batch, counting campaign sends
+   only.
+3. *Quality gate before every batch.* `refreshQualityRating` reads
+   `quality_rating` and `messaging_limit_tier` for the phone number from the
+   Graph API into `wa_accounts` (`quality_rating` exists and nothing writes
+   it today — the superadmin health page shows a permanent "—";
+   `messaging_limit_tier` is a new nullable column).
+   `GREEN` → continue. `YELLOW` → halve the batch and wait 60 minutes.
+   `RED`, or any `FLAGGED`/`RESTRICTED` status → **pause the campaign, notify
+   every tenant admin (`notifications` row → push), never auto-resume**; a
+   human presses resume once the rating recovers. A batch whose failures
+   exceed **10 %** with user- or template-class errors (number not on
+   WhatsApp, template paused, the engagement-based rate limit) pauses the
+   same way. One bad campaign can get a number banned; the pause is the
+   product protecting the tenant from itself.
+4. *Time and frequency.* Sends happen inside the tenant's business hours in
+   the tenant's timezone by default (the customer is local); a contact
+   receives at most **one campaign message per 7 days** across all campaigns
+   (`campaign_recipients.sent_at` lookup), tenant-editable down to 3.
+5. *Replies are conversations.* An inbound reply lands in the inbox exactly
+   as any message does (the 24 h window opens, reps answer, automations on
+   `wa_message_received` fire), and the recipient row is marked `replied`.
+   `BAJA`/`STOP` sets `optout` through the path that already exists. No
+   campaign-specific trigger type is added: "replied to campaign X" is a
+   `wa_message_received` flow with a condition on `campaign_id` if anyone
+   ever asks, not a new enum value now.
+6. *Variables* resolve from the same registry flows use, including
+   `{{contacto.custom.*}}` via P5's `renderContactCustomVars` (which
+   `KNOWN-ISSUES.md` records as unwired in the automation engine — P10 wires
+   it for campaigns, and leaves the engine to whoever next touches it).
+7. *Roles and audit.* Create, launch, pause, resume and cancel are
+   `requireTenantAdmin()` + `writeAuditLog`; agents see the campaign list
+   and per-campaign counts (sent / delivered / read / failed / replied /
+   opted out). The superadmin health page lists campaigns paused by quality
+   and carries a per-tenant kill switch (`tenants.settings.campaignsEnabled`,
+   default true) for a tenant that abuses it.
+8. *Multi-number ready from day one.* `campaigns.wa_account_id` is chosen at
+   creation from the tenant's connected numbers; P10 never calls
+   `getPrimaryAccount`, so P12's sweep does not touch it.
+
+Exit: in the integration suite a 120-contact view with 10 opted-out, 5
+unconsented and 3 invalid numbers launches as 102 recipients, sends in
+batches of 50 with the mocked Graph API, pauses when the mock returns
+`RED`, and marks `replied` on an inbound webhook from a recipient; a second
+campaign to the same view within 7 days sends to nobody.
+
+**P9 — Voice-note transcription.** `AiDriver` gains
+`transcribe({audio, mimeType, languageHint}) → {text, durationSeconds,
+promptTokens?, completionTokens?}` on both drivers; providers that bill per
+minute record duration on the ledger row (`ai_replies.kind =
+'transcription'`, `conversation_id` set, body = the transcript), so cost
+stays visible in the same monthly meter and under the same per-tenant daily
+cap as replies. Inbound `audio` messages only, and only when the tenant's
+AI settings have `transcribeAudio` on (default **on** for tenants with AI
+configured — a rep reading is the whole point — and moot otherwise). Meta
+caps audio at 16 MB; anything over, or longer than **5 minutes**, is skipped
+with a reason on the row rather than sent. The job runs after
+`downloadMedia` succeeds and never blocks message insertion — a transcript
+is an enrichment, and an audio with no transcript is still an audio. In the
+inbox the text renders under the bubble, greyed while pending;
+`modules/ai/reply.ts` passes the transcript as the turn's text so the
+`ai_reply` node answers voice notes exactly as it answers text. Nothing on
+the outbound side: reps still type, and the coach half is J8's (§17.0 #5).
+
+**P14 — Weekly briefing: the numbers are the model's input, never its
+output.** `coach.weekly` uses P7's hourly-chain pattern (act when the
+tenant's local clock reads Monday 07:xx; `coach_briefings` unique on
+`(tenant_id, week_start)` is the idempotency guard, replacing the "already
+sent" column P7 avoided). Input: `getSalesReport` for the week and the week
+before, Hoy counts by kind, the memory profile (K1) for the business's own
+words. The narrative comes from `generateStructured` with a zod schema
+`{summary, recommendations: [3], citedMetrics: string[]}` in voseo; a pure
+post-check (`narrative.ts`, unit-tested) verifies every number in the text
+appears in the input set and every cited metric key exists, and on failure
+**falls back to a deterministic template narrative** built from the same
+numbers — which is also what a tenant with `AI_DRIVER=none` gets, so the
+briefing exists for everyone and the model only improves the prose.
+Ledger kind `weekly_briefing`. Delivery: dashboard card + `notifications`
+row (P2 push) + email to admins through P4's `sendEmail`; the WhatsApp copy
+to the owner's number needs a Meta-approved template
+(`briefing_semanal`, an owner action §15.3 already names) and is sent only
+when the tenant's synced templates contain it, else skipped with a reason.
+Also in this phase, because J8's trigger (§17.5) needs it: a
+`coach.hoy_action` audit row when a Hoy item's action button is used
+(kind, severity, from panel or push).
+
+**P13 — Contracts.** §15.2's shape, with these fixed: acceptance is
+click-to-accept (§17.1 #5), recorded as name typed, timestamp, IP via
+`lib/http/client-ip`, user agent, and the SHA-256 of the PDF bytes the
+visitor was shown; after acceptance the PDF is re-rendered with an
+acceptance page appended and stored under a second key
+(`signed_pdf_storage_key`) — the original is never overwritten, since its
+hash is the evidence. Template bodies are **plain text with headings and
+paragraphs plus `{{…}}` variables** rendered by a pure function; no
+Markdown library and no HTML, because a tenant-authored body reaches a
+public page. Variables come from the registry as it exists when P13 runs
+(`{{contacto.*}}` from P1/P5; `{{negocio.*}}` arrives with K3, later in the
+same lane — a template referencing an unknown variable is refused at save
+with the name). A contract is prose, not line items, so it gets its own
+react-pdf layout and reuses `renderable-document`'s `storeDocumentPdf`,
+`sendDocumentOverWhatsapp` and the `/[token]` page pattern; numbering
+`CON-` through `document_sequences` exactly as P6 added `recibo`. Emitting
+`contract_accepted` closes the `KNOWN-ISSUES.md` line P1 left. The
+`schema/documents.ts` boundary comment applies unchanged: no fiscal fields.
+
+**P16 — Contact merge: the referencing-column list is derived, not
+typed.** A merge re-points every column that references a contact id —
+today that is at least deals, activities, tasks, conversations, quotes,
+documents, lead_submissions, bookings, contract rows (P13), campaign
+recipients (P10), chat conversations, ai_replies, contact_tags — and §4's
+schema has no foreign keys to catch a forgotten one. So `merge.ts` builds
+that list **from the Drizzle schema** (every table with a `contact_id`
+column, the way `src/db/restore-check.ts` derives its table list), and an
+integration test asserts the derived list is non-empty and that after a
+merge no row anywhere still carries the loser's id. Winner/loser is chosen
+by the admin; field values default to the winner's and to the loser's only
+where the winner's is empty; tags are unioned; `contacts.custom` keys are
+unioned with the winner's value on conflict; the loser row is deleted in
+the same transaction and the merge is written to `audit_log` with both
+ids and the field decisions. `requireTenantAdmin()`, a confirm dialog that
+names the counts being moved, no undo — which is why the audit row is
+complete. Duplicate *detection* is exact normalized match only (same
+email, or same name + same first six phone digits); no fuzzy library.
+Companies are the small half: `companies` (name, ruc, phone, email,
+address, custom JSON), `contacts.company_id`, a company page listing its
+contacts and deals, and a picker on the contact.
+
+**P15 / P17** need no Fable decision beyond scope: P15 is per-agent,
+per-source and per-stage conversion, response times and the campaign
+counts if P10 has merged, over a date-range picker with a
+previous-window comparison and CSV export through the same query path
+(§10 1J's "export is what's on screen" rule); P17 replaces the fixed
+`STANDARD_FIELDS` with an add/reorder/remove editor over §4's field types
+plus `checkbox` (whose `consent_whatsapp` key writes P10's column) and
+`date`, maps a field to a P5 custom field by key, and renders the public
+page from the definitions.
+
+**P12 — Embedded signup.** The Facebook JS SDK on `/whatsapp` (no CSP header
+exists today, so nothing to allow; if one is ever added it must permit
+`connect.facebook.net`), `META_APP_ID` + `META_EMBEDDED_CONFIG_ID` in
+env (absent → the button does not render, the manual form stays), a
+server route that exchanges the returned code for a business token,
+reads the WABA and phone-number ids, registers the number, subscribes the
+platform app to the WABA (`POST /{waba-id}/subscribed_apps`), encrypts
+the token (§3.4) and writes the same `wa_accounts` row with
+`connected_via: 'embedded'`. Multi-number: the six `getPrimaryAccount`
+callers become "the conversation's account" where a conversation exists
+and `tenants.settings.defaultWaAccountId` (fallback: oldest connected)
+where one does not; the inbox list shows a number chip only when the
+tenant has more than one. §15.4's interim partner-sharing path is
+documented in the `/whatsapp` guide only after the owner has confirmed it
+against Meta's current docs — that line stays out of the prompt until then.
+
+### 17.4 Phase 2 SIFEN — the two architecture answers, and where it sits
+
+`PLAN-SIFEN.md` now exists and holds the full text. The two questions §9's
+S1 note reserved for Fable are answered there (§2 and §3 of that file);
+this is the summary the rest of PLAN.md points to.
+
+**1. Persistence without importing tenancy — an injected store, owned by
+`modules/invoicing/`.** The engine keeps the S1 rule as tested: no
+`@/modules/*`, no `@/db`, no `@/lib`. It defines its own domain types and
+three **ports** as TypeScript interfaces — `SifenStore` (documents,
+timbrados, events, submissions), `SifenKeyring` (load a certificate and
+private key for an issuer) and `SifenTransport` (SOAP over HTTPS,
+injectable for tests) — and every facade function takes them as
+arguments. The Drizzle schema for the `sifen_*` tables lives in
+`src/db/schema/sifen.ts` (drizzle-kit needs it there) but the engine never
+imports it; `modules/invoicing/sifen-store.ts` implements `SifenStore`
+over `tenantDb(ctx)` and closes the tenant scope inside the adapter, so
+the engine sees an opaque `IssuerRef` and never a `tenant_id`. `§3.3`'s
+isolation suite therefore tests `invoicing`, which is also exactly where
+the HTTP boundary falls on extraction: the standalone service ships its
+own store over its own database and the engine moves unchanged.
+
+**2. Timbrado and numbering — a state machine on the range, and one on
+each number.** A `sifen_timbrados` row is one (timbrado, establecimiento,
+punto de expedición, document type) with its validity window, its range
+and `next_number`; its states are `active → exhausted | expired | closed`.
+A number is taken **at issue, never at draft**, inside a `FOR UPDATE` on
+the timbrado row (the `document_sequences` discipline), and in the same
+transaction the `sifen_documents` row is written as `reserved`. From there
+a document moves `reserved → generated → signed → submitted → approved |
+rejected`, then `approved → cancelled` by event, and a number whose
+document never reaches `submitted` within the policy window becomes
+`to_inutilizar` and is reported by a daily inutilización batch — **a gap
+is a reportable event, never a silent skip**. Whether a `rejected` number
+may be re-used with a corrected DE or must itself be inutilizado is a
+Manual Técnico question; the machine models both behind one policy flag
+so the build does not guess. Contingency (`iTipEmi` is inside the CDC, so
+it is decided at generation) is an explicit operator switch or an
+automatic flip after N consecutive transport failures, and queued
+submissions ride the §2.1 jobs table.
+
+**Sequencing against wave 2.** Nothing in wave 2 depends on SIFEN and
+SIFEN depends on nothing in wave 2 — P13 obeys the documents boundary,
+and the engine's first customer (the platform's own subscription invoice,
+§15.2) issues through the owner's own tenant, which is platform billing,
+not a wave 2 surface. So **S2 is a wave 2 lane 1 phase (P11)** because it
+is Opus work with no owner input and no file overlap, and **S3 onward is
+fully after** — gated on the §15.2 prerequisites, not on wave 2 finishing.
+The one thing that *should* happen before wave 2 ends is owner-side: the
+prerequisites list, because its lead time (certificate issuance, timbrado
+request, test-environment credentials) is longer than the remaining build.
+
+The fiscal field-level detail is **explicitly not in `PLAN-SIFEN.md` yet**:
+this environment's egress proxy blocks `sifende.com.py` and the SET/DNIT
+mirrors, so the Manual Técnico could not be read. The file names every
+place a field, code table or window is a Manual Técnico question, and
+nothing fiscal is asserted from memory.
+
+### 17.5 J8 — the conversational coach: a trigger, not "later"
+
+§15.3 L3 waits so the read-only tools are the questions people actually
+asked, not the ones we imagine. The condition that starts *planning* J8
+(a Fable session that writes the tool list and the phase prompt — Opus
+builds, per §15.5):
+
+**Start planning J8 at the earlier of:**
+
+- **(a)** six weeks after both P9 and P14 have merged, **and** the owner's
+  own tenant has received at least four weekly briefings; or
+- **(b)** three fortnightly owner check-ins on coach usage are recorded in
+  `docs/log/coach-usage.md` — each answers the same five questions: which
+  Hoy rows you acted on this fortnight (P14's `coach.hoy_action` rows are
+  the objective half), which you ignored and why, what you wanted to ask
+  the system and could not, whether the briefing changed a decision, and
+  what the reps say. Three entries is enough signal to name tools.
+
+**Never before** P14 has produced four briefings, whatever the calendar
+says — a coach designed on zero briefings is the "microphone without a
+coach" §15.3 warns about. **And a hard stop on drift:** if neither
+condition has been met by **2026-12-01**, the owner decides explicitly at
+that date to start or to park J8, recorded in §17.7; it does not stay
+"later" by default. Lane B (talk to the app) keeps its §15.3 ordering:
+after L3 exists.
+
+### 17.6 Phase 3 marketing and the §15.6 parking lot — dependency check
+
+Both stay **unscheduled**, and the check the owner asked for comes back
+clean: **no wave 2 phase creates a dependency on either.**
+
+- Phase 3 (§9's "Phase 3 — marketing features" placeholder and
+  `docs/MARKETING_SITE_PLAN.md`): P10's campaigns are WhatsApp templates to
+  the tenant's own consented contacts through the tenant's own number —
+  CRM outreach, not the ad tools, social automation or website builder
+  Phase 3 names. P15's reporting reads CRM tables only. Nothing in wave 2
+  reads or writes anything under `(marketing)`.
+- §15.6 parking lot: P13's public contract page is one more `/[token]`
+  page and does not presuppose the *client portal* idea (which would group
+  such pages — additive later, nothing to undo). P16's `companies` table
+  does not presuppose Instagram/Messenger channels, gateway billing or
+  BYO email. P9's transcription does not presuppose the worker leaving the
+  process (§15.6's last item) — it is one more job kind on the same queue.
+  The one item that grows slightly *closer* is the payment link on the nota
+  de venta: P14's briefing and P15's reports would show it, but neither
+  requires it.
+
+No build order is invented for either list. Items move out of §15.6 only
+by being written into a numbered section with an owner decision behind
+them, the way §16 did for the memory.
+
+### 17.7 Wave 2 build log index
+
+One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
+J8's 2026-12-01 decision, if it comes to that, is recorded here too.
+
+### 17.8 What remains for Fable, and nothing else
+
+Per `phased-autonomous-build`'s rule that Fable appears at most three
+times in a build, each in a session the owner opens:
+
+1. **This session** — the plan (§16 restored, §17, `PLAN-SIFEN.md`).
+2. **Prompt files** — `prompts/opus-p9-voice-notes.md`,
+   `opus-p10-campaigns.md`, `opus-p11-sifen-s2.md`,
+   `opus-p12-embedded-signup.md` and `sonnet-wave2-lane2.md`, written once
+   the owner has reported on §15.7 (a short session: every decision above
+   is already reduced to an env value or a default, so the prompts change
+   by a line or two at most). K2's and K3's prompts already exist. The
+   `prompts/_handoff-p.md` mechanics apply unchanged, with §17.2's
+   concurrent-lane and rebase rules added to each prompt's header.
+3. **Optionally**, the post-wave review after P18, and — separately, not a
+   build session — the `PLAN-SIFEN.md` fiscal sections once the Manual
+   Técnico is on the owner's machine (that session must run where the
+   documents can be read, §17.4).
+
+Fable is never spawned by a phase, never watches a running build, and is
+never named in a phase table. Questions a phase cannot answer go to
+`docs/decisions-needed.md` for the owner.
