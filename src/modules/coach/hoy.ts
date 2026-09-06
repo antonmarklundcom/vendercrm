@@ -139,7 +139,7 @@ function leadWithoutDealCandidates(
   return leadRows
     .filter((lead) => !lead.dealId && now.getTime() - lead.createdAt.getTime() <= LEAD_WINDOW_MS)
     .map((lead) => {
-      const hours = Math.round((now.getTime() - lead.createdAt.getTime()) / 3_600_000);
+      const hours = Math.max(1, Math.round((now.getTime() - lead.createdAt.getTime()) / 3_600_000));
       return {
         // A fresher lead is more actionable than one about to age out of the
         // window, but both still deserve a reply today — urgency ranks by
@@ -165,10 +165,14 @@ function upcomingBookingCandidates(
         booking.status === "confirmed" &&
         !booking.reminderSentAt &&
         booking.calendarEventId &&
+        // Strictly future: `listBookings`'s own from/to filter is overlap-
+        // based (an in-progress visit is still "today's"), but one already
+        // under way is not an "upcoming" reminder to send anymore.
+        booking.startsAt.getTime() > now.getTime() &&
         booking.startsAt.getTime() - now.getTime() <= BOOKING_WINDOW_MS,
     )
     .map((booking) => {
-      const hoursUntil = Math.max(0, (booking.startsAt.getTime() - now.getTime()) / 3_600_000);
+      const hoursUntil = (booking.startsAt.getTime() - now.getTime()) / 3_600_000;
       return {
         kind: "upcoming_booking" as const,
         assignedUserId: booking.dealId ? (dealAssigneeByDealId.get(booking.dealId) ?? null) : null,
