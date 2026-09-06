@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { getQuote, listQuoteItems } from "@/modules/quotes/quotes";
 import { publicQuoteUrl } from "@/modules/quotes/delivery";
+import { getQuoteDecision } from "@/modules/quotes/public";
 import { getDocumentByQuote } from "@/modules/documents/documents";
 import { getContact } from "@/modules/crm/contacts";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   sendQuoteByEmailAction,
   setQuoteStatusAction,
   convertQuoteToDocumentAction,
+  duplicateQuoteAction,
 } from "../actions";
 import { formatMoney } from "@/lib/i18n/format";
 import { getLocale } from "next-intl/server";
@@ -30,10 +32,11 @@ export default async function QuoteDetailPage({
   const quote = await getQuote(ctx, id);
   if (!quote) notFound();
 
-  const [items, contact, existingDocument] = await Promise.all([
+  const [items, contact, existingDocument, decision] = await Promise.all([
     listQuoteItems(ctx, quote.id),
     getContact(ctx, quote.contactId),
     getDocumentByQuote(ctx, quote.id),
+    getQuoteDecision(quote.id, ctx.tenantId),
   ]);
 
   const fmt = (n: number) => formatMoney(n, quote.currency, locale);
@@ -50,6 +53,17 @@ export default async function QuoteDetailPage({
           <p className="text-sm text-muted-foreground">
             {t(`statusValues.${quote.status}` as "statusValues.draft")}
           </p>
+          {decision && (
+            <p className="text-sm text-muted-foreground">
+              {t(
+                decision.decision === "accepted"
+                  ? "decisionAcceptedBy"
+                  : "decisionRejectedBy",
+                { name: decision.name },
+              )}
+              {decision.comment ? ` — "${decision.comment}"` : ""}
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <form action={sendQuoteAction}>
@@ -118,6 +132,17 @@ export default async function QuoteDetailPage({
           {t("downloadPdf")}
         </a>
       </section>
+
+      {quote.status === "expired" && (
+        <section>
+          <form action={duplicateQuoteAction}>
+            <input type="hidden" name="quoteId" value={quote.id} />
+            <Button type="submit" size="sm" variant="outline">
+              {t("duplicateExpired")}
+            </Button>
+          </form>
+        </section>
+      )}
 
       <section className="flex flex-wrap items-center gap-2">
         {(["accepted", "rejected"] as const).map((status) => (

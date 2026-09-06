@@ -36,7 +36,11 @@ export const documents = mysqlTable(
     tenantId: char("tenant_id", { length: 26 }).notNull(),
     /**
      * Varchar rather than a MySQL ENUM so new non-fiscal document kinds can
-     * be added without a migration. Only `nota_venta` ships in 1Q.
+     * be added without a migration. Only `nota_venta` ships in 1Q. A recibo
+     * (§15.8 P6) is *not* a second value here — it renders straight off one
+     * `document_payments` row (receiptNumber/receiptPublicToken on that
+     * table) rather than getting its own `documents` row, since it has no
+     * items, quote link or payment ledger of its own to carry.
      */
     type: varchar("type", { length: 20, enum: ["nota_venta"] })
       .notNull()
@@ -139,6 +143,14 @@ export const documentPayments = mysqlTable(
     paidAt: datetime("paid_at").notNull(),
     recordedByUserId: char("recorded_by_user_id", { length: 26 }),
     notes: varchar("notes", { length: 500 }),
+    /**
+     * The receipt (§15.2, §15.8 P6) is generated lazily, the first time
+     * anyone asks for it — not at payment time, so a payment nobody ever
+     * requests a receipt for never consumes a `document_sequences` number.
+     * Both are null until that first request.
+     */
+    receiptNumber: varchar("receipt_number", { length: 30 }),
+    receiptPublicToken: varchar("receipt_public_token", { length: 64 }),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -149,6 +161,7 @@ export const documentPayments = mysqlTable(
   (table) => [
     index("document_payments_tenant_id_idx").on(table.tenantId),
     index("document_payments_document_id_idx").on(table.documentId),
+    uniqueIndex("document_payments_receipt_token_idx").on(table.receiptPublicToken),
   ],
 );
 

@@ -1174,7 +1174,10 @@
         "unknown": "No se pudo crear el presupuesto. Intentá de nuevo."
       },
       "sendEmail": "Enviar por email",
-      "sendEmailNoContactEmail": "El contacto no tiene un email cargado."
+      "sendEmailNoContactEmail": "El contacto no tiene un email cargado.",
+      "duplicateExpired": "Duplicar como nuevo borrador",
+      "decisionAcceptedBy": "Aceptado por {name}",
+      "decisionRejectedBy": "Rechazado por {name}"
     },
     "documents": {
       "title": "Notas de venta",
@@ -1257,7 +1260,9 @@
         "unknown": "No se pudo guardar. Intentá de nuevo."
       },
       "sendEmail": "Enviar por email",
-      "sendEmailNoContactEmail": "El contacto no tiene un email cargado."
+      "sendEmailNoContactEmail": "El contacto no tiene un email cargado.",
+      "viewReceipt": "Recibo",
+      "sendReceiptWhatsapp": "Enviar recibo por WhatsApp"
     },
     "automations": {
       "title": "Automatizaciones",
@@ -3301,6 +3306,21 @@
         "void": "ANULADO"
       },
       "caption": "Nota de venta"
+    },
+    "recibo": {
+      "title": "Recibo",
+      "client": "Recibido de",
+      "description": "Descripción",
+      "total": "Total",
+      "againstDocument": "Correspondiente a",
+      "disclaimer": "Este recibo no es un comprobante fiscal.",
+      "method": {
+        "transfer": "Transferencia",
+        "cash": "Efectivo",
+        "card": "Tarjeta",
+        "check": "Cheque",
+        "other": "Otro"
+      }
     }
   },
   "public": {
@@ -3318,7 +3338,26 @@
       "discount": "Descuento",
       "validUntil": "Válido hasta:",
       "downloadPdf": "Descargar PDF",
-      "footer": "Documento no fiscal · Factura electrónica próximamente"
+      "footer": "Documento no fiscal · Factura electrónica próximamente",
+      "decisionPrompt": "¿Qué decidís sobre este presupuesto?",
+      "decisionNameLabel": "Tu nombre",
+      "decisionNamePlaceholder": "Nombre y apellido",
+      "decisionCommentLabel": "Comentario (opcional)",
+      "decisionCommentPlaceholder": "Alguna aclaración...",
+      "decisionAccept": "Aceptar",
+      "decisionReject": "Rechazar",
+      "decisionAcceptedGeneric": "¡Listo! Registramos tu aceptación.",
+      "decisionRejectedGeneric": "Listo, registramos tu respuesta.",
+      "decisionAccepted": "Aceptado por {name}",
+      "decisionRejected": "Rechazado por {name}",
+      "decisionErrors": {
+        "nameRequired": "Escribí tu nombre antes de continuar.",
+        "rateLimited": "Demasiadas solicitudes. Probá de nuevo en un momento.",
+        "alreadyDecided": "Este presupuesto ya fue respondido antes.",
+        "notSent": "Este presupuesto todavía no fue enviado.",
+        "expired": "Este presupuesto ya venció. Pedile uno nuevo a quien te lo envió.",
+        "invalid": "No pudimos procesar tu respuesta. Probá de nuevo."
+      }
     },
     "document": {
       "title": "Nota de venta",
@@ -3411,6 +3450,21 @@
     "unsubscribe": {
       "title": "Listo, te sacamos de la lista",
       "body": "{name}, no vas a recibir más emails automáticos de este negocio."
+    },
+    "receipt": {
+      "title": "Recibo",
+      "client": "Recibido de",
+      "againstDocument": "Correspondiente a",
+      "total": "Total recibido",
+      "downloadPdf": "Descargar PDF",
+      "disclaimer": "Este recibo no es un comprobante fiscal.",
+      "method": {
+        "transfer": "Transferencia",
+        "cash": "Efectivo",
+        "card": "Tarjeta",
+        "check": "Cheque",
+        "other": "Otro"
+      }
     }
   }
 }

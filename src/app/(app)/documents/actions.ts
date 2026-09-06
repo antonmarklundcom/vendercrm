@@ -14,10 +14,17 @@ import {
   getDocument,
 } from "@/modules/documents/documents";
 import { sendDocumentToContact, generateDocumentPdf, publicDocumentUrl } from "@/modules/documents/delivery";
+import {
+  getOrCreateReceipt,
+  publicReceiptUrl,
+  publicReceiptPdfUrl,
+  generateReceiptPdf,
+} from "@/modules/documents/receipts";
+import { sendDocumentOverWhatsapp, storeDocumentPdf } from "@/modules/renderable-document/delivery";
+import { getTranslator } from "@/lib/i18n/translator";
 import { sendLinkEmail } from "@/lib/email/document-delivery";
 import { createActivity } from "@/modules/crm/activities";
 import { getTenant } from "@/modules/tenancy/tenants";
-import { getTranslator } from "@/lib/i18n/translator";
 
 const lineSchema = z.object({
   description: z.string().min(1).max(500),
@@ -335,4 +342,49 @@ export async function deletePaymentAction(formData: FormData) {
   if (!parsed.success) return;
   await deletePayment(ctx, parsed.data.documentId, parsed.data.paymentId);
   revalidatePath(`/documents/${parsed.data.documentId}`);
+}
+
+/** "Recibo" beside a payment (PLAN.md §15.2, §15.8 P6) — assigns the
+ *  number/token on first visit, then sends the rep straight to the public
+ *  page (the same one a customer would see if handed the link). */
+export async function viewReceiptAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const paymentId = String(formData.get("paymentId") ?? "");
+  if (!paymentId) return;
+
+  const receipt = await getOrCreateReceipt(ctx, paymentId);
+  if (!receipt) return;
+
+  redirect(publicReceiptUrl(receipt.token));
+}
+
+/** "Enviar por WhatsApp" on the receipt — reuses sendDocumentOverWhatsapp,
+ *  same as the quote and nota de venta sends. No status to advance (a
+ *  receipt has none); a failed send just leaves the public link as the
+ *  fallback, same as everywhere else this helper is used. */
+export async function sendReceiptOverWhatsappAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const paymentId = String(formData.get("paymentId") ?? "");
+  const documentId = String(formData.get("documentId") ?? "");
+  if (!paymentId || !documentId) return;
+
+  const receipt = await getOrCreateReceipt(ctx, paymentId);
+  const document = await getDocument(ctx, documentId);
+  if (!receipt || !document) return;
+
+  const [pdf, tenant] = await Promise.all([
+    generateReceiptPdf(ctx, paymentId),
+    getTenant(ctx.tenantId),
+  ]);
+  const t = await getTranslator(tenant?.locale, "pdf.recibo");
+  await storeDocumentPdf(ctx, { kind: "receipts", id: paymentId, pdf });
+
+  await sendDocumentOverWhatsapp(ctx, {
+    contactId: document.contactId,
+    link: publicReceiptPdfUrl(receipt.token),
+    filename: `${receipt.number}.pdf`,
+    caption: `${t("title")} ${receipt.number}`,
+  });
+
+  revalidatePath(`/documents/${documentId}`);
 }

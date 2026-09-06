@@ -25,6 +25,10 @@ export const PUBLIC_PREFIXES = [
   // redirect to /login here doesn't look like an auth bug — it looks like
   // WhatsApp silently not delivering attachments.
   "/d/",
+  // Public receipt view + PDF (§15.2, §15.8 P6) — same reasoning as /q/ and
+  // /d/: a rep hands this link to a customer, or WhatsApp fetches the /pdf
+  // path itself, and neither has a session here.
+  "/r/",
   // The public booking page (/b/[tenantSlug]/[typeSlug]) and the customer's
   // own manage/cancel link (/b/g/[token]). Both shipped behind the auth gate
   // — a customer opening the link a business sent them landed on a CRM login

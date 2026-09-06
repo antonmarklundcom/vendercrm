@@ -815,7 +815,10 @@
         "unknown": "We couldn't create the quote. Try again."
       },
       "sendEmail": "Send by email",
-      "sendEmailNoContactEmail": "The contact has no email on file."
+      "sendEmailNoContactEmail": "The contact has no email on file.",
+      "duplicateExpired": "Duplicate as a new draft",
+      "decisionAcceptedBy": "Accepted by {name}",
+      "decisionRejectedBy": "Rejected by {name}"
     },
     "documents": {
       "title": "Sales notes",
@@ -898,7 +901,9 @@
         "unknown": "We couldn't save it. Try again."
       },
       "sendEmail": "Send by email",
-      "sendEmailNoContactEmail": "The contact has no email on file."
+      "sendEmailNoContactEmail": "The contact has no email on file.",
+      "viewReceipt": "Receipt",
+      "sendReceiptWhatsapp": "Send receipt by WhatsApp"
     },
     "settings": {
       "title": "Settings",
@@ -3301,6 +3306,21 @@
         "void": "VOID"
       },
       "caption": "Sales note"
+    },
+    "recibo": {
+      "title": "Receipt",
+      "client": "Received from",
+      "description": "Description",
+      "total": "Total",
+      "againstDocument": "Against",
+      "disclaimer": "This receipt is not a fiscal document.",
+      "method": {
+        "transfer": "Transfer",
+        "cash": "Cash",
+        "card": "Card",
+        "check": "Check",
+        "other": "Other"
+      }
     }
   },
   "public": {
@@ -3318,7 +3338,26 @@
       "discount": "Discount",
       "validUntil": "Valid until:",
       "downloadPdf": "Download PDF",
-      "footer": "Non-fiscal document · Electronic invoicing coming soon"
+      "footer": "Non-fiscal document · Electronic invoicing coming soon",
+      "decisionPrompt": "What would you like to do with this quote?",
+      "decisionNameLabel": "Your name",
+      "decisionNamePlaceholder": "Full name",
+      "decisionCommentLabel": "Comment (optional)",
+      "decisionCommentPlaceholder": "Anything to add...",
+      "decisionAccept": "Accept",
+      "decisionReject": "Reject",
+      "decisionAcceptedGeneric": "Done! We recorded your acceptance.",
+      "decisionRejectedGeneric": "Done, we recorded your response.",
+      "decisionAccepted": "Accepted by {name}",
+      "decisionRejected": "Rejected by {name}",
+      "decisionErrors": {
+        "nameRequired": "Write your name before continuing.",
+        "rateLimited": "Too many requests. Try again in a moment.",
+        "alreadyDecided": "This quote was already responded to.",
+        "notSent": "This quote hasn't been sent yet.",
+        "expired": "This quote has expired. Ask whoever sent it for a new one.",
+        "invalid": "We couldn't process your response. Try again."
+      }
     },
     "document": {
       "title": "Sales note",
@@ -3411,6 +3450,21 @@
     "unsubscribe": {
       "title": "Done — you're unsubscribed",
       "body": "{name}, you won't receive more automated emails from this business."
+    },
+    "receipt": {
+      "title": "Receipt",
+      "client": "Received from",
+      "againstDocument": "Against",
+      "total": "Total received",
+      "downloadPdf": "Download PDF",
+      "disclaimer": "This receipt is not a fiscal document.",
+      "method": {
+        "transfer": "Transfer",
+        "cash": "Cash",
+        "card": "Card",
+        "check": "Check",
+        "other": "Other"
+      }
     }
   }
 }

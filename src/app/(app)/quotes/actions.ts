@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { createQuote, getQuote, setQuoteStatus } from "@/modules/quotes/quotes";
+import { createQuote, duplicateQuote, getQuote, setQuoteStatus } from "@/modules/quotes/quotes";
 import { sendQuote, generateQuotePdf, publicQuoteUrl } from "@/modules/quotes/delivery";
 import { createDocumentFromQuote } from "@/modules/documents/documents";
 import { sendLinkEmail } from "@/lib/email/document-delivery";
@@ -200,4 +200,19 @@ export async function convertQuoteToDocumentAction(formData: FormData) {
 
   revalidatePath(`/quotes/${parsed.data}`);
   redirect(`/documents/${document!.id}`);
+}
+
+/** Duplicates an expired quote into a fresh draft (PLAN.md §15.5 J12,
+ *  §15.8 P6) rather than reviving the old one — prices and validity are
+ *  exactly what needed a second look before sending again. */
+export async function duplicateQuoteAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = z.string().min(1).safeParse(formData.get("quoteId"));
+  if (!parsed.success) return;
+
+  const created = await duplicateQuote(ctx, parsed.data);
+  if (!created) return;
+
+  revalidatePath("/quotes");
+  redirect(`/quotes/${created.id}`);
 }

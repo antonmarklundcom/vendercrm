@@ -27,6 +27,17 @@ export type QuoteEvents = {
     total: number;
     currency: string;
   };
+  /** Emitted by the public reject page (§15.8 P6), alongside "quote.accepted"
+   *  above. No automation trigger listens yet — P1 only declared
+   *  `quote_accepted` — but the event exists so one can later without a
+   *  second migration. */
+  "quote.rejected": {
+    tenantId: string;
+    contactId: string;
+    quoteId: string;
+    dealId: string | null;
+    number: string;
+  };
 };
 
 export const quoteEvents = createEventBus<QuoteEvents>();
