@@ -109,6 +109,13 @@ export type TenantSettings = {
    * bank details belong here rather than in a multi-paragraph blob.
    */
   depositInstructions?: string;
+  /**
+   * Reply-to for every email `senderFor(ctx)` resolves (PLAN.md §15.1,
+   * §15.8 P4) — where a customer's "reply" on a transactional or automated
+   * email actually lands. Falls back to the tenant's first active admin's
+   * own login email when unset, so the reply-to is never blank.
+   */
+  contactEmail?: string;
 };
 
 export async function updateTenantBranding(ctx: TenantContext, branding: TenantBranding) {
@@ -129,6 +136,10 @@ export async function updateTenantDefaultCountry(ctx: TenantContext, defaultCoun
 
 export async function updateTenantReviewLink(ctx: TenantContext, reviewLink: string) {
   return mergeTenantSettings(ctx, { reviewLink });
+}
+
+export async function updateTenantContactEmail(ctx: TenantContext, contactEmail: string) {
+  return mergeTenantSettings(ctx, { contactEmail });
 }
 
 export async function updateTenantTimezone(ctx: TenantContext, timezone: string) {

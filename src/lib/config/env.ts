@@ -69,6 +69,15 @@ const envSchema = z
     // on-screen copy link until it's configured.
     RESEND_API_KEY: z.string().min(1).optional(),
     RESEND_FROM_EMAIL: z.string().email().optional(),
+    /**
+     * The default sending tier's subdomain (PLAN.md §15.1) — e.g.
+     * `mail.clientes.com.py`, deliberately not the apex, so the platform's
+     * own mail and a tenant's booking reminders never share reputation with
+     * the marketing site. Unset means `senderFor(ctx)` falls back to
+     * `RESEND_FROM_EMAIL` exactly as before this phase — no tenant sees a
+     * different address until this is set.
+     */
+    EMAIL_DEFAULT_DOMAIN: z.string().min(1).optional(),
     // AI auto-reply (PLAN.md §10 1O). Provider-neutral by the same shape as
     // STORAGE_DRIVER: one env picks the driver, the driver's own key is
     // required only when it's the selected one. `none` is the default and

@@ -225,6 +225,13 @@
       "when": 1788651534534,
       "tag": "0031_add_quick_replies_and_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1788653471646,
+      "tag": "0032_add_email_identity",
+      "breakpoints": true
     }
   ]
 }

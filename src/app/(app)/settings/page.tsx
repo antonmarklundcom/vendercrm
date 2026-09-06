@@ -15,6 +15,7 @@ import { PUSH_KINDS, isKindMuted, type PushKind } from "@/modules/notifications/
 import { countSubscriptionsForUser } from "@/modules/notifications/subscriptions";
 import { setPushPrefsAction } from "./actions";
 import { TaskReminderToggle } from "./TaskReminderToggle";
+import { EmailDomainSection } from "./EmailDomainSection";
 import { listAuditLogForTenant } from "@/modules/tenancy/audit";
 import { contactsFeedUrl } from "@/modules/crm/feed-url";
 import { isAiConfigured } from "@/lib/ai";
@@ -135,6 +136,8 @@ export default async function SettingsPage() {
         <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("reviewLinkIntro")}</p>
         <ReviewLinkForm reviewLink={settings.reviewLink ?? ""} />
       </section>
+
+      <EmailDomainSection ctx={ctx} settings={settings} t={t} />
 
       <section>
         <h2 className="mb-4 text-lg font-semibold">{t("businessHoursTitle")}</h2>

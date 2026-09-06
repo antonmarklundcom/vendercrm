@@ -232,8 +232,11 @@ async function notifyUserAction(
  * treatment a closed 24h window gets on WhatsApp, and the reason
  * lib/email's send never throws.
  *
- * P4 (§15.5 J3) gives tenants their own sending identity; this action calls
- * the same `sendEmail`, so it inherits that without changing.
+ * P4 (§15.5 J3, §15.8) gives tenants their own sending identity: `sendEmail`
+ * resolves `senderFor(ctx)` itself once it has a `ctx` and no explicit
+ * `from`/`replyTo`, so this call site's only change is passing `ctx` and
+ * `kind: "automated"` through — the resolution logic itself lives entirely
+ * in lib/email, not here.
  */
 async function sendEmailAction(
   ctx: TenantContext,
@@ -249,7 +252,13 @@ async function sendEmailAction(
   const body = renderTemplateVars(String(config.body ?? ""), contact).trim();
   if (!subject || !body) return { skipped: true, detail: { reason: "no_content" } };
 
-  const sent = await sendEmail({ to: contact.email, subject, html: emailHtml(body) });
+  const sent = await sendEmail({
+    to: contact.email,
+    subject,
+    html: emailHtml(body),
+    ctx,
+    kind: "automated",
+  });
   return sent
     ? { skipped: false, detail: { to: contact.email, subject } }
     : { skipped: true, detail: { reason: "email_not_configured", to: contact.email } };

@@ -13,7 +13,12 @@ import { listProducts } from "@/modules/quotes/products";
 import { getContact } from "@/modules/crm/contacts";
 import { Button } from "@/components/ui/button";
 import { DocumentBuilder, type DocumentBuilderLabels } from "../DocumentBuilder";
-import { issueDocumentAction, sendDocumentAction, deletePaymentAction } from "../actions";
+import {
+  issueDocumentAction,
+  sendDocumentAction,
+  sendDocumentByEmailAction,
+  deletePaymentAction,
+} from "../actions";
 import { RecordPaymentForm, VoidDocumentForm } from "./DocumentActionForms";
 import { formatMoney } from "@/lib/i18n/format";
 import { getLocale } from "next-intl/server";
@@ -84,10 +89,20 @@ export default async function DocumentDetailPage({
         </div>
 
         {document.status === "issued" && (
-          <form action={sendDocumentAction}>
-            <input type="hidden" name="documentId" value={document.id} />
-            <Button type="submit">{t("sendWhatsapp")}</Button>
-          </form>
+          <div className="flex gap-2">
+            <form action={sendDocumentAction}>
+              <input type="hidden" name="documentId" value={document.id} />
+              <Button type="submit">{t("sendWhatsapp")}</Button>
+            </form>
+            {contact?.email && (
+              <form action={sendDocumentByEmailAction}>
+                <input type="hidden" name="documentId" value={document.id} />
+                <Button type="submit" variant="outline">
+                  {t("sendEmail")}
+                </Button>
+              </form>
+            )}
+          </div>
         )}
       </header>
 

@@ -11,8 +11,13 @@ import {
   voidDocument,
   recordPayment,
   deletePayment,
+  getDocument,
 } from "@/modules/documents/documents";
-import { sendDocumentToContact } from "@/modules/documents/delivery";
+import { sendDocumentToContact, generateDocumentPdf, publicDocumentUrl } from "@/modules/documents/delivery";
+import { sendLinkEmail } from "@/lib/email/document-delivery";
+import { createActivity } from "@/modules/crm/activities";
+import { getTenant } from "@/modules/tenancy/tenants";
+import { getTranslator } from "@/lib/i18n/translator";
 
 const lineSchema = z.object({
   description: z.string().min(1).max(500),
@@ -210,6 +215,46 @@ export async function sendDocumentAction(formData: FormData) {
   const parsed = z.string().min(1).safeParse(formData.get("documentId"));
   if (!parsed.success) return;
   await sendDocumentToContact(ctx, parsed.data);
+  revalidatePath(`/documents/${parsed.data}`);
+}
+
+/** "Enviar por email" (PLAN.md §15.1, §15.8 P4) — same shape as
+ *  sendQuoteByEmailAction: the public link and PDF, no status/activity type
+ *  owned by modules/documents (P6's Owns column). */
+export async function sendDocumentByEmailAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = z.string().min(1).safeParse(formData.get("documentId"));
+  if (!parsed.success) return;
+
+  const document = await getDocument(ctx, parsed.data);
+  if (!document) return;
+
+  const [pdf, tenant] = await Promise.all([
+    generateDocumentPdf(ctx, document.id),
+    getTenant(ctx.tenantId),
+  ]);
+  const t = await getTranslator(tenant?.locale, "pdf.notaVenta");
+  const url = publicDocumentUrl(document.publicToken);
+
+  const result = await sendLinkEmail(ctx, {
+    contactId: document.contactId,
+    subject: `${t("caption")} ${document.number}`,
+    lines: [`${t("caption")} ${document.number}.`],
+    linkLabel: url,
+    linkUrl: url,
+    attachment: { filename: `${document.number}.pdf`, content: pdf },
+  });
+
+  if (result.sent) {
+    await createActivity(ctx, {
+      contactId: document.contactId,
+      dealId: document.dealId ?? undefined,
+      type: "system",
+      payload: { kind: "document_emailed", documentId: document.id, number: document.number },
+      userId: ctx.userId,
+    });
+  }
+
   revalidatePath(`/documents/${parsed.data}`);
 }
 

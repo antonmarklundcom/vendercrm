@@ -5,6 +5,8 @@ import { contacts, sites } from "@/db/schema";
 import { getLatestSubscriptionForTenant } from "./subscriptions";
 import { getPlan } from "./plans";
 import { countTenantMembers } from "./memberships";
+import { buildSystemTenantContext } from "./context";
+import { countEmailsSentToday } from "./email-log";
 import type { TenantContext } from "./context";
 
 // Plan limit enforcement (PLAN.md §13 H6). `plans.limits` has been written
@@ -20,11 +22,15 @@ export const planLimitsSchema = z.object({
   maxUsers: z.number().int().positive().nullable().optional(),
   maxContacts: z.number().int().positive().nullable().optional(),
   maxSitesConnected: z.number().int().positive().nullable().optional(),
+  /** Automated (not transactional) emails per rolling 24h — Resend's own
+   * limits are per platform account, so pacing a tenant's automated volume
+   * belongs in `plans.limits` (PLAN.md §15.1). */
+  maxEmailsPerDay: z.number().int().positive().nullable().optional(),
 });
 
 export type PlanLimits = z.infer<typeof planLimitsSchema>;
 
-export type LimitKey = "maxUsers" | "maxContacts" | "maxSitesConnected";
+export type LimitKey = "maxUsers" | "maxContacts" | "maxSitesConnected" | "maxEmailsPerDay";
 
 export type LimitCheck = {
   allowed: boolean;
@@ -66,6 +72,11 @@ async function currentUsage(tenantId: string, key: LimitKey): Promise<number> {
       .from(contacts)
       .where(eq(contacts.tenantId, tenantId));
     return row?.value ?? 0;
+  }
+
+  if (key === "maxEmailsPerDay") {
+    const ctx = await buildSystemTenantContext(tenantId);
+    return ctx ? countEmailsSentToday(ctx) : 0;
   }
 
   const [row] = await db

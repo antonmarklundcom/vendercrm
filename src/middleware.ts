@@ -33,6 +33,10 @@ export const PUBLIC_PREFIXES = [
   // The embedded chat widget's iframe (/w/[widgetKey]). Loaded by visitors
   // of *other people's* websites, who by definition have no session here.
   "/w/",
+  // The email unsubscribe link (/u/[token], §15.1, §15.8 P4). Clicked from a
+  // customer's own mail client, which by definition has no session here —
+  // same reasoning as /q/, /d/, /b/ above.
+  "/u/",
 ];
 
 // Exact public paths, kept separate from the prefixes above so this stays a
