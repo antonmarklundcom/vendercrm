@@ -15,6 +15,7 @@ import { DEFAULT_TIMEZONE, formatDateTime, formatNumber, formatTime } from "@/li
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { getDashboardSummary } from "@/modules/dashboard/summary";
+import { buildHoy, type HoyItem } from "@/modules/coach/hoy";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { TaskList, type TaskListLabels } from "@/components/task-list";
@@ -114,6 +115,55 @@ function ChecklistItem({
   );
 }
 
+// "Hoy" (PLAN.md §15.3 L1, §15.8 P7): a ranked, rule-based list of what
+// needs attention today — modules/coach/hoy.ts does the ranking, this is
+// purely the render, one row per item with the one deep-link action.
+const HOY_SEVERITY_DOT = {
+  high: "bg-destructive",
+  medium: "bg-warning",
+  low: "bg-info",
+} as const;
+
+function HoyPanel({ items, title, empty }: { items: HoyItem[]; title: string; empty: string }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <Card className="py-1">
+          <ul className="flex flex-col">
+            {items.map((item, index) => (
+              <li
+                key={`${item.kind}-${index}`}
+                className="flex flex-wrap items-center justify-between gap-3 border-b py-3 last:border-b-0"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <span
+                    className={cn("mt-1.5 size-2 shrink-0 rounded-full", HOY_SEVERITY_DOT[item.severity])}
+                    aria-hidden="true"
+                  />
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="text-sm font-medium">{item.title}</span>
+                    <span className="text-sm text-muted-foreground">{item.subtitle}</span>
+                  </div>
+                </div>
+                <Link
+                  href={item.url}
+                  className="flex shrink-0 items-center gap-1 text-sm font-medium whitespace-nowrap underline-offset-4 hover:underline"
+                >
+                  {item.action}
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </section>
+  );
+}
+
 export default async function DashboardPage() {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.dashboard");
@@ -126,10 +176,11 @@ export default async function DashboardPage() {
   const tenant = await getTenant(ctx.tenantId);
   const timeZone = tenant?.timezone || DEFAULT_TIMEZONE;
 
-  const [summary, leadStats, sites] = await Promise.all([
+  const [summary, leadStats, sites, hoy] = await Promise.all([
     getDashboardSummary(ctx, { timeZone }),
     getLeadStats(ctx),
     listSites(ctx),
+    buildHoy(ctx),
   ]);
 
   // Sites are shown by name; the stats module groups by id because that is
@@ -140,6 +191,7 @@ export default async function DashboardPage() {
     summary;
   const tTasks = await getTranslations("app.contacts.tasks");
   const tLeads = await getTranslations("app.dashboard.leads");
+  const tHoy = await getTranslations("app.dashboard.hoy");
   const taskLabels: TaskListLabels = {
     complete: tTasks("complete"),
     reopen: tTasks("reopen"),
@@ -182,6 +234,8 @@ export default async function DashboardPage() {
         title={t("title", { tenant: tenant?.name ?? "" })}
         description={t("subtitle")}
       />
+
+      <HoyPanel items={hoy} title={tHoy("title")} empty={tHoy("empty")} />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
