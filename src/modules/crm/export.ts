@@ -5,6 +5,7 @@ import {
   type ContactListOptions,
   type ContactQuery,
 } from "./contact-list";
+import { listCustomFieldDefinitions } from "./custom-fields";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { tenantDb } from "@/modules/tenancy/db";
 import { contactTags } from "@/db/schema";
@@ -63,7 +64,7 @@ export async function exportContactsCsv(
   // Sort order carries over so the file opens in the order the rep was
   // looking at, but pagination does not — an export is the whole filtered
   // set, not the page that happened to be on screen.
-  const [page, tags, users, links] = await Promise.all([
+  const [page, tags, users, links, customFields] = await Promise.all([
     queryContacts(ctx, query, {
       ...options,
       page: 1,
@@ -72,6 +73,7 @@ export async function exportContactsCsv(
     listTags(ctx),
     listTenantUsers(ctx),
     tenantDb(ctx).select(contactTags),
+    listCustomFieldDefinitions(ctx),
   ]);
 
   const tagNames = new Map(tags.map((tag) => [tag.id, tag.name]));
@@ -86,16 +88,21 @@ export async function exportContactsCsv(
     else tagsByContact.set(link.contactId, [name]);
   }
 
-  const rows = page.rows.map((contact) => [
-    contact.name,
-    contact.phone,
-    contact.email ?? "",
-    contact.source ?? "",
-    (tagsByContact.get(contact.id) ?? []).join(" | "),
-    contact.ownerUserId ? (userNames.get(contact.ownerUserId) ?? "") : "",
-    contact.notes ?? "",
-    contact.createdAt,
-  ]);
+  const rows = page.rows.map((contact) => {
+    const custom = (contact.custom as Record<string, unknown>) ?? {};
+    return [
+      contact.name,
+      contact.phone,
+      contact.email ?? "",
+      contact.source ?? "",
+      (tagsByContact.get(contact.id) ?? []).join(" | "),
+      contact.ownerUserId ? (userNames.get(contact.ownerUserId) ?? "") : "",
+      contact.notes ?? "",
+      contact.createdAt,
+      ...customFields.map((field) => custom[field.key] ?? ""),
+    ];
+  });
 
-  return toCsv(CONTACT_EXPORT_COLUMNS, rows);
+  const headers = [...CONTACT_EXPORT_COLUMNS, ...customFields.map((field) => field.label)];
+  return toCsv(headers, rows);
 }

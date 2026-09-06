@@ -116,9 +116,20 @@ export default async function PipelinePage({
         />
       ) : (
         <PipelineBoard
-          stages={boardStages}
+          stages={boardStages.map((stage) => ({
+            id: stage.id,
+            name: stage.name,
+            color: stage.color,
+            staleAfterDays: stage.staleAfterDays,
+          }))}
           deals={boardDeals.map((deal) => ({
-            ...deal,
+            id: deal.id,
+            stageId: deal.stageId,
+            title: deal.title,
+            value: deal.value,
+            currency: deal.currency,
+            position: deal.position,
+            stageEnteredAt: deal.stageEnteredAt.toISOString(),
             contactName: contactsById.get(deal.contactId)?.name ?? deal.contactId,
           }))}
         />

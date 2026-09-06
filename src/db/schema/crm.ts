@@ -44,6 +44,11 @@ export const stages = mysqlTable(
     color: varchar("color", { length: 20 }),
     isWon: boolean("is_won").notNull().default(false),
     isLost: boolean("is_lost").notNull().default(false),
+    // Board polish (PLAN.md §15.5 J4, §15.8 P5): a deal sitting past this
+    // many days in the stage gets a stale badge. Null means "never flag" —
+    // every stage starts this way, so nothing changes for a tenant that
+    // never opens the stage editor.
+    staleAfterDays: int("stale_after_days"),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -152,8 +157,16 @@ export const deals = mysqlTable(
     closedAt: datetime("closed_at"),
     // Why the deal closed, in the rep's own words (PLAN.md §13 H8). Kept on
     // the deal rather than only in the activity trail so the board and any
-    // later reporting can read it without walking the timeline.
+    // later reporting can read it without walking the timeline. Won deals
+    // use this column; a lost deal's reason goes in `lostReason` instead
+    // (§15.8 P5) — the two answer different questions ("what happened" vs.
+    // "why did we lose") and a reporting query should never have to guess
+    // which one a row means from `stages.is_lost` alone.
     closeReason: varchar("close_reason", { length: 500 }),
+    lostReason: varchar("lost_reason", { length: 500 }),
+    /** Pipeline forecasting (§15.8 P5) — when the rep expects to close,
+     *  editable from the deal detail page. */
+    expectedCloseAt: datetime("expected_close_at"),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -267,5 +280,41 @@ export const contactViews = mysqlTable(
   (table) => [
     index("contact_views_tenant_id_idx").on(table.tenantId),
     uniqueIndex("contact_views_tenant_name_idx").on(table.tenantId, table.name),
+  ],
+);
+
+// Tenant-defined contact fields (PLAN.md §15.5 J4, §15.8 P5). Values live in
+// `contacts.custom` (a json column that has existed since §4 with nothing
+// ever writing to it); this table only defines the shape — key, label, type,
+// `options` for `select`, `position` for display order, `required` and
+// `showOnCard` for the pipeline board card. `key` is the JSON property name
+// and the `{{contacto.custom.<key>}}` template variable, so it is slugified
+// and never renamed once fields have data (a rename would orphan every
+// contact's stored value under the old key).
+export const customFieldDefinitions = mysqlTable(
+  "custom_field_definitions",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    key: varchar("key", { length: 64 }).notNull(),
+    label: varchar("label", { length: 200 }).notNull(),
+    type: varchar("type", {
+      length: 10,
+      enum: ["text", "number", "date", "select", "phone"],
+    }).notNull(),
+    options: json("options").notNull().default([]),
+    position: int("position").notNull().default(0),
+    required: boolean("required").notNull().default(false),
+    showOnCard: boolean("show_on_card").notNull().default(false),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: datetime("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("custom_field_definitions_tenant_id_idx").on(table.tenantId),
+    uniqueIndex("custom_field_definitions_tenant_key_idx").on(table.tenantId, table.key),
   ],
 );

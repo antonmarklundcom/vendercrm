@@ -9,6 +9,7 @@ import {
   getContactByPhone,
   updateContact,
 } from "./contacts";
+import { coerceCustomFieldValue, listCustomFieldDefinitions } from "./custom-fields";
 
 // Contact CSV import (PLAN.md §13 H6) — the GHL migration path (§1.1). The
 // parser is deliberately hand-written rather than a dependency: the format
@@ -177,6 +178,7 @@ export async function importContacts(
   }
 
   const seen = new Set<string>();
+  const customDefinitions = await listCustomFieldDefinitions(ctx);
 
   for (const [index, row] of rows.entries()) {
     const rowNumber = index + 2; // +1 for zero-based, +1 for the header row
@@ -222,6 +224,19 @@ export async function importContacts(
     const notes = value("notes") || undefined;
     const source = value("source") || options.source || "import:csv";
 
+    // Custom field values, coerced per the field's own type — an unparseable
+    // number or date is dropped for that one field rather than failing the
+    // whole row (the same "skip, don't block" rule the rest of this importer
+    // follows).
+    const custom: Record<string, string | number | null> = {};
+    for (const definition of customDefinitions) {
+      const header = options.mapping.custom?.[definition.key];
+      if (!header) continue;
+      const raw = (row[header] ?? "").trim();
+      if (!raw) continue;
+      custom[definition.key] = coerceCustomFieldValue(definition, raw);
+    }
+
     try {
       const existing = await getContactByPhone(ctx, phone, country);
 
@@ -240,6 +255,7 @@ export async function importContacts(
             name,
             ...(email ? { email } : {}),
             ...(notes ? { notes } : {}),
+            ...(Object.keys(custom).length > 0 ? { custom } : {}),
           },
           country,
         );
@@ -248,7 +264,7 @@ export async function importContacts(
         continue;
       }
 
-      const created = await createContact(ctx, { name, phone, email, notes, source }, country);
+      const created = await createContact(ctx, { name, phone, email, notes, source, custom }, country);
       if (created && options.tagId) await addTagToContact(ctx, created.id, options.tagId);
       report.created += 1;
     } catch {

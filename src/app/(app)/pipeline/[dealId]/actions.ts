@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { DealCloseError, assignDeal, closeDeal, reopenDeal } from "@/modules/crm/deals";
+import { DealCloseError, assignDeal, closeDeal, reopenDeal, updateDeal } from "@/modules/crm/deals";
 
 // Deal detail actions (PLAN.md §13 H8). Working a deal is the agent's daily
 // job, so these stay agent-accessible — §3.2 reserves *pipeline
@@ -77,5 +77,26 @@ export async function assignDealAction(formData: FormData) {
   if (!parsed.success) return;
 
   await assignDeal(ctx, parsed.data.dealId, parsed.data.userId);
+  revalidatePath(`/pipeline/${parsed.data.dealId}`);
+}
+
+const expectedCloseSchema = z.object({
+  dealId: z.string().min(1).max(26),
+  expectedCloseAt: z.string(),
+});
+
+/** Pipeline forecasting (§15.8 P5). Empty input clears the date. */
+export async function updateExpectedCloseAtAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = expectedCloseSchema.safeParse({
+    dealId: formData.get("dealId"),
+    expectedCloseAt: formData.get("expectedCloseAt") ?? "",
+  });
+  if (!parsed.success) return;
+
+  const date = parsed.data.expectedCloseAt ? new Date(parsed.data.expectedCloseAt) : null;
+  if (date && Number.isNaN(date.getTime())) return;
+
+  await updateDeal(ctx, parsed.data.dealId, { expectedCloseAt: date });
   revalidatePath(`/pipeline/${parsed.data.dealId}`);
 }

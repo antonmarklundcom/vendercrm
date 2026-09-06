@@ -124,6 +124,18 @@ export default async function StagesPage({
                   </Select>
                 </label>
 
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("staleAfterDays")}
+                  <Input
+                    type="number"
+                    name="staleAfterDays"
+                    min={1}
+                    max={365}
+                    className="w-24"
+                    defaultValue={stage.staleAfterDays ?? ""}
+                  />
+                </label>
+
                 <Button type="submit" size="sm" variant="outline">
                   {t("save")}
                 </Button>

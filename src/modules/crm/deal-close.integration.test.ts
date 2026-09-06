@@ -97,6 +97,10 @@ describe.skipIf(!hasDb)("closing deals and configuring stages (MySQL integration
     const deal = await newDeal("Perdida");
     const lost = await deals.closeDeal(ctx, deal!.id, "lost", "eligió a otro");
     expect((await pipelines.getStage(ctx, lost!.stageId))?.isLost).toBe(true);
+    // Lost writes lostReason, not closeReason — the two answer different
+    // questions (§15.8 P5).
+    expect(lost!.lostReason).toBe("eligió a otro");
+    expect(lost!.closeReason).toBeNull();
 
     const stages = await pipelines.listStagesForPipeline(ctx, pipelineId);
     const open = stages.find((stage) => !stage.isWon && !stage.isLost)!;
@@ -105,6 +109,7 @@ describe.skipIf(!hasDb)("closing deals and configuring stages (MySQL integration
     expect(reopened!.stageId).toBe(open.id);
     expect(reopened!.closedAt).toBeNull();
     expect(reopened!.closeReason).toBeNull();
+    expect(reopened!.lostReason).toBeNull();
   });
 
   it("refuses to close when the pipeline has no won/lost stage", async () => {

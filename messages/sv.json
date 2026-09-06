@@ -289,7 +289,9 @@
       "moveFailed": "Vi kunde inte flytta affären. Den återgick till föregående steg.",
       "showClosed": "Visa {count} stängda",
       "hideClosed": "Dölj stängda",
-      "editStages": "Redigera steg"
+      "editStages": "Redigera steg",
+      "daysInStage": "{count} dagar i det här steget",
+      "stale": "Stillastående"
     },
     "calendar": {
       "title": "Kalender",
@@ -639,7 +641,16 @@
           "unknown": "Vyn kunde inte sparas"
         }
       },
-      "timelineConversationNote": "Intern anteckning"
+      "timelineConversationNote": "Intern anteckning",
+      "customFieldsTitle": "Anpassade fält",
+      "customFieldsSave": "Spara fält",
+      "manageCustomFields": "Hantera anpassade fält",
+      "customFilterLabel": "Anpassat fält",
+      "customFilterNone": "Inget",
+      "customFilterOperator": "Villkor",
+      "customFilterEquals": "Är lika med",
+      "customFilterContains": "Innehåller",
+      "customFilterValue": "Värde"
     },
     "inbox": {
       "title": "Inkorg",
@@ -1446,7 +1457,9 @@
         "quotes": "offerter",
         "documents": "försäljningsnotor",
         "submissions": "inkomna leads"
-      }
+      },
+      "expectedCloseAt": "Förväntat avslut",
+      "save": "Spara"
     },
     "stages": {
       "title": "Steg",
@@ -1470,7 +1483,8 @@
         "notEmpty": "Går inte att ta bort: steget innehåller fortfarande affärer. Flytta dem först.",
         "lastStage": "Går inte att ta bort pipelinens enda steg.",
         "notFound": "Vi hittade inte steget."
-      }
+      },
+      "staleAfterDays": "Stillastående efter (dagar)"
     },
     "business": {
       "switcherTitle": "Företag",
@@ -1842,6 +1856,28 @@
       "assignedBody": "Du sköter nu {contact}.",
       "taskDueTitle": "Din dag",
       "taskDueBody": "{tasks, plural, =0 {Inga uppgifter} one {# uppgift} other {# uppgifter}} · {appointments, plural, =0 {inga bokningar} one {# bokning} other {# bokningar}}"
+    },
+    "customFields": {
+      "title": "Anpassade fält",
+      "intro": "Din egen data på varje kontakt — typen och nyckeln kan inte ändras när fältet väl är skapat.",
+      "backToContacts": "Tillbaka till kontakter",
+      "labelLabel": "Etikett",
+      "typeLabel": "Typ",
+      "typeValues": {
+        "text": "Text",
+        "number": "Nummer",
+        "date": "Datum",
+        "select": "Lista",
+        "phone": "Telefon"
+      },
+      "optionsLabel": "Alternativ (kommaseparerade, endast typ lista)",
+      "requiredLabel": "Obligatoriskt",
+      "showOnCardLabel": "Visa på pipeline-kortet",
+      "create": "Skapa fält",
+      "delete": "Ta bort",
+      "keyTaken": "Ett fält med den nyckeln finns redan.",
+      "adminOnly": "Den här sektionen är endast för administratörer.",
+      "empty": "Inga anpassade fält än."
     }
   },
   "superadmin": {

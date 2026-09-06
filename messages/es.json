@@ -442,7 +442,16 @@
           "unknown": "No se pudo guardar la vista"
         }
       },
-      "timelineConversationNote": "Nota interna"
+      "timelineConversationNote": "Nota interna",
+      "customFieldsTitle": "Campos personalizados",
+      "customFieldsSave": "Guardar campos",
+      "manageCustomFields": "Gestionar campos personalizados",
+      "customFilterLabel": "Campo personalizado",
+      "customFilterNone": "Ninguno",
+      "customFilterOperator": "Condición",
+      "customFilterEquals": "Es igual a",
+      "customFilterContains": "Contiene",
+      "customFilterValue": "Valor"
     },
     "pipeline": {
       "title": "Pipeline",
@@ -474,7 +483,9 @@
       "moveFailed": "No pudimos mover la oportunidad. Se restauró su etapa anterior.",
       "showClosed": "Ver {count} cerrados",
       "hideClosed": "Ocultar cerrados",
-      "editStages": "Editar etapas"
+      "editStages": "Editar etapas",
+      "daysInStage": "{count} días en esta etapa",
+      "stale": "Estancado"
     },
     "calendar": {
       "title": "Agenda",
@@ -1446,7 +1457,9 @@
         "quotes": "presupuestos",
         "documents": "notas de venta",
         "submissions": "leads recibidos"
-      }
+      },
+      "expectedCloseAt": "Cierre esperado",
+      "save": "Guardar"
     },
     "stages": {
       "title": "Etapas",
@@ -1470,7 +1483,8 @@
         "notEmpty": "No se puede eliminar: la etapa todavía tiene negocios. Movelos primero.",
         "lastStage": "No se puede eliminar la única etapa de la pipeline.",
         "notFound": "No encontramos la etapa."
-      }
+      },
+      "staleAfterDays": "Estancado después de (días)"
     },
     "business": {
       "switcherTitle": "Empresa",
@@ -1842,6 +1856,28 @@
       "assignedBody": "Ahora atendés a {contact}.",
       "taskDueTitle": "Tu día",
       "taskDueBody": "{tasks, plural, =0 {Sin tareas} one {# tarea} other {# tareas}} · {appointments, plural, =0 {sin citas} one {# cita} other {# citas}}"
+    },
+    "customFields": {
+      "title": "Campos personalizados",
+      "intro": "Datos propios de tu negocio en cada contacto — el tipo y la clave no se pueden cambiar después de crear el campo.",
+      "backToContacts": "Volver a contactos",
+      "labelLabel": "Etiqueta",
+      "typeLabel": "Tipo",
+      "typeValues": {
+        "text": "Texto",
+        "number": "Número",
+        "date": "Fecha",
+        "select": "Lista",
+        "phone": "Teléfono"
+      },
+      "optionsLabel": "Opciones (separadas por coma, solo para tipo lista)",
+      "requiredLabel": "Obligatorio",
+      "showOnCardLabel": "Mostrar en la tarjeta del pipeline",
+      "create": "Crear campo",
+      "delete": "Eliminar",
+      "keyTaken": "Ya existe un campo con esa clave.",
+      "adminOnly": "Esta sección es solo para administradores.",
+      "empty": "Todavía no hay campos personalizados."
     }
   },
   "superadmin": {

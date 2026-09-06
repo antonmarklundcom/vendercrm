@@ -16,6 +16,14 @@ import {
   removeTagFromContact,
   getContactByPhone,
 } from "@/modules/crm/contacts";
+import {
+  coerceCustomFieldValue,
+  createCustomFieldDefinition,
+  CustomFieldKeyTakenError,
+  deleteCustomFieldDefinition,
+  listCustomFieldDefinitions,
+  CUSTOM_FIELD_TYPES,
+} from "@/modules/crm/custom-fields";
 import { createActivity } from "@/modules/crm/activities";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
 import { checkPlanLimit } from "@/modules/tenancy/limits";
@@ -154,6 +162,26 @@ export async function updateContactAction(
   return { error: null, field: null, saved: true, values: submitted(formData) };
 }
 
+/**
+ * Saves every custom field at once, from `custom_<key>` form inputs
+ * (PLAN.md §15.8 P5) — one small form under the standard edit form rather
+ * than folded into updateContactSchema, since the field set is dynamic per
+ * tenant and unrelated to name/email/notes validation.
+ */
+export async function updateContactCustomFieldsAction(contactId: string, formData: FormData) {
+  const ctx = await requireTenantContext();
+  const definitions = await listCustomFieldDefinitions(ctx);
+
+  const custom: Record<string, string | number | null> = {};
+  for (const definition of definitions) {
+    const raw = String(formData.get(`custom_${definition.key}`) ?? "");
+    custom[definition.key] = coerceCustomFieldValue(definition, raw);
+  }
+
+  await updateContact(ctx, contactId, { custom });
+  revalidatePath(`/contacts/${contactId}`);
+}
+
 export async function addNoteAction(contactId: string, formData: FormData) {
   const ctx = await requireTenantContext();
   const note = z.string().min(1).max(5000).parse(formData.get("note"));
@@ -258,4 +286,57 @@ export async function deleteContactAction(formData: FormData) {
 
   revalidatePath("/contacts");
   redirect("/contacts");
+}
+
+// --- Custom field definitions (PLAN.md §15.8 P5) --------------------------
+// Admin-only, same as the stage editor (§3.2, H1): defining what data every
+// contact carries is tenant configuration, not a rep's daily work.
+
+const createCustomFieldSchema = z.object({
+  label: z.string().trim().min(1).max(200),
+  type: z.enum(CUSTOM_FIELD_TYPES),
+  options: z.string().max(2000).optional(),
+  required: z.boolean(),
+  showOnCard: z.boolean(),
+});
+
+export type CustomFieldFormState = { error: string | null };
+
+export async function createCustomFieldAction(
+  _prevState: CustomFieldFormState,
+  formData: FormData,
+): Promise<CustomFieldFormState> {
+  const ctx = await requireTenantAdmin();
+  const parsed = createCustomFieldSchema.safeParse({
+    label: formData.get("label"),
+    type: formData.get("type"),
+    options: formData.get("options") || undefined,
+    required: formData.get("required") === "on",
+    showOnCard: formData.get("showOnCard") === "on",
+  });
+  if (!parsed.success) return { error: "invalid" };
+
+  try {
+    await createCustomFieldDefinition(ctx, {
+      label: parsed.data.label,
+      type: parsed.data.type,
+      options: parsed.data.options
+        ? parsed.data.options.split(",").map((o) => o.trim()).filter(Boolean)
+        : undefined,
+      required: parsed.data.required,
+      showOnCard: parsed.data.showOnCard,
+    });
+  } catch (err) {
+    if (err instanceof CustomFieldKeyTakenError) return { error: "keyTaken" };
+    return { error: "unknown" };
+  }
+
+  revalidatePath("/contacts/campos");
+  return { error: null };
+}
+
+export async function deleteCustomFieldAction(id: string) {
+  const ctx = await requireTenantAdmin();
+  await deleteCustomFieldDefinition(ctx, id);
+  revalidatePath("/contacts/campos");
 }

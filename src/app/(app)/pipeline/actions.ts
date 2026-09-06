@@ -142,12 +142,14 @@ export async function updateStageAction(formData: FormData) {
       name: z.string().trim().min(1).max(200),
       color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
       outcome: z.enum(["none", "won", "lost"]),
+      staleAfterDays: z.coerce.number().int().min(1).max(365).nullable(),
     })
     .safeParse({
       stageId: formData.get("stageId"),
       name: formData.get("name"),
       color: formData.get("color") || undefined,
       outcome: formData.get("outcome") ?? "none",
+      staleAfterDays: formData.get("staleAfterDays") || null,
     });
   if (!parsed.success) return;
 
@@ -156,6 +158,7 @@ export async function updateStageAction(formData: FormData) {
     color: parsed.data.color || null,
     isWon: parsed.data.outcome === "won",
     isLost: parsed.data.outcome === "lost",
+    staleAfterDays: parsed.data.staleAfterDays,
   });
 
   revalidatePath("/pipeline");

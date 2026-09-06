@@ -49,6 +49,20 @@ export async function listDealsForPipeline(ctx: TenantContext, pipelineId: strin
   return rows.sort((a, b) => a.position - b.position);
 }
 
+/** Value total per stage (PLAN.md §15.8 P5's board column totals) — a pure
+ *  grouping over rows the caller already has, so the board and any test of
+ *  it agree on the same arithmetic. Assumes one currency per stage, the
+ *  same assumption `formatMoney` on the board makes. */
+export function totalsByStage(
+  rows: Array<Pick<typeof deals.$inferSelect, "stageId" | "value">>,
+): Map<string, number> {
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    totals.set(row.stageId, (totals.get(row.stageId) ?? 0) + row.value);
+  }
+  return totals;
+}
+
 export async function listDealsForContact(ctx: TenantContext, contactId: string) {
   const rows = await tenantDb(ctx).select(deals, eq(deals.contactId, contactId));
   return rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -56,7 +70,10 @@ export async function listDealsForContact(ctx: TenantContext, contactId: string)
 
 export type UpdateDealInput = Partial<
   Pick<CreateDealInput, "title" | "value" | "currency" | "assignedUserId">
->;
+> & {
+  /** Pipeline forecasting (§15.8 P5); null clears it. */
+  expectedCloseAt?: Date | null;
+};
 
 export async function updateDeal(ctx: TenantContext, id: string, input: UpdateDealInput) {
   await tenantDb(ctx).update(deals).set(input).where(eq(deals.id, id));
@@ -163,9 +180,16 @@ export async function closeDeal(
 
   const siblings = await tenantDb(ctx).select(deals, eq(deals.stageId, stage.id));
   await moveDeal(ctx, dealId, { toStageId: stage.id, toPosition: siblings.length });
+  // Won and lost answer different questions (§15.8 P5's schema comment): a
+  // won deal keeps `closeReason` ("what happened"); a lost one writes
+  // `lostReason` ("why we lost") and leaves `closeReason` alone.
   await tenantDb(ctx)
     .update(deals)
-    .set({ closeReason: reason?.slice(0, 500) ?? null })
+    .set(
+      outcome === "lost"
+        ? { lostReason: reason?.slice(0, 500) ?? null }
+        : { closeReason: reason?.slice(0, 500) ?? null },
+    )
     .where(eq(deals.id, dealId));
 
   return getDeal(ctx, dealId);
@@ -175,6 +199,9 @@ export async function closeDeal(
 export async function reopenDeal(ctx: TenantContext, dealId: string, toStageId: string) {
   const siblings = await tenantDb(ctx).select(deals, eq(deals.stageId, toStageId));
   await moveDeal(ctx, dealId, { toStageId, toPosition: siblings.length });
-  await tenantDb(ctx).update(deals).set({ closeReason: null }).where(eq(deals.id, dealId));
+  await tenantDb(ctx)
+    .update(deals)
+    .set({ closeReason: null, lostReason: null })
+    .where(eq(deals.id, dealId));
   return getDeal(ctx, dealId);
 }

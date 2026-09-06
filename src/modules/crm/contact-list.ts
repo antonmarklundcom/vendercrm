@@ -1,17 +1,23 @@
-import { and, gte, lte, type SQL } from "drizzle-orm";
-import { contacts, deals, stages } from "@/db/schema";
+import { and, asc, desc, eq, gte, inArray, like, lte, or, sql, type SQL } from "drizzle-orm";
+import { contactTags, contacts, deals, stages } from "@/db/schema";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
-import { listContacts, type ListContactsFilters } from "./contacts";
+import type { ListContactsFilters } from "./contacts";
 
 // The contacts list as a real table (PLAN.md §10 1J #1): sorting, the filters
-// a rep actually reaches for, and pagination. One shape serves both the
-// screen and the CSV export, so "exportar" always means "what this list is
-// showing" — the property that makes an export trustworthy.
+// a rep actually reaches for, and pagination — moved into SQL in §15.8 P5
+// (sort/LIMIT/OFFSET/COUNT all run in MySQL now; only the filters that need
+// a join — tags, pipeline/stage, custom fields — resolve their matching
+// contact ids with one extra scoped read first, then narrow the main query
+// with `inArray` rather than a second in-memory pass). One shape serves both
+// the screen and the CSV export, so "exportar" always means "what this list
+// is showing" — the property that makes an export trustworthy.
 
 export const CONTACT_SORT_FIELDS = ["name", "createdAt", "phone"] as const;
 export type ContactSortField = (typeof CONTACT_SORT_FIELDS)[number];
 export type SortDirection = "asc" | "desc";
+
+export type CustomFieldOperator = "equals" | "contains";
 
 export type ContactQuery = ListContactsFilters & {
   /** Only contacts with a deal in a stage that is neither won nor lost. */
@@ -27,6 +33,11 @@ export type ContactQuery = ListContactsFilters & {
    * action bar (§10 1J #1) reuses the same query path rather than a
    * separate export function. */
   ids?: string[];
+  /** `custom.<key> equals|contains <value>` (§15.8 P5) — one custom field
+   *  filter at a time, the saved-view shape asked for. */
+  customKey?: string;
+  customOp?: CustomFieldOperator;
+  customValue?: string;
 };
 
 export type ContactListOptions = {
@@ -38,60 +49,46 @@ export type ContactListOptions = {
 
 export const DEFAULT_PER_PAGE = 25;
 
-function compare(
-  a: typeof contacts.$inferSelect,
-  b: typeof contacts.$inferSelect,
-  field: ContactSortField,
-): number {
-  switch (field) {
-    case "name":
-      // localeCompare so ñ and accents order the way a Spanish speaker expects
-      // rather than by code point.
-      return a.name.localeCompare(b.name, "es");
-    case "phone":
-      return a.phone.localeCompare(b.phone);
-    case "createdAt":
-      return a.createdAt.getTime() - b.createdAt.getTime();
-  }
-}
+const SORT_COLUMNS = {
+  name: contacts.name,
+  phone: contacts.phone,
+  createdAt: contacts.createdAt,
+} as const;
 
 /**
- * Resolves every filter, then sorts and pages.
- *
- * `listContacts` already owns search/tag/owner/source and the tenant
- * predicate, so this composes on top of it rather than duplicating that
- * logic — the date range narrows in SQL (cheap, indexed by tenant), and
- * has-open-deal is applied in memory from one extra scoped read, since it
- * needs the stage's won/lost flags and tenantDb exposes no join helper.
+ * Resolves every filter into one SQL condition, then sorts and pages in
+ * MySQL. Filters that need a join (tags, pipeline/stage, a custom field)
+ * resolve their contact ids with one extra tenant-scoped read first — the
+ * `tenantDb` boundary has no join helper, and one more scoped query per
+ * filter is a fair trade for keeping every write and read on tenant-scoped
+ * rails (§3.3).
  */
 export async function queryContacts(
   ctx: TenantContext,
   query: ContactQuery = {},
   options: ContactListOptions = {},
 ) {
-  const dateConditions: SQL[] = [];
-  if (query.createdFrom) dateConditions.push(gte(contacts.createdAt, query.createdFrom));
-  if (query.createdTo) dateConditions.push(lte(contacts.createdAt, query.createdTo));
+  const conditions: SQL[] = [];
 
-  let rows = await listContacts(ctx, {
-    search: query.search,
-    tagId: query.tagId,
-    ownerUserId: query.ownerUserId,
-    source: query.source,
-  });
-
-  if (dateConditions.length > 0) {
-    const dateFiltered = await tenantDb(ctx).select(
-      contacts,
-      dateConditions.length === 1 ? dateConditions[0] : (and(...dateConditions) as SQL),
+  if (query.search) {
+    const term = `%${query.search}%`;
+    conditions.push(
+      or(like(contacts.name, term), like(contacts.phone, term), like(contacts.email, term)) as SQL,
     );
-    const allowed = new Set(dateFiltered.map((row) => row.id));
-    rows = rows.filter((row) => allowed.has(row.id));
+  }
+  if (query.ownerUserId) conditions.push(eq(contacts.ownerUserId, query.ownerUserId));
+  if (query.source) conditions.push(eq(contacts.source, query.source));
+  if (query.createdFrom) conditions.push(gte(contacts.createdAt, query.createdFrom));
+  if (query.createdTo) conditions.push(lte(contacts.createdAt, query.createdTo));
+  if (query.ids) {
+    if (query.ids.length === 0) return emptyPage(options);
+    conditions.push(inArray(contacts.id, query.ids));
   }
 
-  if (query.ids) {
-    const allowed = new Set(query.ids);
-    rows = rows.filter((row) => allowed.has(row.id));
+  if (query.tagId) {
+    const tagged = await tenantDb(ctx).select(contactTags, eq(contactTags.tagId, query.tagId));
+    if (tagged.length === 0) return emptyPage(options);
+    conditions.push(inArray(contacts.id, tagged.map((row) => row.contactId)));
   }
 
   // has-open-deal and the pipeline/stage filter both answer "where is this
@@ -110,46 +107,67 @@ export async function queryContacts(
       const withOpenDeal = new Set(
         dealRows.filter((deal) => !closed.has(deal.stageId)).map((deal) => deal.contactId),
       );
-      rows = rows.filter((row) => withOpenDeal.has(row.id));
+      if (withOpenDeal.size === 0) return emptyPage(options);
+      conditions.push(inArray(contacts.id, [...withOpenDeal]));
     }
 
     if (query.stageId || query.pipelineId) {
       const stageIds = query.stageId
         ? new Set([query.stageId])
         : new Set(
-            stageRows
-              .filter((stage) => stage.pipelineId === query.pipelineId)
-              .map((stage) => stage.id),
+            stageRows.filter((stage) => stage.pipelineId === query.pipelineId).map((s) => s.id),
           );
       const inStage = new Set(
         dealRows.filter((deal) => stageIds.has(deal.stageId)).map((deal) => deal.contactId),
       );
-      rows = rows.filter((row) => inStage.has(row.id));
+      if (inStage.size === 0) return emptyPage(options);
+      conditions.push(inArray(contacts.id, [...inStage]));
     }
   }
 
+  if (query.customKey && query.customValue) {
+    // `contacts.custom` is a JSON column; MySQL's own JSON_UNQUOTE/JSON_EXTRACT
+    // read the key by name. No tenantDb join helper covers this either, so
+    // it composes straight into the condition list like any other SQL.
+    const path = `$.${query.customKey}`;
+    const extracted = sql`json_unquote(json_extract(${contacts.custom}, ${path}))`;
+    conditions.push(
+      (query.customOp === "contains"
+        ? like(extracted, `%${query.customValue}%`)
+        : eq(extracted, query.customValue)) as SQL,
+    );
+  }
+
+  const where = conditions.length > 0 ? (and(...conditions) as SQL) : undefined;
+
   const sort = options.sort ?? "createdAt";
   const direction = options.direction ?? (sort === "createdAt" ? "desc" : "asc");
-  const sorted = [...rows].sort((a, b) => {
-    const result = compare(a, b, sort);
-    return direction === "asc" ? result : -result;
-  });
+  const sortColumn = SORT_COLUMNS[sort];
+  const orderBy = direction === "asc" ? asc(sortColumn) : desc(sortColumn);
 
   const perPage = options.perPage ?? DEFAULT_PER_PAGE;
-  const total = sorted.length;
-  const pageCount = Math.max(1, Math.ceil(total / perPage));
+  const unbounded = perPage >= Number.MAX_SAFE_INTEGER;
+
+  const total = await tenantDb(ctx).count(contacts, where);
+  // Unbounded (the CSV export's "the whole filtered set") is one page by
+  // definition — no LIMIT is ever sent to MySQL for it (see `.limit()`
+  // below), so a real page count would be meaningless.
+  const pageCount = unbounded ? 1 : Math.max(1, Math.ceil(total / perPage));
   // Clamp rather than 404: a filter change that shrinks the result set below
   // the current page should land on the last page, not an error.
-  const page = Math.min(Math.max(1, options.page ?? 1), pageCount);
-  const start = (page - 1) * perPage;
+  const page = unbounded ? 1 : Math.min(Math.max(1, options.page ?? 1), pageCount);
 
-  return {
-    rows: sorted.slice(start, start + perPage),
-    total,
-    page,
-    pageCount,
-    perPage,
-  };
+  const baseQuery = tenantDb(ctx).select(contacts, where).orderBy(orderBy);
+  const rows = unbounded
+    ? await baseQuery
+    : await baseQuery.limit(perPage).offset((page - 1) * perPage);
+
+  return { rows, total, page, pageCount, perPage };
+}
+
+function emptyPage(options: ContactListOptions) {
+  const perPage = options.perPage ?? DEFAULT_PER_PAGE;
+  return { rows: [] as (typeof contacts.$inferSelect)[], total: 0, page: 1, pageCount: 1, perPage };
 }
 
 /** Distinct non-empty `source` values, for the filter dropdown. */
