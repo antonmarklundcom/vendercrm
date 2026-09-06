@@ -91,6 +91,7 @@ export default async function AppLayout({
       label: t("groups.crm"),
       items: [
         { href: "/contacts", label: t("contacts"), icon: "contacts" },
+        { href: "/companies", label: t("companies"), icon: "companies" },
         { href: "/pipeline", label: t("pipeline"), icon: "pipeline" },
         { href: "/inbox", label: t("inbox"), icon: "inbox" },
         // A surface of its own rather than a tab inside /inbox: the WhatsApp

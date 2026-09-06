@@ -73,6 +73,7 @@
     "nav": {
       "dashboard": "Inicio",
       "contacts": "Contactos",
+      "companies": "Empresas",
       "pipeline": "Pipeline",
       "inbox": "Bandeja",
       "forms": "Formularios",
@@ -357,7 +358,9 @@
         "conversacion": "Conversación",
         "actividad": "Actividad",
         "datos": "Datos",
-        "tareas": "Tareas"
+        "tareas": "Tareas",
+        "contratos": "Contratos",
+        "fusionar": "Fusionar"
       },
       "searchLabel": "Buscar",
       "tag": "Etiqueta",
@@ -477,6 +480,34 @@
         "submissions": "leads recibidos",
         "automationRuns": "automatizaciones ejecutadas"
       },
+      "company": {
+        "title": "Empresa",
+        "none": "Sin empresa",
+        "save": "Guardar"
+      },
+      "merge": {
+        "intro": "Fusioná este contacto con otro que sea la misma persona. Este contacto conserva su identidad, su teléfono y su historial; el otro se elimina al confirmar. No se puede deshacer.",
+        "otherContact": "Fusionar con",
+        "chooseContact": "Elegí el otro contacto",
+        "keepThis": "Este contacto",
+        "keepOther": "El otro",
+        "countsWillMove": "Los negocios, presupuestos, notas de venta, conversaciones, tareas y todo lo demás del otro contacto pasan a este.",
+        "confirm": "Fusionar contactos",
+        "warning": "Esta acción no se puede deshacer.",
+        "adminOnly": "Solo un administrador puede fusionar contactos.",
+        "errors": {
+          "invalid": "No se pudo fusionar. Revisá los datos e intentá de nuevo.",
+          "sameContact": "No podés fusionar un contacto consigo mismo.",
+          "notFound": "No se encontró alguno de los dos contactos."
+        }
+      },
+      "duplicates": {
+        "title": "Posibles duplicados",
+        "empty": "No se encontraron posibles duplicados.",
+        "reasonEmail": "Mismo email",
+        "reasonNameAndPhone": "Mismo nombre y teléfono similar",
+        "review": "Revisar"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "Todos los pipelines",
       "stage": "Etapa",
@@ -502,6 +533,37 @@
       "customFilterEquals": "Es igual a",
       "customFilterContains": "Contiene",
       "customFilterValue": "Valor"
+    },
+    "companies": {
+      "title": "Empresas",
+      "intro": "Las cuentas detrás de tus contactos: RUC, teléfono y notas compartidas, más quiénes trabajan ahí y qué negocios tienen abiertos.",
+      "emptyTitle": "Todavía no hay empresas",
+      "emptyBody": "Cargá una empresa para agrupar los contactos que trabajan ahí y ver sus negocios en un solo lugar.",
+      "createTitle": "Nueva empresa",
+      "editTitle": "Editar empresa",
+      "save": "Guardar",
+      "name": "Nombre",
+      "ruc": "RUC",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "address": "Dirección",
+      "notes": "Notas",
+      "table": {
+        "name": "Nombre",
+        "contacts": "Contactos",
+        "openDeals": "Negocios abiertos"
+      },
+      "contactsTitle": "Contactos",
+      "contactsEmpty": "Todavía no hay contactos en esta empresa",
+      "dealsTitle": "Negocios",
+      "dealsEmpty": "Todavía no hay negocios de esta empresa",
+      "delete": "Eliminar empresa",
+      "deleteConfirm": "¿Eliminar esta empresa? Esta acción no se puede deshacer.",
+      "deleteBlocked": "No se puede eliminar: todavía tiene contactos asociados.",
+      "errors": {
+        "invalid": "Revisá los datos: el nombre es obligatorio.",
+        "nameTaken": "Ya tenés una empresa con ese nombre."
+      }
     },
     "pipeline": {
       "title": "Pipeline",

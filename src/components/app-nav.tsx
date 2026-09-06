@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Building2,
   CalendarDays,
   CalendarClock,
   ChartNoAxesColumn,
@@ -37,6 +38,7 @@ import { Wordmark } from "@/components/wordmark";
 const ICONS = {
   dashboard: LayoutDashboard,
   contacts: Users,
+  companies: Building2,
   pipeline: SquareKanban,
   calendar: CalendarDays,
   inbox: MessagesSquare,

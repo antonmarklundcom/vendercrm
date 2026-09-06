@@ -4,7 +4,10 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { formatDateTime, formatMoney } from "@/lib/i18n/format";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { listTenantUsers } from "@/modules/tenancy/users";
-import { getContact, listTags, listTagsForContact } from "@/modules/crm/contacts";
+import { getContact, listContacts, listTags, listTagsForContact } from "@/modules/crm/contacts";
+import { listCompanies } from "@/modules/crm/companies";
+import { MergeDialog } from "./MergeDialog";
+import { setContactCompanyAction } from "../merge-actions";
 import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
 import { getContactTimeline, type TimelineEntry } from "@/modules/crm/timeline";
 import { listDealsForContact } from "@/modules/crm/deals";
@@ -52,7 +55,7 @@ import { Input, Select, Textarea } from "@/components/ui/form-fields";
 // own data. Tabs are URL state rather than client state so each one is a
 // plain server render — no client bundle for what is fundamentally reading.
 
-const TABS = ["conversacion", "tareas", "actividad", "contratos", "datos"] as const;
+const TABS = ["conversacion", "tareas", "actividad", "contratos", "datos", "fusionar"] as const;
 type Tab = (typeof TABS)[number];
 
 
@@ -72,10 +75,10 @@ export default async function ContactDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; deleteError?: string }>;
+  searchParams: Promise<{ tab?: string; deleteError?: string; otherId?: string }>;
 }) {
   const { id } = await params;
-  const { tab: rawTab, deleteError } = await searchParams;
+  const { tab: rawTab, deleteError, otherId } = await searchParams;
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.contacts");
   const locale = await getLocale();
@@ -108,6 +111,8 @@ export default async function ContactDetailPage({
     deleteBlockers,
     customFields,
     contracts,
+    companies,
+    allContacts,
   ] =
     await Promise.all([
       getContactTimeline(ctx, id),
@@ -128,6 +133,8 @@ export default async function ContactDetailPage({
         : Promise.resolve<ContactBlocker[]>([]),
       listCustomFieldDefinitions(ctx),
       listContractsForContact(ctx, id),
+      listCompanies(ctx),
+      listContacts(ctx),
     ]);
 
   const assignableUsers = users
@@ -223,6 +230,17 @@ export default async function ContactDetailPage({
           {contact.email ? ` · ${contact.email}` : ""}
           {contact.source ? ` · ${contact.source}` : ""}
         </p>
+        {contact.companyId && (
+          <p className="text-sm text-muted-foreground">
+            <Link
+              href={`/companies/${contact.companyId}`}
+              className="underline underline-offset-4"
+            >
+              {companies.find((company) => company.id === contact.companyId)?.name ??
+                t("company.title")}
+            </Link>
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           {contactTags.map((tag) => (
             <form key={tag.id} action={removeTagFromContactAction.bind(null, id, tag.id)}>
@@ -473,6 +491,26 @@ export default async function ContactDetailPage({
             </section>
           )}
 
+          <section>
+            <h2 className="mb-3 text-lg font-semibold">{t("company.title")}</h2>
+            <form
+              action={setContactCompanyAction.bind(null, id)}
+              className="flex max-w-sm gap-2"
+            >
+              <Select name="companyId" className="flex-1" defaultValue={contact.companyId ?? ""}>
+                <option value="">{t("company.none")}</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </Select>
+              <Button type="submit" size="sm" variant="outline">
+                {t("company.save")}
+              </Button>
+            </form>
+          </section>
+
           {availableTags.length > 0 && (
             <section>
               <h2 className="mb-3 text-lg font-semibold">{t("addTag")}</h2>
@@ -577,6 +615,47 @@ export default async function ContactDetailPage({
             </section>
           )}
         </div>
+      )}
+
+      {tab === "fusionar" && ctx.role === "admin" && (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">{t("merge.intro")}</p>
+          <MergeDialog
+            contactId={id}
+            contactLabel={`${contact.name} — ${contact.phone}`}
+            candidates={allContacts.map((candidate) => ({
+              id: candidate.id,
+              label: `${candidate.name} — ${candidate.phone}`,
+            }))}
+            defaultOtherId={otherId}
+            labels={{
+              otherContact: t("merge.otherContact"),
+              chooseContact: t("merge.chooseContact"),
+              fields: {
+                name: t("name"),
+                email: t("email"),
+                notes: t("notes"),
+                source: t("source"),
+                ownerUserId: t("owner"),
+                companyId: t("company.title"),
+              },
+              keepWinner: t("merge.keepThis"),
+              keepOther: t("merge.keepOther"),
+              countsWillMove: t("merge.countsWillMove"),
+              confirm: t("merge.confirm"),
+              warning: t("merge.warning"),
+              errors: {
+                invalid: t("merge.errors.invalid"),
+                sameContact: t("merge.errors.sameContact"),
+                notFound: t("merge.errors.notFound"),
+              },
+            }}
+          />
+        </div>
+      )}
+
+      {tab === "fusionar" && ctx.role !== "admin" && (
+        <p className="text-sm text-muted-foreground">{t("merge.adminOnly")}</p>
       )}
     </div>
   );
