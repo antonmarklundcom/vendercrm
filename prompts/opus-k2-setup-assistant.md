@@ -1,8 +1,7 @@
 # Phase K2 — The AI setup assistant. OPUS session. Lane 1 of wave K (now wave 2 lane 1, first — PLAN.md §17.2).
 
-Restored 2026-09-06 from PR #93 (§17.0 #1). Also read PLAN.md §17.2's
-concurrent-lane rule: branch off latest `main`, rebase before merge, and
-resolve the append-only conflicts it lists by keeping both sides.
+Restored 2026-09-06 from PR #93 (§17.0 #1). Read `prompts/_handoff-w2.md` first: branch off latest `main`, rebase before
+merge, resolve the append-only conflicts it lists by keeping both sides.
 
 Read ONLY: this file, PLAN.md §16.2 (rules), §16.5 (the steps), §16.6,
 `plan-booking.md` §4 and §6.1 (presets are data), `docs/log/k1.md`, then
@@ -46,7 +45,6 @@ Exit: a tenant with an empty memory can go from first login to an applied plan
 `setup_plans` holds preset + outcome; lint/typecheck/test/build green; PR merged.
 
 ## After this phase
-Follow `prompts/_handoff-p.md`. Do **not** spawn K3: it runs inside wave 2's
-lane 2 session (PLAN.md §17.2). If wave 2's lane 1 has begun, spawn the next
-lane 1 prompt named in §17.2 (`prompts/opus-p9-voice-notes.md`) if that file
-exists; otherwise end with the phase report.
+Follow `prompts/_handoff-w2.md`. Do **not** spawn K3: it runs inside wave 2's
+lane 2 session (PLAN.md §17.2). Next in this session:
+`prompts/opus-p9-voice-notes.md`.

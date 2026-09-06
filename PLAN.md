@@ -3167,25 +3167,27 @@ for every handoff. Two lanes, **run concurrently** this time — wave 1's
 "lane 2 waits for lane 1" rule existed because P1/P2 created things every
 later phase called; no lane 2 phase here depends on a lane 1 output except
 the two cases handled by ordering below (P17 → P10's consent column, K3 →
-K2). Lane 1 is Opus, one session per phase, spawned by the previous phase's
-handoff. Lane 2 is Sonnet, **sequential in one session**
+K2). Lane 1 is Opus, one session for all four phases. Lane 2 is Sonnet, **sequential in one session**
 (`prompts/sonnet-wave2-lane2.md`) for the reason §15.8 gave: every phase adds
-keys to the same three `messages/*.json` files and appends to §17.7.
+keys to the same three `messages/*.json` files and appends to §17.7. Lane 1
+is likewise **one Opus session** (`prompts/opus-wave2-lane1.md`) running its
+four phases in order — nothing is spawned in either lane
+(`prompts/_handoff-w2.md`).
 
 | Phase | §15.5 / §16 | Lane | Model | Prompt | Owns | Depends on |
 |---|---|---|---|---|---|---|
 | K2 Setup assistant | §16.5–16.6 | 1 | Opus | `prompts/opus-k2-setup-assistant.md` (restored) | per §16.6: `src/modules/setup/**` (new), `tenancy/verticals.ts` + `verticals-apply.ts` shape extensions, `src/app/(app)/onboarding/**`, superadmin `SetupWithAi*`, setup keys | K1 ✅ |
-| P9 Voice-note transcription | J6b | 1 | Opus | `prompts/opus-p9-voice-notes.md` | `src/lib/ai/**` (`transcribe()` on the driver interface, both drivers, `AI_AUDIO_DRIVER`), `src/modules/ai/transcription.ts` (new), `messages.transcript` + `transcribed_at` (schema/whatsapp.ts, migration), `ai_replies.kind` +`transcription`, the enqueue after `downloadMedia` in `whatsapp/webhook.ts`, `whatsapp/jobs.ts` (one job kind), the audio bubble in `src/app/(app)/inbox/[id]/**`, transcript-as-turn in `modules/ai/reply.ts`, the toggle in the AI settings card, keys | — |
+| P9 Voice-note transcription | J6b | 1 | Opus | `prompts/opus-p9-voice-notes.md` (lane driver: `prompts/opus-wave2-lane1.md`) | `src/lib/ai/**` (`transcribe()` on the driver interface, both drivers, `AI_AUDIO_DRIVER`), `src/modules/ai/transcription.ts` (new), `messages.transcript` + `transcribed_at` (schema/whatsapp.ts, migration), `ai_replies.kind` +`transcription`, the enqueue after `downloadMedia` in `whatsapp/webhook.ts`, `whatsapp/jobs.ts` (one job kind), the audio bubble in `src/app/(app)/inbox/[id]/**`, transcript-as-turn in `modules/ai/reply.ts`, the toggle in the AI settings card, keys | — |
 | P10 Template campaigns | J10 | 1 | Opus | `prompts/opus-p10-campaigns.md` | `src/modules/campaigns/**` (new), `src/db/schema/campaigns.ts` (new), `contacts.wa_marketing_consent_at/_source` (schema/crm.ts additive), `messages.campaign_id`, migration, `src/app/(app)/campaigns/**` (new), `ensureConversation` in `whatsapp/inbox.ts`, `refreshQualityRating` in `whatsapp/health.ts`, `maxCampaignMessagesPerDay` in `tenancy/limits.ts`, superadmin health rows, campaign keys | — (spec: §17.3) |
 | P11 SIFEN S2 — ports, tables, timbrado machine | §9, `PLAN-SIFEN.md` §5 S2 | 1 | Opus | `prompts/opus-p11-sifen-s2.md` | `src/modules/sifen/**`, `src/modules/invoicing/**` (new), `src/db/schema/sifen.ts` (new), `contacts.ruc` (schema/crm.ts additive), migration, `src/app/(app)/invoicing/settings/**` (new: certificate + timbrado admin only, no issuing UI), invoicing keys | — (no fiscal detail; `PLAN-SIFEN.md` §2–§4) |
 | P12 Embedded signup + multi-number inbox | J9 | **owner-started**, the day Meta approval lands | Opus | `prompts/opus-p12-embedded-signup.md` | `whatsapp/accounts.ts`, `whatsapp/embedded.ts` (new), `src/app/api/whatsapp/embedded/**` (new), `src/app/(app)/whatsapp/**`, the six `getPrimaryAccount` callers, `tenants.settings.defaultWaAccountId`, `META_APP_ID`/`META_EMBEDDED_CONFIG_ID` in env, whatsapp keys | Meta approval (§17.1 #2) |
-| P13 Contracts | J5 (contracts half) | 2 | Sonnet | in `sonnet-wave2-lane2.md` | `src/modules/contracts/**` (new), `src/db/schema/contracts.ts` (new), migration, `NumberedDocumentType` +`contrato` (documents/types.ts, numbering.ts prefix `CON`), `src/app/(app)/contracts/**` (new), `src/app/(public)/c/**` (new), "Contratos" tab on `contacts/[id]`, "generar contrato" on deal and quote detail, one listener line in `automations/triggers.ts`, contract keys | P1 ✅ (`contract_accepted` trigger exists) |
-| P14 Weekly AI briefing | J7 | 2 | Sonnet | same session | `src/modules/coach/briefing.ts`, `briefing-jobs.ts`, `narrative.ts` (new), `src/db/schema/coach.ts` (new: `coach_briefings`), migration, `ai_replies.kind` +`weekly_briefing`, `src/app/(app)/dashboard/Briefing*.tsx`, `/dashboard/briefings/[id]`, Hoy-action instrumentation (`coach.hoy_action` audit rows), keys | K1 ✅, P7 ✅, P4 ✅ |
-| P15 Reporting v2 | J11a | 2 | Sonnet | same session | `src/modules/reports/**`, `src/app/(app)/reports/**`, `src/app/api/exports/reports/**` (new), reports keys | — |
-| P16 Companies + contact merge | J11c | 2 | Sonnet | same session | `crm/companies.ts`, `crm/merge.ts`, `crm/duplicates.ts` (new), `companies` table + `contacts.company_id` (schema/crm.ts), migration, `src/app/(app)/companies/**` (new), company picker + merge dialog on `contacts/[id]`, "posibles duplicados" on `/contacts`, keys | — (spec: §17.3) |
-| P17 Forms field editor | J11b | 2 | Sonnet | same session | `src/modules/forms/**`, `src/app/(app)/forms/**`, `src/app/(public)/f/**`, forms keys | P10 merged for the `consent` field type; if not merged when reached, build without it and log the gap |
+| P13 Contracts | J5 (contracts half) | 2 | Sonnet | `prompts/sonnet-p13-contracts.md` (lane driver: `prompts/sonnet-wave2-lane2.md`) | `src/modules/contracts/**` (new), `src/db/schema/contracts.ts` (new), migration, `NumberedDocumentType` +`contrato` (documents/types.ts, numbering.ts prefix `CON`), `src/app/(app)/contracts/**` (new), `src/app/(public)/c/**` (new), "Contratos" tab on `contacts/[id]`, "generar contrato" on deal and quote detail, one listener line in `automations/triggers.ts`, contract keys | P1 ✅ (`contract_accepted` trigger exists) |
+| P14 Weekly AI briefing | J7 | 2 | Sonnet | `prompts/sonnet-p14-briefing.md` | `src/modules/coach/briefing.ts`, `briefing-jobs.ts`, `narrative.ts` (new), `src/db/schema/coach.ts` (new: `coach_briefings`), migration, `ai_replies.kind` +`weekly_briefing`, `src/app/(app)/dashboard/Briefing*.tsx`, `/dashboard/briefings/[id]`, Hoy-action instrumentation (`coach.hoy_action` audit rows), keys | K1 ✅, P7 ✅, P4 ✅ |
+| P15 Reporting v2 | J11a | 2 | Sonnet | `prompts/sonnet-p15-reporting.md` | `src/modules/reports/**`, `src/app/(app)/reports/**`, `src/app/api/exports/reports/**` (new), reports keys | — |
+| P16 Companies + contact merge | J11c | 2 | Sonnet | `prompts/sonnet-p16-companies-merge.md` | `crm/companies.ts`, `crm/merge.ts`, `crm/duplicates.ts` (new), `companies` table + `contacts.company_id` (schema/crm.ts), migration, `src/app/(app)/companies/**` (new), company picker + merge dialog on `contacts/[id]`, "posibles duplicados" on `/contacts`, keys | — (spec: §17.3) |
+| P17 Forms field editor | J11b | 2 | Sonnet | `prompts/sonnet-p17-forms-editor.md` | `src/modules/forms/**`, `src/app/(app)/forms/**`, `src/app/(public)/f/**`, forms keys | P10 merged for the `consent` field type; if not merged when reached, build without it and log the gap |
 | K3 Imports, variables, coach rows | §16.6 | 2 | Sonnet | `prompts/sonnet-k3-memory-imports.md` (restored) | per §16.6 | K2 merged; if not merged when reached, skip and log |
-| P18 Link pass | — | 2 | Sonnet | same session, last | nav (`Contratos`, `Campañas`, `Empresas`, and the `/settings/negocio` entry K1 left for the link pass), the three inert `settings.ai` text fields in the AI card → link to `/settings/negocio` (K1's open item), `docs/HANDOFF.md` Part 4, `docs/SMOKE_TEST.md` §10, `KNOWN-ISSUES.md`, §17.7 | all lane 2 merged; lane 1 as far as merged |
+| P18 Link pass | — | 2 | Sonnet | `prompts/sonnet-p18-link-pass.md`, last | nav (`Contratos`, `Campañas`, `Empresas`, and the `/settings/negocio` entry K1 left for the link pass), the three inert `settings.ai` text fields in the AI card → link to `/settings/negocio` (K1's open item), `docs/HANDOFF.md` Part 4, `docs/SMOKE_TEST.md` §10, `KNOWN-ISSUES.md`, §17.7 | all lane 2 merged; lane 1 as far as merged |
 
 Order inside lane 1: K2 → P9 → P10 → P11. Order inside lane 2: P13 → P14 →
 P15 → P16 → P17 → K3 → P18. P12 is outside both: its prompt is complete now,
@@ -3535,14 +3537,21 @@ Per `phased-autonomous-build`'s rule that Fable appears at most three
 times in a build, each in a session the owner opens:
 
 1. **This session** — the plan (§16 restored, §17, `PLAN-SIFEN.md`).
-2. **Prompt files** — `prompts/opus-p9-voice-notes.md`,
-   `opus-p10-campaigns.md`, `opus-p11-sifen-s2.md`,
-   `opus-p12-embedded-signup.md` and `sonnet-wave2-lane2.md`, written once
-   the owner has reported on §15.7 (a short session: every decision above
-   is already reduced to an env value or a default, so the prompts change
-   by a line or two at most). K2's and K3's prompts already exist. The
-   `prompts/_handoff-p.md` mechanics apply unchanged, with §17.2's
-   concurrent-lane and rebase rules added to each prompt's header.
+2. **Prompt files — ✅ written in the same session**, since §17.1 showed no
+   decision blocks them: `prompts/_handoff-w2.md` (the wave 2 handoff
+   rules), the two lane drivers `opus-wave2-lane1.md` and
+   `sonnet-wave2-lane2.md`, the per-phase files `opus-p9-voice-notes.md`,
+   `opus-p10-campaigns.md`, `opus-p11-sifen-s2.md`, `sonnet-p13-contracts.md`,
+   `sonnet-p14-briefing.md`, `sonnet-p15-reporting.md`,
+   `sonnet-p16-companies-merge.md`, `sonnet-p17-forms-editor.md`,
+   `sonnet-p18-link-pass.md`, and `opus-p12-embedded-signup.md` held for
+   Meta approval. K2's and K3's prompts were restored with §16. **To start
+   wave 2 the owner opens two sessions** — Opus: `Read
+   prompts/opus-wave2-lane1.md in this repo and execute it.` and Sonnet:
+   `Read prompts/sonnet-wave2-lane2.md in this repo and execute it.` — and,
+   the day Meta approves, a third Opus session on
+   `prompts/opus-p12-embedded-signup.md`. No Fable session is needed for any
+   of that.
 3. **Optionally**, the post-wave review after P18, and — separately, not a
    build session — the `PLAN-SIFEN.md` fiscal sections once the Manual
    Técnico is on the owner's machine (that session must run where the
