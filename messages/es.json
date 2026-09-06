@@ -654,6 +654,7 @@
       "emptyTitle": "Todavía no hay formularios",
       "emptyBody": "Creá un formulario y pegá su enlace en tu sitio o en tu perfil: los datos entran directo al CRM, sin planillas de por medio.",
       "publicUrl": "Enlace público",
+      "editFields": "Editar campos",
       "createTitle": "Nuevo formulario",
       "name": "Nombre",
       "slug": "Slug",
@@ -669,7 +670,40 @@
       },
       "turnstileSite": "Anti-bots con las claves de este sitio",
       "turnstileNone": "Sin protección extra",
-      "turnstileSave": "Guardar"
+      "turnstileSave": "Guardar",
+      "editor": {
+        "title": "Campos de {name}",
+        "locked": "Este formulario ya tiene envíos: los campos existentes se pueden editar, pero su clave no se puede cambiar.",
+        "label": "Etiqueta",
+        "type": "Tipo",
+        "required": "Obligatorio",
+        "mapTo": "Guardar en campo personalizado",
+        "mapToNone": "— no guardar —",
+        "options": "Opciones (separadas por coma)",
+        "moveUp": "Subir",
+        "moveDown": "Bajar",
+        "remove": "Quitar",
+        "addField": "Agregar campo",
+        "save": "Guardar campos",
+        "types": {
+          "text": "Texto",
+          "phone": "Teléfono",
+          "email": "Correo electrónico",
+          "select": "Lista desplegable",
+          "textarea": "Texto largo",
+          "checkbox": "Casilla",
+          "date": "Fecha"
+        },
+        "errors": {
+          "invalid": "Revisá los campos: hay datos inválidos.",
+          "duplicate_key": "Dos campos no pueden tener la misma clave. Cambiá alguna etiqueta.",
+          "select_needs_options": "Una lista desplegable necesita al menos una opción.",
+          "map_to_unknown": "Ese campo personalizado no existe.",
+          "phone_required": "El formulario necesita exactamente un campo de teléfono obligatorio.",
+          "key_immutable": "Este formulario ya tiene envíos: no se puede cambiar la clave de un campo existente. Quitalo y agregá uno nuevo si necesitás otro tipo.",
+          "unknown": "No se pudo guardar. Intentá de nuevo."
+        }
+      }
     },
     "users": {
       "title": "Equipo",

@@ -39,3 +39,8 @@ fair game for whichever future phase touches that file next.
 - **The public quote accept/reject form has no CAPTCHA** (P6) — a per-IP
   rate limit (10/min) is the only abuse guard, the same posture the
   pre-existing `/q/[token]` view already had.
+- **A ticked `consent_whatsapp` checkbox on a form does not stamp
+  `contacts.wa_marketing_consent_at`** (P17) — that column doesn't exist on
+  `main` yet (P10, lane 1, not merged when this phase ran). The `checkbox`
+  field type still ships and a tenant can add the field today; wiring the
+  actual consent write is a one-line follow-up once P10 merges.

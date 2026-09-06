@@ -399,6 +399,7 @@
       "emptyTitle": "Inga formulär ännu",
       "emptyBody": "Skapa ett formulär och klistra in länken på din webbplats eller i din profil: uppgifterna går rakt in i CRM:et, utan kalkylblad emellan.",
       "publicUrl": "Publik länk",
+      "editFields": "Redigera fält",
       "createTitle": "Nytt formulär",
       "name": "Namn",
       "slug": "Slug",
@@ -414,7 +415,40 @@
       },
       "turnstileSite": "Botskydd med den här webbplatsens nycklar",
       "turnstileNone": "Inget extra skydd",
-      "turnstileSave": "Spara"
+      "turnstileSave": "Spara",
+      "editor": {
+        "title": "Fält för {name}",
+        "locked": "Detta formulär har redan svar: befintliga fält kan fortfarande redigeras, men deras nyckel kan inte ändras.",
+        "label": "Etikett",
+        "type": "Typ",
+        "required": "Obligatoriskt",
+        "mapTo": "Spara i anpassat fält",
+        "mapToNone": "— spara inte —",
+        "options": "Alternativ (kommaseparerade)",
+        "moveUp": "Flytta upp",
+        "moveDown": "Flytta ner",
+        "remove": "Ta bort",
+        "addField": "Lägg till fält",
+        "save": "Spara fält",
+        "types": {
+          "text": "Text",
+          "phone": "Telefon",
+          "email": "E-post",
+          "select": "Rullista",
+          "textarea": "Lång text",
+          "checkbox": "Kryssruta",
+          "date": "Datum"
+        },
+        "errors": {
+          "invalid": "Kontrollera fälten: viss data är ogiltig.",
+          "duplicate_key": "Två fält kan inte dela samma nyckel. Ändra en av etiketterna.",
+          "select_needs_options": "En rullista behöver minst ett alternativ.",
+          "map_to_unknown": "Det anpassade fältet finns inte.",
+          "phone_required": "Formuläret behöver exakt ett obligatoriskt telefonfält.",
+          "key_immutable": "Detta formulär har redan svar: ett befintligt fälts nyckel kan inte ändras. Ta bort det och lägg till ett nytt om du behöver en annan typ.",
+          "unknown": "Det gick inte att spara. Försök igen."
+        }
+      }
     },
     "users": {
       "title": "Team",

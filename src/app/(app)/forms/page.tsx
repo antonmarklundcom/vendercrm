@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { requireTenantContext } from "@/modules/tenancy/context";
@@ -66,6 +67,9 @@ export default async function FormsPage({
                 <p className="text-muted-foreground">
                   {tenant && `/f/${tenant.slug}/${form.slug}`}
                 </p>
+                <Link href={`/forms/${form.id}`} className="w-fit text-sm underline">
+                  {t("editFields")}
+                </Link>
                 {turnstileSites.length > 0 && (
                   <form
                     action={updateFormTurnstileAction}

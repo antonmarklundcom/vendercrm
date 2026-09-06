@@ -1,19 +1,16 @@
 import { eq } from "drizzle-orm";
-import { forms } from "@/db/schema";
+import { forms, leadSubmissions } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
+import type { FormField } from "./field-definitions";
 
 // Tenant-side form builder CRUD (PLAN.md §4 "forms"). Public submission
-// (unauthenticated) lives in ./submissions.ts.
+// (unauthenticated) lives in ./submissions.ts. Field-list validation (types,
+// `mapTo`, the "phone stays mandatory" rule, key immutability) lives in
+// ./field-definitions.ts — this module only stores whatever it's handed.
 
-export type FormField = {
-  key: string;
-  label: string;
-  type: "text" | "phone" | "email" | "select" | "textarea";
-  required: boolean;
-  options?: string[];
-};
+export type { FormField, FormFieldType } from "./field-definitions";
 
 export type FormSettings = {
   redirectUrl?: string;
@@ -71,4 +68,14 @@ export function listForms(ctx: TenantContext) {
   return tenantDb(ctx)
     .select(forms)
     .then((rows) => rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+}
+
+/** Whether this form has ever received a submission — the editor uses this
+ *  to decide whether a field's `key` is still renamable (see
+ *  `field-definitions.ts`'s `assertKeysNotRenamed`). */
+export async function hasFormSubmissions(ctx: TenantContext, formId: string): Promise<boolean> {
+  const rows = await tenantDb(ctx)
+    .select(leadSubmissions, eq(leadSubmissions.formId, formId))
+    .then((r) => r.slice(0, 1));
+  return rows.length > 0;
 }

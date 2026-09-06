@@ -11,11 +11,11 @@ import type { FormField, FormSettings } from "@/modules/forms/forms";
 // pipeline strangers' submissions land in. Both actions require admin; the
 // page and nav entry are hidden for agents as defense in depth.
 
-// Standard field set (PLAN.md §4 "forms" allows text/phone/email/select/
-// textarea; the tenant-side field-order/type editor is left for a later
-// pass — nombre/teléfono/correo covers the lead-capture case this product
-// is sold on, and submissions.ts already resolves contacts by any "phone"
-// typed field, not a hardcoded key).
+// Standard field set a new form starts with — nombre/teléfono/correo covers
+// the lead-capture case this product is sold on, and submissions.ts already
+// resolves contacts by any "phone" typed field, not a hardcoded key. The
+// tenant can then add/remove/reorder/map fields in the `/forms/[id]` editor
+// (PLAN.md §17.3 "P15/P17" P17 half).
 const STANDARD_FIELDS: FormField[] = [
   { key: "nombre", label: "Nombre", type: "text", required: true },
   { key: "phone", label: "Teléfono", type: "phone", required: true },
