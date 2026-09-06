@@ -99,6 +99,30 @@ export async function setQuoteStatus(ctx: TenantContext, id: string, status: Quo
   return getQuote(ctx, id);
 }
 
+/** A fresh draft with the same lines (PLAN.md §15.5 J12, §15.8 P6) — the
+ *  path off an expired quote rather than reviving the old one, since an
+ *  expired quote's prices and validity are exactly what needed reviewing
+ *  before sending again. */
+export async function duplicateQuote(ctx: TenantContext, id: string) {
+  const source = await getQuote(ctx, id);
+  if (!source) return null;
+  const items = await listQuoteItems(ctx, id);
+
+  return createQuote(ctx, {
+    contactId: source.contactId,
+    dealId: source.dealId ?? undefined,
+    currency: source.currency,
+    discount: source.discount,
+    notes: source.notes ?? undefined,
+    items: items.map((item) => ({
+      productId: item.productId ?? undefined,
+      description: item.description,
+      qty: item.qty,
+      unitPrice: item.unitPrice,
+    })),
+  });
+}
+
 export async function setQuotePdfKey(ctx: TenantContext, id: string, pdfStorageKey: string) {
   await tenantDb(ctx).update(quotes).set({ pdfStorageKey }).where(eq(quotes.id, id));
 }

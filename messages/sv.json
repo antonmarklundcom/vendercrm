@@ -815,7 +815,10 @@
         "unknown": "Vi kunde inte skapa offerten. Försök igen."
       },
       "sendEmail": "Skicka via e-post",
-      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress."
+      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress.",
+      "duplicateExpired": "Duplicera som nytt utkast",
+      "decisionAcceptedBy": "Godkänd av {name}",
+      "decisionRejectedBy": "Avvisad av {name}"
     },
     "documents": {
       "title": "Försäljningsnotor",
@@ -898,7 +901,9 @@
         "unknown": "Vi kunde inte spara. Försök igen."
       },
       "sendEmail": "Skicka via e-post",
-      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress."
+      "sendEmailNoContactEmail": "Kontakten har ingen e-postadress.",
+      "viewReceipt": "Kvitto",
+      "sendReceiptWhatsapp": "Skicka kvitto via WhatsApp"
     },
     "settings": {
       "title": "Inställningar",
@@ -3301,6 +3306,21 @@
         "void": "MAKULERAD"
       },
       "caption": "Försäljningsnota"
+    },
+    "recibo": {
+      "title": "Kvitto",
+      "client": "Mottaget från",
+      "description": "Beskrivning",
+      "total": "Totalt",
+      "againstDocument": "Avser",
+      "disclaimer": "Det här kvittot är inte ett skattedokument.",
+      "method": {
+        "transfer": "Överföring",
+        "cash": "Kontant",
+        "card": "Kort",
+        "check": "Check",
+        "other": "Annat"
+      }
     }
   },
   "public": {
@@ -3318,7 +3338,26 @@
       "discount": "Rabatt",
       "validUntil": "Giltig till:",
       "downloadPdf": "Ladda ner PDF",
-      "footer": "Icke-fiskalt dokument · Elektronisk fakturering kommer snart"
+      "footer": "Icke-fiskalt dokument · Elektronisk fakturering kommer snart",
+      "decisionPrompt": "Vad vill du göra med den här offerten?",
+      "decisionNameLabel": "Ditt namn",
+      "decisionNamePlaceholder": "Fullständigt namn",
+      "decisionCommentLabel": "Kommentar (valfritt)",
+      "decisionCommentPlaceholder": "Något att tillägga...",
+      "decisionAccept": "Acceptera",
+      "decisionReject": "Avvisa",
+      "decisionAcceptedGeneric": "Klart! Vi registrerade ditt godkännande.",
+      "decisionRejectedGeneric": "Klart, vi registrerade ditt svar.",
+      "decisionAccepted": "Godkänd av {name}",
+      "decisionRejected": "Avvisad av {name}",
+      "decisionErrors": {
+        "nameRequired": "Skriv ditt namn innan du fortsätter.",
+        "rateLimited": "För många förfrågningar. Försök igen om en stund.",
+        "alreadyDecided": "Den här offerten har redan besvarats.",
+        "notSent": "Den här offerten har inte skickats än.",
+        "expired": "Den här offerten har gått ut. Be avsändaren om en ny.",
+        "invalid": "Vi kunde inte behandla ditt svar. Försök igen."
+      }
     },
     "document": {
       "title": "Försäljningsnota",
@@ -3411,6 +3450,21 @@
     "unsubscribe": {
       "title": "Klart — du har avanmält dig",
       "body": "{name}, du kommer inte längre få automatiska e-postmeddelanden från det här företaget."
+    },
+    "receipt": {
+      "title": "Kvitto",
+      "client": "Mottaget från",
+      "againstDocument": "Avser",
+      "total": "Totalt mottaget",
+      "downloadPdf": "Ladda ner PDF",
+      "disclaimer": "Det här kvittot är inte ett skattedokument.",
+      "method": {
+        "transfer": "Överföring",
+        "cash": "Kontant",
+        "card": "Kort",
+        "check": "Check",
+        "other": "Annat"
+      }
     }
   }
 }

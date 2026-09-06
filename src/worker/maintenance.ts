@@ -52,6 +52,11 @@ export async function ensureMaintenanceScheduled(): Promise<void> {
   await ensureChainScheduled(REAP_JOB_TYPE);
   await ensureChainScheduled(TASK_REMINDER_JOB_TYPE);
   await ensureChainScheduled(SWEEP_RATE_LIMITS_JOB_TYPE);
+  // modules/quotes/jobs.ts's daily expiry sweep (§15.8 P6) — registered
+  // there (that module owns it), seeded here alongside every other daily
+  // chain so a fresh deploy starts it without a manual trigger.
+  const { QUOTE_EXPIRE_JOB_TYPE } = await import("@/modules/quotes/jobs");
+  await ensureChainScheduled(QUOTE_EXPIRE_JOB_TYPE);
 }
 
 async function ensureChainScheduled(type: string): Promise<void> {

@@ -18,6 +18,8 @@ import {
   sendDocumentAction,
   sendDocumentByEmailAction,
   deletePaymentAction,
+  viewReceiptAction,
+  sendReceiptOverWhatsappAction,
 } from "../actions";
 import { RecordPaymentForm, VoidDocumentForm } from "./DocumentActionForms";
 import { formatMoney } from "@/lib/i18n/format";
@@ -246,15 +248,30 @@ export default async function DocumentDetailPage({
                       <td className="py-2">{payment.reference}</td>
                       <td className="py-2 text-right">{fmt(payment.amount)}</td>
                       <td className="py-2 text-right">
-                        {document.status === "issued" && isAdmin && (
-                          <form action={deletePaymentAction}>
-                            <input type="hidden" name="documentId" value={document.id} />
+                        <div className="flex justify-end gap-2">
+                          <form action={viewReceiptAction}>
                             <input type="hidden" name="paymentId" value={payment.id} />
                             <button type="submit" className="text-xs underline">
-                              {t("deletePayment")}
+                              {t("viewReceipt")}
                             </button>
                           </form>
-                        )}
+                          <form action={sendReceiptOverWhatsappAction}>
+                            <input type="hidden" name="paymentId" value={payment.id} />
+                            <input type="hidden" name="documentId" value={document.id} />
+                            <button type="submit" className="text-xs underline">
+                              {t("sendReceiptWhatsapp")}
+                            </button>
+                          </form>
+                          {document.status === "issued" && isAdmin && (
+                            <form action={deletePaymentAction}>
+                              <input type="hidden" name="documentId" value={document.id} />
+                              <input type="hidden" name="paymentId" value={payment.id} />
+                              <button type="submit" className="text-xs underline">
+                                {t("deletePayment")}
+                              </button>
+                            </form>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

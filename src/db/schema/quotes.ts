@@ -103,6 +103,31 @@ export const quoteItems = mysqlTable(
   ],
 );
 
+// Online accept/reject (PLAN.md §8, §15.5 J4b, §15.8 P6) — one row per
+// decision. A quote can be decided exactly once (enforced in
+// modules/quotes/public.ts, not here): the row is the evidence a rep can
+// point to if a customer disputes having accepted.
+export const quoteAcceptances = mysqlTable(
+  "quote_acceptances",
+  {
+    id: char("id", { length: 26 }).primaryKey(),
+    tenantId: char("tenant_id", { length: 26 }).notNull(),
+    quoteId: char("quote_id", { length: 26 }).notNull(),
+    decision: varchar("decision", { length: 10, enum: ["accepted", "rejected"] }).notNull(),
+    name: varchar("name", { length: 200 }).notNull(),
+    comment: varchar("comment", { length: 1000 }),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: varchar("user_agent", { length: 500 }),
+    createdAt: datetime("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("quote_acceptances_tenant_id_idx").on(table.tenantId),
+    uniqueIndex("quote_acceptances_quote_id_idx").on(table.quoteId),
+  ],
+);
+
 // One counter row per tenant, incremented inside a transaction so two quotes
 // created at the same moment can never take the same number (§8).
 export const quoteSequences = mysqlTable(

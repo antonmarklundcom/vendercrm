@@ -5,6 +5,15 @@
 export const DOCUMENT_TYPES = ["nota_venta"] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
+/**
+ * Numbering-only kinds (§15.8 P6): `document_sequences` is keyed by
+ * (tenant, doc_type) generically, so a receipt takes a number the same way
+ * a nota de venta does without needing a row — or an enum entry — on the
+ * `documents` table itself (it renders straight off `document_payments`).
+ */
+export const NUMBERED_DOCUMENT_TYPES = [...DOCUMENT_TYPES, "recibo"] as const;
+export type NumberedDocumentType = (typeof NUMBERED_DOCUMENT_TYPES)[number];
+
 export type DocumentStatus = "draft" | "issued" | "void";
 
 export const PAYMENT_METHODS = ["transfer", "cash", "card", "check", "other"] as const;

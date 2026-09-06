@@ -4,7 +4,7 @@ import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantTransaction } from "@/modules/tenancy/db";
 import { formatSequenceNumber } from "@/modules/renderable-document/format";
-import type { DocumentType } from "./types";
+import type { NumberedDocumentType } from "./types";
 
 // Per-tenant, per-type sequential numbers (PLAN.md §10 1Q), same discipline
 // as quote numbering (§8): the counter row is locked FOR UPDATE for the
@@ -12,15 +12,18 @@ import type { DocumentType } from "./types";
 // take the same number. The unique index on (tenant_id, number) is the
 // backstop if that ever fails.
 
-const DEFAULT_PREFIX: Record<DocumentType, string> = {
+const DEFAULT_PREFIX: Record<NumberedDocumentType, string> = {
   nota_venta: "NV",
+  // Receipts (§15.8 P6) share this same counter table, keyed by this type
+  // string — they render off `document_payments`, never `documents`.
+  recibo: "REC",
 };
 
 export const formatDocumentNumber = formatSequenceNumber;
 
 export async function nextDocumentNumber(
   ctx: TenantContext,
-  type: DocumentType,
+  type: NumberedDocumentType,
 ): Promise<string> {
   return tenantTransaction(ctx, async (tx) => {
     const [existing] = await tx.selectForUpdate(
