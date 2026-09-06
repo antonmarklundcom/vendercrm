@@ -35,28 +35,43 @@ export default async function PublicFormPage({
           className="absolute -left-[9999px]"
           aria-hidden="true"
         />
-        {fields.map((field) => (
-          <label key={field.key} className="flex flex-col gap-1 text-sm">
-            {field.label}
-            {field.type === "textarea" ? (
-              <Textarea name={field.key} required={field.required} />
-            ) : field.type === "select" ? (
-              <Select name={field.key} required={field.required}>
-                {(field.options ?? []).map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </Select>
-            ) : (
-              <Input
-                name={field.key}
-                required={field.required}
-                type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"}
-              />
-            )}
-          </label>
-        ))}
+        {fields.map((field) =>
+          field.type === "checkbox" ? (
+            <label key={field.key} className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name={field.key} value="1" required={field.required} />
+              {field.label}
+            </label>
+          ) : (
+            <label key={field.key} className="flex flex-col gap-1 text-sm">
+              {field.label}
+              {field.type === "textarea" ? (
+                <Textarea name={field.key} required={field.required} />
+              ) : field.type === "select" ? (
+                <Select name={field.key} required={field.required}>
+                  {(field.options ?? []).map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  name={field.key}
+                  required={field.required}
+                  type={
+                    field.type === "email"
+                      ? "email"
+                      : field.type === "phone"
+                        ? "tel"
+                        : field.type === "date"
+                          ? "date"
+                          : "text"
+                  }
+                />
+              )}
+            </label>
+          ),
+        )}
         {/* Turnstile, only when the form's linked site has it configured
             (PLAN.md §5.2). The site key is public by design — the secret
             never leaves the server. A form without it renders exactly as

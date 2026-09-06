@@ -399,6 +399,7 @@
       "emptyTitle": "No forms yet",
       "emptyBody": "Create a form and paste its link on your site or in your profile: the data goes straight into the CRM, no spreadsheets in between.",
       "publicUrl": "Public link",
+      "editFields": "Edit fields",
       "createTitle": "New form",
       "name": "Name",
       "slug": "Slug",
@@ -414,7 +415,40 @@
       },
       "turnstileSite": "Anti-bot protection using this site's keys",
       "turnstileNone": "No extra protection",
-      "turnstileSave": "Save"
+      "turnstileSave": "Save",
+      "editor": {
+        "title": "Fields for {name}",
+        "locked": "This form already has submissions: existing fields can still be edited, but their key can't change.",
+        "label": "Label",
+        "type": "Type",
+        "required": "Required",
+        "mapTo": "Save into custom field",
+        "mapToNone": "— don't save —",
+        "options": "Options (comma-separated)",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "remove": "Remove",
+        "addField": "Add field",
+        "save": "Save fields",
+        "types": {
+          "text": "Text",
+          "phone": "Phone",
+          "email": "Email",
+          "select": "Dropdown",
+          "textarea": "Long text",
+          "checkbox": "Checkbox",
+          "date": "Date"
+        },
+        "errors": {
+          "invalid": "Check the fields: some data is invalid.",
+          "duplicate_key": "Two fields can't share the same key. Change one of the labels.",
+          "select_needs_options": "A dropdown needs at least one option.",
+          "map_to_unknown": "That custom field doesn't exist.",
+          "phone_required": "The form needs exactly one required phone field.",
+          "key_immutable": "This form already has submissions: an existing field's key can't change. Remove it and add a new one if you need a different type.",
+          "unknown": "Couldn't save. Try again."
+        }
+      }
     },
     "users": {
       "title": "Team",
