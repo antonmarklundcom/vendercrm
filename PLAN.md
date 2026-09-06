@@ -2885,3 +2885,4 @@ One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 - P3 Inbox ergonomics — PR #99 — `docs/log/p3.md`
 - P4 Email identity — PR #100 — `docs/log/p4.md`
 - P5 Pipeline polish + custom fields — PR #101 — `docs/log/p5.md`
+- P6 Quote accept/reject, receipts, quote expiry — PR #102 — `docs/log/p6.md`
