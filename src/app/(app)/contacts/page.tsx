@@ -11,6 +11,7 @@ import {
 } from "@/modules/crm/contact-list";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
+import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/empty-state";
@@ -55,15 +56,17 @@ export default async function ContactsPage({
   const defaultCountry =
     ((tenantRow?.settings ?? {}) as TenantSettings).defaultCountry ?? DEFAULT_COUNTRY;
 
-  const [page, tags, sources, users, openDeals, pipelines, views] = await Promise.all([
-    queryContacts(ctx, query, options),
-    listTags(ctx),
-    listContactSources(ctx),
-    listTenantUsers(ctx),
-    contactsWithOpenDeals(ctx),
-    listPipelines(ctx),
-    listContactViews(ctx),
-  ]);
+  const [page, tags, sources, users, openDeals, pipelines, views, customFields] =
+    await Promise.all([
+      queryContacts(ctx, query, options),
+      listTags(ctx),
+      listContactSources(ctx),
+      listTenantUsers(ctx),
+      contactsWithOpenDeals(ctx),
+      listPipelines(ctx),
+      listContactViews(ctx),
+      listCustomFieldDefinitions(ctx),
+    ]);
 
   // Stages, kept grouped by pipeline: the filter's <optgroup>s need the
   // grouping, and the bulk "add to pipeline" picker needs the same list
@@ -152,6 +155,14 @@ export default async function ContactsPage({
                   <Download className="size-4" aria-hidden="true" />
                   {t("exportCsv")}
                 </a>
+              )}
+              {ctx.role === "admin" && (
+                <Link
+                  href="/contacts/campos"
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                >
+                  {t("manageCustomFields")}
+                </Link>
               )}
             </div>
           }
@@ -279,6 +290,32 @@ export default async function ContactsPage({
               />
               {t("onlyOpenDeal")}
             </label>
+            {customFields.length > 0 && (
+              <>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("customFilterLabel")}
+                  <Select name="customKey" defaultValue={params.customKey ?? ""}>
+                    <option value="">{t("customFilterNone")}</option>
+                    {customFields.map((field) => (
+                      <option key={field.key} value={field.key}>
+                        {field.label}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("customFilterOperator")}
+                  <Select name="customOp" defaultValue={params.customOp ?? "equals"}>
+                    <option value="equals">{t("customFilterEquals")}</option>
+                    <option value="contains">{t("customFilterContains")}</option>
+                  </Select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("customFilterValue")}
+                  <Input name="customValue" defaultValue={params.customValue ?? ""} />
+                </label>
+              </>
+            )}
             {/* Sorting lives in the URL too, so it must survive a filter submit. */}
             {params.sort && <input type="hidden" name="sort" value={params.sort} />}
             {params.dir && <input type="hidden" name="dir" value={params.dir} />}

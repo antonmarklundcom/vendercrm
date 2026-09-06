@@ -29,7 +29,13 @@ const emptyImport: ImportState = { error: null, report: null };
 // One page, two steps: upload, then map. The mapping step re-posts the CSV
 // text it was handed, so a reload or a back button costs the user a file
 // pick and nothing else (PLAN.md §13 H6).
-export function ImportWizard({ tags }: { tags: Array<{ id: string; name: string }> }) {
+export function ImportWizard({
+  tags,
+  customFields,
+}: {
+  tags: Array<{ id: string; name: string }>;
+  customFields: Array<{ key: string; label: string }>;
+}) {
   const t = useTranslations("app.contacts.import");
   const [preview, previewAction, previewPending] = useActionState(
     previewImportAction,
@@ -119,6 +125,19 @@ export function ImportWizard({ tags }: { tags: Array<{ id: string; name: string 
                   name={`map_${field}`}
                   defaultValue={preview.mapping[field] ?? ""}
                 >
+                  <option value="">{t("ignoreColumn")}</option>
+                  {preview.headers.map((header) => (
+                    <option key={header} value={header}>
+                      {header}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+            ))}
+            {customFields.map((field) => (
+              <label key={field.key} className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="w-40">{field.label}</span>
+                <Select name={`map_custom_${field.key}`} defaultValue="">
                   <option value="">{t("ignoreColumn")}</option>
                   {preview.headers.map((header) => (
                     <option key={header} value={header}>

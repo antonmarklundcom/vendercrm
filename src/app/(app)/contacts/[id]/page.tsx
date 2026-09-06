@@ -5,6 +5,7 @@ import { formatDateTime, formatMoney } from "@/lib/i18n/format";
 import { requireTenantContext } from "@/modules/tenancy/context";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { getContact, listTags, listTagsForContact } from "@/modules/crm/contacts";
+import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
 import { getContactTimeline, type TimelineEntry } from "@/modules/crm/timeline";
 import { listDealsForContact } from "@/modules/crm/deals";
 import { listTasksForContact } from "@/modules/crm/tasks";
@@ -35,6 +36,7 @@ import {
   sendContactMessageAction,
   sendContactTemplateAction,
   updateContactAction,
+  updateContactCustomFieldsAction,
 } from "../actions";
 import {
   completeTaskAction,
@@ -102,6 +104,7 @@ export default async function ContactDetailPage({
     appointments,
     users,
     deleteBlockers,
+    customFields,
   ] =
     await Promise.all([
       getContactTimeline(ctx, id),
@@ -120,6 +123,7 @@ export default async function ContactDetailPage({
       ctx.role === "admin"
         ? findContactDeleteBlockers(ctx, id)
         : Promise.resolve<ContactBlocker[]>([]),
+      listCustomFieldDefinitions(ctx),
     ]);
 
   const assignableUsers = users
@@ -467,6 +471,47 @@ export default async function ContactDetailPage({
               }}
             />
           </section>
+
+          {customFields.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-lg font-semibold">{t("customFieldsTitle")}</h2>
+              <form
+                action={updateContactCustomFieldsAction.bind(null, id)}
+                className="flex max-w-sm flex-col gap-3"
+              >
+                {customFields.map((field) => {
+                  const value = ((contact.custom as Record<string, unknown>) ?? {})[field.key];
+                  const name = `custom_${field.key}`;
+                  return (
+                    <label key={field.id} className="flex flex-col gap-1 text-sm">
+                      {field.label}
+                      {field.type === "select" ? (
+                        <Select name={name} defaultValue={value ? String(value) : ""}>
+                          <option value="" />
+                          {((field.options as string[] | null) ?? []).map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </Select>
+                      ) : (
+                        <Input
+                          name={name}
+                          type={
+                            field.type === "number" ? "number" : field.type === "date" ? "date" : "text"
+                          }
+                          defaultValue={value ? String(value) : ""}
+                        />
+                      )}
+                    </label>
+                  );
+                })}
+                <Button type="submit" size="sm" variant="outline" className="w-fit">
+                  {t("customFieldsSave")}
+                </Button>
+              </form>
+            </section>
+          )}
 
           {/* Deletion is for a record created by mistake, so it is offered
               only while the contact has no history and only to an admin

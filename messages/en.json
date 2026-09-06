@@ -289,7 +289,9 @@
       "moveFailed": "We couldn't move the deal. Its previous stage was restored.",
       "showClosed": "Show {count} closed",
       "hideClosed": "Hide closed",
-      "editStages": "Edit stages"
+      "editStages": "Edit stages",
+      "daysInStage": "{count} days in this stage",
+      "stale": "Stale"
     },
     "calendar": {
       "title": "Calendar",
@@ -639,7 +641,16 @@
           "unknown": "The view couldn't be saved"
         }
       },
-      "timelineConversationNote": "Internal note"
+      "timelineConversationNote": "Internal note",
+      "customFieldsTitle": "Custom fields",
+      "customFieldsSave": "Save fields",
+      "manageCustomFields": "Manage custom fields",
+      "customFilterLabel": "Custom field",
+      "customFilterNone": "None",
+      "customFilterOperator": "Condition",
+      "customFilterEquals": "Equals",
+      "customFilterContains": "Contains",
+      "customFilterValue": "Value"
     },
     "inbox": {
       "title": "Inbox",
@@ -1446,7 +1457,9 @@
         "quotes": "quotes",
         "documents": "sales notes",
         "submissions": "captured leads"
-      }
+      },
+      "expectedCloseAt": "Expected close",
+      "save": "Save"
     },
     "stages": {
       "title": "Stages",
@@ -1470,7 +1483,8 @@
         "notEmpty": "Can't delete: the stage still holds deals. Move them first.",
         "lastStage": "Can't delete a pipeline's only stage.",
         "notFound": "We couldn't find the stage."
-      }
+      },
+      "staleAfterDays": "Stale after (days)"
     },
     "business": {
       "switcherTitle": "Business",
@@ -1842,6 +1856,28 @@
       "assignedBody": "You are now handling {contact}.",
       "taskDueTitle": "Your day",
       "taskDueBody": "{tasks, plural, =0 {No tasks} one {# task} other {# tasks}} · {appointments, plural, =0 {no appointments} one {# appointment} other {# appointments}}"
+    },
+    "customFields": {
+      "title": "Custom fields",
+      "intro": "Your own data on every contact — the type and key can't change once a field is created.",
+      "backToContacts": "Back to contacts",
+      "labelLabel": "Label",
+      "typeLabel": "Type",
+      "typeValues": {
+        "text": "Text",
+        "number": "Number",
+        "date": "Date",
+        "select": "Select",
+        "phone": "Phone"
+      },
+      "optionsLabel": "Options (comma-separated, select type only)",
+      "requiredLabel": "Required",
+      "showOnCardLabel": "Show on the pipeline card",
+      "create": "Create field",
+      "delete": "Delete",
+      "keyTaken": "A field with that key already exists.",
+      "adminOnly": "This section is admin-only.",
+      "empty": "No custom fields yet."
     }
   },
   "superadmin": {

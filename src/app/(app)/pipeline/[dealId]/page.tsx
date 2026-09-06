@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { formatDateTime, formatMoney } from "@/lib/i18n/format";
 import { CloseDealForms, type CloseLabels } from "./CloseDealForms";
-import { assignDealAction, reopenDealAction } from "./actions";
+import { assignDealAction, reopenDealAction, updateExpectedCloseAtAction } from "./actions";
 import { deleteDealAction } from "../actions";
 import { findDealDeleteBlockers, type DealBlocker } from "@/modules/crm/deletion";
-import { Select } from "@/components/ui/form-fields";
+import { Select, Input } from "@/components/ui/form-fields";
 
 // Deal detail (PLAN.md §13 H8). Everything about one opportunity in one
 // place: what it's worth, who owns it, how it got to this stage, and what is
@@ -134,6 +134,27 @@ export default async function DealPage({
           label={t("stageSince")}
           value={formatDateTime(deal.stageEnteredAt, locale)}
         />
+        {!closed && (
+          <Fact
+            label={t("expectedCloseAt")}
+            value={
+              <form action={updateExpectedCloseAtAction} className="flex gap-1">
+                <input type="hidden" name="dealId" value={deal.id} />
+                <Input
+                  type="date"
+                  name="expectedCloseAt"
+                  defaultValue={
+                    deal.expectedCloseAt ? deal.expectedCloseAt.toISOString().slice(0, 10) : ""
+                  }
+                  className="h-7 px-2 text-sm"
+                />
+                <Button type="submit" size="sm" variant="ghost">
+                  {t("save")}
+                </Button>
+              </form>
+            }
+          />
+        )}
         {contact?.phone ? (
           // The rep's next move on a deal in Paraguay is a WhatsApp message,
           // so the number is a link rather than something to copy out
@@ -156,7 +177,13 @@ export default async function DealPage({
         <section className="flex flex-col gap-3">
           <p className="rounded-md border bg-muted px-3 py-2 text-sm">
             {stage?.isWon ? t("closedWon") : t("closedLost")}
-            {deal.closeReason ? ` · ${deal.closeReason}` : ""}
+            {stage?.isLost
+              ? deal.lostReason
+                ? ` · ${deal.lostReason}`
+                : ""
+              : deal.closeReason
+                ? ` · ${deal.closeReason}`
+                : ""}
             {deal.closedAt ? ` · ${formatDateTime(deal.closedAt, locale)}` : ""}
           </p>
 

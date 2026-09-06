@@ -6,6 +6,7 @@ import { requireTenantContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import { DEFAULT_COUNTRY } from "@/lib/phone";
+import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
 import {
   IMPORTABLE_FIELDS,
   guessMapping,
@@ -106,6 +107,15 @@ export async function runImportAction(
   }
   if (!mapping.phone) return { error: "phoneUnmapped", report: null };
   if (!mapping.name) return { error: "nameUnmapped", report: null };
+
+  const customDefinitions = await listCustomFieldDefinitions(ctx);
+  if (customDefinitions.length > 0) {
+    mapping.custom = {};
+    for (const definition of customDefinitions) {
+      const header = String(formData.get(`map_custom_${definition.key}`) ?? "").trim();
+      if (header) mapping.custom[definition.key] = header;
+    }
+  }
 
   const { rows } = parseCsv(parsed.data.csv);
   if (rows.length === 0) return { error: "empty", report: null };

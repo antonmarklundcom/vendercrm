@@ -24,6 +24,10 @@ export type ContactSearchParams = {
   page?: string;
   /** Comma-separated contact ids — "export selection" from the bulk bar. */
   ids?: string;
+  /** `custom.<key> equals|contains <value>` (§15.8 P5). */
+  customKey?: string;
+  customOp?: string;
+  customValue?: string;
 };
 
 function parseDate(value: string | undefined): Date | undefined {
@@ -48,6 +52,9 @@ export function parseContactQuery(params: ContactSearchParams): ContactQuery {
     createdFrom: parseDate(params.from),
     createdTo,
     ids: params.ids ? params.ids.split(",").filter(Boolean) : undefined,
+    customKey: params.customKey || undefined,
+    customOp: params.customOp === "contains" ? "contains" : "equals",
+    customValue: params.customValue || undefined,
   };
 }
 
@@ -75,7 +82,8 @@ export function hasActiveFilters(params: ContactSearchParams): boolean {
       params.stageId ||
       params.openDeal === "1" ||
       params.from ||
-      params.to,
+      params.to ||
+      (params.customKey && params.customValue),
   );
 }
 
@@ -112,6 +120,9 @@ const VIEW_KEYS = [
   "to",
   "sort",
   "dir",
+  "customKey",
+  "customOp",
+  "customValue",
 ] as const satisfies readonly (keyof ContactSearchParams)[];
 
 /**
