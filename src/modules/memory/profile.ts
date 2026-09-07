@@ -91,10 +91,21 @@ export async function upsertProfile(
   return getProfile(ctx);
 }
 
-/** The vertical the setup assistant applied. Bookkeeping only (K2 writes it). */
+/**
+ * The vertical the setup assistant applied. Bookkeeping only (K2 writes it) —
+ * creates the profile row if the tenant doesn't have one yet, rather than
+ * silently no-op'ing: a plan can be generated and applied with an empty
+ * conversation (every topic skipped, or the manual picker), and "which
+ * vertical did they pick" should still be recorded either way.
+ */
 export async function setProfileVertical(ctx: TenantContext, verticalSlug: string) {
   const existing = await getProfile(ctx);
-  if (!existing) return null;
+  if (!existing) {
+    await tenantDb(ctx)
+      .insert(businessProfiles)
+      .values({ id: newId(), verticalSlug, updatedAt: new Date() });
+    return getProfile(ctx);
+  }
   await tenantDb(ctx)
     .update(businessProfiles)
     .set({ verticalSlug, updatedAt: new Date() })
