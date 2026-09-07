@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 # PDFs — customer names, phone numbers, amounts — land here in dev. This is
 # tenant data, not source, and must never be committed.
 .storage/
+
+# Claude Code agent worktree scratch space — transient, never source.
+.claude/worktrees/
