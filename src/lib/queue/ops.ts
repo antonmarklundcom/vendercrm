@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, lt, lte, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { jobs } from "@/db/schema";
 
@@ -88,4 +88,57 @@ export async function requeueJob(jobId: string): Promise<boolean> {
     .where(and(eq(jobs.id, jobId), inArray(jobs.status, ["dead", "failed", "running"])));
 
   return ((result as unknown as { affectedRows?: number }).affectedRows ?? 0) > 0;
+}
+
+// --- Queue health (silent-backlog guard) --------------------------------
+//
+// The in-process worker (worker/index.ts) ticks itself every ~2s with
+// nothing external watching it: if that loop dies (an uncaught throw
+// outside processJob's try/catch, the process wedging, ...) the `jobs`
+// table just keeps growing pending rows and nothing notices short of a
+// customer complaint. This is the read side of that gap — how stale the
+// oldest still-pending job is — behind /api/health/queue.
+
+/** Oldest pending job untouched this long is worth paging someone about.
+ * Comfortably above normal tick cadence and even a slow burst of retries,
+ * but well under "a customer would have noticed by now". Exported so the
+ * threshold is visible/adjustable from one place. */
+export const QUEUE_STALE_AFTER_MS = 10 * 60 * 1000;
+
+export type QueueHealth = {
+  healthy: boolean;
+  pendingCount: number;
+  oldestPendingAgeSeconds: number | null;
+  staleAfterSeconds: number;
+};
+
+/**
+ * Reports queue backlog health: how many jobs are waiting, and the age of
+ * the longest-waiting one. `oldestPendingAgeSeconds` is null when the queue
+ * is empty (nothing pending, trivially healthy) — a bare zero would be
+ * indistinguishable from "a job that just landed".
+ */
+export async function checkQueueHealth(now: Date = new Date()): Promise<QueueHealth> {
+  const [{ pendingCount }] = await db
+    .select({ pendingCount: count() })
+    .from(jobs)
+    .where(eq(jobs.status, "pending"));
+
+  const [oldest] = await db
+    .select({ runAt: jobs.runAt })
+    .from(jobs)
+    .where(and(eq(jobs.status, "pending"), lte(jobs.runAt, now)))
+    .orderBy(asc(jobs.runAt))
+    .limit(1);
+
+  const oldestPendingAgeSeconds = oldest
+    ? Math.max(0, Math.floor((now.getTime() - oldest.runAt.getTime()) / 1000))
+    : null;
+
+  return {
+    healthy: oldestPendingAgeSeconds === null || oldestPendingAgeSeconds * 1000 < QUEUE_STALE_AFTER_MS,
+    pendingCount,
+    oldestPendingAgeSeconds,
+    staleAfterSeconds: QUEUE_STALE_AFTER_MS / 1000,
+  };
 }
