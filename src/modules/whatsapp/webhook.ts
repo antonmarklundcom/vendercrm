@@ -15,6 +15,7 @@ import { whatsappEvents } from "./events";
 import { inboundMessageTime, latest } from "./inbound-time";
 import { advanceNotificationForMessage } from "@/modules/booking/notifications";
 import { advancesMessageStatus, type MessageStatus } from "./message-status";
+import { reportError } from "@/lib/observability";
 
 // Webhook ingestion (PLAN.md §6.3, reliability-critical). The route handler
 // (app/api/webhooks/whatsapp/route.ts) does only steps 1-2 — verify
@@ -237,8 +238,17 @@ async function ingestInboundMessage(
 
   const mediaRef = message.image ?? message.document ?? message.audio ?? message.video;
   let storageKey: string | undefined;
-  if (mediaRef) {
-    storageKey = await downloadMedia(account, mediaRef.id).catch(() => undefined);
+  if (mediaRef && (messageType === "image" || messageType === "document" || messageType === "audio" || messageType === "video")) {
+    storageKey = await downloadMedia(account, mediaRef.id, messageType).catch((error) => {
+      // Inbound webhooks must stay resilient (§6.3): a rejected/oversized/
+      // disallowed-type attachment should never take the handler down or
+      // lose the message it arrived on — it just arrives with no media.
+      reportError(error, {
+        tags: { scope: "whatsapp.inbound_media", tenantId: ctx.tenantId, mediaType: messageType },
+        extra: { mediaId: mediaRef.id },
+      });
+      return undefined;
+    });
   }
 
   const messageId = newId();
@@ -283,10 +293,68 @@ async function ingestInboundMessage(
   }
 }
 
+export type InboundMediaType = "image" | "document" | "audio" | "video";
+
+/**
+ * Meta's documented per-type caps for media *sent to* a WhatsApp user
+ * (Cloud API "Supported Media Types"). We apply the same caps to *inbound*
+ * media, since Meta itself never delivers anything larger — anything past
+ * this is either a misbehaving/compromised sender or a corrupted transfer,
+ * and either way we don't want it in storage.
+ */
+export const WHATSAPP_MEDIA_LIMITS: Record<
+  InboundMediaType,
+  { maxBytes: number; mimeTypes: readonly string[] }
+> = {
+  image: {
+    maxBytes: 5 * 1024 * 1024,
+    mimeTypes: ["image/jpeg", "image/png"],
+  },
+  audio: {
+    maxBytes: 16 * 1024 * 1024,
+    mimeTypes: ["audio/aac", "audio/amr", "audio/mpeg", "audio/mp4", "audio/ogg"],
+  },
+  video: {
+    maxBytes: 16 * 1024 * 1024,
+    mimeTypes: ["video/mp4", "video/3gpp"],
+  },
+  document: {
+    maxBytes: 100 * 1024 * 1024,
+    mimeTypes: [
+      "text/plain",
+      "application/pdf",
+      "application/vnd.ms-powerpoint",
+      "application/msword",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+  },
+};
+
+/** Pure so it's cheap to unit-test without touching fetch/storage. */
+export function validateInboundMedia(
+  type: InboundMediaType,
+  mimeType: string | undefined,
+  sizeBytes: number,
+): { ok: true } | { ok: false; reason: string } {
+  const limit = WHATSAPP_MEDIA_LIMITS[type];
+
+  if (!mimeType || !limit.mimeTypes.includes(mimeType)) {
+    return { ok: false, reason: `Disallowed MIME type for ${type}: ${mimeType ?? "(missing)"}` };
+  }
+  if (sizeBytes > limit.maxBytes) {
+    return { ok: false, reason: `${type} of ${sizeBytes} bytes exceeds ${limit.maxBytes} byte cap` };
+  }
+  return { ok: true };
+}
+
 /** Media URLs Meta returns expire quickly — fetch immediately (§6.3 rule 3). */
-async function downloadMedia(
+export async function downloadMedia(
   account: NonNullable<Awaited<ReturnType<typeof resolveAccountByPhoneNumberId>>>,
   mediaId: string,
+  type: InboundMediaType,
 ): Promise<string> {
   const token = getDecryptedAccessToken(account);
 
@@ -295,7 +363,13 @@ async function downloadMedia(
     signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
   });
   if (!metaRes.ok) throw new Error(`Media metadata fetch failed: ${metaRes.status}`);
-  const meta = (await metaRes.json()) as { url: string; mime_type?: string };
+  const meta = (await metaRes.json()) as { url: string; mime_type?: string; file_size?: number };
+
+  // Meta's own metadata reports the size before we pull the bytes — reject
+  // up front rather than downloading a body we're going to throw away.
+  const declaredSize = typeof meta.file_size === "number" ? meta.file_size : 0;
+  const declaredCheck = validateInboundMedia(type, meta.mime_type, declaredSize);
+  if (!declaredCheck.ok) throw new Error(declaredCheck.reason);
 
   const fileRes = await fetch(meta.url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -303,6 +377,11 @@ async function downloadMedia(
   });
   if (!fileRes.ok) throw new Error(`Media download failed: ${fileRes.status}`);
   const buffer = Buffer.from(await fileRes.arrayBuffer());
+
+  // Defense in depth: `file_size` can be absent, and content can't be
+  // trusted to match what the metadata call claimed.
+  const finalCheck = validateInboundMedia(type, meta.mime_type, buffer.byteLength);
+  if (!finalCheck.ok) throw new Error(finalCheck.reason);
 
   const key = `whatsapp-media/${account.tenantId}/${mediaId}`;
   await storage.put(key, buffer, meta.mime_type);
