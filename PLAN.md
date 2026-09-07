@@ -3094,7 +3094,7 @@ longer spawns K3 itself — wave 2's lane 2 session runs it, §17.2.)*
 One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 
 - K1 Business memory — PRs #94, #95 — `docs/log/k1.md`
-- K2 Setup assistant — PR (pending) — `docs/log/k2.md`
+- K2 Setup assistant — PR #121 — `docs/log/k2.md`
 
 ---
 
