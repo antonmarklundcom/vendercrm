@@ -6,12 +6,15 @@ import { webhookEvents, messages as messagesTable, conversations } from "@/db/sc
 import { newId } from "@/lib/ids";
 import { env } from "@/lib/config/env";
 import { storage } from "@/lib/storage";
+import { enqueue } from "@/lib/queue";
+import { isAiConfigured } from "@/lib/ai";
 import { buildSystemTenantContext, type TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { createContact, getContactByPhone } from "@/modules/crm/contacts";
 import { resolveAccountByPhoneNumberId, getDecryptedAccessToken } from "./accounts";
 import { GRAPH_API_BASE, GRAPH_TIMEOUT_MS, MEDIA_DOWNLOAD_TIMEOUT_MS } from "./graph";
 import { whatsappEvents } from "./events";
+import { TRANSCRIBE_JOB_TYPE } from "./transcription";
 import { inboundMessageTime, latest } from "./inbound-time";
 import { advanceNotificationForMessage } from "@/modules/booking/notifications";
 import { advancesMessageStatus, type MessageStatus } from "./message-status";
@@ -238,8 +241,9 @@ async function ingestInboundMessage(
 
   const mediaRef = message.image ?? message.document ?? message.audio ?? message.video;
   let storageKey: string | undefined;
+  let mediaMimeType: string | undefined = mediaRef?.mime_type;
   if (mediaRef && (messageType === "image" || messageType === "document" || messageType === "audio" || messageType === "video")) {
-    storageKey = await downloadMedia(account, mediaRef.id, messageType).catch((error) => {
+    const stored = await downloadMedia(account, mediaRef.id, messageType).catch((error) => {
       // Inbound webhooks must stay resilient (§6.3): a rejected/oversized/
       // disallowed-type attachment should never take the handler down or
       // lose the message it arrived on — it just arrives with no media.
@@ -249,7 +253,16 @@ async function ingestInboundMessage(
       });
       return undefined;
     });
+    storageKey = stored?.key;
+    // Meta's own answer wins over the webhook's: the webhook omits the mime
+    // type on some payloads, and the transcription call cannot ask later.
+    mediaMimeType = stored?.mimeType ?? mediaMimeType;
   }
+
+  // A voice note is transcribed rather than left as an unreadable bubble
+  // (§15.3 Lane A). Only when a driver is configured — with AI_DRIVER=none
+  // the column stays null and the inbox looks exactly as it did before.
+  const transcribes = messageType === "audio" && !!storageKey && isAiConfigured();
 
   const messageId = newId();
   await tenantDb(ctx)
@@ -265,17 +278,28 @@ async function ingestInboundMessage(
       body: message.text?.body ?? reply?.title ?? undefined,
       mediaId: mediaRef?.id,
       storageKey,
+      mediaMimeType,
+      transcriptStatus: transcribes ? "pending" : undefined,
       status: "delivered",
       // Stamped from Meta's timestamp too, so a thread read after a backlog
       // shows when the customer wrote, not when the queue caught up.
       createdAt: sentAt,
     });
 
+  if (transcribes) {
+    await enqueue(
+      TRANSCRIBE_JOB_TYPE,
+      { messageId, conversationId: conversation.id, contactId: contact.id },
+      { tenantId: ctx.tenantId },
+    );
+  }
+
   await whatsappEvents.emit("wa.message_received", {
     tenantId: ctx.tenantId,
     conversationId: conversation.id,
     contactId: contact.id,
     messageId,
+    transcriptPending: transcribes,
   });
 
   // A tapped slot is a booking (plan-booking.md §5.3). Handled after the
@@ -350,12 +374,14 @@ export function validateInboundMedia(
   return { ok: true };
 }
 
-/** Media URLs Meta returns expire quickly — fetch immediately (§6.3 rule 3). */
+/** Media URLs Meta returns expire quickly — fetch immediately (§6.3 rule 3).
+ *  The mime type comes back with the key because it is not recoverable
+ *  afterwards: storage stores bytes, and the media URL is gone. */
 export async function downloadMedia(
   account: NonNullable<Awaited<ReturnType<typeof resolveAccountByPhoneNumberId>>>,
   mediaId: string,
   type: InboundMediaType,
-): Promise<string> {
+): Promise<{ key: string; mimeType?: string }> {
   const token = getDecryptedAccessToken(account);
 
   const metaRes = await fetch(`${GRAPH_API_BASE}/${mediaId}`, {
@@ -385,5 +411,5 @@ export async function downloadMedia(
 
   const key = `whatsapp-media/${account.tenantId}/${mediaId}`;
   await storage.put(key, buffer, meta.mime_type);
-  return key;
+  return { key, mimeType: meta.mime_type };
 }

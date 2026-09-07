@@ -5,6 +5,7 @@ import {
   listMessagesForConversation,
   markConversationRead,
   isWithinFreeFormWindow,
+  toThreadMessages,
 } from "@/modules/whatsapp/inbox";
 import { listNotesForConversation } from "@/modules/whatsapp/notes";
 import { listQuickReplies } from "@/modules/whatsapp/quick-replies";
@@ -64,13 +65,7 @@ export default async function ConversationPage({
       aiDisabledAt: conversation.aiDisabledAt ? conversation.aiDisabledAt.toISOString() : null,
       assignedUserId: conversation.assignedUserId,
     },
-    messages: messages.map((m) => ({
-      id: m.id,
-      direction: m.direction as "in" | "out",
-      body: m.body,
-      status: m.status,
-      createdAt: m.createdAt.toISOString(),
-    })),
+    messages: await toThreadMessages(messages),
     notes: notes.map((n) => ({
       id: n.id,
       body: n.body,

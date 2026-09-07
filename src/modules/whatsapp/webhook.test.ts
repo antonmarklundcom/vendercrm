@@ -160,8 +160,8 @@ describe.skipIf(!hasDb)("downloadMedia", () => {
     );
 
     const { downloadMedia } = await import("./webhook");
-    const key = await downloadMedia(account as never, "media-id-3", "image");
-    expect(key).toBe("whatsapp-media/tenant-1/media-id-3");
+    const result = await downloadMedia(account as never, "media-id-3", "image");
+    expect(result).toEqual({ key: "whatsapp-media/tenant-1/media-id-3", mimeType: "image/jpeg" });
     expect(put).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledWith(
       "whatsapp-media/tenant-1/media-id-3",

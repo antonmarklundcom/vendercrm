@@ -116,6 +116,14 @@ export type TenantSettings = {
    * own login email when unset, so the reply-to is never blank.
    */
   contactEmail?: string;
+  /**
+   * The owner's own WhatsApp number — their personal phone, not the
+   * business's WABA number (PLAN.md §15.3 "Voice, Lane A", second half).
+   * A voice note from this number asking what is pending gets the "Hoy"
+   * list back instead of being treated as a customer message. Unset means
+   * the coach half is simply off; nothing else changes.
+   */
+  coachPhone?: string;
 };
 
 export async function updateTenantBranding(ctx: TenantContext, branding: TenantBranding) {
@@ -140,6 +148,10 @@ export async function updateTenantReviewLink(ctx: TenantContext, reviewLink: str
 
 export async function updateTenantContactEmail(ctx: TenantContext, contactEmail: string) {
   return mergeTenantSettings(ctx, { contactEmail });
+}
+
+export async function updateTenantCoachPhone(ctx: TenantContext, coachPhone: string) {
+  return mergeTenantSettings(ctx, { coachPhone });
 }
 
 export async function updateTenantTimezone(ctx: TenantContext, timezone: string) {
