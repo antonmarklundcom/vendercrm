@@ -1,4 +1,4 @@
-import { and, count as countRows, eq, type SQL } from "drizzle-orm";
+import { and, count as countRows, eq, sum, type SQL } from "drizzle-orm";
 import type { AnyMySqlColumn, MySqlTable } from "drizzle-orm/mysql-core";
 import { db } from "@/db/client";
 import type { TenantContext } from "./context";
@@ -65,6 +65,25 @@ function scopedBuilder(ctx: TenantContext, executor: Executor) {
         .from(table)
         .where(tenantFilter(table, ctx.tenantId, extra));
       return row?.value ?? 0;
+    },
+
+    /**
+     * SELECT SUM(column) FROM table WHERE tenant_id = ctx.tenantId [AND extra]
+     *
+     * Same rationale as `count` — sums an integer column in SQL instead of
+     * fetching every row to reduce it in Node. Returns 0 for no matching
+     * rows (SQL SUM of an empty set is NULL).
+     */
+    async sum<T extends TenantScopedTable>(
+      table: T,
+      column: AnyMySqlColumn,
+      extra?: SQL,
+    ): Promise<number> {
+      const [row] = await executor
+        .select({ value: sum(column) })
+        .from(table)
+        .where(tenantFilter(table, ctx.tenantId, extra));
+      return Number(row?.value ?? 0);
     },
 
     /** SELECT ... FOR UPDATE — row lock, only meaningful inside a transaction. */

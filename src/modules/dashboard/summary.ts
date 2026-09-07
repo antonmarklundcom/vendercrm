@@ -1,3 +1,4 @@
+import { gt } from "drizzle-orm";
 import {
   activities,
   contacts,
@@ -22,11 +23,15 @@ import { DEFAULT_TIMEZONE } from "@/lib/i18n/format";
 // plus the onboarding checklist state a brand-new tenant lands on.
 //
 // Everything goes through tenantDb — the scoped access layer is the only
-// sanctioned path to tenant rows (§3.3, layer 2). Aggregation happens in
-// memory rather than in SQL because tenantDb exposes no COUNT/SUM helper and
-// widening it is a change to the isolation wall; the same tradeoff
-// modules/leads/stats.ts already makes, at the same (per-tenant, not
-// platform-wide) row counts.
+// sanctioned path to tenant rows (§3.3, layer 2). Most counters still
+// aggregate in memory because the rows are needed anyway (contact names,
+// recent-activity ordering, the checklist flags) — fetching them once and
+// deriving several numbers from the same rows costs nothing extra. The one
+// counter that doesn't need its rows at all — unread messages/conversations,
+// which used to `db.select(conversations)` and reduce over every row just to
+// sum/count a column — now goes through tenantDb's `count`/`sum` (§14
+// perf pass): the rows would otherwise be discarded, so pushing the
+// aggregation into SQL turns "N rows" into two scalars.
 
 const RECENT_ACTIVITY_LIMIT = 8;
 
@@ -117,7 +122,8 @@ export async function getDashboardSummary(
   const [
     dealRows,
     stageRows,
-    conversationRows,
+    unreadMessages,
+    unreadConversations,
     quoteRows,
     contactRows,
     activityRows,
@@ -130,7 +136,8 @@ export async function getDashboardSummary(
   ] = await Promise.all([
     db.select(deals),
     db.select(stages),
-    db.select(conversations),
+    db.sum(conversations, conversations.unreadCount),
+    db.count(conversations, gt(conversations.unreadCount, 0)),
     db.select(quotes),
     db.select(contacts),
     db.select(activities),
@@ -175,13 +182,8 @@ export async function getDashboardSummary(
       openDealsValuePyg: openDeals
         .filter((deal) => deal.currency === "PYG")
         .reduce((sum, deal) => sum + deal.value, 0),
-      unreadMessages: conversationRows.reduce(
-        (sum, conversation) => sum + conversation.unreadCount,
-        0,
-      ),
-      unreadConversations: conversationRows.filter(
-        (conversation) => conversation.unreadCount > 0,
-      ).length,
+      unreadMessages,
+      unreadConversations,
       pendingQuotes: quoteRows.filter((quote) => PENDING_QUOTE_STATUSES.has(quote.status))
         .length,
       contacts: contactRows.length,
