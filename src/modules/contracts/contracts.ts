@@ -10,6 +10,7 @@ import { writeAuditLog } from "@/modules/tenancy/audit";
 import { getContact } from "@/modules/crm/contacts";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { listCustomFieldDefinitions } from "@/modules/crm/custom-fields";
+import { getNegocioVars } from "@/modules/memory/vars";
 import { createActivity } from "@/modules/crm/activities";
 import { checkRateLimit } from "@/lib/rate-limit";
 import type { TenantSettings } from "@/modules/tenancy/settings";
@@ -125,6 +126,7 @@ export async function createContract(
   const contact = await getContact(ctx, input.contactId);
   if (!contact) throw new Error(`contact_not_found:${input.contactId}`);
 
+  const negocio = await getNegocioVars(ctx);
   const renderedBody = renderContractBody(template.body, {
     contacto: {
       nombre: contact.name,
@@ -132,6 +134,7 @@ export async function createContract(
       email: contact.email ?? "",
       custom: contact.custom as Record<string, unknown> | null,
     },
+    negocio,
   });
 
   const id = newId();

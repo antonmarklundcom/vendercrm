@@ -10,6 +10,8 @@ import { listQuotes } from "@/modules/quotes/quotes";
 import { listOpenTasksForTenant } from "@/modules/crm/tasks";
 import { listLeadSubmissions } from "@/modules/leads/stats";
 import { listBookings } from "@/modules/booking/bookings";
+import { todayIn } from "@/modules/calendar/zoned-time";
+import { getProfile, listFacts, type BusinessFact } from "@/modules/memory";
 import {
   isWithinBusinessHours,
   rankHoy,
@@ -210,6 +212,67 @@ function overdueTaskCandidates(
     });
 }
 
+const MEMORY_COMPLETE_THRESHOLD = 60;
+
+/**
+ * The memory's own upkeep (K3, PLAN.md §16.6): below the completion
+ * threshold, a confirmed fact whose `review_after` has passed, or a promo
+ * whose dates lapsed but is still confirmed (so it would otherwise keep
+ * quoting an offer that's over). All three point at `/settings/negocio`,
+ * the one page that fixes any of them — there is no per-row action here,
+ * unlike the other Hoy rules.
+ */
+function memoryCandidates(
+  profile: Awaited<ReturnType<typeof getProfile>>,
+  facts: BusinessFact[],
+  now: Date,
+  timeZone: string,
+): HoyCandidate[] {
+  const candidates: HoyCandidate[] = [];
+  const url = "/settings/negocio";
+
+  if (profile && profile.completedPct < MEMORY_COMPLETE_THRESHOLD) {
+    candidates.push({
+      kind: "memory_incomplete",
+      assignedUserId: null,
+      urgency: MEMORY_COMPLETE_THRESHOLD - profile.completedPct,
+      url,
+      vars: { pct: profile.completedPct },
+    });
+  }
+
+  const dueForReview = facts.filter(
+    (fact) => fact.confirmedAt && fact.reviewAfter && fact.reviewAfter <= now,
+  );
+  if (dueForReview.length > 0) {
+    candidates.push({
+      kind: "fact_review_due",
+      assignedUserId: null,
+      urgency: dueForReview.length,
+      url,
+      vars: { count: dueForReview.length },
+    });
+  }
+
+  const today = todayIn(timeZone, now);
+  const expiredPromos = facts.filter((fact) => {
+    if (fact.kind !== "promo" || !fact.confirmedAt) return false;
+    const structured = (fact.structured ?? {}) as { validUntil?: unknown };
+    return typeof structured.validUntil === "string" && today > structured.validUntil;
+  });
+  if (expiredPromos.length > 0) {
+    candidates.push({
+      kind: "promo_expired",
+      assignedUserId: null,
+      urgency: expiredPromos.length,
+      url,
+      vars: { count: expiredPromos.length },
+    });
+  }
+
+  return candidates;
+}
+
 export async function buildHoy(
   ctx: TenantContext,
   now: Date = new Date(),
@@ -229,6 +292,8 @@ export async function buildHoy(
     taskRows,
     leadRows,
     bookingRows,
+    profile,
+    facts,
   ] = await Promise.all([
     listConversations(ctx, { filter: "all" }),
     tenantDb(ctx).select(deals),
@@ -243,6 +308,8 @@ export async function buildHoy(
       to: new Date(now.getTime() + BOOKING_WINDOW_MS),
       status: "confirmed",
     }),
+    getProfile(ctx),
+    listFacts(ctx, {}),
   ]);
 
   const contactNames = new Map(contactRows.map((contact) => [contact.id, contact.name]));
@@ -273,6 +340,7 @@ export async function buildHoy(
     ),
     ...staleDealCandidates(dealRows, stageById, now),
     ...leadWithoutDealCandidates(leadRows, contactNames, now),
+    ...memoryCandidates(profile, facts, now, timeZone),
   ];
 
   const ranked = rankHoy(candidates, options);

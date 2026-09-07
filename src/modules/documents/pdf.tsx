@@ -45,6 +45,10 @@ export type DocumentPdfData = {
   /** The **tenant's** locale — this is read by their customer, not by
    * whoever pressed send (PLAN.md §13 H5 #4). */
   locale?: string | null;
+  /** From the memory (K3, PLAN.md §16.4) — printed only when the tenant has
+   *  confirmed them, same as everywhere else the memory reaches a customer. */
+  paymentMethods?: string | null;
+  depositPolicy?: string | null;
 };
 
 // PYG has no decimal places (§2.3), so amounts are whole guaraníes and the
@@ -67,6 +71,8 @@ export type DocumentPdfLabels = {
   balance: string;
   notes: string;
   disclaimer: string;
+  paymentMethods: string;
+  depositPolicy: string;
   state: Record<PaymentState, string>;
 };
 
@@ -144,6 +150,21 @@ export function NotaVentaDocument({
             </View>
           )}
 
+          {(data.paymentMethods || data.depositPolicy) && (
+            <View style={styles.notes}>
+              {data.paymentMethods && (
+                <Text>
+                  {labels.paymentMethods} {data.paymentMethods}
+                </Text>
+              )}
+              {data.depositPolicy && (
+                <Text>
+                  {labels.depositPolicy} {data.depositPolicy}
+                </Text>
+              )}
+            </View>
+          )}
+
           {/* The legal disclaimer is not decoration: this document is not a
               factura and carries no timbrado, so it must say so on its face
               — a customer who files it as a tax document has a problem, and
@@ -174,6 +195,8 @@ export async function renderDocumentPdf(data: DocumentPdfData): Promise<Buffer> 
     balance: t("balance"),
     notes: t("notes"),
     disclaimer: t("disclaimer"),
+    paymentMethods: t("paymentMethods"),
+    depositPolicy: t("depositPolicy"),
     state: {
       unpaid: t("state.unpaid"),
       partial: t("state.partial"),

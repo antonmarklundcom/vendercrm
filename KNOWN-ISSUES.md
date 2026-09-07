@@ -37,11 +37,9 @@ phase touches that file next.
 - **The public quote accept/reject form has no CAPTCHA** (P6) — a per-IP
   rate limit (10/min) is the only abuse guard, the same posture the
   pre-existing `/q/[token]` view already had.
-- **`negocio.*` template variables are not resolvable yet** (P13) — a
-  contract template referencing one is refused at save with the variable's
-  name. K3 was expected to register them but was skipped this wave; K2 (its
-  dependency) has now merged (`docs/log/k2.md`), so K3 can be attempted —
-  still open until K3 itself lands.
+- ~~`negocio.*` template variables are not resolvable yet~~ — **fixed by
+  K3** (`docs/log/k3.md`): registered in `contracts/render.ts` and wired
+  into the quote/nota de venta PDF footers.
 - **No drawn-signature pad for contracts** (P13) — click-to-accept is the
   whole flow per §17.1 #5; `contract_acceptances.signature_storage_key`
   exists and nothing writes to it.
@@ -70,7 +68,9 @@ phase touches that file next.
   `main` yet (P10, lane 1, not merged when this phase ran). The `checkbox`
   field type still ships and a tenant can add the field today; wiring the
   actual consent write is a one-line follow-up once P10 merges.
-- **K3 (memory imports, template variables, coach rows) was skipped
-  entirely this wave** — its dependency K2 (Setup assistant, wave 2 lane 1)
-  had not merged when the lane reached it. `memory_imports` and
-  `setup_plans` (K1) remain created and unused until K2 and K3 both land.
+- ~~K3 (memory imports, template variables, coach rows) was skipped
+  entirely this wave~~ — **built** (`docs/log/k3.md`): `memory_imports` is
+  now read/written by `/settings/negocio/importar`; `negocio.*` variables
+  and the three memory-upkeep Hoy rows are live. `renderTemplateVars`
+  (automations flow messages) still does not resolve `negocio.*` — K3
+  scoped that out, see its log's decision 3.

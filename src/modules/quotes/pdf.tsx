@@ -3,7 +3,7 @@
 // from the worker entry, which runs through tsx/esbuild and honours
 // tsconfig's `jsx: "preserve"` as the classic runtime.
 import React from "react";
-import { Text, renderToBuffer } from "@react-pdf/renderer";
+import { Text, View, renderToBuffer } from "@react-pdf/renderer";
 import type { TenantBranding } from "@/modules/tenancy/settings";
 import { getTranslator } from "@/lib/i18n/translator";
 import {
@@ -36,6 +36,10 @@ export type QuotePdfData = {
   /** The **tenant's** locale, never the sending rep's: this document is read
    * by their customer (PLAN.md §13 H5 #4). */
   locale?: string | null;
+  /** From the memory (K3, PLAN.md §16.4) — printed only when the tenant has
+   *  confirmed them, same as everywhere else the memory reaches a customer. */
+  paymentMethods?: string | null;
+  depositPolicy?: string | null;
 };
 
 /** Resolved by renderQuotePdf and passed in, because the react-pdf tree is
@@ -50,6 +54,8 @@ export type QuotePdfLabels = {
   subtotal: string;
   discount: string;
   validUntil: string;
+  paymentMethods: string;
+  depositPolicy: string;
   footer: string;
 };
 
@@ -103,6 +109,20 @@ export function QuoteDocument({
             </Text>
           )}
           {data.notes && <Text style={styles.notes}>{data.notes}</Text>}
+          {(data.paymentMethods || data.depositPolicy) && (
+            <View style={styles.notes}>
+              {data.paymentMethods && (
+                <Text>
+                  {labels.paymentMethods} {data.paymentMethods}
+                </Text>
+              )}
+              {data.depositPolicy && (
+                <Text>
+                  {labels.depositPolicy} {data.depositPolicy}
+                </Text>
+              )}
+            </View>
+          )}
         </>
       }
       footer={
@@ -126,6 +146,8 @@ export async function renderQuotePdf(data: QuotePdfData): Promise<Buffer> {
     subtotal: t("subtotal"),
     discount: t("discount"),
     validUntil: t("validUntil"),
+    paymentMethods: t("paymentMethods"),
+    depositPolicy: t("depositPolicy"),
     footer: t("footer"),
   };
 

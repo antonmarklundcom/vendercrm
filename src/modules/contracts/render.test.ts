@@ -52,13 +52,19 @@ describe("extractVariableNames / isKnownVariable / findUnknownVariable", () => {
     expect(isKnownVariable("contacto.custom.ruc", [])).toBe(false);
   });
 
-  it("does not know negocio.* yet — that arrives with K3", () => {
-    expect(isKnownVariable("negocio.nombre", [])).toBe(false);
+  it("knows every negocio.* variable (K3, PLAN.md §16.6)", () => {
+    expect(isKnownVariable("negocio.nombre", [])).toBe(true);
+    expect(isKnownVariable("negocio.horario", [])).toBe(true);
+    expect(isKnownVariable("negocio.direccion", [])).toBe(true);
+    expect(isKnownVariable("negocio.politica.cancelacion", [])).toBe(true);
+    expect(isKnownVariable("negocio.politica.senas", [])).toBe(true);
+    expect(isKnownVariable("negocio.pagos", [])).toBe(true);
   });
 
   it("findUnknownVariable reports the first name that does not resolve", () => {
     expect(findUnknownVariable("Hola {{contacto.nombre}}", [])).toBeNull();
-    expect(findUnknownVariable("Hola {{negocio.nombre}}", [])).toBe("negocio.nombre");
+    expect(findUnknownVariable("Hola {{negocio.nombre}}", [])).toBeNull();
+    expect(findUnknownVariable("Hola {{negocio.no_existe}}", [])).toBe("negocio.no_existe");
     expect(findUnknownVariable("{{contacto.custom.ruc}}", [])).toBe("contacto.custom.ruc");
   });
 });
@@ -82,7 +88,17 @@ describe("renderContractBody", () => {
     expect(renderContractBody("{{contacto.custom.nope}}", values)).toBe("");
   });
 
-  it("leaves an unresolved token as-is rather than throwing", () => {
-    expect(renderContractBody("{{negocio.nombre}}", values)).toBe("{{negocio.nombre}}");
+  it("leaves a genuinely unknown token as-is rather than throwing", () => {
+    expect(renderContractBody("{{no.se.que.es}}", values)).toBe("{{no.se.que.es}}");
+  });
+
+  it("resolves negocio.* from the given values, empty when omitted", () => {
+    expect(renderContractBody("{{negocio.nombre}}", values)).toBe("");
+    expect(
+      renderContractBody("{{negocio.nombre}} — {{negocio.horario}}", {
+        ...values,
+        negocio: { "negocio.nombre": "Barbería Central", "negocio.horario": "Lun a Vie 08:00–17:00" },
+      }),
+    ).toBe("Barbería Central — Lun a Vie 08:00–17:00");
   });
 });

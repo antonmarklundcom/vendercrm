@@ -189,6 +189,29 @@
         "invalid": "Revisá los datos cargados",
         "notFound": "No encontramos ese dato",
         "unknown": "No pudimos guardar. Probá de nuevo."
+      },
+      "importar": {
+        "title": "Importar a la memoria",
+        "intro": "Pegá texto, subí un PDF o dale un link — un asistente lee el contenido y sugiere hechos para revisar acá.",
+        "back": "Volver a la memoria",
+        "pasteLabel": "Pegar texto",
+        "pasteButton": "Extraer de este texto",
+        "pdfLabel": "Subir un PDF",
+        "pdfButton": "Extraer de este PDF",
+        "urlLabel": "Pegar un link",
+        "urlPlaceholder": "https://tu-sitio.com/servicios",
+        "urlButton": "Extraer de este link",
+        "resultOk": "Se sugirieron {count} hechos. Revisalos abajo, en la memoria.",
+        "resultOkZero": "No se encontró ningún hecho claro en ese contenido.",
+        "errors": {
+          "ai_unavailable": "Todavía no hay un asistente de IA configurado.",
+          "daily_cap_reached": "Se alcanzó el límite diario de IA de tu plan. Probá de nuevo mañana.",
+          "extraction_failed": "No pudimos leer ese contenido. Probá de nuevo.",
+          "no_text": "No encontramos texto para leer ahí.",
+          "fetch_failed": "No pudimos acceder a ese link.",
+          "pdf_no_text_layer": "Ese PDF es una imagen escaneada — no tiene texto para leer.",
+          "empty": "Escribí o subí algo primero."
+        }
       }
     },
     "dashboard": {
@@ -300,6 +323,21 @@
         "voice": {
           "intro": "Tenés {count, plural, one {# cosa pendiente} other {# cosas pendientes}} hoy:",
           "empty": "No tenés nada urgente por ahora. Buen trabajo."
+        },
+        "memory_incomplete": {
+          "title": "La memoria del negocio está incompleta",
+          "subtitle": "Completada al {pct}% — el asistente responde mejor con más datos",
+          "action": "Completar memoria"
+        },
+        "fact_review_due": {
+          "title": "{count, plural, one {Un dato} other {# datos}} para revisar",
+          "subtitle": "Pasaron su fecha de revisión",
+          "action": "Revisar"
+        },
+        "promo_expired": {
+          "title": "{count, plural, one {Una promoción vencida} other {# promociones vencidas}} sigue activa",
+          "subtitle": "El asistente podría seguir ofreciéndolas",
+          "action": "Revisar"
         }
       },
       "briefing": {
@@ -3559,7 +3597,9 @@
       "discount": "Descuento",
       "validUntil": "Válido hasta:",
       "footer": "Documento no fiscal · Factura electrónica próximamente",
-      "caption": "Presupuesto"
+      "caption": "Presupuesto",
+      "paymentMethods": "Formas de pago:",
+      "depositPolicy": "Seña:"
     },
     "notaVenta": {
       "title": "NOTA DE VENTA",
@@ -3581,7 +3621,9 @@
         "paid": "PAGADO",
         "void": "ANULADO"
       },
-      "caption": "Nota de venta"
+      "caption": "Nota de venta",
+      "paymentMethods": "Formas de pago:",
+      "depositPolicy": "Seña:"
     },
     "recibo": {
       "title": "Recibo",

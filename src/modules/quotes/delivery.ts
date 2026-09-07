@@ -4,6 +4,7 @@ import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import { getContact } from "@/modules/crm/contacts";
 import { createActivity } from "@/modules/crm/activities";
+import { getNegocioVars } from "@/modules/memory/vars";
 import { getTranslator } from "@/lib/i18n/translator";
 import {
   sendDocumentOverWhatsapp,
@@ -36,10 +37,11 @@ export async function generateQuotePdf(ctx: TenantContext, quoteId: string): Pro
   const quote = await getQuote(ctx, quoteId);
   if (!quote) throw new Error(`quote_not_found:${quoteId}`);
 
-  const [items, contact, tenant] = await Promise.all([
+  const [items, contact, tenant, negocio] = await Promise.all([
     listQuoteItems(ctx, quote.id),
     getContact(ctx, quote.contactId),
     getTenant(ctx.tenantId),
+    getNegocioVars(ctx),
   ]);
   if (!contact) throw new Error("contact_not_found");
 
@@ -59,6 +61,8 @@ export async function generateQuotePdf(ctx: TenantContext, quoteId: string): Pro
     notes: quote.notes,
     createdAt: quote.createdAt,
     locale: tenant?.locale,
+    paymentMethods: negocio["negocio.pagos"] || null,
+    depositPolicy: negocio["negocio.politica.senas"] || null,
     items: items.map((item) => ({
       description: item.description,
       qty: item.qty,

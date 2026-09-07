@@ -13,7 +13,10 @@ export type HoyItemKind =
   | "upcoming_booking"
   | "unreplied_quote"
   | "stale_deal"
-  | "lead_without_deal";
+  | "lead_without_deal"
+  | "memory_incomplete"
+  | "fact_review_due"
+  | "promo_expired";
 
 export type HoySeverity = "high" | "medium" | "low";
 
@@ -33,6 +36,11 @@ const KIND_ORDER: Record<HoyItemKind, { severity: HoySeverity; rank: number }> =
   stale_deal: { severity: "medium", rank: 4 },
   // Earliest-stage opportunity; nobody has even started working it.
   lead_without_deal: { severity: "low", rank: 5 },
+  // K3 (§16.6): the memory's own upkeep — nothing a customer is waiting on
+  // right now, but the reason a reply reads worse than it should.
+  promo_expired: { severity: "low", rank: 6 },
+  fact_review_due: { severity: "low", rank: 7 },
+  memory_incomplete: { severity: "low", rank: 8 },
 };
 
 export type HoyCandidate = {

@@ -40,16 +40,24 @@ export function extractVariableNames(text: string): string[] {
 
 const CONTACT_FIELD_VARIABLES = new Set(["contacto.nombre", "contacto.telefono", "contacto.email"]);
 const CUSTOM_VARIABLE = /^contacto\.custom\.([a-z0-9_]+)$/;
+/** `{{negocio.*}}` (K3, PLAN.md §16.6): the memory's own variables, resolved
+ *  by `modules/memory/vars.ts`. Named here as a plain string set rather than
+ *  importing `NEGOCIO_VARIABLE_NAMES` — this file stays import-free of the
+ *  memory module so it keeps its own no-db, no-env test bar. */
+const NEGOCIO_VARIABLES = new Set([
+  "negocio.nombre",
+  "negocio.horario",
+  "negocio.direccion",
+  "negocio.politica.cancelacion",
+  "negocio.politica.senas",
+  "negocio.pagos",
+]);
 
-/**
- * Whether a variable name is one this phase's registry can resolve.
- * `negocio.*` is not part of it yet — it arrives with K3, later in the same
- * lane (§17.2) — so a template referencing it is refused here, by design,
- * until then.
- */
+/** Whether a variable name is one this phase's registry can resolve. */
 export function isKnownVariable(name: string, customFieldKeys: readonly string[]): boolean {
   const key = name.toLowerCase();
   if (CONTACT_FIELD_VARIABLES.has(key)) return true;
+  if (NEGOCIO_VARIABLES.has(key)) return true;
   const match = key.match(CUSTOM_VARIABLE);
   return match ? customFieldKeys.includes(match[1]!) : false;
 }
@@ -73,6 +81,9 @@ export type ContractVariableValues = {
     email: string;
     custom: Record<string, unknown> | null | undefined;
   };
+  /** `{{negocio.*}}` (K3) — optional so a caller from before K3 (or a unit
+   *  test with no memory to read) still renders the contact half. */
+  negocio?: Record<string, string>;
 };
 
 /** Resolves every `{{variable}}` in `text`. Assumes `text` was already
@@ -91,6 +102,8 @@ export function renderContractBody(text: string, values: ContractVariableValues)
       const value = (values.contacto.custom ?? {})[custom[1]!];
       return value === undefined || value === null ? "" : String(value);
     }
+
+    if (NEGOCIO_VARIABLES.has(key)) return values.negocio?.[key] ?? "";
 
     return match;
   });

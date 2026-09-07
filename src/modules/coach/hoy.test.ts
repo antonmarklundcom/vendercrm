@@ -295,4 +295,48 @@ describe.skipIf(!hasDb)("buildHoy (MySQL)", () => {
     expect(items.some((i) => i.url === `/pipeline/${mineDeal!.id}`)).toBe(true);
     expect(items.some((i) => i.url === `/pipeline/${otherDeal!.id}`)).toBe(false);
   });
+
+  // K3 (§16.6): the memory's own upkeep rules.
+  it("flags an incomplete memory, a fact past its review date, and an expired-but-confirmed promo", async () => {
+    const { upsertProfile, profileInputSchema } = await import("@/modules/memory/profile");
+    const { createFact, factInputSchema } = await import("@/modules/memory/facts");
+
+    await upsertProfile(ctx, profileInputSchema.parse({ about: "Solo esto está cargado" }));
+    await db
+      .update(schema.businessProfiles)
+      .set({ completedPct: 20 })
+      .where(eq(schema.businessProfiles.tenantId, ctx.tenantId));
+
+    const dueFact = await createFact(
+      ctx,
+      factInputSchema.parse({ kind: "faq", title: "¿Hacen envíos?", visibility: "customer" }),
+      { confirmedByUserId: "admin" },
+    );
+    await db
+      .update(schema.businessFacts)
+      .set({ reviewAfter: new Date(NOW.getTime() - 24 * 60 * 60 * 1000) })
+      .where(eq(schema.businessFacts.id, dueFact!.id));
+
+    await createFact(
+      ctx,
+      factInputSchema.parse({
+        kind: "promo",
+        title: "Descuento de verano",
+        visibility: "customer",
+        structured: { validUntil: "2026-01-01" },
+      }),
+      { confirmedByUserId: "admin" },
+    );
+
+    const items = await buildHoy(ctx, NOW);
+    expect(items.find((i) => i.kind === "memory_incomplete")).toBeTruthy();
+    expect(items.find((i) => i.kind === "fact_review_due")).toBeTruthy();
+    expect(items.find((i) => i.kind === "promo_expired")).toBeTruthy();
+    for (const item of items) {
+      if (["memory_incomplete", "fact_review_due", "promo_expired"].includes(item.kind)) {
+        expect(item.url).toBe("/settings/negocio");
+      }
+    }
+  });
+
 });

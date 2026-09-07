@@ -7,6 +7,7 @@ import { clientIp } from "@/lib/http/client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getTranslator } from "@/lib/i18n/translator";
 import { formatMoney } from "@/lib/i18n/format";
+import { getProfile } from "@/modules/memory/profile";
 import { BookingPicker } from "./[tenantSlug]/[typeSlug]/picker";
 
 // The public booking page's body (docs/SPEC-BOOKING.md §5). Same shape as the
@@ -51,6 +52,10 @@ export async function BookingView({
   const accent = branding.primaryColor || undefined;
   const locale = tenant?.locale ?? "es";
   const t = await getTranslator(locale, "public.booking");
+  // Address + maps link (K3, PLAN.md §16.4): the memory's profile, read
+  // through the same system context getPublicBookingType already resolved
+  // — nothing here is internal-only, address is a customer-facing field.
+  const profile = await getProfile(resolved.ctx);
 
   const locationLabel = {
     in_person: t("locationInPerson"),
@@ -84,6 +89,17 @@ export async function BookingView({
           {type.locationDetail ? ` · ${type.locationDetail}` : ""}
         </p>
         {type.description ? <p className="text-sm">{type.description}</p> : null}
+        {profile?.address ? (
+          <p className="text-sm text-muted-foreground">
+            {profile.mapsUrl ? (
+              <a href={profile.mapsUrl} target="_blank" rel="noreferrer" className="underline">
+                {profile.address}
+              </a>
+            ) : (
+              profile.address
+            )}
+          </p>
+        ) : null}
       </header>
 
       <BookingPicker

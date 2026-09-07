@@ -4,6 +4,7 @@ import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import { getContact } from "@/modules/crm/contacts";
 import { createActivity } from "@/modules/crm/activities";
+import { getNegocioVars } from "@/modules/memory/vars";
 import { getTranslator } from "@/lib/i18n/translator";
 import {
   sendDocumentOverWhatsapp,
@@ -46,11 +47,12 @@ export async function generateDocumentPdf(
   const document = await getDocument(ctx, documentId);
   if (!document) throw new Error(`document_not_found:${documentId}`);
 
-  const [items, contact, tenant, paid] = await Promise.all([
+  const [items, contact, tenant, paid, negocio] = await Promise.all([
     listDocumentItems(ctx, document.id),
     getContact(ctx, document.contactId),
     getTenant(ctx.tenantId),
     amountPaid(ctx, document.id),
+    getNegocioVars(ctx),
   ]);
   if (!contact) throw new Error("contact_not_found");
 
@@ -74,6 +76,8 @@ export async function generateDocumentPdf(
     notes: document.notes,
     createdAt: document.createdAt,
     locale: tenant?.locale,
+    paymentMethods: negocio["negocio.pagos"] || null,
+    depositPolicy: negocio["negocio.politica.senas"] || null,
     items: items.map((item) => ({
       description: item.description,
       qty: item.qty,

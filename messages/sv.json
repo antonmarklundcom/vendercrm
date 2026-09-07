@@ -189,6 +189,29 @@
         "invalid": "Kontrollera uppgifterna",
         "notFound": "Vi hittade inte uppgiften",
         "unknown": "Det gick inte att spara. Försök igen."
+      },
+      "importar": {
+        "title": "Importera till minnet",
+        "intro": "Klistra in text, ladda upp en PDF eller ange en länk — en assistent läser innehållet och föreslår fakta att granska här.",
+        "back": "Tillbaka till minnet",
+        "pasteLabel": "Klistra in text",
+        "pasteButton": "Extrahera från den här texten",
+        "pdfLabel": "Ladda upp en PDF",
+        "pdfButton": "Extrahera från den här PDF:en",
+        "urlLabel": "Klistra in en länk",
+        "urlPlaceholder": "https://din-sida.se/tjanster",
+        "urlButton": "Extrahera från den här länken",
+        "resultOk": "{count} fakta föreslogs. Granska dem nedan, i minnet.",
+        "resultOkZero": "Inga tydliga fakta hittades i det innehållet.",
+        "errors": {
+          "ai_unavailable": "Ingen AI-assistent är konfigurerad än.",
+          "daily_cap_reached": "Din plans dagliga AI-gräns har nåtts. Försök igen imorgon.",
+          "extraction_failed": "Vi kunde inte läsa det innehållet. Försök igen.",
+          "no_text": "Vi hittade ingen text att läsa där.",
+          "fetch_failed": "Vi kunde inte nå den länken.",
+          "pdf_no_text_layer": "Den PDF:en är en skannad bild — den har ingen text att läsa.",
+          "empty": "Skriv eller ladda upp något först."
+        }
       }
     },
     "dashboard": {
@@ -300,6 +323,21 @@
         "voice": {
           "intro": "Du har {count, plural, one {# sak} other {# saker}} kvar idag:",
           "empty": "Inget brådskande just nu. Bra jobbat."
+        },
+        "memory_incomplete": {
+          "title": "Företagets minne är ofullständigt",
+          "subtitle": "{pct}% klart — assistenten svarar bättre med mer data",
+          "action": "Komplettera minnet"
+        },
+        "fact_review_due": {
+          "title": "{count, plural, one {Ett faktum} other {# fakta}} att granska",
+          "subtitle": "Har passerat sitt granskningsdatum",
+          "action": "Granska"
+        },
+        "promo_expired": {
+          "title": "{count, plural, one {En utgången kampanj} other {# utgångna kampanjer}} är fortfarande bekräftad",
+          "subtitle": "Assistenten kan fortfarande erbjuda den",
+          "action": "Granska"
         }
       },
       "briefing": {
@@ -3559,7 +3597,9 @@
       "discount": "Rabatt",
       "validUntil": "Giltig till:",
       "footer": "Icke-fiskalt dokument · Elektronisk fakturering kommer snart",
-      "caption": "Offert"
+      "caption": "Offert",
+      "paymentMethods": "Betalningssätt:",
+      "depositPolicy": "Handpenning:"
     },
     "notaVenta": {
       "title": "FÖRSÄLJNINGSNOTA",
@@ -3581,7 +3621,9 @@
         "paid": "BETALD",
         "void": "MAKULERAD"
       },
-      "caption": "Försäljningsnota"
+      "caption": "Försäljningsnota",
+      "paymentMethods": "Betalningssätt:",
+      "depositPolicy": "Handpenning:"
     },
     "recibo": {
       "title": "Kvitto",

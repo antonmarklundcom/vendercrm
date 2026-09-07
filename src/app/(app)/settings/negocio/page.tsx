@@ -61,6 +61,10 @@ export default async function BusinessMemoryPage() {
     <div className="flex flex-col gap-8">
       <PageHeader title={t("title")} description={t("intro")} />
 
+      <a href="/settings/negocio/importar" className="self-start text-sm underline">
+        {t("importar.title")}
+      </a>
+
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold">{t("completionTitle", { pct })}</h2>
         <ul className="flex flex-col gap-1 text-sm">

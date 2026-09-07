@@ -150,7 +150,7 @@ function visibilityFilter(audience: MemoryAudience) {
  * business that wrote a sentence ("de 8 a 17, sábados hasta el mediodía, y
  * feriados cerramos") said something the seven-row form cannot.
  */
-function resolveHours(always: BusinessFact[], businessHours: BusinessHours | undefined): string | null {
+export function resolveHours(always: BusinessFact[], businessHours: BusinessHours | undefined): string | null {
   const fact = always.find(
     (row) => row.kind === "location" && row.title.trim().toLowerCase() === "horario",
   );

@@ -189,6 +189,29 @@
         "invalid": "Check the values you entered",
         "notFound": "We couldn't find that fact",
         "unknown": "We couldn't save. Try again."
+      },
+      "importar": {
+        "title": "Import into the memory",
+        "intro": "Paste text, upload a PDF, or give a link — an assistant reads it and suggests facts to review here.",
+        "back": "Back to the memory",
+        "pasteLabel": "Paste text",
+        "pasteButton": "Extract from this text",
+        "pdfLabel": "Upload a PDF",
+        "pdfButton": "Extract from this PDF",
+        "urlLabel": "Paste a link",
+        "urlPlaceholder": "https://your-site.com/services",
+        "urlButton": "Extract from this link",
+        "resultOk": "{count} facts were suggested. Review them below, in the memory.",
+        "resultOkZero": "No clear facts were found in that content.",
+        "errors": {
+          "ai_unavailable": "No AI assistant is configured yet.",
+          "daily_cap_reached": "Your plan's daily AI limit was reached. Try again tomorrow.",
+          "extraction_failed": "We couldn't read that content. Try again.",
+          "no_text": "We couldn't find any text to read there.",
+          "fetch_failed": "We couldn't reach that link.",
+          "pdf_no_text_layer": "That PDF is a scanned image — it has no text to read.",
+          "empty": "Write or upload something first."
+        }
       }
     },
     "dashboard": {
@@ -300,6 +323,21 @@
         "voice": {
           "intro": "You have {count, plural, one {# thing} other {# things}} pending today:",
           "empty": "Nothing urgent right now. Good work."
+        },
+        "memory_incomplete": {
+          "title": "The business memory is incomplete",
+          "subtitle": "{pct}% complete — the assistant answers better with more data",
+          "action": "Complete memory"
+        },
+        "fact_review_due": {
+          "title": "{count, plural, one {One fact} other {# facts}} due for review",
+          "subtitle": "Past their review date",
+          "action": "Review"
+        },
+        "promo_expired": {
+          "title": "{count, plural, one {One expired promo} other {# expired promos}} still confirmed",
+          "subtitle": "The assistant could still be offering it",
+          "action": "Review"
         }
       },
       "briefing": {
@@ -3559,7 +3597,9 @@
       "discount": "Discount",
       "validUntil": "Valid until:",
       "footer": "Non-fiscal document · Electronic invoicing coming soon",
-      "caption": "Quote"
+      "caption": "Quote",
+      "paymentMethods": "Payment methods:",
+      "depositPolicy": "Deposit:"
     },
     "notaVenta": {
       "title": "SALES NOTE",
@@ -3581,7 +3621,9 @@
         "paid": "PAID",
         "void": "VOID"
       },
-      "caption": "Sales note"
+      "caption": "Sales note",
+      "paymentMethods": "Payment methods:",
+      "depositPolicy": "Deposit:"
     },
     "recibo": {
       "title": "Receipt",

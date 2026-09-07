@@ -3095,6 +3095,7 @@ One line per phase when merged: phase, PR, `docs/log/<phase>.md`.
 
 - K1 Business memory — PRs #94, #95 — `docs/log/k1.md`
 - K2 Setup assistant — PR #121 — `docs/log/k2.md`
+- K3 Imports, variables, coach rows — PR (pending) — `docs/log/k3.md`
 
 ---
 
