@@ -3536,7 +3536,7 @@ J8's 2026-12-01 decision, if it comes to that, is recorded here too.
 - P15 Reporting v2 — PR #110 — `docs/log/p15.md`
 - P16 Companies + contact merge — PR #112 — `docs/log/p16.md`
 - P17 Forms field editor — PR #114 — `docs/log/p17.md`
-- P9 Voice-note transcription — PR #117 — `docs/log/p9.md` (built as "W1" on a superseded plan; see the log's merge note)
+- P9 Voice-note transcription — PR #120 — `docs/log/p9.md` (built as "W1" on a superseded plan across #117/#118/#120; see the log's merge note)
 
 ### 17.8 What remains for Fable, and nothing else
 
