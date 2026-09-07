@@ -193,11 +193,90 @@ describe.skipIf(!hasDb)("applying a vertical preset (MySQL integration)", () => 
       stages: 0,
       tags: 0,
       flows: 0,
+      quickReplies: 0,
     });
 
     const flows = await flowsModule.listFlows(ctx);
     expect(flows.length).toBe(
       VERTICAL_PRESETS.find((entry) => entry.slug === "gimnasio")!.flows.length,
     );
+  });
+
+  // K2's shape extensions (PLAN.md §16.5): none of the six catalogue presets
+  // above exercise stage flags, quick replies, the business-hours condition
+  // or a non-booking trigger, since they predate the assistant. A synthetic
+  // preset — the same shape `plan.ts` hands `applyPreset` — is what proves
+  // the extension actually works end to end.
+  it("applies a setup-assistant-shaped preset: quick replies, stage flags, gated welcome flow", async () => {
+    const { applyPreset } = await import("./verticals-apply");
+    const { ctx } = await freshTenant();
+
+    const preset: import("./verticals").VerticalPreset = {
+      slug: "custom",
+      name: "A medida",
+      description: "",
+      resources: [],
+      hours: [],
+      bookingTypes: [],
+      pipelineStages: [
+        "Consulta",
+        { name: "Ganado", isWon: true, staleAfterDays: 14 },
+        { name: "Perdido", isLost: true },
+      ],
+      tags: ["cliente nuevo"],
+      quickReplies: [{ name: "Saludo", body: "¡Hola! Gracias por escribirnos." }],
+      aiMode: "draft",
+      flows: [
+        {
+          name: "Bienvenida fuera de horario",
+          trigger: "wa_message_received",
+          waitMinutes: 0,
+          text: "Gracias por escribirnos, te respondemos apenas abramos.",
+          conditions: ["outside_business_hours"],
+        },
+      ],
+    };
+
+    const outcome = await applyPreset(ctx, preset);
+    expect(outcome.created.quickReplies).toBe(1);
+    expect(outcome.created.stages).toBe(3);
+    expect(outcome.created.flows).toBe(1);
+
+    const replies = await (await import("@/modules/whatsapp/quick-replies")).listQuickReplies(ctx);
+    expect(replies.some((row) => row.name === "Saludo")).toBe(true);
+
+    const { listPipelines, listStagesForPipeline } = await import("@/modules/crm/pipelines");
+    const [pipeline] = await listPipelines(ctx);
+    const stages = await listStagesForPipeline(ctx, pipeline!.id);
+    const won = stages.find((stage) => stage.name === "Ganado");
+    const lost = stages.find((stage) => stage.name === "Perdido");
+    expect(won?.isWon).toBe(true);
+    expect(won?.staleAfterDays).toBe(14);
+    expect(lost?.isLost).toBe(true);
+
+    const flows = await flowsModule.listFlows(ctx);
+    const welcome = flows.find((flow) => flow.triggerType === "wa_message_received");
+    expect(welcome).toBeTruthy();
+    const graph = (await flowsModule.getVersion(ctx, welcome!.publishedVersionId!))!.graph as {
+      nodes: Array<{ id: string; type: string; config: Record<string, unknown> }>;
+      edges: Array<{ source: string; target: string; branch: string }>;
+    };
+    const condition = graph.nodes.find((node) => node.type === "condition");
+    expect(condition?.config.kind).toBe("business_hours");
+    expect(graph.edges.some((edge) => edge.source === condition!.id && edge.branch === "no")).toBe(
+      true,
+    );
+
+    // aiMode: "draft" is set on a tenant that never chose one, and applying
+    // again must not fight a human's later choice.
+    const { getTenant } = await import("./tenants");
+    const tenant = await getTenant(ctx.tenantId);
+    expect((tenant!.settings as { ai?: { mode?: string } }).ai?.mode).toBe("draft");
+
+    const { updateTenantAiSettings } = await import("./settings");
+    await updateTenantAiSettings(ctx, { mode: "send" });
+    await applyPreset(ctx, preset);
+    const after = await getTenant(ctx.tenantId);
+    expect((after!.settings as { ai?: { mode?: string } }).ai?.mode).toBe("send");
   });
 });

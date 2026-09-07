@@ -287,6 +287,29 @@ export async function impersonateAction(formData: FormData) {
   redirect("/dashboard");
 }
 
+/**
+ * "Configurar con IA" (K2, PLAN.md §16.5 entry point #3): the same
+ * impersonation swap as "Ver como" above, landing on `/onboarding` instead
+ * of the dashboard so the setup assistant's guard (tenant admin) and audit
+ * trail (actorUserId is the impersonated admin, impersonatorUserId is the
+ * superadmin) are exactly the tenant's own — no separate code path.
+ */
+export async function configureWithAiAction(formData: FormData) {
+  const parsed = impersonateSchema.safeParse({
+    userId: formData.get("userId"),
+    tenantId: formData.get("tenantId"),
+  });
+  if (!parsed.success) return;
+
+  try {
+    await startImpersonation(parsed.data.userId, parsed.data.tenantId);
+  } catch {
+    return;
+  }
+
+  redirect("/onboarding");
+}
+
 
 // --- Member profile edit (PLAN.md §3.1: adding/removing/editing a person on
 // a business's roster is a superadmin action, since `users` is a platform

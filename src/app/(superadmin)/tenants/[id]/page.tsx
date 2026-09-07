@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/page-header";
 import { CreateUserForm, type CreateUserLabels } from "./CreateUserForm";
 import { AddExistingUserForm, type AddExistingUserLabels } from "./AddExistingUserForm";
 import { CreateSubscriptionForm, RecordPaymentForm } from "./SubscriptionForms";
-import { impersonateAction } from "./actions";
+import { configureWithAiAction, impersonateAction } from "./actions";
 import { MemberEditDialog, type MemberEditLabels } from "./MemberEditDialog";
 import { ResetPasswordButton, type ResetPasswordLabels } from "./ResetPasswordButton";
 import { WhatsappSection } from "./WhatsappSection";
@@ -190,6 +190,15 @@ export default async function TenantDetailPage({
                             {t("impersonate")}
                           </Button>
                         </form>
+                        {user.role === "admin" && (
+                          <form action={configureWithAiAction}>
+                            <input type="hidden" name="userId" value={user.id} />
+                            <input type="hidden" name="tenantId" value={tenant.id} />
+                            <Button type="submit" size="sm" variant="outline">
+                              {t("configureWithAi")}
+                            </Button>
+                          </form>
+                        )}
                         <ResetPasswordButton
                           tenantId={tenant.id}
                           userId={user.id}

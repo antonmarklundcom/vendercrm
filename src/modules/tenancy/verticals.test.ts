@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { VERTICAL_PRESETS, findPreset } from "./verticals";
+import { VERTICAL_PRESETS, findPreset, stageName } from "./verticals";
 
 // Presets are data, not code paths (plan-booking.md §6.1). These guard the
 // properties that make that true — a preset that produced an unbookable
@@ -142,5 +142,21 @@ describe("vertical presets", () => {
     expect(findPreset("panaderia")).toBeNull();
     expect(findPreset(null)).toBeNull();
     expect(findPreset("")).toBeNull();
+  });
+
+  // K2's shape extensions (§16.5): quick replies and an aiMode on every
+  // catalogue preset, and `stageName` reading both a plain string (every
+  // preset above) and the object form the setup assistant's generated plans
+  // use for won/lost/staleAfterDays.
+  it("gives every catalogue preset quick replies and a draft aiMode", () => {
+    for (const preset of VERTICAL_PRESETS) {
+      expect(preset.quickReplies?.length, preset.slug).toBeGreaterThan(0);
+      expect(preset.aiMode, preset.slug).toBe("draft");
+    }
+  });
+
+  it("reads a stage name from either shape", () => {
+    expect(stageName("Consulta")).toBe("Consulta");
+    expect(stageName({ name: "Ganado", isWon: true })).toBe("Ganado");
   });
 });

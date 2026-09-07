@@ -1,0 +1,1 @@
+ALTER TABLE `setup_plans` ADD `conversation` json;

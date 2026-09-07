@@ -182,6 +182,14 @@ export const setupPlans = mysqlTable(
       .default("draft"),
     /** The conversation summary the plan was generated from. */
     brief: text("brief"),
+    /**
+     * The setup conversation's own progress (K2, §16.5 step 2): current
+     * topic index, per-topic answers and skips. Read back so a reload — or
+     * an admin who leaves and returns from `/settings/negocio` — resumes on
+     * the same question instead of starting over. Separate from `brief`,
+     * which is the finished summary handed to `generateSetupPlan`.
+     */
+    conversation: json("conversation").$type<Record<string, unknown>>(),
     /** The zod-validated `VerticalPreset` — data in the preset shape (§16.2 rule 3). */
     preset: json("preset").$type<Record<string, unknown>>(),
     /** The `ApplyOutcome` of applyVerticalPreset, stored on apply. */

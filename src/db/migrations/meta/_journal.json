@@ -281,6 +281,13 @@
       "when": 1788796771250,
       "tag": "0039_add_message_transcripts",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1788814217124,
+      "tag": "0040_add_setup_conversation",
+      "breakpoints": true
     }
   ]
 }

@@ -48,7 +48,13 @@ export type PresetFlow = {
    * sees and would rename or delete.
    */
   name: string;
-  trigger: "booking_no_show" | "booking_completed";
+  /**
+   * `wa_message_received`, `lead_received` and `deal_won` were added for the
+   * setup assistant's generated plans (§16.5 step 3: a welcome message and a
+   * won-deal review request); the catalogue presets above still only use the
+   * booking two.
+   */
+  trigger: "booking_no_show" | "booking_completed" | "wa_message_received" | "lead_received" | "deal_won";
   /**
    * Minutes between the trigger and the message. Never zero: a reactivation
    * that arrives while the customer is still stuck in traffic reads as a
@@ -63,7 +69,31 @@ export type PresetFlow = {
    * B3 added). Resolved to an id when the preset is applied.
    */
   offerSlotsFor?: string;
+  /**
+   * Gates the flow behind an existing automation condition kind (§16.5:
+   * a welcome message should only fire outside business hours, when nobody
+   * is there to answer live). The only value that exists today; more would
+   * be new condition kinds, which K2's hard limits forbid adding.
+   */
+  conditions?: readonly ["outside_business_hours"];
 };
+
+/**
+ * A pipeline stage name, optionally carrying the flags §16.5 asks the setup
+ * assistant's generated plans to set (one `isWon`, one `isLost`, a staleness
+ * threshold for the coach). Plain strings — every catalogue preset above —
+ * still work unchanged; `stageName` reads either shape.
+ */
+export type PresetStage =
+  | string
+  | { name: string; isWon?: boolean; isLost?: boolean; staleAfterDays?: number };
+
+export function stageName(stage: PresetStage): string {
+  return typeof stage === "string" ? stage : stage.name;
+}
+
+/** A canned reply the assistant offers from the inbox (§16.5 step 3). */
+export type PresetQuickReply = { name: string; body: string };
 
 /**
  * The two flows §6.1 asks for, as builders rather than copies, so that what
@@ -99,9 +129,15 @@ export type VerticalPreset = {
   resources: string[];
   hours: PresetHours[];
   bookingTypes: PresetBookingType[];
-  pipelineStages: string[];
+  pipelineStages: PresetStage[];
   tags: string[];
   flows: PresetFlow[];
+  /** §16.5 step 3. Optional so the six hand-written presets above need not
+   *  all carry one; the setup assistant's generated plans always do. */
+  quickReplies?: PresetQuickReply[];
+  /** AI auto-reply starts in draft (§16.2 rule "the AI suggests, a human
+   *  confirms") — never applied over a tenant who already chose a mode. */
+  aiMode?: "draft";
 };
 
 /**
@@ -146,6 +182,11 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     ],
     pipelineStages: ["Consulta", "Turno agendado", "Atendido"],
     tags: ["cliente frecuente", "primera vez"],
+    quickReplies: [
+      { name: "Horarios", body: "Atendemos de lunes a sábado. ¿Qué día te queda mejor?" },
+      { name: "Precios", body: "Los precios varían según el servicio, te paso el detalle en un toque." },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, te esperábamos hoy y no llegaste a venir. ¿Querés que te busquemos otro horario?",
@@ -181,6 +222,11 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     ],
     pipelineStages: ["Consulta", "Turno agendado", "Atendido", "Control pendiente"],
     tags: ["obra social", "particular"],
+    quickReplies: [
+      { name: "Requisitos", body: "Para la primera consulta traé tus estudios previos si tenés." },
+      { name: "Obra social", body: "Contanos qué obra social tenés y te confirmamos la cobertura." },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, hoy no pudimos atenderte porque no llegaste a la consulta. ¿Querés que la reprogramemos?",
@@ -226,6 +272,11 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     ],
     pipelineStages: ["Consulta", "Presupuesto", "En taller", "Entregado"],
     tags: ["flota", "particular"],
+    quickReplies: [
+      { name: "Diagnóstico", body: "Podemos revisar el vehículo con un diagnóstico corto, ¿cuándo te queda bien traerlo?" },
+      { name: "Presupuesto", body: "Te armamos el presupuesto apenas lo revisemos, sin compromiso." },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, te esperábamos con el vehículo y no llegaste. ¿Buscamos otro día?",
@@ -261,6 +312,11 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     ],
     pipelineStages: ["Consulta", "Clase de prueba", "Socio", "Baja"],
     tags: ["mensualidad", "clase de prueba"],
+    quickReplies: [
+      { name: "Clase de prueba", body: "¡Dale! Te reservamos un lugar en la próxima clase de prueba, sin cargo." },
+      { name: "Mensualidad", body: "Te paso los planes de mensualidad y qué incluye cada uno." },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, hoy te perdiste la clase. ¿Te anotamos en la próxima?",
@@ -297,6 +353,10 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     ],
     pipelineStages: ["Consulta", "Propuesta enviada", "Cliente", "Cerrado"],
     tags: ["persona física", "empresa"],
+    quickReplies: [
+      { name: "Consulta inicial", body: "La primera consulta es por videollamada, ¿qué día y horario te queda bien?" },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, no pudimos tener la consulta de hoy. ¿Coordinamos otro horario?",
@@ -318,6 +378,10 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
     bookingTypes: [{ name: "Cita", slug: "cita", durationMinutes: 30 }],
     pipelineStages: ["Consulta", "Agendado", "Atendido"],
     tags: [],
+    quickReplies: [
+      { name: "Bienvenida", body: "¡Hola! Contanos en qué te podemos ayudar y te respondemos a la brevedad." },
+    ],
+    aiMode: "draft",
     flows: [
       reactivateNoShow(
         "Hola {{contact.name}}, te esperábamos hoy. ¿Querés que te agendemos de nuevo?",

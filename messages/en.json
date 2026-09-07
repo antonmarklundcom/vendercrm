@@ -2085,7 +2085,35 @@
       "previewCapacity": "{count} places",
       "alreadyApplied": "You already applied the \\u201c{name}\\u201d industry.",
       "alreadyAppliedHelp": "You can apply another one whenever you like: it adds to what you have and never replaces anything.",
-      "additiveNote": "Applying an industry only adds services, resources, stages and tags. It never deletes or changes what you already configured."
+      "additiveNote": "Applying an industry only adds services, resources, stages and tags. It never deletes or changes what you already configured.",
+      "assistant": {
+        "cta": "Set up with the assistant",
+        "intro": "We'll ask a few questions and build the setup for you. You can skip any of them.",
+        "pickerLink": "Choose an industry without the assistant",
+        "skip": "Skip",
+        "continueButton": "Continue",
+        "stepOf": "Question {current} of {total}",
+        "topics": {
+          "about": "What does your business do, and for whom?",
+          "contactToday": "How do customers reach you today?",
+          "hoursAddress": "What are your business hours and address?",
+          "servicesPrices": "What services do you offer and at what price? Skip this if you'd rather add them later.",
+          "policies": "How do you handle deposits, cancellations and payments?",
+          "faqs": "What are the 5 questions customers ask most? Write each one as its own paragraph, with the answer below it.",
+          "tone": "How should the assistant sound: warm, formal or direct?",
+          "neverPromise": "What should the assistant never promise?"
+        },
+        "generating": "Building your plan…",
+        "aiUnavailable": "No AI assistant is configured yet. Choose an industry manually below.",
+        "generationFailed": "We couldn't generate the plan automatically. Choose an industry manually below.",
+        "dailyCapReached": "Your plan's daily AI limit was reached. Try again tomorrow or choose an industry manually.",
+        "previewTitle": "Here's what we'll create — and nothing you already have gets deleted",
+        "previewQuickReplies": "Quick replies:",
+        "applyPlan": "Apply this plan",
+        "startOver": "Start over",
+        "appliedTitle": "Done! We applied your plan.",
+        "retry": "Try again"
+      }
     },
     "notifications": {
       "title": "Notifications",
@@ -2207,7 +2235,8 @@
         "slugTaken": "A company with that slug already exists.",
         "unknown": "We couldn't create the company. Try again."
       },
-      "slugPlaceholder": "Generated from the name; you can change it"
+      "slugPlaceholder": "Generated from the name; you can change it",
+      "configureWithAi": "Set up with AI"
     },
     "subscriptions": {
       "title": "Subscription",

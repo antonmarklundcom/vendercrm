@@ -2085,7 +2085,35 @@
       "previewCapacity": "{count} lugares",
       "alreadyApplied": "Ya aplicaste el rubro «{name}».",
       "alreadyAppliedHelp": "Podés aplicar otro rubro cuando quieras: se agrega a lo que ya tenés, nunca reemplaza nada.",
-      "additiveNote": "Aplicar un rubro solo agrega servicios, recursos, etapas y etiquetas. Nunca borra ni cambia lo que ya configuraste."
+      "additiveNote": "Aplicar un rubro solo agrega servicios, recursos, etapas y etiquetas. Nunca borra ni cambia lo que ya configuraste.",
+      "assistant": {
+        "cta": "Configurar con el asistente",
+        "intro": "Te hacemos algunas preguntas y armamos la configuración por vos. Podés saltar cualquiera.",
+        "pickerLink": "Elegir un rubro sin el asistente",
+        "skip": "Saltar",
+        "continueButton": "Continuar",
+        "stepOf": "Pregunta {current} de {total}",
+        "topics": {
+          "about": "¿A qué se dedica tu negocio y para quién?",
+          "contactToday": "¿Cómo te contactan hoy tus clientes?",
+          "hoursAddress": "¿Cuál es tu horario de atención y tu dirección?",
+          "servicesPrices": "¿Qué servicios ofrecés y a qué precio? Si preferís cargarlos después, saltá esta pregunta.",
+          "policies": "¿Cómo manejás las señas, la cancelación y los pagos?",
+          "faqs": "¿Cuáles son las 5 preguntas que más te hacen? Escribí cada una en un párrafo separado, con la respuesta debajo.",
+          "tone": "¿Cómo querés que hable el asistente: cercano, formal o directo?",
+          "neverPromise": "¿Qué no debe prometer nunca el asistente?"
+        },
+        "generating": "Armando tu plan…",
+        "aiUnavailable": "Todavía no hay un asistente de IA configurado. Elegí un rubro manualmente abajo.",
+        "generationFailed": "No pudimos generar el plan automáticamente. Elegí un rubro manualmente abajo.",
+        "dailyCapReached": "Se alcanzó el límite diario de IA de tu plan. Probá de nuevo mañana o elegí un rubro manualmente.",
+        "previewTitle": "Esto es lo que vamos a crear — y nada de lo que ya tenés se borra",
+        "previewQuickReplies": "Respuestas rápidas:",
+        "applyPlan": "Aplicar este plan",
+        "startOver": "Empezar de nuevo",
+        "appliedTitle": "¡Listo! Aplicamos tu plan.",
+        "retry": "Reintentar"
+      }
     },
     "notifications": {
       "title": "Avisos",
@@ -2207,7 +2235,8 @@
         "slugTaken": "Ya existe una empresa con ese slug.",
         "unknown": "No se pudo crear la empresa. Intentá de nuevo."
       },
-      "slugPlaceholder": "Se genera del nombre; podés cambiarlo"
+      "slugPlaceholder": "Se genera del nombre; podés cambiarlo",
+      "configureWithAi": "Configurar con IA"
     },
     "subscriptions": {
       "title": "Suscripción",

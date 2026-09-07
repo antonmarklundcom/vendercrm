@@ -2085,7 +2085,35 @@
       "previewCapacity": "{count} platser",
       "alreadyApplied": "Du har redan tillämpat branschen \\u201c{name}\\u201d.",
       "alreadyAppliedHelp": "Du kan tillämpa en annan när du vill: den läggs till det du har och ersätter aldrig något.",
-      "additiveNote": "Att tillämpa en bransch lägger bara till tjänster, resurser, steg och etiketter. Den tar aldrig bort eller ändrar det du redan konfigurerat."
+      "additiveNote": "Att tillämpa en bransch lägger bara till tjänster, resurser, steg och etiketter. Den tar aldrig bort eller ändrar det du redan konfigurerat.",
+      "assistant": {
+        "cta": "Ställ in med assistenten",
+        "intro": "Vi ställer några frågor och bygger inställningarna åt dig. Du kan hoppa över vilken som helst.",
+        "pickerLink": "Välj en bransch utan assistenten",
+        "skip": "Hoppa över",
+        "continueButton": "Fortsätt",
+        "stepOf": "Fråga {current} av {total}",
+        "topics": {
+          "about": "Vad gör ditt företag, och för vem?",
+          "contactToday": "Hur når kunder dig idag?",
+          "hoursAddress": "Vilka är dina öppettider och din adress?",
+          "servicesPrices": "Vilka tjänster erbjuder du och till vilket pris? Hoppa över om du vill lägga till dem senare.",
+          "policies": "Hur hanterar du handpenning, avbokning och betalningar?",
+          "faqs": "Vilka är de 5 vanligaste frågorna kunder ställer? Skriv varje fråga som ett eget stycke, med svaret under.",
+          "tone": "Hur ska assistenten låta: nära, formell eller direkt?",
+          "neverPromise": "Vad ska assistenten aldrig lova?"
+        },
+        "generating": "Bygger din plan…",
+        "aiUnavailable": "Ingen AI-assistent är konfigurerad än. Välj en bransch manuellt nedan.",
+        "generationFailed": "Vi kunde inte generera planen automatiskt. Välj en bransch manuellt nedan.",
+        "dailyCapReached": "Din plans dagliga AI-gräns har nåtts. Försök igen imorgon eller välj en bransch manuellt.",
+        "previewTitle": "Det här skapar vi — och inget du redan har tas bort",
+        "previewQuickReplies": "Snabbsvar:",
+        "applyPlan": "Tillämpa den här planen",
+        "startOver": "Börja om",
+        "appliedTitle": "Klart! Vi tillämpade din plan.",
+        "retry": "Försök igen"
+      }
     },
     "notifications": {
       "title": "Aviseringar",
@@ -2207,7 +2235,8 @@
         "slugTaken": "Det finns redan ett företag med den sluggen.",
         "unknown": "Vi kunde inte skapa företaget. Försök igen."
       },
-      "slugPlaceholder": "Skapas från namnet; du kan ändra det"
+      "slugPlaceholder": "Skapas från namnet; du kan ändra det",
+      "configureWithAi": "Ställ in med AI"
     },
     "subscriptions": {
       "title": "Prenumeration",

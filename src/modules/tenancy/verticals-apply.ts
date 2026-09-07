@@ -12,8 +12,10 @@ import { setResourcesForType } from "@/modules/booking/resources";
 import { createService, listServicesForType } from "@/modules/booking/services";
 import { createFlow, listFlows, publishFlow, saveDraft } from "@/modules/automations/flows";
 import type { FlowGraph } from "@/modules/automations/graph";
-import { updateTenantVertical } from "./settings";
-import { findPreset, type PresetFlow, type VerticalPreset } from "./verticals";
+import { createQuickReply, listQuickReplies } from "@/modules/whatsapp/quick-replies";
+import { updateTenantAiSettings, updateTenantVertical, type TenantSettings } from "./settings";
+import { getTenant } from "./tenants";
+import { findPreset, stageName, type PresetFlow, type VerticalPreset } from "./verticals";
 
 // Applying a preset (plan-booking.md §6.1).
 //
@@ -41,6 +43,7 @@ export type ApplyOutcome = {
     stages: number;
     tags: number;
     flows: number;
+    quickReplies: number;
   };
 };
 
@@ -50,7 +53,16 @@ export async function applyVerticalPreset(
 ): Promise<ApplyOutcome | { error: "unknown_vertical" }> {
   const preset = findPreset(slug);
   if (!preset) return { error: "unknown_vertical" };
+  return applyPreset(ctx, preset);
+}
 
+/**
+ * The same apply logic, given a preset object directly rather than a
+ * catalogue slug — what the setup assistant's AI-generated plan needs
+ * (K2, §16.2 rule 3: "applied by `applyVerticalPreset`", same shape either
+ * way). `applyVerticalPreset` above is now a thin lookup in front of this.
+ */
+export async function applyPreset(ctx: TenantContext, preset: VerticalPreset): Promise<ApplyOutcome> {
   const created = {
     resources: await applyResources(ctx, preset),
     bookingTypes: 0,
@@ -58,6 +70,7 @@ export async function applyVerticalPreset(
     stages: await applyStages(ctx, preset),
     tags: await applyTags(ctx, preset),
     flows: 0,
+    quickReplies: await applyQuickReplies(ctx, preset),
   };
 
   const types = await applyBookingTypes(ctx, preset);
@@ -67,6 +80,8 @@ export async function applyVerticalPreset(
   // After the booking types, because a no-show flow offers slots for one of
   // them and needs its id.
   created.flows = await applyFlows(ctx, preset);
+
+  await applyAiMode(ctx, preset);
 
   // Recorded last, so a half-applied preset (a crash mid-way) does not claim
   // to have been applied. Settings only — no migration, per §2.
@@ -199,14 +214,51 @@ async function applyStages(ctx: TenantContext, preset: VerticalPreset): Promise<
   let count = 0;
   let position = stages.length;
 
-  for (const name of preset.pipelineStages) {
+  for (const stage of preset.pipelineStages) {
+    const name = stageName(stage);
     if (byName.has(name.toLowerCase())) continue;
-    await createStage(ctx, { pipelineId: pipeline.id, name, position });
+    await createStage(ctx, {
+      pipelineId: pipeline.id,
+      name,
+      position,
+      ...(typeof stage === "string"
+        ? {}
+        : { isWon: stage.isWon, isLost: stage.isLost, staleAfterDays: stage.staleAfterDays }),
+    });
     position += 1;
     count += 1;
   }
 
   return count;
+}
+
+/** §16.5 step 3's 3–5 canned replies, idempotent by name like everything else. */
+async function applyQuickReplies(ctx: TenantContext, preset: VerticalPreset): Promise<number> {
+  if (!preset.quickReplies || preset.quickReplies.length === 0) return 0;
+  const existing = await listQuickReplies(ctx);
+  const byName = new Set(existing.map((row) => row.name.toLowerCase()));
+
+  let count = 0;
+  for (const reply of preset.quickReplies) {
+    if (byName.has(reply.name.toLowerCase())) continue;
+    await createQuickReply(ctx, { name: reply.name, body: reply.body });
+    count += 1;
+  }
+  return count;
+}
+
+/**
+ * AI reply mode always starts in `draft` (§16.2 rule 2) and only when the
+ * tenant has never chosen one — a preset applied a second time, or applied
+ * onto a tenant who already turned AI on or off, must not flip the switch
+ * back.
+ */
+async function applyAiMode(ctx: TenantContext, preset: VerticalPreset): Promise<void> {
+  if (!preset.aiMode) return;
+  const tenant = await getTenant(ctx.tenantId);
+  const settings = (tenant?.settings ?? {}) as TenantSettings;
+  if (settings.ai?.mode) return;
+  await updateTenantAiSettings(ctx, { mode: preset.aiMode });
 }
 
 async function applyTags(ctx: TenantContext, preset: VerticalPreset): Promise<number> {
@@ -271,27 +323,47 @@ async function applyFlows(ctx: TenantContext, preset: VerticalPreset): Promise<n
   return count;
 }
 
+/** Review requests fire on either "the job is done" moment the catalogue or
+ *  the setup assistant names — a completed booking, or a deal dragged to a
+ *  won stage. */
+const REVIEW_TRIGGERS: PresetFlow["trigger"][] = ["booking_completed", "deal_won"];
+
 function graphFor(definition: PresetFlow, offerTypeId: string | null): FlowGraph {
   const nodes: FlowGraph["nodes"] = [
     { id: "trigger", type: "trigger", config: { triggerType: definition.trigger } },
-    {
-      id: "wait",
-      type: "delay",
-      config: { kind: "wait_duration", minutes: definition.waitMinutes },
-    },
-    {
-      id: "message",
-      type: "action",
-      config:
-        definition.trigger === "booking_completed"
-          ? { kind: "send_review_request", text: definition.text }
-          : { kind: "send_whatsapp", text: definition.text },
-    },
   ];
-  const edges: FlowGraph["edges"] = [
-    { id: "e1", source: "trigger", target: "wait", branch: "default" },
-    { id: "e2", source: "wait", target: "message", branch: "default" },
-  ];
+  const edges: FlowGraph["edges"] = [];
+
+  // §16.5's welcome flow only wants to greet a customer nobody is there to
+  // answer live — the "no" branch of the same `business_hours` condition
+  // the manual flow editor already offers, not a new condition kind.
+  let lastNode = "trigger";
+  if (definition.conditions?.includes("outside_business_hours")) {
+    nodes.push({ id: "hours", type: "condition", config: { kind: "business_hours" } });
+    edges.push({ id: "e0", source: "trigger", target: "hours", branch: "default" });
+    lastNode = "hours";
+  }
+
+  nodes.push({
+    id: "wait",
+    type: "delay",
+    config: { kind: "wait_duration", minutes: definition.waitMinutes },
+  });
+  edges.push({
+    id: "e1",
+    source: lastNode,
+    target: "wait",
+    branch: lastNode === "hours" ? "no" : "default",
+  });
+
+  nodes.push({
+    id: "message",
+    type: "action",
+    config: REVIEW_TRIGGERS.includes(definition.trigger)
+      ? { kind: "send_review_request", text: definition.text }
+      : { kind: "send_whatsapp", text: definition.text },
+  });
+  edges.push({ id: "e2", source: "wait", target: "message", branch: "default" });
 
   if (offerTypeId) {
     nodes.push({

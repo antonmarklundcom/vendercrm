@@ -39,8 +39,9 @@ phase touches that file next.
   pre-existing `/q/[token]` view already had.
 - **`negocio.*` template variables are not resolvable yet** (P13) — a
   contract template referencing one is refused at save with the variable's
-  name. K3 was expected to register them but was skipped this wave (K2, its
-  own dependency, has not merged) — still open until K2 and K3 both land.
+  name. K3 was expected to register them but was skipped this wave; K2 (its
+  dependency) has now merged (`docs/log/k2.md`), so K3 can be attempted —
+  still open until K3 itself lands.
 - **No drawn-signature pad for contracts** (P13) — click-to-accept is the
   whole flow per §17.1 #5; `contract_acceptances.signature_storage_key`
   exists and nothing writes to it.
