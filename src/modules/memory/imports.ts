@@ -72,9 +72,7 @@ export async function importFromPdf(ctx: TenantContext, key: string): Promise<Im
   const row = await createImportRow(ctx, "pdf", key);
   try {
     const buffer = await storage.get(key);
-    const pdfParse = (await import("pdf-parse")).default;
-    const parsed = await pdfParse(buffer);
-    const text = parsed.text.trim();
+    const text = (await extractPdfText(buffer)).trim();
     if (!text) {
       await markFailed(ctx, row.id, "pdf_no_text_layer");
       return { ok: false, reason: "pdf_no_text_layer" };
@@ -84,6 +82,23 @@ export async function importFromPdf(ctx: TenantContext, key: string): Promise<Im
     await markFailed(ctx, row.id, String(error));
     return { ok: false, reason: "extraction_failed" };
   }
+}
+
+/** `pdfjs-dist`'s own text layer reader — no rendering, no canvas, just the
+ *  text runs per page. Mozilla's actively maintained engine; the older
+ *  `pdf-parse` package bundles a years-stale pdf.js that rejects PDFs from
+ *  perfectly ordinary modern writers (react-pdf's own output included) with
+ *  a "bad XRef entry" error. */
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pages: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    pages.push(content.items.map((item) => ("str" in item ? item.str : "")).join(" "));
+  }
+  return pages.join("\n");
 }
 
 /** A same-tenant rate limit, a 200 KB cap on the response, and a crude

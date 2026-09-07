@@ -74,12 +74,14 @@ describe.skipIf(!hasDb)("contracts lifecycle (MySQL)", () => {
   });
 
   it("refuses a template that references an unknown variable, naming it", async () => {
+    // negocio.nombre is a known variable since K3 — this has to be one
+    // nothing registers.
     await expect(
       contracts.createContractTemplate(ctx, {
         name: "Malo",
-        body: "Hola {{negocio.nombre}}",
+        body: "Hola {{negocio.no_existe}}",
       }),
-    ).rejects.toMatchObject({ variable: "negocio.nombre" });
+    ).rejects.toMatchObject({ variable: "negocio.no_existe" });
   });
 
   it("full lifecycle: draft -> sent -> accepted, PDF hash recorded, trigger fired, deal referenced", async () => {
