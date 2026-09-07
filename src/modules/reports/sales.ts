@@ -45,11 +45,19 @@ export type SourceRow = {
 
 export type AgentRow = {
   userId: string;
+  /** Leads whose resulting deal this agent owns — a lead has no owner of its
+   *  own until it becomes a deal. */
+  leads: number;
+  dealsOpened: number;
   dealsWon: number;
+  dealsLost: number;
   wonValue: number;
   dealsOpen: number;
   messagesSent: number;
   tasksCompleted: number;
+  /** Median first-response time across this agent's own replies — null
+   *  when they haven't sent one in the window. */
+  responseMedianMinutes: number | null;
 };
 
 export type MonthRow = { month: string; won: number; lost: number; wonValue: number };
@@ -63,6 +71,31 @@ export type ResponseTimes = {
   slowestMinutes: number | null;
 };
 
+/** One bucket of the response-time distribution (§17.3 P15) — coarser than
+ *  the median/slowest pair above, so a rep can see the shape (mostly fast
+ *  with one bad weekend vs. uniformly slow) rather than one summary number. */
+export type ResponseBucket = "under15m" | "15mTo1h" | "1hTo24h" | "over24h";
+export type ResponseBucketRow = { bucket: ResponseBucket; count: number };
+
+export type StageConversionRow = {
+  stageId: string;
+  name: string;
+  position: number;
+  /** Deals currently at this stage or further along it (§17.3 P15's
+   *  "stage-by-stage conversion") — a cumulative funnel read off each deal's
+   *  *current* stage, since no stage-history table exists to reconstruct
+   *  which deals ever passed through a stage they have since left. */
+  reachedOrPast: number;
+};
+
+export type ReportFilters = {
+  /** Narrows every table to one pipeline's deals and stages. */
+  pipelineId?: string;
+  /** Narrows every table to one agent's own numbers — the same report a rep
+   *  sees for themself, exactly what they'd get filtering by their own id. */
+  agentUserId?: string;
+};
+
 export type SalesReport = {
   window: ReportWindow;
   funnel: FunnelCounts;
@@ -71,6 +104,10 @@ export type SalesReport = {
   byAgent: AgentRow[];
   byMonth: MonthRow[];
   response: ResponseTimes;
+  responseDistribution: ResponseBucketRow[];
+  /** Present only when `filters.pipelineId` is given — computing a funnel
+   *  without a pipeline to order stages by would not mean anything. */
+  stageConversion: StageConversionRow[];
 };
 
 type Utm = { source?: string; campaign?: string };
@@ -88,28 +125,30 @@ function median(values: number[]): number | null {
   return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
 }
 
+type ResponseMessage = {
+  conversationId: string;
+  direction: string;
+  createdAt: Date;
+  sentByUserId?: string | null;
+};
+
+type FirstResponse = { minutes: number; respondedByUserId: string | null } | { minutes: null };
+
 /**
- * First-response time per conversation: from the first inbound message in the
- * window to the first outbound message after it.
- *
- * The median rather than the mean, because one holiday weekend would drag an
- * average past the point of meaning anything. Conversations that were never
- * answered are counted separately rather than folded in as a huge number —
- * "eleven unanswered" is the actionable form of that fact.
+ * First-response time per conversation: from the first inbound message in
+ * the window to the first outbound message after it — `null` when nobody
+ * answered. The one pass every response-time reading in this module is
+ * built from, so "who replied" and "how long it took" never drift apart.
  */
-export function computeResponseTimes(
-  rows: Array<{ conversationId: string; direction: string; createdAt: Date }>,
-): ResponseTimes {
-  const byConversation = new Map<string, Array<{ direction: string; createdAt: Date }>>();
+function firstResponsesByConversation(rows: ResponseMessage[]): FirstResponse[] {
+  const byConversation = new Map<string, ResponseMessage[]>();
   for (const row of rows) {
     const list = byConversation.get(row.conversationId) ?? [];
-    list.push({ direction: row.direction, createdAt: row.createdAt });
+    list.push(row);
     byConversation.set(row.conversationId, list);
   }
 
-  const minutes: number[] = [];
-  let unanswered = 0;
-
+  const results: FirstResponse[] = [];
   for (const list of byConversation.values()) {
     list.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     const firstInbound = list.find((message) => message.direction === "in");
@@ -121,11 +160,32 @@ export function computeResponseTimes(
         message.createdAt.getTime() >= firstInbound.createdAt.getTime(),
     );
     if (!reply) {
-      unanswered += 1;
+      results.push({ minutes: null });
       continue;
     }
-    minutes.push((reply.createdAt.getTime() - firstInbound.createdAt.getTime()) / 60000);
+    results.push({
+      minutes: (reply.createdAt.getTime() - firstInbound.createdAt.getTime()) / 60000,
+      respondedByUserId: reply.sentByUserId ?? null,
+    });
   }
+  return results;
+}
+
+/**
+ * First-response time per conversation, aggregated: from the first inbound
+ * message in the window to the first outbound message after it.
+ *
+ * The median rather than the mean, because one holiday weekend would drag an
+ * average past the point of meaning anything. Conversations that were never
+ * answered are counted separately rather than folded in as a huge number —
+ * "eleven unanswered" is the actionable form of that fact.
+ */
+export function computeResponseTimes(rows: ResponseMessage[]): ResponseTimes {
+  const responses = firstResponsesByConversation(rows);
+  const minutes = responses
+    .map((response) => response.minutes)
+    .filter((value): value is number => value !== null);
+  const unanswered = responses.length - minutes.length;
 
   return {
     answered: minutes.length,
@@ -135,17 +195,106 @@ export function computeResponseTimes(
   };
 }
 
+const RESPONSE_BUCKET_ORDER: ResponseBucket[] = ["under15m", "15mTo1h", "1hTo24h", "over24h"];
+
+function bucketOf(minutes: number): ResponseBucket {
+  if (minutes < 15) return "under15m";
+  if (minutes < 60) return "15mTo1h";
+  if (minutes < 24 * 60) return "1hTo24h";
+  return "over24h";
+}
+
+/** The shape of response times, not just their median (§17.3 P15) —
+ *  answered conversations only, bucketed into fixed, always-present rows so
+ *  a chart never has to guess which buckets exist. */
+export function computeResponseBuckets(rows: ResponseMessage[]): ResponseBucketRow[] {
+  const counts = new Map<ResponseBucket, number>();
+  for (const response of firstResponsesByConversation(rows)) {
+    if (response.minutes === null) continue;
+    const bucket = bucketOf(response.minutes);
+    counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  }
+  return RESPONSE_BUCKET_ORDER.map((bucket) => ({ bucket, count: counts.get(bucket) ?? 0 }));
+}
+
+/** Median first-response minutes, per replying agent — the per-agent half
+ *  of the same first-response computation above. */
+function responseMedianByAgent(rows: ResponseMessage[]): Map<string, number> {
+  const byAgent = new Map<string, number[]>();
+  for (const response of firstResponsesByConversation(rows)) {
+    if (response.minutes === null || !response.respondedByUserId) continue;
+    const list = byAgent.get(response.respondedByUserId) ?? [];
+    list.push(response.minutes);
+    byAgent.set(response.respondedByUserId, list);
+  }
+
+  const result = new Map<string, number>();
+  for (const [userId, minutes] of byAgent) {
+    const value = median(minutes);
+    if (value !== null) result.set(userId, value);
+  }
+  return result;
+}
+
+/**
+ * Cumulative stage funnel for one pipeline (§17.3 P15): for each stage,
+ * ordered by position, how many deals are currently at that stage or one
+ * further along — read off each deal's *current* stage, since no
+ * stage-history table exists to ask "did this deal ever reach stage N".
+ */
+export function computeStageFunnel(
+  dealRows: (typeof deals.$inferSelect)[],
+  stageRows: (typeof stages.$inferSelect)[],
+  pipelineId: string,
+): StageConversionRow[] {
+  const pipelineStages = stageRows
+    .filter((stage) => stage.pipelineId === pipelineId)
+    .sort((a, b) => a.position - b.position);
+
+  const countAtPosition = new Map<number, number>();
+  for (const deal of dealRows) {
+    if (deal.pipelineId !== pipelineId) continue;
+    const stage = pipelineStages.find((candidate) => candidate.id === deal.stageId);
+    if (!stage) continue;
+    countAtPosition.set(stage.position, (countAtPosition.get(stage.position) ?? 0) + 1);
+  }
+
+  // Cumulative from the end: "reached stage N or past it" sums this stage's
+  // own count with every later stage's.
+  let runningTotal = 0;
+  const totalsByPosition = new Map<number, number>();
+  for (let i = pipelineStages.length - 1; i >= 0; i--) {
+    runningTotal += countAtPosition.get(pipelineStages[i]!.position) ?? 0;
+    totalsByPosition.set(pipelineStages[i]!.position, runningTotal);
+  }
+
+  return pipelineStages.map((stage) => ({
+    stageId: stage.id,
+    name: stage.name,
+    position: stage.position,
+    reachedOrPast: totalsByPosition.get(stage.position) ?? 0,
+  }));
+}
+
 function monthKey(date: Date): string {
   return date.toISOString().slice(0, 7);
+}
+
+/** The same length of time, immediately before `window.from` — the
+ *  comparison column every P15 table carries (§17.3 P15). */
+export function previousWindow(window: ReportWindow): ReportWindow {
+  const spanMs = window.to.getTime() - window.from.getTime();
+  return { from: new Date(window.from.getTime() - spanMs), to: window.from, days: window.days };
 }
 
 export async function getSalesReport(
   ctx: TenantContext,
   window: ReportWindow,
+  filters: ReportFilters = {},
 ): Promise<SalesReport> {
   const db = tenantDb(ctx);
 
-  const [leadRows, contactRows, dealRows, stageRows, messageRows, taskRows] = await Promise.all([
+  const [leadRows, contactRows, allDealRows, stageRows, messageRows, taskRows] = await Promise.all([
     db.select(leadSubmissions, inWindow(leadSubmissions.createdAt, window)),
     db.select(contacts, inWindow(contacts.createdAt, window)),
     // Deals are read on *creation* in the window and again on closure below —
@@ -157,6 +306,15 @@ export async function getSalesReport(
     db.select(messages, inWindow(messages.createdAt, window)),
     db.select(tasks, inWindow(tasks.dueAt, window)),
   ]);
+
+  // Both filters narrow the same one array; everything below reads only
+  // `dealRows`, so a pipeline or agent filter reaches every table (funnel,
+  // sources, agents, months, the stage funnel) without a second pass.
+  const dealRows = allDealRows.filter(
+    (deal) =>
+      (!filters.pipelineId || deal.pipelineId === filters.pipelineId) &&
+      (!filters.agentUserId || deal.assignedUserId === filters.agentUserId),
+  );
 
   const wonStages = new Set(stageRows.filter((stage) => stage.isWon).map((stage) => stage.id));
   const lostStages = new Set(stageRows.filter((stage) => stage.isLost).map((stage) => stage.id));
@@ -199,21 +357,35 @@ export async function getSalesReport(
   const agentRow = (userId: string) => {
     const row = agents.get(userId) ?? {
       userId,
+      leads: 0,
+      dealsOpened: 0,
       dealsWon: 0,
+      dealsLost: 0,
       wonValue: 0,
       dealsOpen: 0,
       messagesSent: 0,
       tasksCompleted: 0,
+      responseMedianMinutes: null,
     };
     agents.set(userId, row);
     return row;
   };
 
+  for (const lead of leadRows) {
+    const deal = lead.dealId ? dealsById.get(lead.dealId) : undefined;
+    if (deal?.assignedUserId) agentRow(deal.assignedUserId).leads += 1;
+  }
+  for (const deal of openedInWindow) {
+    if (deal.assignedUserId) agentRow(deal.assignedUserId).dealsOpened += 1;
+  }
   for (const deal of wonInWindow) {
     if (!deal.assignedUserId) continue;
     const row = agentRow(deal.assignedUserId);
     row.dealsWon += 1;
     row.wonValue += deal.value;
+  }
+  for (const deal of lostInWindow) {
+    if (deal.assignedUserId) agentRow(deal.assignedUserId).dealsLost += 1;
   }
   for (const deal of dealRows) {
     if (!deal.assignedUserId) continue;
@@ -228,6 +400,9 @@ export async function getSalesReport(
     if (!task.completedAt || !task.assignedUserId) continue;
     if (task.completedAt < window.from || task.completedAt >= window.to) continue;
     agentRow(task.assignedUserId).tasksCompleted += 1;
+  }
+  for (const [userId, minutes] of responseMedianByAgent(messageRows)) {
+    if (agents.has(userId)) agentRow(userId).responseMedianMinutes = minutes;
   }
 
   const months = new Map<string, MonthRow>();
@@ -262,5 +437,9 @@ export async function getSalesReport(
     byAgent: [...agents.values()].sort((a, b) => b.wonValue - a.wonValue),
     byMonth: [...months.values()].sort((a, b) => a.month.localeCompare(b.month)),
     response: computeResponseTimes(messageRows),
+    responseDistribution: computeResponseBuckets(messageRows),
+    stageConversion: filters.pipelineId
+      ? computeStageFunnel(allDealRows, stageRows, filters.pipelineId)
+      : [],
   };
 }

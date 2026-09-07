@@ -161,7 +161,7 @@ export const messages = mysqlTable(
      */
     mediaMimeType: varchar("media_mime_type", { length: 120 }),
     /**
-     * Voice-note transcription (PLAN.md §15.3 Lane A, §15.10 W1). Null for
+     * Voice-note transcription (PLAN.md §15.3 Lane A, §17.3 P9). Null for
      * every non-audio message and for audio received while no AI driver was
      * configured — the feature is opt-in and absent, never half-applied.
      */

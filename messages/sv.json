@@ -73,11 +73,14 @@
     "nav": {
       "dashboard": "Start",
       "contacts": "Kontakter",
+      "companies": "Företag",
+      "contracts": "Avtal",
       "pipeline": "Pipeline",
       "inbox": "Inkorg",
       "forms": "Formulär",
       "whatsapp": "WhatsApp",
       "settings": "Inställningar",
+      "negocio": "Företagsminne",
       "sites": "Webbplatser",
       "quotes": "Offerter",
       "documents": "Försäljningsnotor",
@@ -298,6 +301,19 @@
           "intro": "Du har {count, plural, one {# sak} other {# saker}} kvar idag:",
           "empty": "Inget brådskande just nu. Bra jobbat."
         }
+      },
+      "briefing": {
+        "title": "Veckans briefing",
+        "notificationTitle": "Din veckobriefing är klar",
+        "viewAll": "Se alla briefingar",
+        "listTitle": "Veckobriefingar",
+        "empty": "Ingen briefing ännu. Den första kommer på måndag.",
+        "recommendationsTitle": "Rekommendationer",
+        "weekOf": "Veckan från {date}",
+        "sourceValues": {
+          "ai": "AI-genererad",
+          "template": "Automatisk"
+        }
       }
     },
     "pipeline": {
@@ -389,6 +405,7 @@
       "emptyTitle": "Inga formulär ännu",
       "emptyBody": "Skapa ett formulär och klistra in länken på din webbplats eller i din profil: uppgifterna går rakt in i CRM:et, utan kalkylblad emellan.",
       "publicUrl": "Publik länk",
+      "editFields": "Redigera fält",
       "createTitle": "Nytt formulär",
       "name": "Namn",
       "slug": "Slug",
@@ -404,7 +421,40 @@
       },
       "turnstileSite": "Botskydd med den här webbplatsens nycklar",
       "turnstileNone": "Inget extra skydd",
-      "turnstileSave": "Spara"
+      "turnstileSave": "Spara",
+      "editor": {
+        "title": "Fält för {name}",
+        "locked": "Detta formulär har redan svar: befintliga fält kan fortfarande redigeras, men deras nyckel kan inte ändras.",
+        "label": "Etikett",
+        "type": "Typ",
+        "required": "Obligatoriskt",
+        "mapTo": "Spara i anpassat fält",
+        "mapToNone": "— spara inte —",
+        "options": "Alternativ (kommaseparerade)",
+        "moveUp": "Flytta upp",
+        "moveDown": "Flytta ner",
+        "remove": "Ta bort",
+        "addField": "Lägg till fält",
+        "save": "Spara fält",
+        "types": {
+          "text": "Text",
+          "phone": "Telefon",
+          "email": "E-post",
+          "select": "Rullista",
+          "textarea": "Lång text",
+          "checkbox": "Kryssruta",
+          "date": "Datum"
+        },
+        "errors": {
+          "invalid": "Kontrollera fälten: viss data är ogiltig.",
+          "duplicate_key": "Två fält kan inte dela samma nyckel. Ändra en av etiketterna.",
+          "select_needs_options": "En rullista behöver minst ett alternativ.",
+          "map_to_unknown": "Det anpassade fältet finns inte.",
+          "phone_required": "Formuläret behöver exakt ett obligatoriskt telefonfält.",
+          "key_immutable": "Detta formulär har redan svar: ett befintligt fälts nyckel kan inte ändras. Ta bort det och lägg till ett nytt om du behöver en annan typ.",
+          "unknown": "Det gick inte att spara. Försök igen."
+        }
+      }
     },
     "users": {
       "title": "Team",
@@ -547,7 +597,9 @@
         "conversacion": "Konversation",
         "actividad": "Aktivitet",
         "datos": "Uppgifter",
-        "tareas": "Uppgifter att göra"
+        "tareas": "Uppgifter att göra",
+        "contratos": "Avtal",
+        "fusionar": "Slå ihop"
       },
       "searchLabel": "Sök",
       "tag": "Tagg",
@@ -667,6 +719,34 @@
         "submissions": "inkomna leads",
         "automationRuns": "körda automationer"
       },
+      "company": {
+        "title": "Företag",
+        "none": "Inget företag",
+        "save": "Spara"
+      },
+      "merge": {
+        "intro": "Slå ihop den här kontakten med en annan som är samma person. Den här kontakten behåller sin identitet, telefonnummer och historik; den andra tas bort vid bekräftelse. Går inte att ångra.",
+        "otherContact": "Slå ihop med",
+        "chooseContact": "Välj den andra kontakten",
+        "keepThis": "Den här kontakten",
+        "keepOther": "Den andra",
+        "countsWillMove": "Affärer, offerter, dokument, konversationer, uppgifter och allt annat på den andra kontakten flyttas till den här.",
+        "confirm": "Slå ihop kontakter",
+        "warning": "Den här åtgärden går inte att ångra.",
+        "adminOnly": "Bara en administratör kan slå ihop kontakter.",
+        "errors": {
+          "invalid": "Kunde inte slå ihop. Kontrollera uppgifterna och försök igen.",
+          "sameContact": "Du kan inte slå ihop en kontakt med sig själv.",
+          "notFound": "En av de två kontakterna hittades inte."
+        }
+      },
+      "duplicates": {
+        "title": "Möjliga dubbletter",
+        "empty": "Inga möjliga dubbletter hittades.",
+        "reasonEmail": "Samma e-post",
+        "reasonNameAndPhone": "Samma namn och liknande telefonnummer",
+        "review": "Granska"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "Alla pipelines",
       "stage": "Steg",
@@ -692,6 +772,37 @@
       "customFilterEquals": "Är lika med",
       "customFilterContains": "Innehåller",
       "customFilterValue": "Värde"
+    },
+    "companies": {
+      "title": "Företag",
+      "intro": "Kontona bakom dina kontakter: RUC, telefon och delade anteckningar, plus vilka som jobbar där och vilka affärer som är öppna.",
+      "emptyTitle": "Inga företag än",
+      "emptyBody": "Lägg till ett företag för att gruppera kontakterna som jobbar där och se deras affärer på ett ställe.",
+      "createTitle": "Nytt företag",
+      "editTitle": "Redigera företag",
+      "save": "Spara",
+      "name": "Namn",
+      "ruc": "RUC",
+      "phone": "Telefon",
+      "email": "E-post",
+      "address": "Adress",
+      "notes": "Anteckningar",
+      "table": {
+        "name": "Namn",
+        "contacts": "Kontakter",
+        "openDeals": "Öppna affärer"
+      },
+      "contactsTitle": "Kontakter",
+      "contactsEmpty": "Inga kontakter på detta företag än",
+      "dealsTitle": "Affärer",
+      "dealsEmpty": "Inga affärer för detta företag än",
+      "delete": "Ta bort företag",
+      "deleteConfirm": "Ta bort detta företag? Det går inte att ångra.",
+      "deleteBlocked": "Kan inte ta bort: har fortfarande kontakter.",
+      "errors": {
+        "invalid": "Kontrollera fälten: namn krävs.",
+        "nameTaken": "Du har redan ett företag med det namnet."
+      }
     },
     "inbox": {
       "title": "Inkorg",
@@ -960,6 +1071,51 @@
       "viewReceipt": "Kvitto",
       "sendReceiptWhatsapp": "Skicka kvitto via WhatsApp"
     },
+    "contracts": {
+      "title": "Avtal",
+      "intro": "Skapa ett avtal från en mall, skicka det via WhatsApp eller e-post, och kunden godkänner det med ett klick från mobilen.",
+      "emptyTitle": "Inga avtal ännu",
+      "emptyBody": "Välj en kontakt och en mall för att skapa det första avtalet.",
+      "createTitle": "Nytt avtal",
+      "needContact": "Du behöver minst en kontakt först.",
+      "goToContacts": "Gå till kontakter",
+      "needTemplate": "Du behöver minst en aktiv mall först.",
+      "manageTemplates": "Hantera mallar",
+      "number": "Nummer",
+      "contact": "Kontakt",
+      "template": "Mall",
+      "status": "Status",
+      "statusValues": {
+        "draft": "Utkast",
+        "sent": "Skickat",
+        "accepted": "Godkänt",
+        "declined": "Avböjt",
+        "voided": "Ogiltigförklarat"
+      },
+      "sendWhatsapp": "Skicka via WhatsApp",
+      "sendEmail": "Skicka via e-post",
+      "publicLink": "Offentlig länk",
+      "downloadPdf": "Ladda ner PDF",
+      "decisionAccepted": "Kunden godkände avtalet.",
+      "decisionDeclined": "Kunden avböjde avtalet.",
+      "voidTitle": "Ogiltigförklara",
+      "voidReason": "Anledning",
+      "voidWarning": "Att ogiltigförklara ett avtal är permanent.",
+      "voidAction": "Ogiltigförklara avtal",
+      "voidedNotice": "Ogiltigförklarat: {reason}",
+      "templatesTitle": "Avtalsmallar",
+      "templatesIntro": "Skriv innehållet i vanlig text. Använd # för en rubrik och en tom rad för att separera stycken. Tillgängliga variabler, inom dubbla klamrar: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Namn",
+      "templateBody": "Innehåll",
+      "templateBodyHint": "Vanlig text — ingen Markdown eller HTML. # Rubrik för ett avsnitt, tom rad mellan stycken.",
+      "templateActive": "Aktiv",
+      "templateSave": "Spara ändringar",
+      "templateCreate": "Skapa mall",
+      "errors": {
+        "invalid": "Kunde inte spara. Kontrollera uppgifterna och försök igen.",
+        "unknownVariable": "Mallen använder en okänd variabel"
+      }
+    },
     "settings": {
       "title": "Inställningar",
       "intro": "Företagsuppgifterna som resten av systemet använder: varumärket som syns på offert-PDF:erna och öppettiderna som automationerna respekterar.",
@@ -1004,6 +1160,8 @@
       },
       "aiTitle": "AI-svar",
       "aiIntro": "AI:n skriver utkast till WhatsApp-svar utifrån din verksamhets sammanhang. Börja i utkastläge: en säljare granskar varje meddelande innan det går ut. Inget skickas någonsin utanför 24-timmarsfönstret.",
+      "aiBusinessProfileIntro": "Om företaget, ton och öppettider fylls nu i under företagsminnet.",
+      "aiBusinessProfileLink": "Gå till Företagsminne",
       "aiNotConfigured": "Ingen AI-leverantör är konfigurerad på servern ännu. Du kan spara inställningarna, men inga svar genereras förrän operatören aktiverar det.",
       "aiEnabled": "Slå på AI-svar",
       "aiMode": "Svarsläge",
@@ -1582,9 +1740,35 @@
         "won": "Vunna",
         "wonValue": "Sålt",
         "open": "Öppna",
+        "opened": "Öppnade i perioden",
+        "lost": "Förlorade",
         "messages": "Meddelanden",
         "tasks": "Uppgifter",
+        "responseMedian": "Svarstid (median)",
+        "stage": "Steg",
+        "reachedOrPast": "Nådde eller passerade",
+        "bucket": "Intervall",
+        "conversations": "Konversationer",
         "empty": "Ingen data för den här perioden ännu."
+      },
+      "customRange": "Anpassat intervall",
+      "from": "Från",
+      "to": "Till",
+      "apply": "Tillämpa",
+      "pipeline": "Pipeline",
+      "agent": "Säljare",
+      "allPipelines": "Alla pipelines",
+      "allAgents": "Alla säljare",
+      "vsPrevious": "jämfört med föregående period",
+      "exportCsv": "Exportera CSV",
+      "stageConversionTitle": "Stegtratt",
+      "stageConversionHint": "Välj en pipeline för att se dess stegtratt.",
+      "responseDistributionTitle": "Fördelning av svarstid",
+      "responseBuckets": {
+        "under15m": "Under 15 min",
+        "15mTo1h": "15 min till 1 timme",
+        "1hTo24h": "1 till 24 timmar",
+        "over24h": "Över 24 timmar"
       }
     },
     "booking": {
@@ -3327,6 +3511,11 @@
       "appointmentsSubject": "Du har {count} bokning(ar) idag",
       "appointmentsBody": "I din kalender de närmaste 24 timmarna: {count} bokning(ar).",
       "allDay": "Heldag"
+    },
+    "weeklyBriefing": {
+      "subject": "{business}s veckobriefing",
+      "title": "Din veckobriefing",
+      "cta": "Se hela briefingen"
     }
   },
   "pdf": {
@@ -3379,6 +3568,23 @@
         "check": "Check",
         "other": "Annat"
       }
+    },
+    "contract": {
+      "title": "AVTAL",
+      "client": "Kund",
+      "legalNotice": "Enkel elektronisk signatur enligt Ley 4017/2010 — inte en certifierad digital signatur.",
+      "footer": "Icke-skattemässigt dokument",
+      "caption": "Avtal",
+      "acceptancePageTitle": "Godkännanderegistrering",
+      "decisionLabel": "Beslut",
+      "decisionValues": {
+        "accepted": "Godkänt",
+        "declined": "Avböjt"
+      },
+      "nameLabel": "Namn",
+      "dateLabel": "Datum",
+      "ipLabel": "IP-adress",
+      "userAgentLabel": "Webbläsare"
     }
   },
   "public": {
@@ -3522,6 +3728,27 @@
         "card": "Kort",
         "check": "Check",
         "other": "Annat"
+      }
+    },
+    "contract": {
+      "title": "Avtal",
+      "downloadPdf": "Ladda ner PDF",
+      "legalNotice": "Det här dokumentet godkänns med en enkel elektronisk signatur, enligt Ley 4017/2010 — inte en certifierad digital signatur.",
+      "decisionPrompt": "Godkänner du det här avtalet?",
+      "decisionNameLabel": "Ditt namn",
+      "decisionNamePlaceholder": "För- och efternamn",
+      "decisionAccept": "Godkänn",
+      "decisionDecline": "Avböj",
+      "decisionAcceptedGeneric": "Klart! Vi har registrerat ditt godkännande.",
+      "decisionDeclinedGeneric": "Klart, vi har registrerat ditt svar.",
+      "decisionAccepted": "Godkänt av {name}",
+      "decisionDeclined": "Avböjt av {name}",
+      "decisionErrors": {
+        "nameRequired": "Skriv ditt namn innan du fortsätter.",
+        "rateLimited": "För många förfrågningar. Försök igen om en stund.",
+        "alreadyDecided": "Det här avtalet har redan besvarats.",
+        "notSent": "Det här avtalet har inte skickats än.",
+        "invalid": "Vi kunde inte behandla ditt svar. Försök igen."
       }
     }
   }

@@ -7,7 +7,7 @@ import { countRepliesTodayForTenant, recordReply } from "@/modules/ai/replies";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 
-// WhatsApp voice notes, transcribed (PLAN.md §15.3 "Lane A", §15.10 W1).
+// WhatsApp voice notes, transcribed (PLAN.md §15.3 "Lane A", §17.3 P9).
 // Paraguayan customers send audios constantly and a rep who reads instead of
 // listening moves faster — so the transcript is a column on the message, not
 // a separate surface, and everything downstream (search, the AI auto-reply,
@@ -20,7 +20,7 @@ import { tenantDb } from "@/modules/tenancy/db";
 /**
  * WhatsApp caps a voice note at 16 MB itself, so this is a floor against a
  * pathological object rather than a policy — an opus voice note runs about
- * 1 MB for ten minutes. Duration is the limit §15.10 W1 names, but neither
+ * 1 MB for ten minutes. Duration is the limit §17.3 P9 names, but neither
  * the webhook payload nor the stored object carries it, and decoding the
  * container to find out would cost more than the transcription; the byte cap
  * stands in for it and is documented as such in docs/log/w1.md.
@@ -88,7 +88,7 @@ export async function transcribeMessage(
 
   // The same ceiling every other provider call answers to. Transcriptions
   // write `ai_replies` rows like replies do, so this is one budget rather
-  // than two — the reason §15.10 W1 put audio behind this seam at all.
+  // than two — the reason §17.3 P9 put audio behind this seam at all.
   const config = await getAiConfig(ctx);
   if ((await countRepliesTodayForTenant(ctx)) >= config.maxRepliesPerTenantPerDay) {
     return skip(ctx, row, "tenant_daily_cap");

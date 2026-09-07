@@ -260,3 +260,36 @@ export async function taskRemindersEmail(input: {
     ),
   };
 }
+
+/**
+ * The Monday weekly briefing (PLAN.md §15.3 L2, §17.2 P14) — the same
+ * narrative and recommendations the dashboard card shows, mailed to every
+ * tenant admin.
+ */
+export async function weeklyBriefingEmail(input: {
+  businessName: string;
+  summary: string;
+  recommendations: string[];
+  briefingUrl: string;
+  locale?: string | null;
+}): Promise<Email> {
+  const locale = input.locale ?? "es";
+  const t = await getTranslator(locale, "email.weeklyBriefing");
+
+  const items = input.recommendations
+    .map((line) => `<li style="margin-bottom:8px;">${line}</li>`)
+    .join("");
+
+  return {
+    subject: t("subject", { business: input.businessName }),
+    html: layout(
+      `
+      ${heading(t("title"))}
+      ${paragraph(input.summary)}
+      <ul style="font-size:14px;line-height:1.5;color:#3f3f46;padding-left:18px;">${items}</ul>
+      ${button(input.briefingUrl, t("cta"))}
+    `,
+      locale,
+    ),
+  };
+}

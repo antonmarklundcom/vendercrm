@@ -73,11 +73,14 @@
     "nav": {
       "dashboard": "Inicio",
       "contacts": "Contactos",
+      "companies": "Empresas",
+      "contracts": "Contratos",
       "pipeline": "Pipeline",
       "inbox": "Bandeja",
       "forms": "Formularios",
       "whatsapp": "WhatsApp",
       "settings": "Configuración",
+      "negocio": "Memoria del negocio",
       "sites": "Sitios",
       "quotes": "Presupuestos",
       "documents": "Notas de venta",
@@ -298,6 +301,19 @@
           "intro": "Tenés {count, plural, one {# cosa pendiente} other {# cosas pendientes}} hoy:",
           "empty": "No tenés nada urgente por ahora. Buen trabajo."
         }
+      },
+      "briefing": {
+        "title": "Briefing semanal",
+        "notificationTitle": "Tu briefing semanal está listo",
+        "viewAll": "Ver todos los briefings",
+        "listTitle": "Briefings semanales",
+        "empty": "Todavía no hay un briefing. El primero llega el lunes.",
+        "recommendationsTitle": "Recomendaciones",
+        "weekOf": "Semana del {date}",
+        "sourceValues": {
+          "ai": "Generado con IA",
+          "template": "Automático"
+        }
       }
     },
     "contacts": {
@@ -348,7 +364,9 @@
         "conversacion": "Conversación",
         "actividad": "Actividad",
         "datos": "Datos",
-        "tareas": "Tareas"
+        "tareas": "Tareas",
+        "contratos": "Contratos",
+        "fusionar": "Fusionar"
       },
       "searchLabel": "Buscar",
       "tag": "Etiqueta",
@@ -468,6 +486,34 @@
         "submissions": "leads recibidos",
         "automationRuns": "automatizaciones ejecutadas"
       },
+      "company": {
+        "title": "Empresa",
+        "none": "Sin empresa",
+        "save": "Guardar"
+      },
+      "merge": {
+        "intro": "Fusioná este contacto con otro que sea la misma persona. Este contacto conserva su identidad, su teléfono y su historial; el otro se elimina al confirmar. No se puede deshacer.",
+        "otherContact": "Fusionar con",
+        "chooseContact": "Elegí el otro contacto",
+        "keepThis": "Este contacto",
+        "keepOther": "El otro",
+        "countsWillMove": "Los negocios, presupuestos, notas de venta, conversaciones, tareas y todo lo demás del otro contacto pasan a este.",
+        "confirm": "Fusionar contactos",
+        "warning": "Esta acción no se puede deshacer.",
+        "adminOnly": "Solo un administrador puede fusionar contactos.",
+        "errors": {
+          "invalid": "No se pudo fusionar. Revisá los datos e intentá de nuevo.",
+          "sameContact": "No podés fusionar un contacto consigo mismo.",
+          "notFound": "No se encontró alguno de los dos contactos."
+        }
+      },
+      "duplicates": {
+        "title": "Posibles duplicados",
+        "empty": "No se encontraron posibles duplicados.",
+        "reasonEmail": "Mismo email",
+        "reasonNameAndPhone": "Mismo nombre y teléfono similar",
+        "review": "Revisar"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "Todos los pipelines",
       "stage": "Etapa",
@@ -493,6 +539,37 @@
       "customFilterEquals": "Es igual a",
       "customFilterContains": "Contiene",
       "customFilterValue": "Valor"
+    },
+    "companies": {
+      "title": "Empresas",
+      "intro": "Las cuentas detrás de tus contactos: RUC, teléfono y notas compartidas, más quiénes trabajan ahí y qué negocios tienen abiertos.",
+      "emptyTitle": "Todavía no hay empresas",
+      "emptyBody": "Cargá una empresa para agrupar los contactos que trabajan ahí y ver sus negocios en un solo lugar.",
+      "createTitle": "Nueva empresa",
+      "editTitle": "Editar empresa",
+      "save": "Guardar",
+      "name": "Nombre",
+      "ruc": "RUC",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "address": "Dirección",
+      "notes": "Notas",
+      "table": {
+        "name": "Nombre",
+        "contacts": "Contactos",
+        "openDeals": "Negocios abiertos"
+      },
+      "contactsTitle": "Contactos",
+      "contactsEmpty": "Todavía no hay contactos en esta empresa",
+      "dealsTitle": "Negocios",
+      "dealsEmpty": "Todavía no hay negocios de esta empresa",
+      "delete": "Eliminar empresa",
+      "deleteConfirm": "¿Eliminar esta empresa? Esta acción no se puede deshacer.",
+      "deleteBlocked": "No se puede eliminar: todavía tiene contactos asociados.",
+      "errors": {
+        "invalid": "Revisá los datos: el nombre es obligatorio.",
+        "nameTaken": "Ya tenés una empresa con ese nombre."
+      }
     },
     "pipeline": {
       "title": "Pipeline",
@@ -583,6 +660,7 @@
       "emptyTitle": "Todavía no hay formularios",
       "emptyBody": "Creá un formulario y pegá su enlace en tu sitio o en tu perfil: los datos entran directo al CRM, sin planillas de por medio.",
       "publicUrl": "Enlace público",
+      "editFields": "Editar campos",
       "createTitle": "Nuevo formulario",
       "name": "Nombre",
       "slug": "Slug",
@@ -598,7 +676,40 @@
       },
       "turnstileSite": "Anti-bots con las claves de este sitio",
       "turnstileNone": "Sin protección extra",
-      "turnstileSave": "Guardar"
+      "turnstileSave": "Guardar",
+      "editor": {
+        "title": "Campos de {name}",
+        "locked": "Este formulario ya tiene envíos: los campos existentes se pueden editar, pero su clave no se puede cambiar.",
+        "label": "Etiqueta",
+        "type": "Tipo",
+        "required": "Obligatorio",
+        "mapTo": "Guardar en campo personalizado",
+        "mapToNone": "— no guardar —",
+        "options": "Opciones (separadas por coma)",
+        "moveUp": "Subir",
+        "moveDown": "Bajar",
+        "remove": "Quitar",
+        "addField": "Agregar campo",
+        "save": "Guardar campos",
+        "types": {
+          "text": "Texto",
+          "phone": "Teléfono",
+          "email": "Correo electrónico",
+          "select": "Lista desplegable",
+          "textarea": "Texto largo",
+          "checkbox": "Casilla",
+          "date": "Fecha"
+        },
+        "errors": {
+          "invalid": "Revisá los campos: hay datos inválidos.",
+          "duplicate_key": "Dos campos no pueden tener la misma clave. Cambiá alguna etiqueta.",
+          "select_needs_options": "Una lista desplegable necesita al menos una opción.",
+          "map_to_unknown": "Ese campo personalizado no existe.",
+          "phone_required": "El formulario necesita exactamente un campo de teléfono obligatorio.",
+          "key_immutable": "Este formulario ya tiene envíos: no se puede cambiar la clave de un campo existente. Quitalo y agregá uno nuevo si necesitás otro tipo.",
+          "unknown": "No se pudo guardar. Intentá de nuevo."
+        }
+      }
     },
     "users": {
       "title": "Equipo",
@@ -686,6 +797,8 @@
       },
       "aiTitle": "Respuestas con IA",
       "aiIntro": "La IA redacta respuestas de WhatsApp usando el contexto de tu negocio. Empezá en modo borrador: un asesor revisa cada mensaje antes de que salga. Nunca se envía fuera de la ventana de 24 horas.",
+      "aiBusinessProfileIntro": "Sobre el negocio, tono y horario ahora se completan en la memoria del negocio.",
+      "aiBusinessProfileLink": "Ir a Memoria del negocio",
       "aiNotConfigured": "Todavía no hay un proveedor de IA configurado en el servidor. Podés guardar la configuración, pero no se van a generar respuestas hasta que el operador la habilite.",
       "aiEnabled": "Activar respuestas con IA",
       "aiMode": "Modo de respuesta",
@@ -1322,6 +1435,51 @@
       "viewReceipt": "Recibo",
       "sendReceiptWhatsapp": "Enviar recibo por WhatsApp"
     },
+    "contracts": {
+      "title": "Contratos",
+      "intro": "Generá un contrato desde una plantilla, mandalo por WhatsApp o email, y el cliente lo acepta con un clic desde el celular.",
+      "emptyTitle": "Todavía no hay contratos",
+      "emptyBody": "Elegí un contacto y una plantilla para generar el primer contrato.",
+      "createTitle": "Nuevo contrato",
+      "needContact": "Primero necesitás al menos un contacto.",
+      "goToContacts": "Ir a contactos",
+      "needTemplate": "Primero necesitás al menos una plantilla activa.",
+      "manageTemplates": "Administrar plantillas",
+      "number": "Número",
+      "contact": "Contacto",
+      "template": "Plantilla",
+      "status": "Estado",
+      "statusValues": {
+        "draft": "Borrador",
+        "sent": "Enviado",
+        "accepted": "Aceptado",
+        "declined": "Rechazado",
+        "voided": "Anulado"
+      },
+      "sendWhatsapp": "Enviar por WhatsApp",
+      "sendEmail": "Enviar por email",
+      "publicLink": "Enlace público",
+      "downloadPdf": "Descargar PDF",
+      "decisionAccepted": "El cliente aceptó el contrato.",
+      "decisionDeclined": "El cliente rechazó el contrato.",
+      "voidTitle": "Anular",
+      "voidReason": "Motivo",
+      "voidWarning": "Anular un contrato es definitivo.",
+      "voidAction": "Anular contrato",
+      "voidedNotice": "Anulado: {reason}",
+      "templatesTitle": "Plantillas de contrato",
+      "templatesIntro": "Escribí el cuerpo en texto plano. Usá # para un título de sección y una línea en blanco para separar párrafos. Variables disponibles entre llaves dobles: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Nombre",
+      "templateBody": "Cuerpo",
+      "templateBodyHint": "Texto plano — sin Markdown ni HTML. # Título para una sección, línea en blanco entre párrafos.",
+      "templateActive": "Activa",
+      "templateSave": "Guardar cambios",
+      "templateCreate": "Crear plantilla",
+      "errors": {
+        "invalid": "No se pudo guardar. Revisá los datos e intentá de nuevo.",
+        "unknownVariable": "La plantilla usa una variable desconocida"
+      }
+    },
     "automations": {
       "title": "Automatizaciones",
       "adminOnly": "Solo los administradores pueden ver esta página",
@@ -1582,9 +1740,35 @@
         "won": "Ganados",
         "wonValue": "Vendido",
         "open": "Abiertos",
+        "opened": "Abiertos en el período",
+        "lost": "Perdidos",
         "messages": "Mensajes",
         "tasks": "Tareas",
+        "responseMedian": "Respuesta (mediana)",
+        "stage": "Etapa",
+        "reachedOrPast": "Llegaron o pasaron",
+        "bucket": "Rango",
+        "conversations": "Conversaciones",
         "empty": "Todavía no hay datos en este período."
+      },
+      "customRange": "Rango personalizado",
+      "from": "Desde",
+      "to": "Hasta",
+      "apply": "Aplicar",
+      "pipeline": "Pipeline",
+      "agent": "Vendedor",
+      "allPipelines": "Todos los pipelines",
+      "allAgents": "Todos los vendedores",
+      "vsPrevious": "vs. período anterior",
+      "exportCsv": "Exportar CSV",
+      "stageConversionTitle": "Embudo por etapa",
+      "stageConversionHint": "Elegí un pipeline para ver el embudo por etapa.",
+      "responseDistributionTitle": "Distribución del tiempo de respuesta",
+      "responseBuckets": {
+        "under15m": "Menos de 15 min",
+        "15mTo1h": "15 min a 1 hora",
+        "1hTo24h": "1 a 24 horas",
+        "over24h": "Más de 24 horas"
       }
     },
     "booking": {
@@ -3327,6 +3511,11 @@
       "appointmentsSubject": "Tenés {count} cita(s) para hoy",
       "appointmentsBody": "En tu agenda para las próximas 24 horas: {count} cita(s).",
       "allDay": "Todo el día"
+    },
+    "weeklyBriefing": {
+      "subject": "Briefing semanal de {business}",
+      "title": "Tu briefing semanal",
+      "cta": "Ver el briefing completo"
     }
   },
   "pdf": {
@@ -3379,6 +3568,23 @@
         "check": "Cheque",
         "other": "Otro"
       }
+    },
+    "contract": {
+      "title": "CONTRATO",
+      "client": "Cliente",
+      "legalNotice": "Firma electrónica simple bajo la Ley 4017/2010 — no es una firma digital certificada.",
+      "footer": "Documento no fiscal",
+      "caption": "Contrato",
+      "acceptancePageTitle": "Registro de aceptación",
+      "decisionLabel": "Decisión",
+      "decisionValues": {
+        "accepted": "Aceptado",
+        "declined": "Rechazado"
+      },
+      "nameLabel": "Nombre",
+      "dateLabel": "Fecha",
+      "ipLabel": "Dirección IP",
+      "userAgentLabel": "Navegador"
     }
   },
   "public": {
@@ -3522,6 +3728,27 @@
         "card": "Tarjeta",
         "check": "Cheque",
         "other": "Otro"
+      }
+    },
+    "contract": {
+      "title": "Contrato",
+      "downloadPdf": "Descargar PDF",
+      "legalNotice": "Este documento se acepta mediante firma electrónica simple, bajo la Ley 4017/2010 — no es una firma digital certificada.",
+      "decisionPrompt": "¿Aceptás este contrato?",
+      "decisionNameLabel": "Tu nombre",
+      "decisionNamePlaceholder": "Nombre y apellido",
+      "decisionAccept": "Aceptar",
+      "decisionDecline": "Rechazar",
+      "decisionAcceptedGeneric": "¡Listo! Registramos tu aceptación.",
+      "decisionDeclinedGeneric": "Listo, registramos tu respuesta.",
+      "decisionAccepted": "Aceptado por {name}",
+      "decisionDeclined": "Rechazado por {name}",
+      "decisionErrors": {
+        "nameRequired": "Escribí tu nombre antes de continuar.",
+        "rateLimited": "Demasiadas solicitudes. Probá de nuevo en un momento.",
+        "alreadyDecided": "Este contrato ya fue respondido antes.",
+        "notSent": "Este contrato todavía no fue enviado.",
+        "invalid": "No pudimos procesar tu respuesta. Probá de nuevo."
       }
     }
   }

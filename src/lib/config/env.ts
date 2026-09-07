@@ -112,7 +112,7 @@ const envSchema = z
     /** Overrides the driver's default model. Optional — see lib/ai/*.ts. */
     AI_MODEL: z.string().min(1).optional(),
     /**
-     * Overrides the driver's default *audio* model (PLAN.md §15.10 W1).
+     * Overrides the driver's default *audio* model (PLAN.md §17.3 P9).
      * Separate from AI_MODEL because transcription is a different model on
      * OpenAI (`gpt-4o-mini-transcribe`) even when the chat model is set, and
      * because §15.7 item 3 leaves the provider choice open on price.

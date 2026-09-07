@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
-// W1 — voice notes (PLAN.md §15.3 Lane A, §15.10). Everything here is the
+// W1 — voice notes (PLAN.md §15.3 Lane A, §17.3 P9). Everything here is the
 // real path: a real stored object, the real driver seam with only `fetch`
 // stubbed, and real rows. The provider is the one thing a test cannot have.
 const hasDb = !!process.env.DATABASE_URL;

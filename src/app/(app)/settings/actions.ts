@@ -183,8 +183,8 @@ export async function updateReviewLinkAction(
   return { error: null, saved: true, values };
 }
 
-// The owner's own WhatsApp number for the voice coach (§15.3 Lane A, §15.10
-// W1). Stored as typed and normalised at comparison time, so a number saved
+// The owner's own WhatsApp number for the voice coach (§15.3 Lane A, §17.3
+// P9). Stored as typed and normalised at comparison time, so a number saved
 // as "0981 123 456" still matches the "+595981123456" WhatsApp sends.
 const coachPhoneSchema = z.string().trim().min(6).max(30);
 

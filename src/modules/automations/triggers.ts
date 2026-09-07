@@ -6,6 +6,7 @@ import { bookingEvents } from "@/modules/booking/events";
 import { chatEvents } from "@/modules/chatwidget/events";
 import { quoteEvents } from "@/modules/quotes/events";
 import { documentEvents } from "@/modules/documents/events";
+import { contractEvents } from "@/modules/contracts/events";
 import { whatsappEvents } from "@/modules/whatsapp/events";
 import { listActiveFlowsForTrigger } from "./flows";
 import { startRun } from "./engine";
@@ -165,6 +166,17 @@ export function registerAutomationTriggers() {
     },
   );
 
+  // Contracts (§17.2 P13) — closes the `contract_accepted` entry P1 left
+  // unemitted (docs/log/p1.md "Known issues").
+  contractEvents.on("contract.accepted", async ({ tenantId, contactId, contractId, dealId, number }) => {
+    await fireTrigger({
+      tenantId,
+      triggerType: "contract_accepted",
+      contactId,
+      data: { contractId, dealId, number },
+    });
+  });
+
   leadEvents.on("lead.received", async ({ tenantId, contactId, formId, siteId }) => {
     // A hosted-form lead fires both triggers so a flow can target either
     // "any lead" or "this specific form".
@@ -242,7 +254,7 @@ export function registerAutomationTriggers() {
   });
 
   // A voice note whose transcription is still queued is handled on
-  // `wa.message_transcribed` instead (§15.10 W1) — the same work, once the
+  // `wa.message_transcribed` instead (§17.3 P9) — the same work, once the
   // message has words in it. Both paths run onInboundMessage below, so the
   // opt-out check, the handoff keyword and every flow see the transcript
   // rather than an empty body.
@@ -309,8 +321,8 @@ async function contactForDeal(ctx: TenantContext, dealId: string): Promise<strin
   return deal?.contactId ?? null;
 }
 
-/** The text of a message — the transcript when it is a voice note (§15.10
- *  W1), so "BAJA" said out loud opts a contact out exactly like "BAJA"
+/** The text of a message — the transcript when it is a voice note (§17.3 P9)
+ *  so "BAJA" said out loud opts a contact out exactly like "BAJA"
  *  typed, and a flow's wait-for-reply hears an audio the same way. */
 async function messageBody(ctx: TenantContext, messageId: string): Promise<string> {
   const { eq } = await import("drizzle-orm");

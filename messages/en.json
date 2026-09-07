@@ -73,11 +73,14 @@
     "nav": {
       "dashboard": "Home",
       "contacts": "Contacts",
+      "companies": "Companies",
+      "contracts": "Contracts",
       "pipeline": "Pipeline",
       "inbox": "Inbox",
       "forms": "Forms",
       "whatsapp": "WhatsApp",
       "settings": "Settings",
+      "negocio": "Business memory",
       "sites": "Sites",
       "quotes": "Quotes",
       "documents": "Sales notes",
@@ -298,6 +301,19 @@
           "intro": "You have {count, plural, one {# thing} other {# things}} pending today:",
           "empty": "Nothing urgent right now. Good work."
         }
+      },
+      "briefing": {
+        "title": "Weekly briefing",
+        "notificationTitle": "Your weekly briefing is ready",
+        "viewAll": "View all briefings",
+        "listTitle": "Weekly briefings",
+        "empty": "No briefing yet. The first one arrives on Monday.",
+        "recommendationsTitle": "Recommendations",
+        "weekOf": "Week of {date}",
+        "sourceValues": {
+          "ai": "AI-generated",
+          "template": "Automatic"
+        }
       }
     },
     "pipeline": {
@@ -389,6 +405,7 @@
       "emptyTitle": "No forms yet",
       "emptyBody": "Create a form and paste its link on your site or in your profile: the data goes straight into the CRM, no spreadsheets in between.",
       "publicUrl": "Public link",
+      "editFields": "Edit fields",
       "createTitle": "New form",
       "name": "Name",
       "slug": "Slug",
@@ -404,7 +421,40 @@
       },
       "turnstileSite": "Anti-bot protection using this site's keys",
       "turnstileNone": "No extra protection",
-      "turnstileSave": "Save"
+      "turnstileSave": "Save",
+      "editor": {
+        "title": "Fields for {name}",
+        "locked": "This form already has submissions: existing fields can still be edited, but their key can't change.",
+        "label": "Label",
+        "type": "Type",
+        "required": "Required",
+        "mapTo": "Save into custom field",
+        "mapToNone": "— don't save —",
+        "options": "Options (comma-separated)",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "remove": "Remove",
+        "addField": "Add field",
+        "save": "Save fields",
+        "types": {
+          "text": "Text",
+          "phone": "Phone",
+          "email": "Email",
+          "select": "Dropdown",
+          "textarea": "Long text",
+          "checkbox": "Checkbox",
+          "date": "Date"
+        },
+        "errors": {
+          "invalid": "Check the fields: some data is invalid.",
+          "duplicate_key": "Two fields can't share the same key. Change one of the labels.",
+          "select_needs_options": "A dropdown needs at least one option.",
+          "map_to_unknown": "That custom field doesn't exist.",
+          "phone_required": "The form needs exactly one required phone field.",
+          "key_immutable": "This form already has submissions: an existing field's key can't change. Remove it and add a new one if you need a different type.",
+          "unknown": "Couldn't save. Try again."
+        }
+      }
     },
     "users": {
       "title": "Team",
@@ -547,7 +597,9 @@
         "conversacion": "Conversation",
         "actividad": "Activity",
         "datos": "Details",
-        "tareas": "Tasks"
+        "tareas": "Tasks",
+        "contratos": "Contracts",
+        "fusionar": "Merge"
       },
       "searchLabel": "Search",
       "tag": "Tag",
@@ -667,6 +719,34 @@
         "submissions": "captured leads",
         "automationRuns": "automation runs"
       },
+      "company": {
+        "title": "Company",
+        "none": "No company",
+        "save": "Save"
+      },
+      "merge": {
+        "intro": "Merge this contact with another one that's the same person. This contact keeps its identity, phone and history; the other is deleted on confirm. This can't be undone.",
+        "otherContact": "Merge with",
+        "chooseContact": "Pick the other contact",
+        "keepThis": "This contact",
+        "keepOther": "The other",
+        "countsWillMove": "Deals, quotes, documents, conversations, tasks and everything else on the other contact move to this one.",
+        "confirm": "Merge contacts",
+        "warning": "This action can't be undone.",
+        "adminOnly": "Only an admin can merge contacts.",
+        "errors": {
+          "invalid": "Couldn't merge. Check the data and try again.",
+          "sameContact": "You can't merge a contact with itself.",
+          "notFound": "One of the two contacts wasn't found."
+        }
+      },
+      "duplicates": {
+        "title": "Possible duplicates",
+        "empty": "No possible duplicates found.",
+        "reasonEmail": "Same email",
+        "reasonNameAndPhone": "Same name and similar phone",
+        "review": "Review"
+      },
       "pipeline": "Pipeline",
       "allPipelines": "All pipelines",
       "stage": "Stage",
@@ -692,6 +772,37 @@
       "customFilterEquals": "Equals",
       "customFilterContains": "Contains",
       "customFilterValue": "Value"
+    },
+    "companies": {
+      "title": "Companies",
+      "intro": "The accounts behind your contacts: RUC, phone, and shared notes, plus who works there and what deals are open.",
+      "emptyTitle": "No companies yet",
+      "emptyBody": "Add a company to group the contacts who work there and see their deals in one place.",
+      "createTitle": "New company",
+      "editTitle": "Edit company",
+      "save": "Save",
+      "name": "Name",
+      "ruc": "RUC",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "notes": "Notes",
+      "table": {
+        "name": "Name",
+        "contacts": "Contacts",
+        "openDeals": "Open deals"
+      },
+      "contactsTitle": "Contacts",
+      "contactsEmpty": "No contacts at this company yet",
+      "dealsTitle": "Deals",
+      "dealsEmpty": "No deals for this company yet",
+      "delete": "Delete company",
+      "deleteConfirm": "Delete this company? This can't be undone.",
+      "deleteBlocked": "Can't delete: it still has contacts.",
+      "errors": {
+        "invalid": "Check the fields: name is required.",
+        "nameTaken": "You already have a company with that name."
+      }
     },
     "inbox": {
       "title": "Inbox",
@@ -960,6 +1071,51 @@
       "viewReceipt": "Receipt",
       "sendReceiptWhatsapp": "Send receipt by WhatsApp"
     },
+    "contracts": {
+      "title": "Contracts",
+      "intro": "Generate a contract from a template, send it by WhatsApp or email, and the customer accepts it with one tap from their phone.",
+      "emptyTitle": "No contracts yet",
+      "emptyBody": "Pick a contact and a template to generate the first contract.",
+      "createTitle": "New contract",
+      "needContact": "You need at least one contact first.",
+      "goToContacts": "Go to contacts",
+      "needTemplate": "You need at least one active template first.",
+      "manageTemplates": "Manage templates",
+      "number": "Number",
+      "contact": "Contact",
+      "template": "Template",
+      "status": "Status",
+      "statusValues": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "declined": "Declined",
+        "voided": "Voided"
+      },
+      "sendWhatsapp": "Send by WhatsApp",
+      "sendEmail": "Send by email",
+      "publicLink": "Public link",
+      "downloadPdf": "Download PDF",
+      "decisionAccepted": "The customer accepted the contract.",
+      "decisionDeclined": "The customer declined the contract.",
+      "voidTitle": "Void",
+      "voidReason": "Reason",
+      "voidWarning": "Voiding a contract is permanent.",
+      "voidAction": "Void contract",
+      "voidedNotice": "Voided: {reason}",
+      "templatesTitle": "Contract templates",
+      "templatesIntro": "Write the body in plain text. Use # for a section heading and a blank line to separate paragraphs. Available variables, in double curly braces: contacto.nombre, contacto.telefono, contacto.email.",
+      "templateName": "Name",
+      "templateBody": "Body",
+      "templateBodyHint": "Plain text — no Markdown or HTML. # Heading for a section, blank line between paragraphs.",
+      "templateActive": "Active",
+      "templateSave": "Save changes",
+      "templateCreate": "Create template",
+      "errors": {
+        "invalid": "Couldn't save. Check the data and try again.",
+        "unknownVariable": "The template uses an unknown variable"
+      }
+    },
     "settings": {
       "title": "Settings",
       "intro": "Your company details that the rest of the system uses: the branding that appears on quote PDFs, and the business hours automations respect.",
@@ -1004,6 +1160,8 @@
       },
       "aiTitle": "AI replies",
       "aiIntro": "The AI drafts WhatsApp replies using your business context. Start in draft mode: a rep reviews every message before it goes out. Nothing is ever sent outside the 24-hour window.",
+      "aiBusinessProfileIntro": "About the business, tone, and hours are now set in the business memory.",
+      "aiBusinessProfileLink": "Go to Business memory",
       "aiNotConfigured": "No AI provider is configured on the server yet. You can save the settings, but no replies will be generated until the operator enables it.",
       "aiEnabled": "Turn on AI replies",
       "aiMode": "Reply mode",
@@ -1582,9 +1740,35 @@
         "won": "Won",
         "wonValue": "Sold",
         "open": "Open",
+        "opened": "Opened in period",
+        "lost": "Lost",
         "messages": "Messages",
         "tasks": "Tasks",
+        "responseMedian": "Response (median)",
+        "stage": "Stage",
+        "reachedOrPast": "Reached or past",
+        "bucket": "Range",
+        "conversations": "Conversations",
         "empty": "No data in this period yet."
+      },
+      "customRange": "Custom range",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "pipeline": "Pipeline",
+      "agent": "Rep",
+      "allPipelines": "All pipelines",
+      "allAgents": "All reps",
+      "vsPrevious": "vs. previous period",
+      "exportCsv": "Export CSV",
+      "stageConversionTitle": "Stage funnel",
+      "stageConversionHint": "Pick a pipeline to see its stage funnel.",
+      "responseDistributionTitle": "Response time distribution",
+      "responseBuckets": {
+        "under15m": "Under 15 min",
+        "15mTo1h": "15 min to 1 hour",
+        "1hTo24h": "1 to 24 hours",
+        "over24h": "Over 24 hours"
       }
     },
     "booking": {
@@ -3327,6 +3511,11 @@
       "appointmentsSubject": "You have {count} appointment(s) today",
       "appointmentsBody": "On your calendar for the next 24 hours: {count} appointment(s).",
       "allDay": "All day"
+    },
+    "weeklyBriefing": {
+      "subject": "{business}'s weekly briefing",
+      "title": "Your weekly briefing",
+      "cta": "View the full briefing"
     }
   },
   "pdf": {
@@ -3379,6 +3568,23 @@
         "check": "Check",
         "other": "Other"
       }
+    },
+    "contract": {
+      "title": "CONTRACT",
+      "client": "Client",
+      "legalNotice": "Simple electronic signature under Ley 4017/2010 — not a certified digital signature.",
+      "footer": "Non-fiscal document",
+      "caption": "Contract",
+      "acceptancePageTitle": "Acceptance record",
+      "decisionLabel": "Decision",
+      "decisionValues": {
+        "accepted": "Accepted",
+        "declined": "Declined"
+      },
+      "nameLabel": "Name",
+      "dateLabel": "Date",
+      "ipLabel": "IP address",
+      "userAgentLabel": "Browser"
     }
   },
   "public": {
@@ -3522,6 +3728,27 @@
         "card": "Card",
         "check": "Check",
         "other": "Other"
+      }
+    },
+    "contract": {
+      "title": "Contract",
+      "downloadPdf": "Download PDF",
+      "legalNotice": "This document is accepted by a simple electronic signature, under Ley 4017/2010 — not a certified digital signature.",
+      "decisionPrompt": "Do you accept this contract?",
+      "decisionNameLabel": "Your name",
+      "decisionNamePlaceholder": "Full name",
+      "decisionAccept": "Accept",
+      "decisionDecline": "Decline",
+      "decisionAcceptedGeneric": "Done! We recorded your acceptance.",
+      "decisionDeclinedGeneric": "Done, we recorded your response.",
+      "decisionAccepted": "Accepted by {name}",
+      "decisionDeclined": "Declined by {name}",
+      "decisionErrors": {
+        "nameRequired": "Type your name before continuing.",
+        "rateLimited": "Too many requests. Try again in a moment.",
+        "alreadyDecided": "This contract was already answered.",
+        "notSent": "This contract hasn't been sent yet.",
+        "invalid": "We couldn't process your response. Try again."
       }
     }
   }

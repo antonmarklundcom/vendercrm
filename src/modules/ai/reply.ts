@@ -265,7 +265,7 @@ function lastInboundBody(messages: PromptMessage[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
     // messageText, not `body`: the memory query for a voice note is what the
-    // customer said in it (§15.10 W1).
+    // customer said in it (§17.3 P9).
     const text = messageText(message);
     if (message.direction === "in" && text) return text;
   }

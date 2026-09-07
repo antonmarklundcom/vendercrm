@@ -112,7 +112,7 @@ export function buildSystemPrompt(business: BusinessContext): string {
  */
 /**
  * A message's text for the model: its body, or — for a voice note — its
- * transcript once one exists (PLAN.md §15.10 W1). An audio still being
+ * transcript once one exists (PLAN.md §17.3 P9). An audio still being
  * transcribed contributes nothing rather than an empty turn, which is what
  * makes the deferred reply in automations/triggers.ts worth deferring.
  */

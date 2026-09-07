@@ -24,7 +24,7 @@ const DEFAULT_MODEL = "gpt-4o-mini";
 /**
  * Transcription is its own model on OpenAI — the chat model cannot take
  * audio on this endpoint at all — so it is not derived from `model`
- * (PLAN.md §15.10 W1). Overridable with AI_TRANSCRIBE_MODEL.
+ * (PLAN.md §17.3 P9). Overridable with AI_TRANSCRIBE_MODEL.
  */
 const DEFAULT_TRANSCRIBE_MODEL = "gpt-4o-mini-transcribe";
 /** A voice note is a minute of speech, not a paragraph of tokens. */

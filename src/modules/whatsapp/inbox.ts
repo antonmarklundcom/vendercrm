@@ -49,7 +49,7 @@ export async function searchConversations(ctx: TenantContext, query: string, lim
   ).select(contacts, or(like(contacts.name, term), like(contacts.phone, term)) as SQL);
   const contactIds = new Set(matchingContacts.map((c) => c.id));
 
-  // Transcripts are searched alongside bodies (§15.10 W1): to a rep looking
+  // Transcripts are searched alongside bodies (§17.3 P9): to a rep looking
   // for "el presupuesto del portón", whether the customer typed it or said
   // it in a voice note is not a distinction worth losing the result over.
   const matchingMessages = await tenantDb(ctx).select(
@@ -109,7 +109,7 @@ export type ThreadMessage = {
 };
 
 /**
- * The thread as the inbox renders it (PLAN.md §15.10 W1). One mapper for
+ * The thread as the inbox renders it (PLAN.md §17.3 P9). One mapper for
  * both readers — the page's first render and the 5s poll route — because a
  * voice note that plays on load and not on the next poll is a bug nobody
  * would think to look for.

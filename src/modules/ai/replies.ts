@@ -22,7 +22,7 @@ export type RecordReplyInput = {
   /** Null until a website visitor gives a phone and becomes a contact. */
   contactId?: string;
   /** What the call was for; absent means a customer reply (PLAN.md §16.2 rule 6). */
-  kind?: "reply" | "memory_extract" | "setup_plan" | "transcription";
+  kind?: "reply" | "memory_extract" | "setup_plan" | "weekly_briefing" | "transcription";
   mode: "draft" | "send";
   status: "draft" | "sent" | "failed";
   prompt: string;
@@ -101,7 +101,7 @@ export function startOfDay(now: Date = new Date()): Date {
  * has to bound. Guard-rejected generations never reach the provider and
  * never write a row, so they correctly don't consume the allowance.
  *
- * Narrowed to `kind = reply` (§15.10 W1): this is the *per-conversation
+ * Narrowed to `kind = reply` (§17.3 P9): this is the *per-conversation
  * reply* cap, three a day by default, and a customer who sends three voice
  * notes must not thereby use up the thread's whole allowance to be answered.
  * Transcriptions still count against the per-tenant budget below, which is

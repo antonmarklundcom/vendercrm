@@ -4,7 +4,7 @@ import { createOpenAiDriver } from "./openai";
 import { messageText, toTurns } from "./prompt";
 
 // Voice-note transcription behind the driver seam (PLAN.md §15.3 Lane A,
-// §15.10 W1). The drivers are tested against a stubbed fetch — the request
+// §17.3 P9). The drivers are tested against a stubbed fetch — the request
 // shape is the only part of them that is theirs rather than the provider's.
 
 /** Swaps global fetch, capturing the raw init so a multipart body can be

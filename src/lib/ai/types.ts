@@ -54,7 +54,7 @@ export type AiStructuredResult<T> = {
 };
 
 /**
- * Audio in, text out (PLAN.md §15.3 Lane A, §15.10 W1). Deliberately the
+ * Audio in, text out (PLAN.md §15.3 Lane A, §17.3 P9). Deliberately the
  * same shape as the two calls above — bytes and a mime type instead of a
  * prompt, token counts back the same way — so a voice note is metered by the
  * `ai_replies` ledger and the per-tenant daily cap with no second accounting

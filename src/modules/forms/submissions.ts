@@ -3,7 +3,8 @@ import { forms } from "@/db/schema";
 import { buildSystemTenantContext } from "@/modules/tenancy/context";
 import { getTenantBySlug } from "@/modules/tenancy/tenants";
 import { tenantDb } from "@/modules/tenancy/db";
-import { normalizePhone } from "@/modules/crm/contacts";
+import { normalizePhone, updateContact } from "@/modules/crm/contacts";
+import { listCustomFieldDefinitions, coerceCustomFieldValue } from "@/modules/crm/custom-fields";
 import { recordLeadSubmission } from "@/modules/leads/submissions";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -12,6 +13,8 @@ import { siteTurnstileSecret, siteTurnstileSiteKey } from "@/modules/sites/setti
 import { DEFAULT_COUNTRY } from "@/lib/phone";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import type { FormSettings } from "./forms";
+import type { FormField } from "./field-definitions";
+import { validateSubmissionData } from "./field-definitions";
 
 // Thrown messages are stable codes, not copy (PLAN.md §13 H5 #4): a
 // literal Spanish sentence here is a string the user might see in an
@@ -102,7 +105,7 @@ export async function submitForm(
     }
   }
 
-  const fields = form.fields as Array<{ key: string; type: string }>;
+  const fields = form.fields as FormField[];
   const valueOfType = (type: string) => {
     const field = fields.find((f) => f.type === type);
     return field ? input.data[field.key] : undefined;
@@ -110,6 +113,11 @@ export async function submitForm(
 
   const phone = valueOfType("phone");
   if (!phone) throw new Error("phone_required");
+
+  // Re-validates required/select constraints server-side (§5) — the public
+  // page enforces the same rules via `required`/native <select>, but that's
+  // a courtesy, not a boundary.
+  validateSubmissionData(fields, input.data);
 
   const nameField = fields.find((f) => f.key === "name" || f.key === "nombre");
   const name = nameField ? input.data[nameField.key] : undefined;
@@ -134,6 +142,33 @@ export async function submitForm(
       dealTitle: `${form.name} — ${name || phone}`,
     },
   });
+
+  // Fields mapped to a P5 custom field (§17.3 "P15/P17" P17 half) land in
+  // `contacts.custom` through the same `updateContact` path the contact edit
+  // form uses — merged, not replaced, so this never clobbers a value the
+  // contact already had from elsewhere.
+  const mappedFields = fields.filter((f) => f.mapTo);
+  if (mappedFields.length > 0) {
+    const definitions = await listCustomFieldDefinitions(ctx);
+    const definitionsByKey = new Map(definitions.map((d) => [d.key, d]));
+    const custom: Record<string, string | number | null> = {};
+    for (const field of mappedFields) {
+      const raw = input.data[field.key];
+      const definition = field.mapTo ? definitionsByKey.get(field.mapTo) : undefined;
+      if (!raw || !definition) continue;
+      const coerced = coerceCustomFieldValue(definition, raw);
+      if (coerced !== null) custom[definition.key] = coerced;
+    }
+    if (Object.keys(custom).length > 0) {
+      await updateContact(ctx, result.contactId, { custom });
+    }
+  }
+
+  // WhatsApp marketing consent (§17.3 "P15/P17" P17 half): a ticked
+  // `consent_whatsapp` checkbox would stamp `contacts.wa_marketing_consent_at`
+  // here, but that column doesn't exist on `main` yet (P10, lane 1, not
+  // merged when this phase ran) — logged in KNOWN-ISSUES.md, per the phase's
+  // documented fallback. The checkbox field type itself still ships.
 
   return {
     contactId: result.contactId,

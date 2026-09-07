@@ -40,7 +40,7 @@ registerHandler("whatsapp.sync_templates", async (payload, tenantId) => {
   await scheduleTemplateSync(ctx, accountId, SYNC_INTERVAL_MS);
 });
 
-// Voice-note transcription (§15.3 Lane A, §15.10 W1). The handler always
+// Voice-note transcription (§15.3 Lane A, §17.3 P9). The handler always
 // emits `wa.message_transcribed` before it returns or rethrows on its last
 // attempt, because the automation chain for this message is parked on that
 // event — a voice note that cannot be transcribed still has to reach the

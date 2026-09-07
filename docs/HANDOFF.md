@@ -435,3 +435,63 @@ index of what is new this wave: `/inbox/quick-replies`,
 section on `/settings`, the "Enviar por email" buttons on quotes/documents,
 `/q/[token]`'s new accept/reject form, `/r/[token]` (+ `/pdf`), and the
 "Hoy" panel at the top of `/dashboard`.
+
+## Part 4 — Wave 2 lane 2 (P13–P17) + K1 deploy
+
+Written after PRs #106–#114 merged (PLAN.md §17.2's phase table, lane 2).
+Five phases in one session: contracts, the weekly AI briefing, reporting
+v2, companies + contact merge, and the forms field editor. `docs/log/p13.md`
+through `docs/log/p17.md` are the per-phase detail; this is the one deploy
+pass for all five, plus `0028` (K1, business memory — merged earlier but
+never folded into a HANDOFF pass until now).
+
+Lane 1 (K2, P9, P10, P11) had not merged when this lane finished — nothing
+from it is in this pass. `prompts/sonnet-k3-memory-imports.md` (K3) was
+skipped for the same reason (K2 not merged); see `KNOWN-ISSUES.md`.
+
+### 4.1 Migrations to run
+
+Four new migrations, `0028` and `0035` through `0037`, additive only (new
+tables and nullable columns — nothing altered or dropped):
+
+```bash
+git pull origin main
+npm ci
+npm run db:migrate
+```
+
+Expected to apply: `0028_add_business_memory`, `0035_add_contracts`,
+`0036_add_coach_briefings`, `0037_add_companies`.
+
+`0028` predates this pass (K1) but was never run through a HANDOFF deploy
+step until now — **do not regenerate it** with `drizzle-kit generate` if it
+ever needs a follow-up; its FULLTEXT index on `business_facts(title, body)`
+is hand-written because drizzle-kit's MySQL dialect can't express one
+(`docs/log/k1.md`).
+
+### 4.2 Env vars to add
+
+None. Every wave 2 lane 2 phase and K1 build on existing integrations
+(storage for contract PDFs, the existing AI driver for the briefing) —
+nothing new to configure in hPanel.
+
+### 4.3 The human checks this wave needs
+
+**A contract accepted on a phone** (5 minutes): from a won deal, generate a
+contract, open its public link on a phone, and click-to-accept it. Confirm
+the contract's detail page shows the acceptance record and a PDF with it
+attached (§15.5 J5's exit criterion).
+
+**The Monday briefing arriving by push and email** (needs to wait for an
+actual Monday, or a manual trigger per `docs/DEPLOY.md` §5): confirm
+`coach.weekly` produces a briefing whose numbers are real (not invented by
+the model) and that it reaches the tenant by both channels the same way
+`coach.morning`'s existing digest already does.
+
+### 4.4 New URLs, for the smoke test
+
+Already folded into `docs/SMOKE_TEST.md` §10 — listed here only as a quick
+index: `/contracts` (+ `/templates`), `/dashboard/briefings`, `/reports`
+(+ `/api/exports/reports/[table]`), `/companies`, `/forms/[id]` (the field
+editor), and `/settings/negocio` (now reachable from the nav — it existed
+since K1 but had no nav entry until this pass).

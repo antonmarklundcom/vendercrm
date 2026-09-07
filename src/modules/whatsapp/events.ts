@@ -8,7 +8,7 @@ export type WhatsappEvents = {
     messageId: string;
     /**
      * The message is a voice note whose transcription is still queued
-     * (PLAN.md §15.10 W1). Listeners that read the *text* of the message —
+     * (PLAN.md §17.3 P9). Listeners that read the *text* of the message —
      * the automation trigger chain, and through it the AI auto-reply — skip
      * it here and act on `wa.message_transcribed` instead, so a voice note
      * is answered once, with words in it, rather than twice or empty.

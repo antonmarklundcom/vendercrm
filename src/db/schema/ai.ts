@@ -28,14 +28,18 @@ export const aiReplies = mysqlTable(
     /**
      * What the call was for (PLAN.md §16.2 rule 6). A generated customer
      * reply is `reply`; the memory extractor, the setup-plan generator and
-     * the voice-note transcriber (§15.10 W1) write their own kinds so the
+     * the voice-note transcriber (§17.3 P9) write their own kinds so the
      * ledger explains a token bill that has no conversation attached to it.
      * Defaulted, so every row written before the memory existed keeps its
      * meaning.
      */
     kind: varchar("kind", {
       length: 20,
-      enum: ["reply", "memory_extract", "setup_plan", "transcription"],
+      // `weekly_briefing` — P14 (§17.2): the Monday narrative's structured
+      // call, audited and capped through this same table (§10 1W's
+      // "activities.type needed no migration" precedent — varchar enum, no
+      // ALTER). `transcription` — W1: voice-note transcription calls.
+      enum: ["reply", "memory_extract", "setup_plan", "weekly_briefing", "transcription"],
     })
       .notNull()
       .default("reply"),

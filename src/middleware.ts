@@ -41,6 +41,10 @@ export const PUBLIC_PREFIXES = [
   // customer's own mail client, which by definition has no session here —
   // same reasoning as /q/, /d/, /b/ above.
   "/u/",
+  // Public contract view + PDF (§17.2 P13) — same reasoning as /q/, /d/, /r/:
+  // a rep hands this link to a customer, or WhatsApp fetches the /pdf path
+  // itself, and neither has a session here.
+  "/c/",
 ];
 
 // Exact public paths, kept separate from the prefixes above so this stays a

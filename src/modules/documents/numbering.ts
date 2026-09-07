@@ -17,6 +17,9 @@ const DEFAULT_PREFIX: Record<NumberedDocumentType, string> = {
   // Receipts (§15.8 P6) share this same counter table, keyed by this type
   // string — they render off `document_payments`, never `documents`.
   recibo: "REC",
+  // Contracts (§17.2 P13) — a `contracts` row, not a `documents` one, but the
+  // same per-tenant counter table exactly as `recibo` widened it.
+  contrato: "CON",
 };
 
 export const formatDocumentNumber = formatSequenceNumber;

@@ -3,7 +3,7 @@ import { matchesCoachIntent } from "./voice";
 
 // The coach half of §15.3's Lane A answers a *short list* of ways of asking
 // one question and nothing else — a voice note about anything else must
-// stay a customer message (PLAN.md §15.10 W1).
+// stay a customer message (PLAN.md §17.3 P9).
 
 describe("matchesCoachIntent", () => {
   it("matches the ways an owner asks what is pending", () => {

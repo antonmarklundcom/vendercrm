@@ -71,7 +71,7 @@ export type ConversationData = {
 type QuickReply = { id: string; name: string; body: string };
 
 /**
- * A voice note (PLAN.md §15.3 Lane A, §15.10 W1): the audio itself, and
+ * A voice note (PLAN.md §15.3 Lane A, §17.3 P9): the audio itself, and
  * under it the transcript in a quieter type — what a rep reads instead of
  * listening. A message still being transcribed says so; one that could not
  * be says why, because an empty bubble under an audio is worse than a

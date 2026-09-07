@@ -25,7 +25,7 @@ const DEFAULT_MODEL = "gemini-2.0-flash";
  * Gemini takes audio on the same generateContent endpoint as text, so the
  * audio model defaults to the chat model rather than a separate one — the
  * opposite of OpenAI, and the reason AI_TRANSCRIBE_MODEL is a separate
- * setting instead of a driver constant (PLAN.md §15.10 W1).
+ * setting instead of a driver constant (PLAN.md §17.3 P9).
  */
 const DEFAULT_TRANSCRIBE_MODEL = DEFAULT_MODEL;
 /** A voice note is a minute of speech, not a paragraph of tokens. */

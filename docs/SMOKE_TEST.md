@@ -183,6 +183,38 @@ skipped.
       thing needing attention today, each with a working deep link; with
       nothing pending it shows the empty state instead
 
+## 10. Wave 2 lane 2 — contracts, briefing, reports, companies, forms (P13–P17) + K1
+
+- [ ] From a won deal, "generar contrato" creates a contract from a
+      template; its public link accepts click-to-accept on a phone, and the
+      accepted PDF (with the acceptance record) appears on the contract's
+      detail page — `/contracts` lists it and `/contracts/templates`
+      manages the templates
+- [ ] With AI off, `/dashboard`'s briefing card shows a Monday summary built
+      from real numbers (no model call); `/dashboard/briefings/[id]` shows
+      the full narrative, and acting on a "Hoy" action records a
+      `coach.hoy_action` audit row
+- [ ] `/reports` renders funnel, sources, sites, agents, and the response
+      distribution for a date range, each with a comparison column vs. the
+      previous window; `/api/exports/reports/[table]` CSV matches what the
+      page shows for the same filters
+- [ ] `/companies` — create a company, link two contacts to it from their
+      own pages, and see its contact/open-deal counts; deleting a company
+      with contacts still on it is refused
+- [ ] `/contacts` shows a "posibles duplicados" panel when two contacts
+      share an email or a name + phone prefix; "revisar" opens the merge
+      dialog with both contacts preselected; admin-only, and the loser's
+      history (deals, tags, custom fields) appears under the winner after
+      merging
+- [ ] `/forms/[id]` — add a `select` field and map one field to a custom
+      field; submit the public form and confirm the mapped answer lands on
+      the contact's custom fields; a required field left empty or an
+      invalid `select` answer is refused
+- [ ] `/settings/negocio` (now in the nav) — fill in the business profile
+      and add a fact; the AI reply test (K1) answers using it; the AI
+      card's old "Sobre el negocio/Tono/Horario" text fields are gone,
+      replaced by a link here
+
 ## If anything fails
 
 Don't leave a failing smoke test unresolved before calling a deploy done —

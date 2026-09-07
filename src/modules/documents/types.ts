@@ -11,7 +11,7 @@ export type DocumentType = (typeof DOCUMENT_TYPES)[number];
  * a nota de venta does without needing a row — or an enum entry — on the
  * `documents` table itself (it renders straight off `document_payments`).
  */
-export const NUMBERED_DOCUMENT_TYPES = [...DOCUMENT_TYPES, "recibo"] as const;
+export const NUMBERED_DOCUMENT_TYPES = [...DOCUMENT_TYPES, "recibo", "contrato"] as const;
 export type NumberedDocumentType = (typeof NUMBERED_DOCUMENT_TYPES)[number];
 
 export type DocumentStatus = "draft" | "issued" | "void";

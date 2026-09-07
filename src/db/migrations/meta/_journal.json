@@ -250,8 +250,29 @@
     {
       "idx": 35,
       "version": "5",
-      "when": 1788699306619,
-      "tag": "0035_curly_tempest",
+      "when": 1788699693003,
+      "tag": "0035_add_contracts",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1788701517544,
+      "tag": "0036_add_coach_briefings",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1788704865668,
+      "tag": "0037_add_companies",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1788750877052,
+      "tag": "0038_add_message_transcripts",
       "breakpoints": true
     }
   ]
