@@ -230,7 +230,7 @@ describe.skipIf(!hasDb)("applying a vertical preset (MySQL integration)", () => 
         {
           name: "Bienvenida fuera de horario",
           trigger: "wa_message_received",
-          waitMinutes: 0,
+          waitMinutes: 1,
           text: "Gracias por escribirnos, te respondemos apenas abramos.",
           conditions: ["outside_business_hours"],
         },

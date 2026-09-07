@@ -72,7 +72,9 @@ export function presetFromOutput(output: SetupPlanOutput): VerticalPreset {
     flows.push({
       name: "Bienvenida fuera de horario",
       trigger: "wa_message_received",
-      waitMinutes: 0,
+      // The graph's wait node requires >=1 minute (flowGraphSchema); a
+      // welcome message still reads as immediate at this scale.
+      waitMinutes: 1,
       text: output.welcomeMessage,
       conditions: ["outside_business_hours"],
     });
