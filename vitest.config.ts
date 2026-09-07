@@ -13,6 +13,10 @@ export default defineConfig({
     // (jobs above all), so files must not run concurrently — a parallel run
     // has them claiming each other's rows.
     fileParallelism: false,
+    // Claude Code agent worktrees land under .claude/worktrees/ as full
+    // nested copies of the repo (see .gitignore) — without this, a run from
+    // the outer repo also picks up their duplicate test files.
+    exclude: ["**/node_modules/**", "**/.claude/**"],
   },
   resolve: {
     alias: {
