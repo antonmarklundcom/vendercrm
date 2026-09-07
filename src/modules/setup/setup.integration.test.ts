@@ -58,13 +58,18 @@ describe.skipIf(!hasDb)("setup assistant (MySQL integration)", () => {
     }));
   }
 
+  // Names deliberately distinct from `DEFAULT_STAGES` (pipelines.ts) — a
+  // fresh tenant with no pipeline gets one seeded with those names before
+  // this preset's own stages are added (applyStages), and a same-named
+  // stage is skipped as already existing (idempotent by name). Colliding
+  // here would undercount what this test means to check.
   const VALID_PLAN_OUTPUT = {
     stages: [
       { name: "Consulta" },
-      { name: "Propuesta" },
-      { name: "Negociación" },
-      { name: "Ganado", isWon: true, staleAfterDays: 20 },
-      { name: "Perdido", isLost: true },
+      { name: "Presupuesto enviado" },
+      { name: "En conversación" },
+      { name: "Cliente", isWon: true, staleAfterDays: 20 },
+      { name: "No avanzó", isLost: true },
     ],
     tags: ["nuevo", "recurrente"],
     quickReplies: [

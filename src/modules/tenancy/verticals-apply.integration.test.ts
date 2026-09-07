@@ -218,10 +218,13 @@ describe.skipIf(!hasDb)("applying a vertical preset (MySQL integration)", () => 
       resources: [],
       hours: [],
       bookingTypes: [],
+      // Names distinct from `DEFAULT_STAGES` (pipelines.ts): a fresh tenant's
+      // first `applyStages` call seeds that default pipeline first, and a
+      // same-named stage is skipped as already existing.
       pipelineStages: [
         "Consulta",
-        { name: "Ganado", isWon: true, staleAfterDays: 14 },
-        { name: "Perdido", isLost: true },
+        { name: "Cliente", isWon: true, staleAfterDays: 14 },
+        { name: "No avanzó", isLost: true },
       ],
       tags: ["cliente nuevo"],
       quickReplies: [{ name: "Saludo", body: "¡Hola! Gracias por escribirnos." }],
@@ -248,8 +251,8 @@ describe.skipIf(!hasDb)("applying a vertical preset (MySQL integration)", () => 
     const { listPipelines, listStagesForPipeline } = await import("@/modules/crm/pipelines");
     const [pipeline] = await listPipelines(ctx);
     const stages = await listStagesForPipeline(ctx, pipeline!.id);
-    const won = stages.find((stage) => stage.name === "Ganado");
-    const lost = stages.find((stage) => stage.name === "Perdido");
+    const won = stages.find((stage) => stage.name === "Cliente");
+    const lost = stages.find((stage) => stage.name === "No avanzó");
     expect(won?.isWon).toBe(true);
     expect(won?.staleAfterDays).toBe(14);
     expect(lost?.isLost).toBe(true);
