@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isValidCronSecret } from "@/lib/config/cron-secret";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getTenantContext, type TenantContext } from "@/modules/tenancy/context";
+import { resolveOpsToken, type OpsTokenRow } from "@/modules/ops/tokens";
 
 // One place for "who is allowed to call this route" (PLAN.md §13 H9 #2).
 // Before this the eleven API routes carried five different inline patterns
@@ -20,7 +21,13 @@ export type GuardResult<T> = GuardSuccess<T> | GuardFailure;
 /** The uniform error body. `code` is stable and machine-readable; the
  * message is for whoever is reading a log. */
 export function apiError(
-  code: "unauthorized" | "forbidden" | "not_found" | "rate_limited" | "invalid_request",
+  code:
+    | "unauthorized"
+    | "forbidden"
+    | "not_found"
+    | "rate_limited"
+    | "invalid_request"
+    | "conflict",
   status: number,
   message?: string,
 ): Response {
@@ -80,4 +87,22 @@ export async function requireToken<T>(
   if (!resolved) return { ok: false, response: apiError("not_found", 404) };
 
   return { ok: true, resolved };
+}
+
+/**
+ * Claude Ops (PLAN.md §18.1.8). A long-lived token in `X-Ops-Token`, held by
+ * a Claude Code session on the owner's PC. A revoked or expired token is
+ * indistinguishable from a wrong one here — resolution answers null for all
+ * three, and the caller learns only "unauthorized".
+ *
+ * This guard answers *who is calling*, never *what they may touch*: that
+ * second question lives in `modules/ops/guard.ts` and is asked again on
+ * every object, by every endpoint.
+ */
+export async function requireOpsToken(
+  request: Request,
+): Promise<GuardResult<{ token: OpsTokenRow }>> {
+  const token = await resolveOpsToken(request.headers.get("x-ops-token"));
+  if (!token) return { ok: false, response: unauthorized() };
+  return { ok: true, token };
 }

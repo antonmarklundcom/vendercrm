@@ -18,7 +18,8 @@
     "seed-tenant": "tsx scripts/seed-tenant.ts",
     "verify-restore": "tsx scripts/verify-restore.ts",
     "smoke-storage": "tsx scripts/smoke-storage.ts",
-    "generate-vapid": "tsx scripts/generate-vapid.ts"
+    "generate-vapid": "tsx scripts/generate-vapid.ts",
+    "create-ops-token": "tsx scripts/create-ops-token.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1100.0",

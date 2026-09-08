@@ -18,6 +18,14 @@ export type CreateSiteInput = {
   defaultOwnerUserId?: string;
   defaultTagIds?: string[];
   waAccountId?: string;
+  /**
+   * Defaults to true — a site an admin creates in the UI is live at once.
+   * Claude Ops (PLAN.md §18.1.4) passes false: a site provisioned by a
+   * session is born inactive and goes live on the owner's click. Set at
+   * INSERT rather than by a follow-up update, so there is no window, however
+   * short, in which such a site would accept a lead.
+   */
+  isActive?: boolean;
 };
 
 export type CreatedSite = {
@@ -39,7 +47,7 @@ export async function createSite(
       name: input.name,
       slug: input.slug,
       domain: input.domain,
-      isActive: true,
+      isActive: input.isActive ?? true,
       defaultPipelineId: input.defaultPipelineId,
       defaultStageId: input.defaultStageId,
       defaultOwnerUserId: input.defaultOwnerUserId,

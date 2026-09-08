@@ -124,6 +124,14 @@ const envSchema = z
      * staging deploy at a stub instead of a billable endpoint.
      */
     AI_BASE_URL: z.string().url().optional(),
+    /**
+     * The phone number the Claude Ops test lead is created with (PLAN.md
+     * §18.3). Fixed rather than caller-supplied — a test lead is a fixture —
+     * and env-driven so the owner can point it at a number he actually
+     * watches. The contact and its deal are deleted when he approves the
+     * site, so this number never accumulates rows.
+     */
+    OPS_TEST_PHONE: z.string().min(6).max(30).default("+595981000000"),
   })
   .superRefine((value, ctx) => {
     if (value.STORAGE_DRIVER === "s3") {

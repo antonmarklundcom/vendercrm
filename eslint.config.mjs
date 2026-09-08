@@ -116,6 +116,15 @@ const eslintConfig = defineConfig([
       // acceptance record and everything else are read back through
       // tenantDb once the tenant is known.
       "src/modules/contracts/**/*.{ts,tsx}",
+      // Claude Ops (PLAN.md §18). Its four tables carry no `tenant_id` at
+      // all: they are platform-level bookkeeping about provisioning, owned
+      // by a superadmin, the same shape as `tenants` itself — tenantDb has
+      // no predicate to inject for them. The token lookup is also, like the
+      // ingest key lookup above, a routing read that runs before any context
+      // can exist. Every tenant-owned object these endpoints create
+      // (site, pipeline, tags, contact, deal) is written through the ordinary
+      // module services and tenantDb once the tenant is known.
+      "src/modules/ops/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

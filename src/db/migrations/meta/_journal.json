@@ -288,6 +288,13 @@
       "when": 1788814217124,
       "tag": "0040_add_setup_conversation",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1788831292667,
+      "tag": "0041_add_claude_ops",
+      "breakpoints": true
     }
   ]
 }

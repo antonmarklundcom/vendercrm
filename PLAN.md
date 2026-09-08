@@ -3695,3 +3695,4 @@ raw text, approve row, reject row. All require `requireSuperadminContext`.
 
 | Phase | PR | Log |
 |---|---|---|
+| O1 ops API | #TBD | `docs/log/o1.md` |

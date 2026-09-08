@@ -74,3 +74,14 @@ phase touches that file next.
   and the three memory-upkeep Hoy rows are live. `renderTemplateVars`
   (automations flow messages) still does not resolve `negocio.*` — K3
   scoped that out, see its log's decision 3.
+- **Claude Ops tokens have no UI until O2** (O1) — `npm run create-ops-token`
+  prints one, and cannot set an expiry or an allowlisted tenant; both are the
+  console's to add. Nothing in the ops API deletes anything, so a
+  half-provisioned row is finished, corrected or left alone by hand.
+- **An ops-provisioned site carries one revoked `site_api_keys` row** (O1) —
+  the key `createSite` issues automatically is revoked immediately, because
+  its plaintext is discarded and the ops key step issues the one the website
+  actually holds.
+- **Explicit stage names given to the ops pipeline step are created without
+  won/lost flags** (O1) — a custom set has no `is_won` stage until someone
+  marks it in the CRM; omitting `stages` uses the flagged default set.

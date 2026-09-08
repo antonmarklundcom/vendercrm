@@ -17,3 +17,4 @@ export * from "./notifications";
 export * from "./email";
 export * from "./contracts";
 export * from "./coach";
+export * from "./ops";
