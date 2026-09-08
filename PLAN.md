@@ -3568,3 +3568,129 @@ times in a build, each in a session the owner opens:
 Fable is never spawned by a phase, never watches a running build, and is
 never named in a phase table. Questions a phase cannot answer go to
 `docs/decisions-needed.md` for the owner.
+
+## 18. Claude Ops — provisioning sites from a Claude Code session (Fable plan, 2026-09-08)
+
+The owner runs ~50 lead-gen sites and will add more, one per Claude Code session
+that also builds the website (php-site-template). Today the CRM side of a new
+site is clicks in the superadmin: create company, create site, create pipeline,
+issue key, paste key into the site, send a test lead. §18 makes that a set of
+**create-only ops endpoints** a session calls with a **long-lived ops token**,
+plus one superadmin page ("Claude Ops") where the owner sees what got
+provisioned, holds the token, and **approves each site before it goes live**.
+The design concept is `docs/design/claude-ops-mockup.html` (static HTML, example
+data; the Sonnet phase reads it for layout, states and copy, not as code).
+
+### 18.1 Decisions already made — do not reopen
+
+1. **The token is long-lived and owner-held.** One ops token per owner PC, created
+   on the Claude Ops page, stored once in the PC's environment as
+   `VCRM_OPS_TOKEN`. Shown in plaintext exactly once; SHA-256 hashed at rest with
+   a visible prefix, `last_used_at` and a call counter, exactly like
+   `site_api_keys`. Revoke is a timestamp. No expiry by default; the owner may
+   set one. Per-batch short-lived tokens (the mockup's rail) are NOT built.
+2. **Create-only, and blind to everything that existed before.** The token can
+   create a tenant + its first admin, a site, a pipeline (+ stages, tags,
+   default owner), an API key, and a test lead. It can read and modify **only
+   objects it created**, tracked in `ops_objects`. It cannot list, read, edit
+   or delete any pre-existing tenant, site, pipeline, contact, deal or key. It
+   cannot activate a site and cannot read an existing key. Enforced server-side
+   on every endpoint by one guard; the session is never trusted.
+3. **Allowlisted tenants are the only exception.** The owner may mark existing
+   tenants (e.g. his own PY network tenant) as "ops may add sites here" on the
+   page. In an allowlisted tenant the token may create a *new* site and that
+   site's pipeline/key/test lead, and still cannot see or touch the tenant's
+   existing sites, pipelines, contacts or deals. Stored on `ops_tokens` as an
+   explicit list, never a wildcard.
+4. **Sites are born inactive.** `sites.is_active = false` on every ops-created
+   site. Go-live is a human click on the Claude Ops page (activates the site,
+   deletes the test lead's contact + deal through `modules/crm/deletion`,
+   writes `site.activated`). The test lead reaches an inactive site only via
+   the ops test-lead endpoint, which calls `ingestLeadForSite` with an explicit
+   `allowInactive` flag that no public route ever sets.
+5. **The batch is the unit of work, and it is optional.** `ops_batches` holds
+   the owner's raw text (pasted on the page) or a one-line title (created by the
+   session for "new site for a dentist"). `ops_batch_rows` holds one row per
+   domain with the five step states. A session may create batches and rows
+   itself: the page is a control tower, never a gate on starting.
+6. **Every ops call is an ordinary audit entry.** `actor_user_id` = the token's
+   owner, `payload.via = "ops_token:<prefix>"`, `payload.batch_id`. The Claude
+   Ops log is `listAuditLog` filtered on `payload.via`; no second trail.
+7. **Idempotent per row and step.** Repeating `POST …/rows/{id}/site` returns
+   the site created before, never a duplicate. Failures are stored on the row
+   (`step`, `http status`, `reason`, verbatim from the endpoint) so the page
+   shows the real error.
+8. **Transport is the existing `lib/api/guards` shape** (`apiError`, uniform
+   error body), header `X-Ops-Token`, base `/api/ops/v1`, rate-limited per token.
+9. **Models.** O1 (schema, token, guard, endpoints, tests, repo skill) is Opus:
+   it is the security boundary and the contract O2 and every future session
+   build on. O2 (the page) is Sonnet. Fable is never spawned (§17.8).
+
+### 18.2 Object model
+
+`ops_tokens` — id, owner_user_id (superadmin), label, token_hash (sha256),
+token_prefix, allowed_tenant_ids (json, list), expires_at (null), revoked_at,
+last_used_at, call_count, created_at.
+`ops_batches` — id, token_id, title, raw_text (text, nullable), status
+(open|done|archived), created_at, updated_at.
+`ops_batch_rows` — id, batch_id, domain, display_name, tenant_mode
+(new|existing), tenant_id (nullable until created/resolved), details (json:
+stages[], owner_email, tags[], wa_account_id, notes), state
+(pending|running|needs_input|failed|awaiting_approval|live), steps (json:
+{tenant,site,pipeline,key,test_lead} each pending|done|failed|skipped with
+timestamps), last_error (json: step,status,reason), needs_input (text),
+site_id, pipeline_id, api_key_id, test_contact_id, test_deal_id, created_at,
+updated_at.
+`ops_objects` — id, token_id, batch_id, row_id, entity (tenant|site|pipeline|
+api_key|user|contact|deal), entity_id, created_at. Unique (entity, entity_id).
+The guard's question "may this token touch X" is: X is in `ops_objects` for
+this token, or X is a tenant in `allowed_tenant_ids` (site-create only).
+
+### 18.3 Endpoints (all under `/api/ops/v1`, header `X-Ops-Token`)
+
+| Method · path | Does | Guard |
+|---|---|---|
+| GET `/me` | token label, prefix, allowed tenants (id, name, slug), open batches | valid token |
+| POST `/batches` · GET `/batches` · GET `/batches/{id}` | create with title; list/read own batches with rows and raw_text | own batches only |
+| POST `/batches/{id}/rows` · PATCH `/batches/{id}/rows/{rowId}` | add rows from the raw text; update details, `needs_input`, notes | own batch |
+| POST `/rows/{id}/tenant` | `createTenant` + `createTenantAdminUser` (email, name; reset link sent, password never returned); registers both in `ops_objects` | row.tenant_mode = new |
+| POST `/rows/{id}/site` | `createSite` in row.tenant_id with `is_active=false`, domain, slug from domain | tenant is ops-created for this token, or allowlisted |
+| POST `/rows/{id}/pipeline` | `createPipeline` with the row's stages (or the tenant default set), creates missing tags, resolves owner by email inside the tenant, writes site defaults (pipeline, first stage, owner, tags, wa account) | site is ops-created |
+| POST `/rows/{id}/key` | `issueApiKey` with label; **plaintext in this response only** | site is ops-created |
+| POST `/rows/{id}/test-lead` | `ingestLeadForSite` with `allowInactive`, a fixed payload (`source: "ops-test"`, name "Prueba onboarding", phone from settings); stores contact/deal ids; row → awaiting_approval | site is ops-created |
+
+Every step endpoint: 200 with the existing object on repeat; 409/422 with a
+verbatim reason on failure, and the row's `last_error` updated; audit entry
+per call (§18.1.6). Nothing here deletes or lists across tenants.
+
+### 18.4 The page — `/claude-ops` in `(superadmin)`
+
+Nav item after WhatsApp. Sections, in this order (mockup for reference):
+token panel (create with label + allowlisted tenants + optional expiry, one-time
+reveal dialog, prefix + last used + calls + revoke afterwards); batch selector
+with state roll-up; worksheet table (domain, company, pipeline·owner·tags,
+five-cell step strip, state + reason, row drawer with the checklist and the
+**Approve and go live / Reject with note** gate; reject writes `needs_input`
+and state `needs_input`); paste box tab (raw text saved on the batch; "rows
+recognised" comes from the rows the session wrote); "Needs you" list; the log
+(audit filtered on `payload.via`, chips: this batch / failures / all ops).
+Server actions: create token, revoke token, set allowlist, create batch, save
+raw text, approve row, reject row. All require `requireSuperadminContext`.
+
+### 18.5 Phase table
+
+| Phase | Model | Prompt | Owns | Depends on |
+|---|---|---|---|---|
+| O1 ops API | Opus | `prompts/opus-o1-ops-api.md` | `src/db/schema/ops.ts`, one migration, `src/modules/ops/**`, `src/app/api/ops/**`, `skills/vendercrm-ops/**`, `docs/log/o1.md`; append-only: `src/db/schema/index.ts`, `src/modules/sites/ingest.ts` (the `allowInactive` flag), `src/lib/api/guards.ts` (one `requireOpsToken`) | — |
+| O2 console | Sonnet | `prompts/sonnet-o2-ops-console.md` | `src/app/(superadmin)/claude-ops/**`, `src/components/ops/**`, `docs/log/o2.md`; append-only: `src/app/(superadmin)/layout.tsx` (nav item), `messages/*.json` | O1 |
+
+### 18.6 Human inputs
+
+- A superadmin login on production to create the first ops token (O2 ships the page; until then O1's `scripts/create-ops-token.ts` prints one).
+- `VCRM_OPS_TOKEN` and `VCRM_OPS_URL` set once on the owner's PC.
+- Copy `skills/vendercrm-ops/` into the owner's synced skills after O1 merges, and add one line to the private `php-site-template` skill: "after the lead form step, run the vendercrm-ops provisioning flow".
+
+### 18.7 Build log index
+
+| Phase | PR | Log |
+|---|---|---|

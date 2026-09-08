@@ -1,0 +1,579 @@
+<title>Claude Ops Console</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f4f7f8;
+    --panel: #ffffff;
+    --panel-2: #eef2f4;
+    --fg: #22333a;
+    --fg-muted: #5b6d75;
+    --fg-faint: #8a9aa1;
+    --border: #dfe6e9;
+    --border-strong: #c4d0d5;
+    --primary: #2b6b80;
+    --primary-fg: #ffffff;
+    --primary-soft: #e3eef2;
+    --ok: #2f7c52;
+    --ok-soft: #e2f1e7;
+    --warn: #a9711a;
+    --warn-soft: #f7ecd6;
+    --fail: #a63a2f;
+    --fail-soft: #f8e4e1;
+    --run: #2b6b80;
+    --run-soft: #dcebf1;
+    --code-bg: #f0f3f5;
+    --mask: #1f2c31;
+    --shadow: 0 1px 2px rgba(34,51,58,.06), 0 4px 16px rgba(34,51,58,.06);
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c272c; --panel: #24323a; --panel-2: #2b3b43; --fg: #e6edef; --fg-muted: #a7b7bd; --fg-faint: #7a8c93;
+      --border: rgba(255,255,255,.10); --border-strong: rgba(255,255,255,.2);
+      --primary: #7fbdd1; --primary-fg: #15272e; --primary-soft: #2a4550;
+      --ok: #7fcf9c; --ok-soft: #244334; --warn: #e2b25c; --warn-soft: #45391f; --fail: #ef8f83; --fail-soft: #4a2c28;
+      --run: #7fbdd1; --run-soft: #2a4550; --code-bg: #1d282d; --mask: #0f181c;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c272c; --panel: #24323a; --panel-2: #2b3b43; --fg: #e6edef; --fg-muted: #a7b7bd; --fg-faint: #7a8c93;
+    --border: rgba(255,255,255,.10); --border-strong: rgba(255,255,255,.2);
+    --primary: #7fbdd1; --primary-fg: #15272e; --primary-soft: #2a4550;
+    --ok: #7fcf9c; --ok-soft: #244334; --warn: #e2b25c; --warn-soft: #45391f; --fail: #ef8f83; --fail-soft: #4a2c28;
+    --run: #7fbdd1; --run-soft: #2a4550; --code-bg: #1d282d; --mask: #0f181c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 13px/1.45 var(--sans); margin: 0; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  code, .mono { font-family: var(--mono); font-size: 12px; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  /* ── Shell: same rail as the rest of the superadmin ─────────────── */
+  .shell { display: grid; grid-template-columns: 208px 1fr; min-height: 100vh; }
+  .rail { border-right: 1px solid var(--border); background: var(--panel); padding: 18px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .rail .brand { font-weight: 600; font-size: 14px; padding: 4px 8px 14px; letter-spacing: -.01em; }
+  .rail .brand small { display: block; font-weight: 400; color: var(--fg-muted); font-size: 11px; }
+  .rail a { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; text-decoration: none; color: var(--fg-muted); }
+  .rail a.on { background: var(--primary-soft); color: var(--primary); font-weight: 500; }
+  .rail a .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .55; }
+  .rail .new { margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: var(--primary); color: var(--primary-fg); padding: 1px 5px; border-radius: 3px; }
+  .rail .me { margin-top: auto; padding: 10px 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--fg-muted); }
+  .rail .me b { display: block; color: var(--fg); font-weight: 500; }
+
+  .page { padding: 22px 26px 60px; min-width: 0; }
+  .crumbs { color: var(--fg-faint); font-size: 12px; margin-bottom: 8px; }
+  .crumbs span { color: var(--fg-muted); }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
+  h1 { font-size: 20px; font-weight: 600; letter-spacing: -.015em; margin: 0 0 4px; text-wrap: balance; }
+  .head p { margin: 0; color: var(--fg-muted); max-width: 62ch; }
+  .head-actions { display: flex; gap: 8px; }
+
+  .btn { border: 1px solid var(--border-strong); background: var(--panel); border-radius: 6px; padding: 6px 11px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn:hover { background: var(--panel-2); }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn.sm { padding: 3px 8px; font-size: 12px; }
+  .btn.danger { color: var(--fail); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Batch bar ──────────────────────────────────────────────────── */
+  .batchbar { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+  .batch-id { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .batch-id .name { font-weight: 600; font-size: 14px; }
+  .batch-id .sel { border: 1px solid var(--border-strong); border-radius: 6px; padding: 4px 8px; background: var(--panel); display: inline-flex; gap: 8px; align-items: center; color: var(--fg-muted); }
+  .batch-id .sel b { color: var(--fg); font-weight: 500; }
+  .batch-meta { color: var(--fg-muted); font-size: 12px; }
+  .counts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  .count i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .count.done { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .count.run { background: var(--run-soft); color: var(--run); border-color: transparent; }
+  .count.fail { background: var(--fail-soft); color: var(--fail); border-color: transparent; }
+  .count.wait { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .count.pending { color: var(--fg-muted); }
+  .count.done i { background: var(--ok); } .count.run i { background: var(--run); } .count.fail i { background: var(--fail); } .count.wait i { background: var(--warn); } .count.pending i { background: var(--fg-faint); }
+
+  /* ── Main grid ──────────────────────────────────────────────────── */
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+  .panel-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  .panel-h h2 { margin: 0; font-size: 13px; font-weight: 600; }
+  .panel-h .hint { color: var(--fg-faint); font-size: 12px; }
+  .tabs { display: flex; gap: 2px; }
+  .tab { padding: 4px 9px; border-radius: 5px; color: var(--fg-muted); cursor: pointer; border: 0; background: transparent; font-size: 12px; }
+  .tab.on { background: var(--panel-2); color: var(--fg); font-weight: 500; }
+
+  /* Worksheet table */
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th { text-align: left; font-size: 11px; font-weight: 500; color: var(--fg-faint); letter-spacing: .05em; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { padding-left: 14px; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr.row { cursor: pointer; }
+  tr.row:hover td { background: color-mix(in oklab, var(--panel-2) 55%, transparent); }
+  tr.row.open td { background: var(--panel-2); border-bottom-color: transparent; }
+  .domain { font-weight: 500; }
+  .domain small { display: block; color: var(--fg-muted); font-weight: 400; }
+  .chip { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--panel-2); color: var(--fg-muted); font-size: 11px; margin-right: 3px; white-space: nowrap; }
+  .tenant { color: var(--fg-muted); }
+  .tenant.new::before { content: "new"; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--primary); background: var(--primary-soft); padding: 1px 4px; border-radius: 3px; margin-right: 5px; font-weight: 600; }
+
+  /* Step strip: five cells, one per provisioning step */
+  .steps { display: inline-grid; grid-template-columns: repeat(5, 22px); gap: 3px; }
+  .step { height: 18px; border-radius: 3px; background: var(--panel-2); position: relative; border: 1px solid var(--border); }
+  .step.done { background: var(--ok); border-color: var(--ok); }
+  .step.run { background: var(--run-soft); border-color: var(--run); }
+  .step.run::after { content: ""; position: absolute; inset: 4px; border-radius: 2px; background: var(--run); animation: pulse 1.2s ease-in-out infinite; }
+  .step.fail { background: var(--fail); border-color: var(--fail); }
+  .step.wait { background: var(--warn-soft); border-color: var(--warn); }
+  .step.wait::after { content: ""; position: absolute; inset: 4px; border-radius: 2px; background: var(--warn); }
+  .step.skip { background: repeating-linear-gradient(135deg, var(--panel-2) 0 3px, var(--border) 3px 5px); }
+  @keyframes pulse { 0%,100% { opacity: .35 } 50% { opacity: 1 } }
+  @media (prefers-reduced-motion: reduce) { .step.run::after { animation: none; } }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--fg-muted); padding: 8px 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; border: 1px solid var(--border); }
+
+  .state { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; white-space: nowrap; }
+  .state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .state.done { color: var(--ok); } .state.run { color: var(--run); } .state.fail { color: var(--fail); } .state.wait { color: var(--warn); } .state.pending { color: var(--fg-faint); }
+  .why { display: block; color: var(--fg-muted); font-weight: 400; font-size: 12px; white-space: normal; max-width: 26ch; }
+
+  /* Expanded row: drawer */
+  tr.drawer td { padding: 0 14px 14px; background: var(--panel-2); }
+  .drawer-in { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+  .kv { display: grid; grid-template-columns: 120px 1fr; gap: 5px 12px; font-size: 12px; }
+  .kv dt { color: var(--fg-muted); }
+  .kv dd { margin: 0; }
+  .drawer h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; }
+  .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .checks li { display: grid; grid-template-columns: 16px 1fr auto; gap: 8px; align-items: baseline; font-size: 12px; }
+  .checks .mark { width: 14px; height: 14px; border-radius: 50%; display: inline-block; text-align: center; font-size: 10px; line-height: 14px; font-weight: 700; }
+  .checks .mark.ok { background: var(--ok-soft); color: var(--ok); }
+  .checks .mark.fail { background: var(--fail-soft); color: var(--fail); }
+  .checks .mark.wait { background: var(--warn-soft); color: var(--warn); }
+  .checks .mark.pending { background: var(--panel-2); color: var(--fg-faint); }
+  .checks time { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; }
+  .keyline { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; }
+  .keyline .masked { letter-spacing: .12em; color: var(--fg-faint); }
+  .gate { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .gate p { margin: 0; color: var(--fg-muted); font-size: 12px; max-width: 60ch; }
+
+  /* Paste / intake view */
+  .intake { padding: 14px; display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
+  textarea { width: 100%; min-height: 190px; resize: vertical; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; font: 12.5px/1.55 var(--mono); background: var(--code-bg); color: var(--fg); }
+  .intake-side { font-size: 12px; color: var(--fg-muted); display: flex; flex-direction: column; gap: 10px; }
+  .intake-side h3 { margin: 0; font-size: 12px; font-weight: 600; color: var(--fg); }
+  .intake-side ul { margin: 0; padding-left: 16px; }
+  .intake-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .parsed { font-size: 12px; color: var(--fg-muted); }
+  .parsed b { color: var(--fg); font-weight: 500; }
+
+  /* ── Right rail ─────────────────────────────────────────────────── */
+  .side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 16px; }
+  .side .panel-b { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .token { background: var(--mask); color: #d9e6ea; border-radius: 6px; padding: 10px 12px; font-family: var(--mono); font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .token .masked { letter-spacing: .14em; opacity: .55; }
+  .token .btn { background: transparent; border-color: rgba(255,255,255,.2); color: #d9e6ea; }
+  .meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 12px; color: var(--fg-muted); }
+  .meta b { color: var(--fg); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .ttl { height: 4px; border-radius: 2px; background: var(--panel-2); overflow: hidden; }
+  .ttl i { display: block; height: 100%; width: 58%; background: var(--primary); }
+  .scope { display: flex; flex-wrap: wrap; gap: 4px; }
+  .scope code { background: var(--code-bg); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+  .note { font-size: 12px; color: var(--fg-muted); margin: 0; }
+  .split { display: flex; gap: 8px; }
+  .split .btn { flex: 1; justify-content: center; }
+  pre.brief { margin: 0; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font: 11.5px/1.5 var(--mono); overflow-x: auto; color: var(--fg); max-height: 250px; }
+  pre.brief .c { color: var(--fg-faint); }
+  pre.brief .k { color: var(--primary); }
+
+  /* ── Log ────────────────────────────────────────────────────────── */
+  .log { margin-top: 16px; }
+  .log table { min-width: 760px; }
+  .log td { padding: 7px 10px; }
+  .log .t { font-family: var(--mono); font-size: 11.5px; color: var(--fg-muted); white-space: nowrap; }
+  .log .act { font-family: var(--mono); font-size: 11.5px; }
+  .log .act.fail { color: var(--fail); }
+  .log .who { color: var(--fg-muted); white-space: nowrap; }
+  .log .who b { color: var(--fg); font-weight: 500; }
+  .log .who .via { display: block; font-size: 11px; color: var(--fg-faint); }
+  .log .obj { font-family: var(--mono); font-size: 11.5px; color: var(--fg-muted); }
+  .filters { display: flex; gap: 6px; align-items: center; }
+  .filters .chip.on { background: var(--primary-soft); color: var(--primary); }
+
+  /* ── Concept notes ──────────────────────────────────────────────── */
+  .notes { margin-top: 40px; max-width: 78ch; }
+  .notes h2 { font-size: 15px; margin: 0 0 4px; }
+  .notes .lede { color: var(--fg-muted); margin: 0 0 18px; }
+  .notes ol { padding-left: 0; list-style: none; margin: 0; display: grid; gap: 14px; }
+  .notes li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
+  .notes li b { font-family: var(--mono); font-size: 11px; color: var(--primary); padding-top: 3px; }
+  .notes li h3 { margin: 0 0 3px; font-size: 13px; font-weight: 600; }
+  .notes li p { margin: 0; color: var(--fg-muted); }
+
+  @media (max-width: 1080px) {
+    .grid { grid-template-columns: 1fr; }
+    .side { position: static; }
+    .intake { grid-template-columns: 1fr; }
+    .drawer-in { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
+    .shell { grid-template-columns: 1fr; }
+    .rail { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--border); }
+    .rail .me { display: none; }
+    .page { padding: 16px; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Superadmin">
+    <div class="brand">VenderCRM <small>Superadmin</small></div>
+    <a href="#"><span class="dot"></span>Overview</a>
+    <a href="#"><span class="dot"></span>Companies</a>
+    <a href="#"><span class="dot"></span>Users</a>
+    <a href="#"><span class="dot"></span>Plans</a>
+    <a href="#"><span class="dot"></span>WhatsApp</a>
+    <a href="#" class="on"><span class="dot"></span>Claude Ops <span class="new">new</span></a>
+    <a href="#"><span class="dot"></span>Audit log</a>
+    <div class="me"><b>Anton</b>marklundfaktura@gmail.com</div>
+  </nav>
+
+  <main class="page">
+    <div class="crumbs">Superadmin / <span>Claude Ops</span></div>
+    <header class="head">
+      <div>
+        <h1>Claude Ops</h1>
+        <p>Hand a batch of sites to a Claude Code session, watch what it provisions, and approve each one before it goes live. Nothing here creates a site by hand. The session does, through the ops API, and every call lands in the log below.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn">Past batches</button>
+        <button class="btn primary">New batch</button>
+      </div>
+    </header>
+
+    <!-- Batch bar: which batch, and the roll-up of row states -->
+    <section class="batchbar" aria-label="Batch">
+      <div>
+        <div class="batch-id">
+          <span class="name">Batch 07 · Asunción services, September</span>
+          <span class="sel"><span>batch</span><b>ops_b07</b> ▾</span>
+          <span class="batch-meta">8 sites · opened 2026-09-08 09:12 · session token active</span>
+        </div>
+      </div>
+      <div class="counts" aria-label="Rows by state">
+        <span class="count done"><i></i>3 live</span>
+        <span class="count wait"><i></i>2 awaiting approval</span>
+        <span class="count run"><i></i>1 in progress</span>
+        <span class="count fail"><i></i>1 failed</span>
+        <span class="count pending"><i></i>1 not started</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- ───────────── Worksheet ───────────── -->
+      <section class="panel" aria-label="Worksheet">
+        <div class="panel-h">
+          <div class="tabs" role="tablist">
+            <button class="tab on" role="tab" data-view="rows">Sites</button>
+            <button class="tab" role="tab" data-view="intake">Paste list</button>
+          </div>
+          <span class="hint">Click a row for its checklist and go-live gate</span>
+        </div>
+
+        <!-- Rows view -->
+        <div id="view-rows">
+          <div class="wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Domain</th>
+                  <th>Company</th>
+                  <th>Pipeline · owner · tags</th>
+                  <th>Steps</th>
+                  <th>State</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row">
+                  <td class="domain">plomero.com.py<small>Plomería Asunción</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">Nuevo → Contactado → Presupuesto → Ganado</span><span class="chip">Anton</span><span class="chip">plomeria</span></td>
+                  <td><span class="steps" title="tenant · site · pipeline · key · test lead"><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i></span></td>
+                  <td><span class="state done">Live</span></td>
+                  <td><button class="btn sm">Open site</button></td>
+                </tr>
+                <tr class="row">
+                  <td class="domain">electricista.com.py<small>Electricistas Asunción</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">electricista</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i></span></td>
+                  <td><span class="state done">Live</span></td>
+                  <td><button class="btn sm">Open site</button></td>
+                </tr>
+                <tr class="row">
+                  <td class="domain">cerrajero.com.py<small>Cerrajería 24h</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">cerrajeria</span><span class="chip">urgente</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i></span></td>
+                  <td><span class="state done">Live</span></td>
+                  <td><button class="btn sm">Open site</button></td>
+                </tr>
+
+                <!-- Expanded row: awaiting approval -->
+                <tr class="row open">
+                  <td class="domain">dentista.com.py<small>Clínica Dental Sonrisa</small></td>
+                  <td class="tenant new">Clínica Dental Sonrisa</td>
+                  <td><span class="chip">Nuevo → Turno agendado → Atendido → Ganado</span><span class="chip">Dra. Benítez</span><span class="chip">dental</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step wait"></i></span></td>
+                  <td><span class="state wait">Awaiting approval</span><span class="why">Test lead landed. Site is still inactive.</span></td>
+                  <td><button class="btn sm primary">Review</button></td>
+                </tr>
+                <tr class="drawer">
+                  <td colspan="6">
+                    <div class="drawer-in">
+                      <div>
+                        <h3>What Claude provisioned</h3>
+                        <ul class="checks">
+                          <li><span class="mark ok">✓</span><span>Company <b>Clínica Dental Sonrisa</b> created, plan Starter, trial until 2026-10-08</span><time>09:41:07</time></li>
+                          <li><span class="mark ok">✓</span><span>User <b>dra.benitez@dentista.com.py</b> created as admin (password reset link sent, not stored)</span><time>09:41:09</time></li>
+                          <li><span class="mark ok">✓</span><span>Site <b>dentista.com.py</b> created, <b>inactive</b>, default owner Dra. Benítez, tag <code>dental</code></span><time>09:41:12</time></li>
+                          <li><span class="mark ok">✓</span><span>Pipeline <b>Pacientes</b> with 4 stages, default stage Nuevo</span><time>09:41:14</time></li>
+                          <li><span class="mark ok">✓</span><span>API key issued, label <code>hostinger-2026-09</code>. Plaintext returned to the session once, never stored.</span><time>09:41:15</time></li>
+                          <li><span class="mark ok">✓</span><span>Test lead received on the key lane → contact + deal in Nuevo</span><time>09:52:30</time></li>
+                          <li><span class="mark wait">·</span><span>Go-live approval by owner</span><time>pending</time></li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h3>Credentials on this site</h3>
+                        <dl class="kv">
+                          <dt>API key</dt><dd><span class="keyline">vcrm_live_k7Q2<span class="masked">••••••••••••</span> <span class="chip">last used 09:52</span></span></dd>
+                          <dt>Webhook token</dt><dd><span class="chip">none</span> <span class="note">server-to-server site, no hook lane</span></dd>
+                          <dt>WhatsApp</dt><dd>+595 981 ••• 412 <span class="chip">tenant primary</span></dd>
+                          <dt>Test lead</dt><dd><a href="#">Deal #1 · "Prueba onboarding"</a> · delete after approval</dd>
+                        </dl>
+                        <h3 style="margin-top:14px">Raw details you gave</h3>
+                        <dl class="kv">
+                          <dt>From paste</dt><dd class="mono">dentista.com.py | Clínica Dental Sonrisa | new tenant | owner dra.benitez@… | Nuevo, Turno agendado, Atendido, Ganado | tags dental</dd>
+                        </dl>
+                      </div>
+                      <div class="gate">
+                        <p><b>Go-live gate.</b> Approving flips the site to active and deletes the test lead. Until then the site can accept leads only from the session's test call. Rejecting sends the row back to Claude with your note.</p>
+                        <div class="split">
+                          <button class="btn danger">Reject with note</button>
+                          <button class="btn primary">Approve and go live</button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="row">
+                  <td class="domain">gasista.com.py<small>Gasistas Matriculados</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">gas</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step done"></i><i class="step wait"></i></span></td>
+                  <td><span class="state wait">Awaiting approval</span></td>
+                  <td><button class="btn sm primary">Review</button></td>
+                </tr>
+                <tr class="row">
+                  <td class="domain">pintor.com.py<small>Pintores Asunción</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">pintura</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step done"></i><i class="step run"></i><i class="step"></i><i class="step"></i></span></td>
+                  <td><span class="state run">Creating pipeline</span><span class="why">Session call 09:58:02</span></td>
+                  <td></td>
+                </tr>
+                <tr class="row">
+                  <td class="domain">mudanzas.com.py<small>Mudanzas Express</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">mudanzas</span></td>
+                  <td><span class="steps"><i class="step done"></i><i class="step fail"></i><i class="step"></i><i class="step"></i><i class="step"></i></span></td>
+                  <td><span class="state fail">Failed at site</span><span class="why">409 slug <code>mudanzas</code> already exists on this company (site created 2025-11-03). Merge or rename.</span></td>
+                  <td><button class="btn sm">Resolve</button></td>
+                </tr>
+                <tr class="row">
+                  <td class="domain">jardinero.com.py<small>Jardinería y Poda</small></td>
+                  <td class="tenant">Marklund PY Network</td>
+                  <td><span class="chip">4 stages</span><span class="chip">Anton</span><span class="chip">jardin</span></td>
+                  <td><span class="steps"><i class="step"></i><i class="step"></i><i class="step"></i><i class="step"></i><i class="step"></i></span></td>
+                  <td><span class="state pending">Not started</span></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span>Steps, left to right: company · site · pipeline · API key · test lead</span>
+            <span><i style="background:var(--ok);border-color:var(--ok)"></i>done</span>
+            <span><i style="background:var(--run-soft);border-color:var(--run)"></i>running</span>
+            <span><i style="background:var(--warn-soft);border-color:var(--warn)"></i>needs you</span>
+            <span><i style="background:var(--fail);border-color:var(--fail)"></i>failed</span>
+            <span><i></i>pending</span>
+          </div>
+        </div>
+
+        <!-- Intake view -->
+        <div id="view-intake" hidden>
+          <div class="intake">
+            <div>
+              <textarea aria-label="Sites to onboard" spellcheck="false">## Batch 07 — Asunción services
+All under Marklund PY Network unless "new tenant". Owner Anton. Stages: Nuevo, Contactado, Presupuesto, Ganado.
+
+plomero.com.py       Plomería Asunción         tags: plomeria
+electricista.com.py  Electricistas Asunción    tags: electricista
+cerrajero.com.py     Cerrajería 24h            tags: cerrajeria, urgente
+dentista.com.py      Clínica Dental Sonrisa    new tenant, owner dra.benitez@dentista.com.py
+                     stages: Nuevo, Turno agendado, Atendido, Ganado   tags: dental
+gasista.com.py       Gasistas Matriculados     tags: gas
+pintor.com.py        Pintores Asunción         tags: pintura
+mudanzas.com.py      Mudanzas Express          tags: mudanzas
+jardinero.com.py     Jardinería y Poda         tags: jardin</textarea>
+            </div>
+            <aside class="intake-side">
+              <h3>How this is read</h3>
+              <p>Write it the way you would say it to Claude. The batch stores your text verbatim, and the session reads it through the ops API. The table on the Sites tab is the session's <em>interpretation</em>, one row per domain, which you correct here if it got something wrong.</p>
+              <h3>Worth stating per line</h3>
+              <ul>
+                <li>domain and display name</li>
+                <li>existing company, or "new tenant" plus its first admin</li>
+                <li>pipeline stages if not the batch default</li>
+                <li>default owner, tags, WhatsApp number</li>
+              </ul>
+              <p>Anything you leave out inherits the batch header. Anything the session cannot resolve becomes a row in <span class="state fail" style="font-size:12px">Needs input</span> rather than a guess.</p>
+            </aside>
+            <div class="intake-foot">
+              <span class="parsed">Last read by session <b>09:38:51</b> · <b>8 domains</b> recognised · <b>1</b> new company · <b>0</b> unresolved lines</span>
+              <div class="split">
+                <button class="btn">Discard changes</button>
+                <button class="btn primary">Save batch text</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────── Right rail ───────────── -->
+      <aside class="side">
+        <section class="panel" aria-label="Session token">
+          <div class="panel-h"><h2>Claude session token</h2><span class="state run" style="font-size:12px">Active</span></div>
+          <div class="panel-b">
+            <div class="token"><span>vcrm_ops_b07_9Fk2<span class="masked">••••••••••••••••</span></span><button class="btn sm" title="Shown once at issue time; this copies only the prefix">Copy prefix</button></div>
+            <div class="meta">
+              <span>Issued</span><b>09:14 by Anton · shown once</b>
+              <span>Expires</span><b>13:14 · 2 h 40 min left</b>
+              <span>Last used</span><b>09:58:02 · 147 calls</b>
+              <span>Bound to</span><b>batch ops_b07 · superadmin</b>
+            </div>
+            <div class="ttl" aria-hidden="true"><i></i></div>
+            <div class="scope">
+              <code>tenants:create</code><code>sites:create</code><code>pipelines:create</code><code>keys:issue</code><code>leads:test</code><code>batch:read</code>
+            </div>
+            <p class="note">Cannot activate a site, delete anything, or read an existing key. Those stay with you, on this page.</p>
+            <div class="split">
+              <button class="btn danger">Revoke now</button>
+              <button class="btn">Extend 4 h</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Hand-off">
+          <div class="panel-h"><h2>Hand-off for the session</h2><button class="btn sm">Copy</button></div>
+          <div class="panel-b">
+            <p class="note">Paste this as the first message. The token itself is not in it. You paste that separately, once, into the session's environment.</p>
+<pre class="brief"><span class="c"># VenderCRM onboarding, batch ops_b07</span>
+<span class="k">base</span>     https://app.vendercrm.com/api/ops/v1
+<span class="k">auth</span>     header X-Ops-Token (from env VCRM_OPS_TOKEN)
+<span class="k">batch</span>    GET  /batches/ops_b07        <span class="c"># raw text + rows</span>
+<span class="k">steps</span>    POST /batches/ops_b07/rows/{id}/tenant
+         POST …/site  …/pipeline  …/key  …/test-lead
+<span class="k">rules</span>    sites are created inactive
+         one call per step, idempotent on row id
+         report a blocker as PATCH …/rows/{id} {"needsInput": "…"}
+<span class="k">skill</span>    vendercrm-lead-capture for the site side</pre>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="Needs you">
+          <div class="panel-h"><h2>Needs you</h2><span class="hint">3</span></div>
+          <div class="panel-b">
+            <ul class="checks">
+              <li><span class="mark wait">·</span><span>Approve <b>dentista.com.py</b></span><time>09:52</time></li>
+              <li><span class="mark wait">·</span><span>Approve <b>gasista.com.py</b></span><time>09:55</time></li>
+              <li><span class="mark fail">!</span><span>Resolve slug clash on <b>mudanzas.com.py</b></span><time>09:49</time></li>
+            </ul>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <!-- ───────────── Provisioning log ───────────── -->
+    <section class="panel log" aria-label="Provisioning log">
+      <div class="panel-h">
+        <h2>Provisioning log</h2>
+        <div class="filters">
+          <span class="chip on">This batch</span><span class="chip">Failures only</span><span class="chip">All Claude Ops</span>
+          <button class="btn sm">Open in Audit log</button>
+        </div>
+      </div>
+      <div class="wrap">
+        <table>
+          <thead><tr><th>When</th><th>Action</th><th>Object</th><th>Actor</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td class="t">09:58:02</td><td class="act">pipeline.create</td><td class="obj">site/pintor</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>Pipeline "Ventas", 4 stages</td></tr>
+            <tr><td class="t">09:55:41</td><td class="act">lead.test</td><td class="obj">site/gasista</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>201 · contact + deal in Nuevo · row → awaiting approval</td></tr>
+            <tr><td class="t">09:52:30</td><td class="act">lead.test</td><td class="obj">site/dentista</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>201 · contact + deal in Nuevo · row → awaiting approval</td></tr>
+            <tr><td class="t">09:49:17</td><td class="act fail">site.create · 409</td><td class="obj">batch/ops_b07/row/7</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>slug "mudanzas" exists on Marklund PY Network · row → failed</td></tr>
+            <tr><td class="t">09:47:03</td><td class="act">site.activate</td><td class="obj">site/cerrajero</td><td class="who"><b>Anton</b><span class="via">from this page · go-live approved</span></td><td>Test lead deleted · site active</td></tr>
+            <tr><td class="t">09:41:15</td><td class="act">key.issue</td><td class="obj">site/dentista</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>prefix vcrm_live_k7Q2 · label hostinger-2026-09 · plaintext returned once</td></tr>
+            <tr><td class="t">09:41:07</td><td class="act">tenant.create</td><td class="obj">tenant/clinica-dental-sonrisa</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>plan Starter · trial 30 d · admin dra.benitez@…</td></tr>
+            <tr><td class="t">09:38:51</td><td class="act">batch.read</td><td class="obj">batch/ops_b07</td><td class="who"><b>Anton</b><span class="via">via session token ops_b07_9Fk2</span></td><td>8 rows recognised</td></tr>
+            <tr><td class="t">09:14:22</td><td class="act">ops_token.issue</td><td class="obj">batch/ops_b07</td><td class="who"><b>Anton</b><span class="via">from this page</span></td><td>4 h · 6 scopes · prefix ops_b07_9Fk2</td></tr>
+            <tr><td class="t">09:12:05</td><td class="act">batch.create</td><td class="obj">batch/ops_b07</td><td class="who"><b>Anton</b><span class="via">from this page</span></td><td>"Asunción services, September"</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ───────────── Concept notes ───────────── -->
+    <section class="notes" aria-label="Design notes">
+      <h2>Notes on the concept</h2>
+      <p class="lede">Why the page is shaped this way, for whoever builds it.</p>
+      <ol>
+        <li><b>01</b><div><h3>One page, one batch at a time</h3><p>The owner works in bursts of five to ten domains. A batch is the unit of work: it holds the raw text, the rows the session derived from it, the token that was allowed to act on it, and the log slice. Past batches are one click away and stay readable forever.</p></div></li>
+        <li><b>02</b><div><h3>Raw text is the source, the table is the interpretation</h3><p>The paste box stores exactly what the owner wrote. The session reads it through the ops API and writes back one row per domain. The table exists so the human can spot a misread before anything is provisioned, and again before anything goes live.</p></div></li>
+        <li><b>03</b><div><h3>Five steps, one strip</h3><p>Company, site, pipeline, key, test lead. The strip encodes state in form, so a scan of the column tells the owner where the batch is without reading a word. A failed cell carries the API's own reason, verbatim, because a paraphrased error is worth less than a real one.</p></div></li>
+        <li><b>04</b><div><h3>Sites are born inactive</h3><p>The session can create everything but cannot activate. Approval is a human click on this page. It also deletes the test lead. That single gate is what turns "Claude did fifty things" into "Claude did fifty things and I checked each one in ten seconds".</p></div></li>
+        <li><b>05</b><div><h3>The token is scoped, bound, short-lived, and shown once</h3><p>It is bound to one batch, expires in hours, and cannot read existing keys or delete. After issue the page shows only the prefix, last use, and call count, the same treatment the codebase already gives site API keys. Revoke is always one click.</p></div></li>
+        <li><b>06</b><div><h3>The log is the existing audit log, filtered</h3><p>Every ops call writes a normal audit entry with the superadmin as actor and the token as the "via", mirroring how impersonation is already recorded. Nothing about this page needs a second trail.</p></div></li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Tab switch between the worksheet and the paste box.
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t === tab); });
+      document.getElementById('view-rows').hidden = tab.dataset.view !== 'rows';
+      document.getElementById('view-intake').hidden = tab.dataset.view !== 'intake';
+    });
+  });
+  // Only the dentista row has a drawer in this mockup; other rows just toggle highlight.
+  document.querySelectorAll('tr.row').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+      if (e.target.closest('button')) return;
+      var drawer = row.nextElementSibling;
+      var has = drawer && drawer.classList.contains('drawer');
+      var open = row.classList.toggle('open');
+      if (has) drawer.hidden = !open;
+    });
+  });
+</script>
