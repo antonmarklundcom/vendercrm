@@ -2198,10 +2198,95 @@
       "tenants": "Companies",
       "plans": "Plans",
       "whatsappHealth": "WhatsApp",
+      "claudeOps": "Claude Ops",
       "superadmin": "Superadmin",
       "audit": "Audit log",
       "users": "Users",
       "overview": "Overview"
+    },
+    "ops": {
+      "title": "Claude Ops",
+      "intro": "Hand a batch of sites to a Claude Code session, watch what it provisions, and approve each one before it goes live. Nothing here creates a site by hand — the session does, through the ops API, and every call lands in the log below.",
+      "noTokenIntro": "There's no ops token yet. Create one below and paste it, along with the URL, into the environment on the PC where the Claude Code session runs.",
+      "states": {
+        "pending": "Not started",
+        "running": "Running",
+        "needsInput": "Needs your input",
+        "failed": "Failed",
+        "awaitingApproval": "Awaiting approval",
+        "live": "Live"
+      },
+      "token": {
+        "title": "Session token",
+        "createLabel": "Label",
+        "createPlaceholder": "Label (e.g. \"Anton's PC\")",
+        "createSubmit": "Create token",
+        "revealTitle": "Token created",
+        "revealHint": "Shown once. Copy it and paste it into the session's environment as VCRM_OPS_TOKEN — there's nothing stored to show it again.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "prefix": "Prefix",
+        "lastUsed": "Last used",
+        "calls": "Calls",
+        "never": "never",
+        "allowlist": "Allowed companies",
+        "allowlistNone": "none — can only create new companies",
+        "revoke": "Revoke",
+        "revoked": "Revoked",
+        "errorInvalid": "Give the token a label.",
+        "noneYet": "No tokens yet."
+      },
+      "batch": {
+        "select": "Batch",
+        "newBatch": "New batch",
+        "newBatchPlaceholder": "Batch title",
+        "newBatchSubmit": "Create",
+        "noBatches": "No batches yet.",
+        "pickOne": "Pick a batch to see its rows."
+      },
+      "worksheet": {
+        "tabSites": "Sites",
+        "tabPaste": "Paste list",
+        "colDomain": "Domain",
+        "colCompany": "Company",
+        "colPipeline": "Pipeline",
+        "colSteps": "Steps",
+        "colState": "State",
+        "openSite": "Open company",
+        "review": "Review",
+        "emptyRows": "The session has not written rows for this batch yet.",
+        "provisioned": "What Claude provisioned",
+        "credentials": "Credentials on this site",
+        "rawDetails": "Pasted detail",
+        "gateNote": "Approving activates the site and deletes the test lead. Until then the site accepts only the session's test lead. Rejecting sends it back to Claude with your note.",
+        "approve": "Approve and go live",
+        "reject": "Reject with note",
+        "rejectPlaceholder": "What's missing or wrong",
+        "rejectSubmit": "Send",
+        "newTenant": "new company",
+        "intakeHint": "The batch stores exactly what you write here. The session reads it through the ops API and writes one row per domain on the Sites tab.",
+        "intakeSave": "Save text",
+        "intakePlaceholder": "domain.com   Company name   tags: example"
+      },
+      "needsYou": {
+        "title": "Needs you",
+        "empty": "Nothing pending right now."
+      },
+      "log": {
+        "title": "Provisioning log",
+        "when": "When",
+        "action": "Action",
+        "object": "Object",
+        "via": "Via",
+        "empty": "No entries yet.",
+        "filterBatch": "This batch",
+        "filterFailures": "Failures only",
+        "filterAll": "All Claude Ops",
+        "openFull": "Open in Audit log"
+      },
+      "common": {
+        "cancel": "Cancel"
+      }
     },
     "tenantUsers": {
       "title": "Company users",

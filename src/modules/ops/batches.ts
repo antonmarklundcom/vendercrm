@@ -326,3 +326,16 @@ export async function markRowLive(rowId: string): Promise<void> {
 export async function markRowRejected(rowId: string, note: string): Promise<void> {
   await patchRow(rowId, { state: "needs_input", needsInput: note });
 }
+
+/**
+ * The owner's edit of his own paste box (§18.4 "save raw text"). Not
+ * token-scoped: the console already sees every batch through
+ * `listAllOpsBatches`, and this is the one field on it the owner — not a
+ * session — writes.
+ */
+export async function setBatchRawText(batchId: string, rawText: string): Promise<OpsBatchRow> {
+  await db.update(opsBatches).set({ rawText }).where(eq(opsBatches.id, batchId));
+  const [row] = await db.select().from(opsBatches).where(eq(opsBatches.id, batchId));
+  if (!row) throw new OpsAccessError(404, "batch not found");
+  return row;
+}

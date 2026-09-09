@@ -29,6 +29,7 @@ export default async function SuperadminLayout({
         { href: "/platform-users", label: t("users"), icon: "users" },
         { href: "/plans", label: t("plans"), icon: "quotes" },
         { href: "/whatsapp-health", label: t("whatsappHealth"), icon: "whatsapp" },
+        { href: "/claude-ops", label: t("claudeOps"), icon: "automations" },
         { href: "/audit", label: t("audit"), icon: "settings" },
       ],
     },

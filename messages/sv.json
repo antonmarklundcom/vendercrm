@@ -2198,10 +2198,95 @@
       "tenants": "Företag",
       "plans": "Planer",
       "whatsappHealth": "WhatsApp",
+      "claudeOps": "Claude Ops",
       "superadmin": "Superadministratör",
       "audit": "Granskningslogg",
       "users": "Användare",
       "overview": "Översikt"
+    },
+    "ops": {
+      "title": "Claude Ops",
+      "intro": "Lämna en sats sajter till en Claude Code-session, se vad den etablerar och godkänn varje sajt innan den går live. Inget här skapar en sajt för hand — det gör sessionen, via ops-API:et, och varje anrop hamnar i loggen nedan.",
+      "noTokenIntro": "Det finns ingen ops-token än. Skapa en nedan och klistra in den, tillsammans med URL:en, i miljön på datorn där Claude Code-sessionen körs.",
+      "states": {
+        "pending": "Ej påbörjad",
+        "running": "Pågår",
+        "needsInput": "Behöver ditt svar",
+        "failed": "Misslyckades",
+        "awaitingApproval": "Väntar på godkännande",
+        "live": "Live"
+      },
+      "token": {
+        "title": "Sessionens token",
+        "createLabel": "Etikett",
+        "createPlaceholder": "Etikett (t.ex. \"Antons dator\")",
+        "createSubmit": "Skapa token",
+        "revealTitle": "Token skapad",
+        "revealHint": "Visas bara en gång. Kopiera den och klistra in den i sessionens miljö som VCRM_OPS_TOKEN — den sparas inte för att visas igen.",
+        "copy": "Kopiera",
+        "copied": "Kopierad",
+        "prefix": "Prefix",
+        "lastUsed": "Senast använd",
+        "calls": "Anrop",
+        "never": "aldrig",
+        "allowlist": "Tillåtna företag",
+        "allowlistNone": "inga — kan bara skapa nya företag",
+        "revoke": "Återkalla",
+        "revoked": "Återkallad",
+        "errorInvalid": "Ge token en etikett.",
+        "noneYet": "Inga tokens än."
+      },
+      "batch": {
+        "select": "Sats",
+        "newBatch": "Ny sats",
+        "newBatchPlaceholder": "Satsens titel",
+        "newBatchSubmit": "Skapa",
+        "noBatches": "Inga satser än.",
+        "pickOne": "Välj en sats för att se dess rader."
+      },
+      "worksheet": {
+        "tabSites": "Sajter",
+        "tabPaste": "Klistra in lista",
+        "colDomain": "Domän",
+        "colCompany": "Företag",
+        "colPipeline": "Pipeline",
+        "colSteps": "Steg",
+        "colState": "Status",
+        "openSite": "Öppna företag",
+        "review": "Granska",
+        "emptyRows": "Sessionen har inte skrivit några rader för denna sats än.",
+        "provisioned": "Vad Claude etablerade",
+        "credentials": "Uppgifter för den här sajten",
+        "rawDetails": "Inklistrad text",
+        "gateNote": "Godkännande aktiverar sajten och tar bort testleadet. Fram till dess accepterar sajten bara sessionens testlead. Avvisning skickar tillbaka raden till Claude med din notering.",
+        "approve": "Godkänn och gå live",
+        "reject": "Avvisa med notering",
+        "rejectPlaceholder": "Vad saknas eller är fel",
+        "rejectSubmit": "Skicka",
+        "newTenant": "nytt företag",
+        "intakeHint": "Satsen sparar exakt det du skriver här. Sessionen läser det via ops-API:et och skriver en rad per domän på fliken Sajter.",
+        "intakeSave": "Spara text",
+        "intakePlaceholder": "domän.se   Företagets namn   tags: exempel"
+      },
+      "needsYou": {
+        "title": "Behöver dig",
+        "empty": "Inget väntar just nu."
+      },
+      "log": {
+        "title": "Etableringslogg",
+        "when": "När",
+        "action": "Åtgärd",
+        "object": "Objekt",
+        "via": "Via",
+        "empty": "Inga poster än.",
+        "filterBatch": "Denna sats",
+        "filterFailures": "Endast fel",
+        "filterAll": "Alla Claude Ops",
+        "openFull": "Öppna i granskningslogg"
+      },
+      "common": {
+        "cancel": "Avbryt"
+      }
     },
     "tenantUsers": {
       "title": "Företagets användare",

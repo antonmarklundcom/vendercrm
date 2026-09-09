@@ -2198,10 +2198,95 @@
       "tenants": "Empresas",
       "plans": "Planes",
       "whatsappHealth": "WhatsApp",
+      "claudeOps": "Claude Ops",
       "superadmin": "Superadministrador",
       "audit": "Auditoría",
       "users": "Usuarios",
       "overview": "Panel"
+    },
+    "ops": {
+      "title": "Claude Ops",
+      "intro": "Pasale un lote de sitios a una sesión de Claude Code, mirá qué va aprovisionando y aprobá cada uno antes de que quede en vivo. Nada acá crea un sitio a mano: lo hace la sesión, a través de la API de ops, y cada llamada queda en el registro de abajo.",
+      "noTokenIntro": "Todavía no hay ningún token de ops. Creá uno abajo y pegalo, junto con la URL, en el entorno de la PC donde corre la sesión de Claude Code.",
+      "states": {
+        "pending": "Sin empezar",
+        "running": "En curso",
+        "needsInput": "Necesita tu respuesta",
+        "failed": "Falló",
+        "awaitingApproval": "Esperando aprobación",
+        "live": "En vivo"
+      },
+      "token": {
+        "title": "Token de la sesión",
+        "createLabel": "Etiqueta",
+        "createPlaceholder": "Etiqueta (por ejemplo, «PC de Anton»)",
+        "createSubmit": "Crear token",
+        "revealTitle": "Token creado",
+        "revealHint": "Se muestra una sola vez. Copialo y pegalo en el entorno de la sesión como VCRM_OPS_TOKEN; no queda guardado en ningún lado para volver a mostrarlo.",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "prefix": "Prefijo",
+        "lastUsed": "Último uso",
+        "calls": "Llamadas",
+        "never": "nunca",
+        "allowlist": "Empresas permitidas",
+        "allowlistNone": "ninguna — solo puede crear empresas nuevas",
+        "revoke": "Revocar",
+        "revoked": "Revocado",
+        "errorInvalid": "Poné una etiqueta para el token.",
+        "noneYet": "Todavía no hay tokens."
+      },
+      "batch": {
+        "select": "Lote",
+        "newBatch": "Nuevo lote",
+        "newBatchPlaceholder": "Título del lote",
+        "newBatchSubmit": "Crear",
+        "noBatches": "Todavía no hay lotes.",
+        "pickOne": "Elegí un lote para ver sus filas."
+      },
+      "worksheet": {
+        "tabSites": "Sitios",
+        "tabPaste": "Pegar lista",
+        "colDomain": "Dominio",
+        "colCompany": "Empresa",
+        "colPipeline": "Pipeline",
+        "colSteps": "Pasos",
+        "colState": "Estado",
+        "openSite": "Ver empresa",
+        "review": "Revisar",
+        "emptyRows": "La sesión todavía no escribió filas para este lote.",
+        "provisioned": "Lo que aprovisionó Claude",
+        "credentials": "Credenciales de este sitio",
+        "rawDetails": "Detalle pegado",
+        "gateNote": "Aprobar activa el sitio y borra el lead de prueba. Hasta entonces el sitio solo acepta el lead de prueba de la sesión. Rechazar lo devuelve a Claude con tu nota.",
+        "approve": "Aprobar y activar",
+        "reject": "Rechazar con nota",
+        "rejectPlaceholder": "Qué falta o qué corregir",
+        "rejectSubmit": "Enviar",
+        "newTenant": "empresa nueva",
+        "intakeHint": "El lote guarda exactamente lo que escribís acá. La sesión lo lee a través de la API de ops y escribe una fila por dominio en la pestaña Sitios.",
+        "intakeSave": "Guardar texto",
+        "intakePlaceholder": "dominio.com.py   Nombre de la empresa   tags: ejemplo"
+      },
+      "needsYou": {
+        "title": "Necesita tu atención",
+        "empty": "Nada pendiente por ahora."
+      },
+      "log": {
+        "title": "Registro de aprovisionamiento",
+        "when": "Cuándo",
+        "action": "Acción",
+        "object": "Objeto",
+        "via": "Vía",
+        "empty": "Todavía no hay entradas.",
+        "filterBatch": "Este lote",
+        "filterFailures": "Solo fallos",
+        "filterAll": "Todo Claude Ops",
+        "openFull": "Ver en Auditoría"
+      },
+      "common": {
+        "cancel": "Cancelar"
+      }
     },
     "tenantUsers": {
       "title": "Usuarios de la empresa",

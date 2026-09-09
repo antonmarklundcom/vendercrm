@@ -155,6 +155,17 @@ export async function getOpsToken(id: string): Promise<OpsTokenSummary | null> {
   return row ? summarize(row) : null;
 }
 
+/**
+ * The full row, hash included — `getOpsToken` above is what the console page
+ * renders, this is what the console's own server actions need to reuse a
+ * token-scoped write (e.g. minting a batch under it). Never returned from a
+ * route or rendered; stays inside modules/ops.
+ */
+export async function getOpsTokenRow(id: string): Promise<OpsTokenRow | null> {
+  const [row] = await db.select().from(opsTokens).where(eq(opsTokens.id, id));
+  return row ?? null;
+}
+
 /** Revocation is a timestamp, not a delete (§18.1.1). */
 export async function revokeOpsToken(id: string): Promise<void> {
   await db
