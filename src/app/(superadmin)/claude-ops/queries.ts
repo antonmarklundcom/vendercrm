@@ -67,14 +67,48 @@ export function listOpsBatchesForConsole() {
   return listAllOpsBatches();
 }
 
+/**
+ * How many rows are enriched at once.
+ *
+ * `Promise.all(rows.map(enrichOpsRow))` is the obvious way to write this and
+ * it does not survive a real batch: each row opens its own tenant context and
+ * runs half a dozen queries, so N rows put ~6N queries in flight at once. The
+ * pool is deliberately small — `connectionLimit: 6`, `queueLimit: 24` in
+ * src/db/client.ts, sized against Hostinger's per-user connection ceiling —
+ * and past those 30 mysql2 does not wait, it rejects. A console that renders
+ * fine for five rows then throws for fifty is exactly the failure that shape
+ * produces, and it lands on the page whose whole job is approving a bulk run.
+ *
+ * Four keeps a batch of any size inside the pool with room for the rest of
+ * the request, at a cost of a few hundred milliseconds on a large page.
+ */
+const ENRICH_CONCURRENCY = 4;
+
+/** Maps with a bounded number of workers, preserving input order. */
+async function enrichAll(rows: OpsRow[]): Promise<OpsRowView[]> {
+  const views = new Array<OpsRowView>(rows.length);
+  let next = 0;
+
+  async function worker() {
+    while (true) {
+      const index = next++;
+      if (index >= rows.length) return;
+      views[index] = await enrichOpsRow(rows[index]!);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(ENRICH_CONCURRENCY, rows.length) }, worker),
+  );
+  return views;
+}
+
 export async function getBatchRowViews(batchId: string): Promise<OpsRowView[]> {
-  const rows = await listRowsForBatch(batchId);
-  return Promise.all(rows.map(enrichOpsRow));
+  return enrichAll(await listRowsForBatch(batchId));
 }
 
 export async function listNeedsYouViews(): Promise<OpsRowView[]> {
-  const rows = await listRowsAwaitingOwner();
-  return Promise.all(rows.map(enrichOpsRow));
+  return enrichAll(await listRowsAwaitingOwner());
 }
 
 /** Every audit row a Claude Ops call — token-driven or console-driven —
