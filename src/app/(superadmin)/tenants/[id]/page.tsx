@@ -104,7 +104,9 @@ export default async function TenantDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={tenant.name} description={tenant.slug} />
+      {/* The id is what the ops token allowlist and the ops API key on; until
+          now it was only readable from the address bar. */}
+      <PageHeader title={tenant.name} description={`${tenant.slug} · ID ${tenant.id}`} />
 
       <section>
         <h2 className="mb-2 text-lg font-semibold">{ts("title")}</h2>

@@ -23,6 +23,8 @@ export {
   type OpsTokenSummary,
 } from "./tokens";
 
+export { resolveTenantRefs, type ResolvedTenantRefs, type TenantRef } from "./tenant-refs";
+
 export {
   assertMayCreateSiteInTenant,
   assertMayTouch,

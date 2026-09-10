@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { requireSuperadminContext } from "@/modules/tenancy/context";
 import { PageHeader } from "@/components/page-header";
 import { listOpsTokens, type OpsRowState } from "@/modules/ops";
+import { listTenants } from "@/modules/tenancy/tenants";
 import { OpsLog } from "@/components/ops/OpsLog";
 import { TokenPanel, type TokenPanelLabels } from "./TokenPanel";
 import { BatchBar, type BatchBarLabels } from "./BatchBar";
@@ -29,7 +30,12 @@ export default async function ClaudeOpsPage({
   const t = await getTranslations("superadmin.ops");
   const locale = await getLocale();
 
-  const [tokens, batches] = await Promise.all([listOpsTokens(), listOpsBatchesForConsole()]);
+  const [tokens, batches, tenants] = await Promise.all([
+    listOpsTokens(),
+    listOpsBatchesForConsole(),
+    listTenants(),
+  ]);
+  const tenantNames = Object.fromEntries(tenants.map((tenant) => [tenant.id, tenant.name]));
 
   const stateLabels: Record<OpsRowState, string> = {
     pending: t("states.pending"),
@@ -58,6 +64,9 @@ export default async function ClaudeOpsPage({
     never: t("token.never"),
     allowlist: t("token.allowlist"),
     allowlistNone: t("token.allowlistNone"),
+    allowlistPlaceholder: t("token.allowlistPlaceholder"),
+    allowlistHint: t("token.allowlistHint"),
+    allowlistUnknown: t("token.allowlistUnknown"),
     revoke: t("token.revoke"),
     revoked: t("token.revoked"),
     errorInvalid: t("token.errorInvalid"),
@@ -69,7 +78,12 @@ export default async function ClaudeOpsPage({
       <div className="flex flex-col gap-6">
         <PageHeader title={t("title")} description={t("intro")} />
         <p className="max-w-2xl text-sm text-muted-foreground">{t("noTokenIntro")}</p>
-        <TokenPanel tokens={tokens} labels={tokenLabels} locale={locale} />
+        <TokenPanel
+          tokens={tokens}
+          tenantNames={tenantNames}
+          labels={tokenLabels}
+          locale={locale}
+        />
       </div>
     );
   }
@@ -153,7 +167,12 @@ export default async function ClaudeOpsPage({
         </div>
 
         <div className="flex flex-col gap-4">
-          <TokenPanel tokens={tokens} labels={tokenLabels} locale={locale} />
+          <TokenPanel
+            tokens={tokens}
+            tenantNames={tenantNames}
+            labels={tokenLabels}
+            locale={locale}
+          />
           <NeedsYou rows={needsYou} labels={needsYouLabels} />
         </div>
       </div>
