@@ -68,7 +68,9 @@ async function call(method, path, body) {
       response = await fetch(`${BASE}${path}`, {
         method,
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
+          // `x-ops-token`, not an Authorization bearer: requireOpsToken in
+          // src/lib/api/guards.ts reads this header and nothing else.
+          "x-ops-token": TOKEN,
           ...(body ? { "Content-Type": "application/json" } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
@@ -166,7 +168,14 @@ async function main() {
     raw_text: domains.map((row) => row.domain).join("\n"),
   });
   if (created.status !== 201) {
-    console.error("Could not create the batch:", created.status, created.data);
+    console.error(
+      "Could not create the batch:",
+      created.status,
+      created.data?.error?.message ?? created.data,
+    );
+    if (created.status === 401) {
+      console.error("Check VCRM_OPS_TOKEN — the server did not recognise it.");
+    }
     process.exit(1);
   }
   const batchId = created.data.batch.id;
@@ -193,7 +202,10 @@ async function main() {
     for (const step of STEPS) {
       const response = await call("POST", `/api/ops/v1/rows/${row.id}/${step}`);
       if (response.status >= 400) {
-        const reason = response.data?.message ?? response.data?.error ?? response.status;
+        // The API's error shape is { error: { code, message } } — reaching
+        // only for `.error` prints "[object Object]" instead of the reason.
+        const reason =
+          response.data?.error?.message ?? response.data?.error?.code ?? response.status;
         console.log(`      ${step}: FAILED — ${reason}`);
         result.failed_step = step;
         result.error = reason;
