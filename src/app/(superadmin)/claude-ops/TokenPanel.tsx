@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { AlertTriangle, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/form-fields";
 import { formatDateTime } from "@/lib/i18n/format";
 import {
@@ -11,12 +12,22 @@ import {
   setAllowlistAction,
   type CreateTokenState,
 } from "./actions";
+import {
+  canCloseReveal,
+  isRevealAcknowledged,
+  isRevealOpen,
+  shouldWarnBeforeUnload,
+  warnBeforeUnload,
+  type TokenRevealState,
+} from "./tokenReveal";
 import type { OpsTokenSummary } from "@/modules/ops";
 
 // The session's credential (PLAN.md §18.1.1, §18.4). Shown in plaintext
-// exactly once, right after creation — the same "here's a link, copy it now"
-// idiom ResetPasswordButton already uses for a reset URL, since there is
-// nothing to fetch back afterwards either way.
+// exactly once, right after creation — nothing is stored that could show it
+// again, so the reveal is a modal that cannot be dismissed by Escape, by a
+// click outside, or by a refresh without the browser asking first. It used to
+// be an inline panel, and a token was lost to exactly that: created, rendered
+// somewhere off the owner's eyeline, gone on the next navigation.
 
 export type TokenPanelLabels = {
   title: string;
@@ -25,6 +36,9 @@ export type TokenPanelLabels = {
   createSubmit: string;
   revealTitle: string;
   revealHint: string;
+  revealWarning: string;
+  revealAck: string;
+  revealDone: string;
   copy: string;
   copied: string;
   prefix: string;
@@ -44,10 +58,32 @@ const initialState: CreateTokenState = { error: null, token: null };
 function CreateTokenForm({ labels }: { labels: TokenPanelLabels }) {
   const [state, formAction, pending] = useActionState(createTokenAction, initialState);
   const [copied, setCopied] = useState(false);
+  // Keyed on the plaintext, not booleans: creating a second token in the same
+  // session has to start from unacknowledged again (see tokenReveal.ts).
+  const [acknowledgedFor, setAcknowledgedFor] = useState<string | null>(null);
+  const [closedFor, setClosedFor] = useState<string | null>(null);
 
-  async function copyToken(plaintext: string) {
+  const plaintext = state.token?.plaintext ?? null;
+  const reveal: TokenRevealState = { plaintext, acknowledgedFor, closedFor };
+  const open = isRevealOpen(reveal);
+  const acknowledged = isRevealAcknowledged(reveal);
+  const atRisk = shouldWarnBeforeUnload(reveal);
+
+  // The failure that cost a token: refresh or navigate while the plaintext is
+  // on screen and it is gone with no way back. This is the browser's own
+  // "leave site?" prompt — the only interruption that survives a reload.
+  useEffect(() => {
+    if (!atRisk) return;
+    function onBeforeUnload(event: BeforeUnloadEvent) {
+      warnBeforeUnload(event, { plaintext, acknowledgedFor, closedFor }, labels.revealWarning);
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [atRisk, plaintext, acknowledgedFor, closedFor, labels.revealWarning]);
+
+  async function copyToken(value: string) {
     try {
-      await navigator.clipboard.writeText(plaintext);
+      await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -55,41 +91,69 @@ function CreateTokenForm({ labels }: { labels: TokenPanelLabels }) {
     }
   }
 
-  if (state.token) {
-    return (
-      <div className="flex flex-col gap-2 rounded-md border bg-muted/40 p-3">
-        <span className="text-sm font-medium">{labels.revealTitle}</span>
-        <p className="text-xs text-muted-foreground">{labels.revealHint}</p>
-        <div className="flex items-center gap-2">
-          <code className="min-w-0 flex-1 overflow-x-auto rounded border bg-background px-2 py-1 font-mono text-xs">
-            {state.token.plaintext}
-          </code>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => copyToken(state.token!.plaintext)}
-          >
-            {copied ? (
-              <Check className="size-3.5" aria-hidden="true" />
-            ) : (
-              <Copy className="size-3.5" aria-hidden="true" />
-            )}
-            {copied ? labels.copied : labels.copy}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <form action={formAction} className="flex flex-col gap-2">
-      <Input name="label" placeholder={labels.createPlaceholder} required maxLength={100} />
-      {state.error && <p className="text-sm text-destructive">{labels.errorInvalid}</p>}
-      <Button type="submit" size="sm" disabled={pending}>
-        {labels.createSubmit}
-      </Button>
-    </form>
+    <>
+      <form action={formAction} className="flex flex-col gap-2">
+        <Input name="label" placeholder={labels.createPlaceholder} required maxLength={100} />
+        {state.error && <p className="text-sm text-destructive">{labels.errorInvalid}</p>}
+        <Button type="submit" size="sm" disabled={pending}>
+          {labels.createSubmit}
+        </Button>
+      </form>
+
+      <Dialog
+        open={open}
+        onClose={() => setClosedFor(plaintext)}
+        label={labels.revealTitle}
+        dismissible={false}
+      >
+        <div className="flex flex-col gap-3 p-4">
+          <h2 className="text-base font-semibold">{labels.revealTitle}</h2>
+          <p className="text-sm text-muted-foreground">{labels.revealHint}</p>
+          <p className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-sm text-destructive">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span>{labels.revealWarning}</span>
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="min-w-0 flex-1 overflow-x-auto rounded border bg-muted/40 px-2 py-1 font-mono text-xs">
+              {plaintext}
+            </code>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => plaintext && copyToken(plaintext)}
+            >
+              {copied ? (
+                <Check className="size-3.5" aria-hidden="true" />
+              ) : (
+                <Copy className="size-3.5" aria-hidden="true" />
+              )}
+              {copied ? labels.copied : labels.copy}
+            </Button>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={acknowledged}
+              onChange={(event) => setAcknowledgedFor(event.target.checked ? plaintext : null)}
+            />
+            {labels.revealAck}
+          </label>
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              disabled={!canCloseReveal(reveal)}
+              onClick={() => setClosedFor(plaintext)}
+            >
+              {labels.revealDone}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </>
   );
 }
 
