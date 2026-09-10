@@ -2276,7 +2276,9 @@
       },
       "needsYou": {
         "title": "Behöver dig",
-        "empty": "Inget väntar just nu."
+        "empty": "Inget väntar just nu.",
+        "approveAll": "Godkänn och aktivera alla {count}",
+        "approveAllHint": "Aktiverar varje sajt och tar bort dess testlead. Kontrollera listan först."
       },
       "log": {
         "title": "Etableringslogg",

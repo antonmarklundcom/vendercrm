@@ -42,23 +42,13 @@ const ops = {
   })),
   markRowLive: vi.fn(async () => undefined),
   markRowRejected: vi.fn(async () => undefined),
+  listRowsAwaitingOwner: vi.fn(async () => []),
+  retireTestLead: vi.fn(async () => undefined),
 };
 vi.mock("@/modules/ops", () => ops);
 
 const sites = { updateSite: vi.fn(async () => undefined) };
 vi.mock("@/modules/sites/sites", () => sites);
-
-class RecordDeleteError extends Error {
-  constructor(public code: "notFound" | "hasHistory") {
-    super(code);
-  }
-}
-const deletion = {
-  deleteContactRecord: vi.fn(async () => undefined),
-  deleteDealRecord: vi.fn(async () => undefined),
-  RecordDeleteError,
-};
-vi.mock("@/modules/crm/deletion", () => deletion);
 
 vi.mock("@/modules/tenancy/audit", () => ({ writeAuditLog: vi.fn(async () => undefined) }));
 
@@ -202,15 +192,60 @@ describe("Claude Ops console actions", () => {
       "site-9",
       { isActive: true },
     );
-    expect(deletion.deleteDealRecord).toHaveBeenCalledWith(
+    // Retiring the fixture is one operation now, in the ops module, because
+    // the order matters: the lead_submissions row has to go before the deal
+    // and the contact are deletable at all.
+    expect(ops.retireTestLead).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: "tenant-9" }),
-      "deal-9",
-    );
-    expect(deletion.deleteContactRecord).toHaveBeenCalledWith(
-      expect.objectContaining({ tenantId: "tenant-9" }),
-      "contact-9",
+      { contactId: "contact-9", dealId: "deal-9" },
     );
     expect(ops.markRowLive).toHaveBeenCalledWith("row-1");
+  });
+
+  it("approve-all activates every row awaiting the owner", async () => {
+    isSuperadmin = true;
+    ops.listRowsAwaitingOwner.mockResolvedValueOnce([
+      {
+        id: "row-a",
+        batchId: "batch-1",
+        tenantId: "tenant-a",
+        siteId: "site-a",
+        testContactId: "contact-a",
+        testDealId: "deal-a",
+        state: "awaiting_approval",
+      },
+      {
+        id: "row-b",
+        batchId: "batch-1",
+        tenantId: "tenant-b",
+        siteId: "site-b",
+        testContactId: null,
+        testDealId: null,
+        state: "awaiting_approval",
+      },
+      // Already live: activating it again would write a second audit entry
+      // for a decision taken once.
+      {
+        id: "row-c",
+        batchId: "batch-1",
+        tenantId: "tenant-c",
+        siteId: "site-c",
+        testContactId: null,
+        testDealId: null,
+        state: "live",
+      },
+    ] as never);
+
+    await actions.approveAllRowsAction();
+
+    expect(ops.markRowLive).toHaveBeenCalledWith("row-a");
+    expect(ops.markRowLive).toHaveBeenCalledWith("row-b");
+    expect(ops.markRowLive).not.toHaveBeenCalledWith("row-c");
+  });
+
+  it("refuses a tenant admin — approveAllRowsAction", async () => {
+    await expect(actions.approveAllRowsAction()).rejects.toThrow();
+    expect(ops.markRowLive).not.toHaveBeenCalled();
   });
 
   it("reject stores the note", async () => {

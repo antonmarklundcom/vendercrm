@@ -2276,7 +2276,9 @@
       },
       "needsYou": {
         "title": "Needs you",
-        "empty": "Nothing pending right now."
+        "empty": "Nothing pending right now.",
+        "approveAll": "Approve and activate all {count}",
+        "approveAllHint": "Activates every site and deletes its test lead. Check the list first."
       },
       "log": {
         "title": "Provisioning log",

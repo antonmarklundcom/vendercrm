@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { buildSystemTenantContext, requireSuperadminContext } from "@/modules/tenancy/context";
 import { updateSite } from "@/modules/sites/sites";
-import { deleteContactRecord, deleteDealRecord, RecordDeleteError } from "@/modules/crm/deletion";
+import { listRowsAwaitingOwner, retireTestLead } from "@/modules/ops";
 import { writeAuditLog } from "@/modules/tenancy/audit";
 import {
   createOpsBatch,
@@ -19,6 +19,7 @@ import {
   setBatchRawText,
   setOpsTokenAllowlist,
 } from "@/modules/ops";
+import type { OpsRow } from "@/modules/ops";
 // Imported by path, not through the module index: it is pure, and the
 // console's authorization test mocks "@/modules/ops" wholesale.
 import { resolveTenantRefs } from "@/modules/ops/tenant-refs";
@@ -182,15 +183,6 @@ export async function saveBatchTextAction(formData: FormData): Promise<void> {
 /** A record deleted by an earlier, interrupted approval click reads as
  * "not found" — treated as already done rather than a failure, the same
  * idempotence the ops steps themselves lean on (§18.1.7). */
-async function deleteIfPresent(run: () => Promise<void>): Promise<void> {
-  try {
-    await run();
-  } catch (err) {
-    if (err instanceof RecordDeleteError && err.code === "notFound") return;
-    throw err;
-  }
-}
-
 export async function approveRowAction(formData: FormData): Promise<void> {
   const ctx = await requireSuperadminContext();
   const rowId = String(formData.get("rowId") ?? "");
@@ -200,27 +192,59 @@ export async function approveRowAction(formData: FormData): Promise<void> {
     return;
   }
 
+  await activateRow(row, ctx.userId);
+  revalidatePath("/claude-ops");
+}
+
+/**
+ * Puts one row's site live. Shared by the single-row button and the bulk
+ * action below so the two can never drift — approving fifty must mean exactly
+ * what approving one means, including the audit entry.
+ */
+async function activateRow(row: OpsRow, actorUserId: string): Promise<boolean> {
+  if (!row.tenantId || !row.siteId || row.state === "live") return false;
+
   const tenantCtx = await buildSystemTenantContext(row.tenantId);
-  if (!tenantCtx) return;
+  if (!tenantCtx) return false;
 
   await updateSite(tenantCtx, row.siteId, { isActive: true });
+  await retireTestLead(tenantCtx, {
+    contactId: row.testContactId,
+    dealId: row.testDealId,
+  });
 
-  if (row.testDealId) {
-    await deleteIfPresent(() => deleteDealRecord(tenantCtx, row.testDealId!));
-  }
-  if (row.testContactId) {
-    await deleteIfPresent(() => deleteContactRecord(tenantCtx, row.testContactId!));
-  }
-
-  await markRowLive(rowId);
+  await markRowLive(row.id);
   await writeAuditLog({
     tenantId: row.tenantId,
-    actorUserId: ctx.userId,
+    actorUserId,
     action: "site.activated",
     entity: "site",
     entityId: row.siteId,
-    payload: { via: consoleVia(ctx.userId), batch_id: row.batchId, row_id: row.id },
+    payload: { via: consoleVia(actorUserId), batch_id: row.batchId, row_id: row.id },
   });
+  return true;
+}
+
+/**
+ * Approves every row currently awaiting the owner.
+ *
+ * One row at a time is the right default — §18.1.4 makes go-live a decision
+ * rather than a formality, and the single-row button is where that decision
+ * is taken. But a batch of fifty turns "a decision each" into "fifty clicks",
+ * and the clicks stop being decisions well before the fiftieth. This is the
+ * same decision taken once, deliberately, on rows the owner has already
+ * reviewed on this page.
+ *
+ * Sequential rather than Promise.all: each row activates a site, deletes two
+ * records and writes an audit entry, and the pool is small on purpose
+ * (src/db/client.ts). Fanning out is how the same page broke before.
+ */
+export async function approveAllRowsAction(): Promise<void> {
+  const ctx = await requireSuperadminContext();
+
+  for (const row of await listRowsAwaitingOwner()) {
+    await activateRow(row, ctx.userId);
+  }
 
   revalidatePath("/claude-ops");
 }
