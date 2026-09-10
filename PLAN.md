@@ -3590,6 +3590,11 @@ data; the Sonnet phase reads it for layout, states and copy, not as code).
    a visible prefix, `last_used_at` and a call counter, exactly like
    `site_api_keys`. Revoke is a timestamp. No expiry by default; the owner may
    set one. Per-batch short-lived tokens (the mockup's rail) are NOT built.
+   The one-time reveal is a **non-dismissible dialog** (§18.4): no Escape, no
+   click-outside, a "Done" button that stays disabled until the owner ticks
+   "I copied it", and a `beforeunload` guard while it is unacknowledged. A
+   token was lost to the earlier inline panel — created, rendered off the
+   owner's eyeline, gone on the next page load, unrecoverable by design.
 2. **Create-only, and blind to everything that existed before.** The token can
    create a tenant + its first admin, a site, a pipeline (+ stages, tags,
    default owner), an API key, and a test lead. It can read and modify **only

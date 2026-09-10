@@ -12,6 +12,7 @@ function Dialog({
   onClose,
   label,
   className,
+  dismissible = true,
   children,
 }: {
   open: boolean;
@@ -19,16 +20,22 @@ function Dialog({
   /** Accessible name; the dialog has no visible title of its own. */
   label: string;
   className?: string;
+  /**
+   * Escape and click-outside close the dialog by default. Set false when
+   * leaving costs something irreversible (§18.1.1: the ops token's one-time
+   * reveal) — the body then has to offer the only way out itself.
+   */
+  dismissible?: boolean;
   children: React.ReactNode;
 }) {
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || !dismissible) return;
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [open, dismissible, onClose]);
 
   if (!open) return null;
 
@@ -38,7 +45,7 @@ function Dialog({
       role="dialog"
       aria-modal="true"
       aria-label={label}
-      onClick={onClose}
+      onClick={dismissible ? onClose : undefined}
     >
       <div
         className={cn(
