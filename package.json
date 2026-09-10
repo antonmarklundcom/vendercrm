@@ -20,7 +20,8 @@
     "smoke-storage": "tsx scripts/smoke-storage.ts",
     "generate-vapid": "tsx scripts/generate-vapid.ts",
     "create-ops-token": "tsx scripts/create-ops-token.ts",
-    "grant-shared-admin": "tsx scripts/grant-shared-admin.ts"
+    "grant-shared-admin": "tsx scripts/grant-shared-admin.ts",
+    "lead-endpoints": "tsx scripts/lead-endpoints.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1100.0",

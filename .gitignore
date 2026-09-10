@@ -150,3 +150,7 @@ vite.config.ts.timestamp-*
 
 # Claude Code agent worktree scratch space — transient, never source.
 .claude/worktrees/
+
+# Provisioning output — holds live site API keys, never commit
+vendercrm-provisioning-results*.json
+vendercrm-lead-endpoints*.md
