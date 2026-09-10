@@ -1,3 +1,9 @@
+// Loads `.env` before anything imports `@/lib/config/env`, which parses the
+// whole server schema at module load and would otherwise refuse to start over
+// six unrelated variables. `dotenv` never overwrites a variable that is
+// already set, so `$env:DATABASE_URL=...` in the shell still wins over a
+// stale `.env` — which is exactly how this is meant to be pointed at prod.
+import "dotenv/config";
 import { listTenants } from "@/modules/tenancy/tenants";
 import { getUserByEmail } from "@/modules/tenancy/users";
 import {
