@@ -22,7 +22,8 @@
     "create-ops-token": "tsx scripts/create-ops-token.ts",
     "grant-shared-admin": "tsx scripts/grant-shared-admin.ts",
     "lead-endpoints": "tsx scripts/lead-endpoints.ts",
-    "approve-sites": "tsx scripts/approve-sites.ts"
+    "approve-sites": "tsx scripts/approve-sites.ts",
+    "create-site": "tsx scripts/create-site.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1100.0",
