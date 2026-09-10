@@ -6,7 +6,7 @@ import { env } from "@/lib/config/env";
 import { listTenants } from "@/modules/tenancy/tenants";
 import { buildSystemTenantContext } from "@/modules/tenancy/context";
 import { listSites } from "@/modules/sites/sites";
-import { issueApiKey, listActiveApiKeys } from "@/modules/sites/keys";
+import { issueApiKey, listActiveApiKeys, revokeApiKey } from "@/modules/sites/keys";
 
 // One page listing every business, its site, and what a website needs to post
 // leads into it (PLAN.md §5.1) — so wiring a contact form is a copy rather
@@ -21,6 +21,15 @@ import { issueApiKey, listActiveApiKeys } from "@/modules/sites/keys";
 //
 //   default        report what exists, including how many keys each site
 //                  holds. Writes no key, changes nothing.
+//   --revoke-superseded
+//                  keep each site's newest active key and revoke the rest.
+//                  After an --issue-keys run a site provisioned earlier holds
+//                  two: the fresh one, in the file you just generated, and the
+//                  original, whose plaintext was never captured and which
+//                  nobody can therefore use or rotate. A live credential no
+//                  one holds is only risk, and it occupies the second of the
+//                  two slots. Newest-first is exact here, not a guess:
+//                  listApiKeys sorts by createdAt descending.
 //   --issue-keys   issue a *fresh* key per site and print it, which is the
 //                  only way to get a usable list when the originals were not
 //                  kept. A site may hold two at once (MAX_ACTIVE_KEYS_PER_SITE),
@@ -31,6 +40,7 @@ import { issueApiKey, listActiveApiKeys } from "@/modules/sites/keys";
 //   npx tsx scripts/lead-endpoints.ts                        # report only
 //   npx tsx scripts/lead-endpoints.ts --issue-keys           # + new keys
 //   npx tsx scripts/lead-endpoints.ts --issue-keys --out ../lead-endpoints.md
+//   npx tsx scripts/lead-endpoints.ts --revoke-superseded
 //
 // The output holds live credentials for every site in the network. It is
 // written outside the repository by default for that reason; keep it out of
@@ -46,6 +56,7 @@ type Row = {
   isActive: boolean;
   activeKeys: number;
   newKey: string | null;
+  revoked: number;
   note: string | null;
 };
 
@@ -107,8 +118,95 @@ function buildMarkdown(rows: Row[], endpoint: string, issued: boolean): string {
   );
   lines.push("live from **Sitios** inside that business.");
   lines.push("");
+  lines.push("### Responses");
+  lines.push("");
+  lines.push("| Status | Meaning |");
+  lines.push("| --- | --- |");
+  lines.push("| 200 / 201 | Accepted. The contact and deal exist in the CRM. |");
+  lines.push("| 401 | The key is wrong, or was revoked. |");
+  lines.push("| 403 | The site is not active yet. Approve it in Claude Ops. |");
+  lines.push("| 422 | The body failed validation — the message names the field. |");
+  lines.push("| 429 | Too many submissions from this key. Back off and retry. |");
+  lines.push("");
+  lines.push("### PHP (static site with a form handler)");
+  lines.push("");
+  lines.push("```php");
+  lines.push("<?php");
+  lines.push("$payload = [");
+  lines.push("  'phone'           => $_POST['telefono'],");
+  lines.push("  'name'            => $_POST['nombre'],");
+  lines.push("  'message'         => $_POST['mensaje'] ?? '',");
+  lines.push("  'source'          => 'web',");
+  lines.push("  'idempotency_key' => bin2hex(random_bytes(16)),");
+  lines.push("];");
+  lines.push("");
+  lines.push("$ch = curl_init(getenv('VCRM_ENDPOINT'));");
+  lines.push("curl_setopt_array($ch, [");
+  lines.push("  CURLOPT_POST           => true,");
+  lines.push("  CURLOPT_RETURNTRANSFER => true,");
+  lines.push("  CURLOPT_TIMEOUT        => 10,");
+  lines.push("  CURLOPT_HTTPHEADER     => [");
+  lines.push("    'Content-Type: application/json',");
+  lines.push("    'X-Api-Key: ' . getenv('VCRM_API_KEY'),");
+  lines.push("  ],");
+  lines.push("  CURLOPT_POSTFIELDS     => json_encode($payload),");
+  lines.push("]);");
+  lines.push("$response = curl_exec($ch);");
+  lines.push("$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);");
+  lines.push("curl_close($ch);");
+  lines.push("");
+  lines.push("// Never block the visitor on the CRM. Show the thank-you page either");
+  lines.push("// way and log the failure for yourself.");
+  lines.push("if ($status >= 300) { error_log(\"VenderCRM $status: $response\"); }");
+  lines.push("header('Location: /gracias.html');");
+  lines.push("```");
+  lines.push("");
+  lines.push("### Next.js (route handler)");
+  lines.push("");
+  lines.push("```js");
+  lines.push("export async function POST(request) {");
+  lines.push("  const form = await request.json();");
+  lines.push("");
+  lines.push("  const response = await fetch(process.env.VCRM_ENDPOINT, {");
+  lines.push("    method: 'POST',");
+  lines.push("    headers: {");
+  lines.push("      'Content-Type': 'application/json',");
+  lines.push("      'X-Api-Key': process.env.VCRM_API_KEY,");
+  lines.push("    },");
+  lines.push("    body: JSON.stringify({");
+  lines.push("      phone: form.phone,");
+  lines.push("      name: form.name,");
+  lines.push("      email: form.email,");
+  lines.push("      message: form.message,");
+  lines.push("      source: 'web',");
+  lines.push("      idempotency_key: crypto.randomUUID(),");
+  lines.push("    }),");
+  lines.push("  });");
+  lines.push("");
+  lines.push("  if (!response.ok) console.error('VenderCRM', response.status, await response.text());");
+  lines.push("  return Response.json({ ok: true });");
+  lines.push("}");
+  lines.push("```");
+  lines.push("");
+  lines.push("### Rules that are easy to get wrong");
+  lines.push("");
+  lines.push("1. **The key is a server-side secret.** It goes in the hosting");
+  lines.push("   environment, never in client JavaScript and never in the repo. A key");
+  lines.push("   in a browser bundle can be used by anyone to write into the CRM.");
+  lines.push("2. **Post from the server, not the browser.** Besides leaking the key,");
+  lines.push("   the endpoint sets no CORS headers for arbitrary origins.");
+  lines.push("3. **Never block the visitor on this call.** If the CRM is slow or down,");
+  lines.push("   still show the thank-you page and log the failure.");
+  lines.push("4. **Send a fresh `idempotency_key` per submission** — a UUID is fine.");
+  lines.push("   Reusing one silently drops the second lead as a duplicate.");
+  lines.push("5. **`phone` is the identity.** Include it, in international format");
+  lines.push("   (`+595...`). Without it the CRM cannot match a returning customer,");
+  lines.push("   and WhatsApp replies will not thread onto the contact.");
+  lines.push("6. **One key per site.** Do not reuse a key across domains — the key is");
+  lines.push("   what tells the CRM which business the lead belongs to.");
+  lines.push("");
   lines.push(
-    `The repository's \`vendercrm-lead-capture\` skill has ready-made form code for`,
+    `The repository's \`vendercrm-lead-capture\` skill has fuller examples for`,
   );
   lines.push("static HTML+PHP, Node/Express, Next.js and WordPress.");
   lines.push("");
@@ -160,6 +258,7 @@ function buildMarkdown(rows: Row[], endpoint: string, issued: boolean): string {
 async function main() {
   const args = process.argv.slice(2);
   const issue = args.includes("--issue-keys");
+  const revokeSuperseded = args.includes("--revoke-superseded");
   const outIndex = args.indexOf("--out");
   const out =
     outIndex >= 0 && args[outIndex + 1]
@@ -184,15 +283,28 @@ async function main() {
         isActive: false,
         activeKeys: 0,
         newKey: null,
+        revoked: 0,
         note: null,
       });
       continue;
     }
 
     for (const site of sites) {
-      const active = await listActiveApiKeys(ctx, site.id);
+      let active = await listActiveApiKeys(ctx, site.id);
       let newKey: string | null = null;
       let note: string | null = null;
+      let revoked = 0;
+
+      // Before issuing, not after: a site already holding two keys would
+      // otherwise be refused, and the key being dropped here is by
+      // construction one nobody can use.
+      if (revokeSuperseded && active.length > 1) {
+        for (const key of active.slice(1)) {
+          await revokeApiKey(ctx, site.id, key.id);
+          revoked++;
+        }
+        active = await listActiveApiKeys(ctx, site.id);
+      }
 
       if (issue) {
         const result = await issueApiKey(ctx, site.id, "lead-form");
@@ -214,6 +326,7 @@ async function main() {
         isActive: site.isActive,
         activeKeys: active.length,
         newKey,
+        revoked,
         note,
       });
     }
@@ -230,6 +343,10 @@ async function main() {
   console.log(`  ${withSite.length} sites across ${new Set(rows.map((r) => r.tenantId)).size} businesses`);
   console.log(`  ${withSite.filter((r) => r.isActive).length} live, ${withSite.length - withSite.filter((r) => r.isActive).length} inactive`);
   if (noSite > 0) console.log(`  ${noSite} business(es) with no site yet`);
+  const revokedTotal = rows.reduce((sum, r) => sum + r.revoked, 0);
+  if (revokedTotal > 0) {
+    console.log(`  ${revokedTotal} superseded key(s) revoked`);
+  }
   if (issue) {
     console.log(`  ${issued} new key(s) issued`);
     if (blocked > 0) console.log(`  ${blocked} site(s) already at the 2-key limit`);
