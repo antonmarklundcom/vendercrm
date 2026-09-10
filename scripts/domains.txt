@@ -1,0 +1,42 @@
+# Domains to provision — one per line, optional display name after a comma.
+# Blank lines and # comments are ignored.
+#
+#   node scripts/provision-sites.mjs scripts/domains.txt --dry-run
+#   node scripts/provision-sites.mjs scripts/domains.txt
+#
+# These 27 have no business in the CRM yet. The other 23 domains in the
+# owner's list already have one and must NOT be re-provisioned — a second
+# tenant for the same domain is not what "already provisioned" should mean.
+
+arq.com.py, Arquitectura
+asado.com.py, Asado
+camiones.com.py, Camiones
+china.com.py, China
+ciberseguridad.com.py, Ciberseguridad
+desarrollo.com.py, Desarrollo
+embarazo.com.py, Embarazo
+estudio.com.py, Estudio
+lenceria.com.py, Lencería
+moto.com.py, Moto
+negocio.com.py, Negocio
+nombres.com.py, Nombres
+obra.com.py, Obra
+perro.com.py, Perro
+prestamo.com.py, Préstamo
+productos.com.py, Productos
+redessociales.com.py, Redes Sociales
+rentparaguay.com, Rent Paraguay
+retratos.com.py, Retratos
+ropa.com.py, Ropa
+seguro.com.py, Seguro
+trabajo.com.py, Trabajo
+universidad.com.py, Universidad
+veterinarios.com.py, Veterinarios
+viaje.com.py, Viaje
+vino.com.py, Vino
+visas.com.py, Visas
+
+# Held back pending a decision — clientes.com.py is the CRM's own domain
+# (crm.clientes.com.py runs on it, no-reply@clientes.com.py sends its mail),
+# so it is probably not a client business. Uncomment to include it.
+# clientes.com.py, Clientes
