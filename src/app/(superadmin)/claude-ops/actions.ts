@@ -20,6 +20,10 @@ import {
   setOpsTokenAllowlist,
 } from "@/modules/ops";
 import type { OpsRow } from "@/modules/ops";
+// Imported by path, not through the module index: it is pure, and the
+// console's authorization test mocks "@/modules/ops" wholesale.
+import { resolveTenantRefs } from "@/modules/ops/tenant-refs";
+import { listTenants } from "@/modules/tenancy/tenants";
 
 // Server actions behind the Claude Ops console (PLAN.md §18.4). Every one
 // re-checks superadmin itself (defense in depth, §3.3) and writes an
@@ -82,14 +86,33 @@ export async function revokeTokenAction(formData: FormData): Promise<void> {
   revalidatePath("/claude-ops");
 }
 
-export async function setAllowlistAction(formData: FormData): Promise<void> {
+export type AllowlistState = {
+  /** Entries that matched no business — nothing was saved when this is set. */
+  unknown: string[];
+  saved: boolean;
+};
+
+/**
+ * The owner types businesses by name, slug or id, comma-separated. Only ids
+ * are stored (see resolveTenantRefs), and an entry that matches nothing
+ * refuses the whole save rather than storing a partial list — a name saved
+ * as-is once looked allowlisted on the console while `/me` saw nothing.
+ */
+export async function setAllowlistAction(
+  _prevState: AllowlistState,
+  formData: FormData,
+): Promise<AllowlistState> {
   const ctx = await requireSuperadminContext();
   const tokenId = String(formData.get("tokenId") ?? "");
-  if (!tokenId) return;
-  const tenantIds = String(formData.get("tenantIds") ?? "")
+  if (!tokenId) return { unknown: [], saved: false };
+  const refs = String(formData.get("tenantIds") ?? "")
     .split(",")
-    .map((id) => id.trim())
+    .map((ref) => ref.trim())
     .filter(Boolean);
+
+  const tenants = await listTenants();
+  const { ids: tenantIds, unknown } = resolveTenantRefs(refs, tenants);
+  if (unknown.length > 0) return { unknown, saved: false };
 
   await setOpsTokenAllowlist(tokenId, tenantIds);
   await writeAuditLog({
@@ -101,6 +124,7 @@ export async function setAllowlistAction(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/claude-ops");
+  return { unknown: [], saved: true };
 }
 
 // --- Batches -------------------------------------------------------------

@@ -51,6 +51,15 @@ const sites = { updateSite: vi.fn(async () => undefined) };
 vi.mock("@/modules/sites/sites", () => sites);
 
 vi.mock("@/modules/tenancy/audit", () => ({ writeAuditLog: vi.fn(async () => undefined) }));
+
+// The allowlist action resolves what the owner typed against every business.
+const tenancy = {
+  listTenants: vi.fn(async () => [
+    { id: "tenant-2", name: "Tasacion", slug: "tasacion" },
+    { id: "tenant-3", name: "Sitiosweb.com.py", slug: "sitiosweb" },
+  ]),
+};
+vi.mock("@/modules/tenancy/tenants", () => tenancy);
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(() => {
@@ -95,7 +104,11 @@ describe("Claude Ops console actions", () => {
     },
     {
       name: "setAllowlistAction",
-      call: () => actions.setAllowlistAction(form({ tokenId: "token-1", tenantIds: "tenant-2" })),
+      call: () =>
+        actions.setAllowlistAction(
+          { unknown: [], saved: false },
+          form({ tokenId: "token-1", tenantIds: "tenant-2" }),
+        ),
       service: () => ops.setOpsTokenAllowlist,
     },
     {
@@ -143,6 +156,26 @@ describe("Claude Ops console actions", () => {
     );
     expect(ops.createOpsToken).toHaveBeenCalled();
     expect(result.token?.plaintext).toBe("vc_ops_abc");
+  });
+
+  it("allowlist: stores ids for names, slugs and ids alike", async () => {
+    isSuperadmin = true;
+    const result = await actions.setAllowlistAction(
+      { unknown: [], saved: false },
+      form({ tokenId: "token-1", tenantIds: "Tasacion, sitiosweb, tenant-2" }),
+    );
+    expect(result).toEqual({ unknown: [], saved: true });
+    expect(ops.setOpsTokenAllowlist).toHaveBeenCalledWith("token-1", ["tenant-2", "tenant-3"]);
+  });
+
+  it("allowlist: an unknown entry refuses the whole save and names it", async () => {
+    isSuperadmin = true;
+    const result = await actions.setAllowlistAction(
+      { unknown: [], saved: false },
+      form({ tokenId: "token-1", tenantIds: "Tasacion, Gruas" }),
+    );
+    expect(result).toEqual({ unknown: ["Gruas"], saved: false });
+    expect(ops.setOpsTokenAllowlist).not.toHaveBeenCalled();
   });
 
   it("refuses a tenant admin — createBatchAction", async () => {

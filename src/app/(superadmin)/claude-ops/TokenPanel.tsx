@@ -10,6 +10,7 @@ import {
   createTokenAction,
   revokeTokenAction,
   setAllowlistAction,
+  type AllowlistState,
   type CreateTokenState,
 } from "./actions";
 import {
@@ -47,6 +48,9 @@ export type TokenPanelLabels = {
   never: string;
   allowlist: string;
   allowlistNone: string;
+  allowlistPlaceholder: string;
+  allowlistHint: string;
+  allowlistUnknown: string;
   revoke: string;
   revoked: string;
   errorInvalid: string;
@@ -159,10 +163,13 @@ function CreateTokenForm({ labels }: { labels: TokenPanelLabels }) {
 
 export function TokenPanel({
   tokens,
+  tenantNames,
   labels,
   locale,
 }: {
   tokens: OpsTokenSummary[];
+  /** id → name for every business, so allowlists render as names. */
+  tenantNames: Record<string, string>;
   labels: TokenPanelLabels;
   locale: string;
 }) {
@@ -199,7 +206,7 @@ export function TokenPanel({
                 {token.lastUsedAt ? formatDateTime(token.lastUsedAt, locale) : labels.never} ·{" "}
                 {labels.calls}: {token.callCount}
               </div>
-              <AllowlistForm token={token} labels={labels} />
+              <AllowlistForm token={token} tenantNames={tenantNames} labels={labels} />
             </li>
           ))}
         </ul>
@@ -208,23 +215,38 @@ export function TokenPanel({
   );
 }
 
+const initialAllowlistState: AllowlistState = { unknown: [], saved: false };
+
 function AllowlistForm({
   token,
+  tenantNames,
   labels,
 }: {
   token: OpsTokenSummary;
+  tenantNames: Record<string, string>;
   labels: TokenPanelLabels;
 }) {
   const allowed = Array.isArray(token.allowedTenantIds)
     ? (token.allowedTenantIds as string[])
     : [];
+  // Stored values are ids; show the business name when it resolves. A raw
+  // id showing through means the business no longer exists (or a value was
+  // saved before the console validated entries) — visible on purpose.
+  const shown = allowed.map((id) => tenantNames[id] ?? id);
   const [editing, setEditing] = useState(false);
+  const [state, formAction, pending] = useActionState(setAllowlistAction, initialAllowlistState);
+
+  // Close the editor only once the server accepted the list; an unknown
+  // entry keeps the form open with the offending names underneath it.
+  useEffect(() => {
+    if (state.saved) setEditing(false);
+  }, [state]);
 
   if (!editing) {
     return (
       <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>
-          {labels.allowlist}: {allowed.length > 0 ? allowed.join(", ") : labels.allowlistNone}
+          {labels.allowlist}: {shown.length > 0 ? shown.join(", ") : labels.allowlistNone}
         </span>
         <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(true)}>
           {labels.allowlist}
@@ -234,21 +256,26 @@ function AllowlistForm({
   }
 
   return (
-    <form
-      action={setAllowlistAction}
-      className="flex flex-wrap items-center gap-2"
-      onSubmit={() => setEditing(false)}
-    >
-      <input type="hidden" name="tokenId" value={token.id} />
-      <Input
-        name="tenantIds"
-        defaultValue={allowed.join(",")}
-        placeholder="tenant-id-1,tenant-id-2"
-        className="h-8 flex-1 text-xs"
-      />
-      <Button type="submit" size="sm" variant="outline">
-        {labels.allowlist}
-      </Button>
+    <form action={formAction} className="flex flex-col gap-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <input type="hidden" name="tokenId" value={token.id} />
+        <Input
+          name="tenantIds"
+          defaultValue={shown.join(", ")}
+          placeholder={labels.allowlistPlaceholder}
+          className="h-8 flex-1 text-xs"
+          aria-label={labels.allowlist}
+        />
+        <Button type="submit" size="sm" variant="outline" disabled={pending}>
+          {labels.allowlist}
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">{labels.allowlistHint}</p>
+      {state.unknown.length > 0 && (
+        <p className="text-xs text-destructive">
+          {labels.allowlistUnknown}: {state.unknown.join(", ")}
+        </p>
+      )}
     </form>
   );
 }
