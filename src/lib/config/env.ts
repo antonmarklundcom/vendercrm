@@ -131,6 +131,18 @@ const envSchema = z
      * watches. The contact and its deal are deleted when he approves the
      * site, so this number never accumulates rows.
      */
+    /**
+     * The one account every business the ops API creates is handed to
+     * (PLAN.md §18.3). Set it and provisioning grants *this* user an admin
+     * membership in each new tenant, so the owner reaches all of them from
+     * the sidebar switcher under a single login — rather than accumulating
+     * one unreachable per-tenant admin per business.
+     *
+     * Optional so a deploy that has not decided on a shared operator keeps
+     * the old per-tenant admin behaviour; `details.admin_email` still works
+     * alongside it for a business whose own staff should get a login.
+     */
+    OPS_SHARED_ADMIN_EMAIL: z.string().email().max(320).optional(),
     OPS_TEST_PHONE: z.string().min(6).max(30).default("+595981000000"),
   })
   .superRefine((value, ctx) => {

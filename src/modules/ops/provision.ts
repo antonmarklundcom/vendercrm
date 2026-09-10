@@ -8,6 +8,7 @@ import {
   getUserByEmail,
   listUsersForTenant,
 } from "@/modules/tenancy/users";
+import { addMembership, getMembership } from "@/modules/tenancy/memberships";
 import { createTag, listTags } from "@/modules/crm/contacts";
 import {
   createPipeline,
@@ -121,9 +122,17 @@ async function step<T>(
 export type TenantStepResult = {
   repeated: boolean;
   tenantId: string;
+  /** The per-business admin created for this tenant, when `admin_email`
+   * asked for one. Null on the common path, where the business is reached
+   * through the shared operator account instead. */
   adminUserId: string | null;
-  /** Whether the reset e-mail could be sent. The link itself never leaves
-   * the server: the admin sets their own password from their inbox. */
+  /** The shared operator granted admin here (`OPS_SHARED_ADMIN_EMAIL`), or
+   * null when none is configured. */
+  sharedAdminUserId: string | null;
+  /** Whether the reset e-mail could be sent. Only ever true when a
+   * per-business admin was created: the shared operator already has a
+   * password, and mailing them one reset per tenant is exactly the noise a
+   * bulk run does not need. The link itself never leaves the server. */
   resetEmailSent: boolean;
 };
 
@@ -131,27 +140,63 @@ export function provisionTenant(token: OpsTokenRow, rowId: string): Promise<Tena
   return step(token, rowId, "tenant", async (row) => {
     const steps = rowSteps(row);
     if (row.tenantId && steps.tenant?.status === "done") {
-      return { repeated: true, tenantId: row.tenantId, adminUserId: null, resetEmailSent: false };
+      return {
+        repeated: true,
+        tenantId: row.tenantId,
+        adminUserId: null,
+        sharedAdminUserId: null,
+        resetEmailSent: false,
+      };
     }
 
     // `existing` is not a create at all: the tenant must already be
     // allowlisted, and the step exists only to record that the row is bound
-    // to it (§18.1.3).
+    // to it (§18.1.3). The shared operator is still granted here, because a
+    // business the owner is provisioning a site into is one he must be able
+    // to open — and the grant is a no-op when he is already a member.
     if (row.tenantMode === "existing") {
       if (!row.tenantId) {
         throw new OpsAccessError(422, "tenant_id is required when tenant_mode is existing");
       }
       await assertMayCreateSiteInTenant(token, row.tenantId);
+      const shared = await grantSharedAdmin(row.tenantId);
       await markStepDone(row, "tenant", {}, "running");
-      return { repeated: true, tenantId: row.tenantId, adminUserId: null, resetEmailSent: false };
+      return {
+        repeated: true,
+        tenantId: row.tenantId,
+        adminUserId: null,
+        sharedAdminUserId: shared,
+        resetEmailSent: false,
+      };
     }
 
     const details = rowDetails(row);
-    const adminEmail = (details.admin_email ?? details.owner_email ?? "").trim().toLowerCase();
-    if (!adminEmail) {
-      throw new OpsAccessError(422, "details.admin_email is required to create a tenant");
+
+    // Two ways a new business gets an admin, and it needs at least one of
+    // them. `OPS_SHARED_ADMIN_EMAIL` is the ordinary path: one account, every
+    // business, switched from the sidebar. `details.admin_email` is the
+    // exception — a business whose own staff should hold a login of their
+    // own — and it is no longer required, because demanding it once forced a
+    // throwaway per-tenant account nobody could reach without opening a reset
+    // e-mail per business.
+    const adminEmail = (details.admin_email ?? "").trim().toLowerCase();
+    const sharedEmail = (env.OPS_SHARED_ADMIN_EMAIL ?? "").trim().toLowerCase();
+    if (!adminEmail && !sharedEmail) {
+      throw new OpsAccessError(
+        422,
+        "no admin for this business: set OPS_SHARED_ADMIN_EMAIL on the server, or pass details.admin_email",
+      );
     }
-    if (await getUserByEmail(adminEmail)) {
+    if (adminEmail && adminEmail === sharedEmail) {
+      // Otherwise the block below would refuse the run over the shared
+      // operator's own account already existing, which is the whole point of
+      // it. Naming it explicitly is redundant, not an error.
+      throw new OpsAccessError(
+        422,
+        `details.admin_email ${adminEmail} is already the shared operator; omit it`,
+      );
+    }
+    if (adminEmail && (await getUserByEmail(adminEmail))) {
       // Never adopt a user that already exists: that account may belong to
       // another business, and an ops token may not reach into one.
       throw new OpsAccessError(
@@ -181,33 +226,47 @@ export function provisionTenant(token: OpsTokenRow, rowId: string): Promise<Tena
       entityId: tenant.id,
     });
 
-    // A random password nobody ever sees: the account is reached through the
-    // reset link, and there is no plaintext to return, log or leak.
-    const admin = await createTenantAdminUser({
-      tenantId: tenant.id,
-      email: adminEmail,
-      password: randomBytes(32).toString("base64url"),
-      name: details.admin_name ?? name,
-      role: "admin",
-    });
-    if (admin) {
-      await registerOpsObject({
-        tokenId: token.id,
-        batchId: row.batchId,
-        rowId: row.id,
-        entity: "user",
-        entityId: admin.id,
-      });
-    }
+    // The shared operator first, so that the business is reachable even if
+    // the optional per-business admin below fails to be created.
+    const sharedAdminUserId = await grantSharedAdmin(tenant.id);
 
-    const resetEmailSent = await sendAdminResetEmail(adminEmail);
+    // A random password nobody ever sees: the account is reached through the
+    // reset link, and there is no plaintext to return, log or leak. Only ever
+    // created when this row asked for its own admin — see above.
+    let admin: Awaited<ReturnType<typeof createTenantAdminUser>> | null = null;
+    let resetEmailSent = false;
+    if (adminEmail) {
+      admin = await createTenantAdminUser({
+        tenantId: tenant.id,
+        email: adminEmail,
+        password: randomBytes(32).toString("base64url"),
+        name: details.admin_name ?? name,
+        role: "admin",
+      });
+      if (admin) {
+        await registerOpsObject({
+          tokenId: token.id,
+          batchId: row.batchId,
+          rowId: row.id,
+          entity: "user",
+          entityId: admin.id,
+        });
+      }
+      resetEmailSent = await sendAdminResetEmail(adminEmail);
+    }
 
     await writeOpsAudit(token, row, {
       tenantId: tenant.id,
       action: "ops.tenant_created",
       entity: "tenant",
       entityId: tenant.id,
-      payload: { name, slug, admin_email: adminEmail, domain: row.domain },
+      payload: {
+        name,
+        slug,
+        admin_email: adminEmail || null,
+        shared_admin_user_id: sharedAdminUserId,
+        domain: row.domain,
+      },
     });
 
     await markStepDone(row, "tenant", { tenantId: tenant.id });
@@ -216,9 +275,39 @@ export function provisionTenant(token: OpsTokenRow, rowId: string): Promise<Tena
       repeated: false,
       tenantId: tenant.id,
       adminUserId: admin?.id ?? null,
+      sharedAdminUserId,
       resetEmailSent,
     };
   });
+}
+
+/**
+ * Grants `OPS_SHARED_ADMIN_EMAIL` admin access to one business, and answers
+ * the user id it granted — or null when no shared operator is configured.
+ *
+ * Idempotent where `addMembership` is not: re-provisioning a row, or pointing
+ * a second site at a business the operator already reaches, must not fail
+ * over a grant that is already there. A configured address that names nobody
+ * *is* refused, because it is a server misconfiguration the owner wants to
+ * hear about on the first row rather than after thirty silent ones.
+ */
+async function grantSharedAdmin(tenantId: string): Promise<string | null> {
+  const email = (env.OPS_SHARED_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  if (!email) return null;
+
+  const user = await getUserByEmail(email);
+  if (!user) {
+    throw new OpsAccessError(
+      422,
+      `OPS_SHARED_ADMIN_EMAIL names ${email}, which is not a user on this server`,
+    );
+  }
+
+  const existing = await getMembership(user.id, tenantId);
+  if (existing) return user.id;
+
+  await addMembership({ userId: user.id, tenantId, role: "admin" });
+  return user.id;
 }
 
 /**

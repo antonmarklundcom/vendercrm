@@ -19,7 +19,8 @@
     "verify-restore": "tsx scripts/verify-restore.ts",
     "smoke-storage": "tsx scripts/smoke-storage.ts",
     "generate-vapid": "tsx scripts/generate-vapid.ts",
-    "create-ops-token": "tsx scripts/create-ops-token.ts"
+    "create-ops-token": "tsx scripts/create-ops-token.ts",
+    "grant-shared-admin": "tsx scripts/grant-shared-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1100.0",

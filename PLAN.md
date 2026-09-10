@@ -3592,7 +3592,12 @@ data; the Sonnet phase reads it for layout, states and copy, not as code).
    set one. Per-batch short-lived tokens (the mockup's rail) are NOT built.
 2. **Create-only, and blind to everything that existed before.** The token can
    create a tenant + its first admin, a site, a pipeline (+ stages, tags,
-   default owner), an API key, and a test lead. It can read and modify **only
+   default owner), an API key, and a test lead. "Its first admin" is normally
+   the shared operator named by `OPS_SHARED_ADMIN_EMAIL`, granted an admin
+   *membership* in each new business so the owner reaches all of them from the
+   sidebar switcher under one login; a row may still ask for a per-business
+   admin of its own with `details.admin_email`, which is the only case that
+   creates a user and sends a reset e-mail. It can read and modify **only
    objects it created**, tracked in `ops_objects`. It cannot list, read, edit
    or delete any pre-existing tenant, site, pipeline, contact, deal or key. It
    cannot activate a site and cannot read an existing key. Enforced server-side
