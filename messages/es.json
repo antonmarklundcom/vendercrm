@@ -2273,7 +2273,9 @@
       },
       "needsYou": {
         "title": "Necesita tu atención",
-        "empty": "Nada pendiente por ahora."
+        "empty": "Nada pendiente por ahora.",
+        "approveAll": "Aprobar y activar los {count}",
+        "approveAllHint": "Activa cada sitio y borra su lead de prueba. Revisá la lista antes."
       },
       "log": {
         "title": "Registro de aprovisionamiento",

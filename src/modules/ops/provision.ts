@@ -1,4 +1,8 @@
 import { randomBytes } from "node:crypto";
+import { eq } from "drizzle-orm";
+import { leadSubmissions } from "@/db/schema";
+import { tenantDb } from "@/modules/tenancy/db";
+import { deleteContactRecord, deleteDealRecord } from "@/modules/crm/deletion";
 import { env } from "@/lib/config/env";
 import type { SuperadminContext, TenantContext } from "@/modules/tenancy/context";
 import { buildSystemTenantContext } from "@/modules/tenancy/context";
@@ -592,6 +596,53 @@ export type TestLeadStepResult = {
 
 /** Fixed, and not caller-supplied: a test lead is a fixture, not an input. */
 export const OPS_TEST_LEAD_NAME = "Prueba onboarding";
+
+/**
+ * Removes the test lead a row created, on the way to putting its site live.
+ *
+ * The order is the whole point. `deleteDealRecord` and `deleteContactRecord`
+ * refuse a record with history, and `lead_submissions` counts as history for
+ * both — correctly, since that table is §5.1's attribution record and losing
+ * a row silently would falsify every report built on it. But the test lead's
+ * own submission is not history worth protecting: this module wrote it, one
+ * step earlier, as a fixture. So it is deleted first, by contact, and only
+ * then does the deal and the contact become deletable.
+ *
+ * Without this, approving *any* row throws `hasHistory` — which is exactly
+ * what the console did before this existed, on the one button §18.1.4 makes
+ * load-bearing.
+ *
+ * Best-effort per record: a fixture the owner already deleted by hand must
+ * not keep a site from going live.
+ */
+export async function retireTestLead(
+  ctx: TenantContext,
+  test: { contactId: string | null; dealId: string | null },
+): Promise<void> {
+  if (!test.contactId && !test.dealId) return;
+
+  if (test.contactId) {
+    await tenantDb(ctx).delete(
+      leadSubmissions,
+      eq(leadSubmissions.contactId, test.contactId),
+    );
+  }
+
+  if (test.dealId) {
+    try {
+      await deleteDealRecord(ctx, test.dealId);
+    } catch {
+      /* already gone, or the owner deleted it by hand */
+    }
+  }
+  if (test.contactId) {
+    try {
+      await deleteContactRecord(ctx, test.contactId);
+    } catch {
+      /* as above */
+    }
+  }
+}
 
 export function provisionTestLead(
   token: OpsTokenRow,

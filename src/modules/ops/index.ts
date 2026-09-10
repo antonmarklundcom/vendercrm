@@ -73,6 +73,7 @@ export { opsVia, writeOpsAudit } from "./audit";
 
 export {
   OPS_TEST_LEAD_NAME,
+  retireTestLead,
   provisionKey,
   provisionPipeline,
   provisionSite,
