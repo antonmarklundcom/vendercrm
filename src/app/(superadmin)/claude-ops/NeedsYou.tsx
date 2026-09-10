@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { approveAllRowsAction } from "./actions";
 import type { OpsRowView } from "./queries";
 
 // "Needs you" (§18.4): every row waiting on the owner, across every batch —
@@ -11,9 +13,13 @@ export type NeedsYouLabels = {
   awaitingApproval: string;
   needsInput: string;
   failed: string;
+  approveAll: string;
+  approveAllHint: string;
 };
 
 export function NeedsYou({ rows, labels }: { rows: OpsRowView[]; labels: NeedsYouLabels }) {
+  const approvable = rows.filter(({ row }) => row.state === "awaiting_approval").length;
+
   return (
     <section className="flex flex-col gap-2 rounded-md border p-4" aria-label={labels.title}>
       <h2 className="text-sm font-semibold">
@@ -39,6 +45,18 @@ export function NeedsYou({ rows, labels }: { rows: OpsRowView[]; labels: NeedsYo
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Only ever offers what it says: rows still waiting on approval. A
+          failed row or one asking a question is not approvable, and counting
+          it here would promise something the action cannot do. */}
+      {approvable > 0 && (
+        <form action={approveAllRowsAction} className="mt-2 flex flex-col gap-1 border-t pt-3">
+          <Button type="submit" variant="secondary" className="w-full">
+            {labels.approveAll.replace("{count}", String(approvable))}
+          </Button>
+          <p className="text-xs text-muted-foreground">{labels.approveAllHint}</p>
+        </form>
       )}
     </section>
   );

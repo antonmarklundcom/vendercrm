@@ -126,6 +126,8 @@ export default async function ClaudeOpsPage({
     awaitingApproval: t("states.awaitingApproval"),
     needsInput: t("states.needsInput"),
     failed: t("states.failed"),
+    approveAll: t("needsYou.approveAll"),
+    approveAllHint: t("needsYou.approveAllHint"),
   };
 
   return (
