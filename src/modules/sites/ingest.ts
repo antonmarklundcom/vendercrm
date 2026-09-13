@@ -8,7 +8,7 @@ import { recordLeadSubmission, type RecordLeadResult } from "@/modules/leads/sub
 import { checkRateLimit } from "@/lib/rate-limit";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import type { sites } from "@/db/schema";
-import { resolveSiteByApiKey } from "./keys";
+import { findSiteByRevokedApiKey, resolveSiteByApiKey } from "./keys";
 import { siteSettings, siteTurnstileSecret } from "./settings";
 import { classifyIngestError, recordIngestFailure, recordIngestSuccess } from "./health";
 
@@ -100,7 +100,15 @@ export async function ingestLead(
   if (!apiKey) return { ok: false, status: 401, error: "Missing API key" };
 
   const site = await resolveSiteByApiKey(apiKey);
-  if (!site) return { ok: false, status: 401, error: "Invalid API key" };
+  if (!site) {
+    // A 401 normally has no site to charge it to. The one case that can be
+    // attributed is a key this CRM issued and later revoked: record it on
+    // that site so /sites can say "still sending the old key" instead of
+    // showing a silent, idle site. Best-effort, and the answer stays 401.
+    const revokedOwner = await findSiteByRevokedApiKey(apiKey).catch(() => null);
+    if (revokedOwner) await recordIngestFailure(revokedOwner, "key", 401, "revoked-key");
+    return { ok: false, status: 401, error: "Invalid API key" };
+  }
 
   return ingestLeadForSite(site, rawBody, meta, "key");
 }

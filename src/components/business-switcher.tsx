@@ -92,7 +92,10 @@ export function BusinessSwitcher({
           role="listbox"
           aria-label={labels.title}
           className={cn(
-            "absolute left-3 right-3 z-20 mt-1 overflow-hidden rounded-md border",
+            // Capped and scrollable: an operator in a dozen businesses gets a
+            // list that fits the sidebar instead of one that runs off the
+            // bottom of the screen with the last entries unreachable.
+            "absolute left-3 right-3 z-20 mt-1 max-h-64 overflow-y-auto rounded-md border",
             "bg-popover text-popover-foreground shadow-md",
           )}
         >

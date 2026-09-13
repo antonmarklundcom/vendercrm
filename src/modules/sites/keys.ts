@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { siteApiKeys, sites } from "@/db/schema";
 import { newId } from "@/lib/ids";
@@ -81,6 +81,29 @@ export async function resolveSiteByApiKey(plaintext: string) {
   await touchApiKey(key.id, key.lastUsedAt);
 
   return { ...site, apiKeyId: key.id };
+}
+
+/**
+ * Diagnostics only (§5.2 health): when a key is rejected, find out whether
+ * it is a key this CRM once issued and later revoked. A site still posting
+ * with the old key after a rotation fails with a bare 401 on THEIR server;
+ * from here it looked identical to a typo. Matching the hash against
+ * revoked rows lets the failure be attributed to the right site and shown
+ * on /sites as "still sending a revoked key". Never grants access: the
+ * caller records health and still answers 401.
+ */
+export async function findSiteByRevokedApiKey(plaintext: string) {
+  if (!plaintext.startsWith(KEY_PREFIX)) return null;
+
+  const hash = hashApiKey(plaintext);
+  const [key] = await db
+    .select()
+    .from(siteApiKeys)
+    .where(and(eq(siteApiKeys.apiKeyHash, hash), isNotNull(siteApiKeys.revokedAt)));
+  if (!key) return null;
+
+  const [site] = await db.select().from(sites).where(eq(sites.id, key.siteId));
+  return site ?? null;
 }
 
 /** Records that this key is the one a site is really sending with — the

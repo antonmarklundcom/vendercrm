@@ -1599,6 +1599,7 @@
         "errorCount": "{count} fel totalt",
         "reasons": {
           "invalid-key": "ogiltig nyckel",
+          "revoked-key": "skickar fortfarande en återkallad nyckel",
           "site-inactive": "webbplatsen avaktiverad",
           "tenant-unavailable": "kontot inte tillgängligt",
           "tenant-read-only": "kontot i läsläge",
@@ -1660,6 +1661,51 @@
             ]
           }
         ]
+      },
+      "jumpTo": "Hoppa till en webbplats",
+      "keysTitle": "Nycklar för den här webbplatsen",
+      "diagnostics": {
+        "title": "Anslutning och felsökning",
+        "summary": {
+          "idle": "inget har kommit in ännu",
+          "failing": "senaste inskicket misslyckades",
+          "ok": "fungerar"
+        },
+        "endpoint": "API-URL",
+        "headers": "Headers",
+        "required": "Obligatoriska",
+        "requiredNote": "resten är valfritt; skicka inte tomma fält (\"\").",
+        "checkTitle": "Vad du ska kontrollera",
+        "steps": {
+          "idle1": "Titta i webbplatsens serverlogg. Står det 401: nyckeln den skickar är inte en aktiv nyckel för den här webbplatsen. Utfärda en ny nyckel nedan och uppdatera VENDERCRM_API_KEY på hostingen.",
+          "idle2": "Visar loggen inget försök alls: formuläret når inte sin egen handler. Kontrollera formulärets action och method, och att handlern är publicerad.",
+          "idle3": "Visar loggen timeout eller anslutningsfel: kontrollera att URL:en är exakt den ovan, med https och utan avslutande snedstreck.",
+          "idle4": "Kör curl-testet nedan med en aktiv nyckel. Svarar det 201 fungerar CRM:et och felet ligger på webbplatsen.",
+          "ok1": "Inskick kommer in. Saknas ett specifikt lead, kolla webbplatsens logg för det inskicket: svaret innehåller orsaken."
+        },
+        "fixes": {
+          "invalid-key": "Nyckeln webbplatsen skickade matchar ingen aktiv nyckel. Utfärda en ny nyckel nedan, lägg den i VENDERCRM_API_KEY och försök igen.",
+          "revoked-key": "Webbplatsen skickar fortfarande en nyckel du redan återkallat. Lägg in den aktiva nyckeln (eller utfärda en ny nedan) i VENDERCRM_API_KEY och starta om webbplatsens app vid behov.",
+          "site-inactive": "Webbplatsen är avaktiverad här, så alla inskick avvisas med 403. Aktivera den med knappen ovan.",
+          "tenant-unavailable": "Ditt konto kan inte ta emot leads just nu. Kontrollera kontots status eller kontakta oss.",
+          "tenant-read-only": "Ditt konto är i läsläge (prenumerationen har gått ut eller är i uppskov). När det är åtgärdat kommer inskicken in igen.",
+          "rate-limited": "Webbplatsen överskred 60 inskick per minut. Om det inte är spam, kontrollera att webbplatsen inte försöker igen i en loop.",
+          "turnstile-failed": "Turnstile-token gick inte igenom verifieringen. Kontrollera att webbplatsen skickar turnstile_token och att Cloudflare-nycklarna nedan hör till samma widget.",
+          "invalid-body": "Uppgifterna kom in men klarade inte valideringen (422). Vanligast: tom email (\"\") i stället för utelämnad, idempotency_key kortare än 8 tecken, eller felformaterad JSON. Webbplatsens logg anger fältet.",
+          "phone-missing": "Inskicket kom utan telefonnummer, eller så heter fältet något annat (det måste heta phone, 6 till 30 tecken). Kontrollera inputens name och mappningen i handlern.",
+          "unknown": "Senaste inskicket misslyckades av en orsak vi inte känner igen. Kör curl-testet och läs hela svaret."
+        },
+        "noStageHint": "Kontakter skapas men ingen affär: välj ett målsteg ovan och spara.",
+        "testTitle": "Testa från en terminal",
+        "testBody": "Byt ut nyckeln och kör detta. Det testar CRM:et utan att gå via webbplatsen, så du vet vilken sida som är trasig. Det skapar en riktig testkontakt: radera den efteråt.",
+        "copy": "Kopiera",
+        "copied": "Kopierat",
+        "expect": {
+          "201": "201 → CRM:et fungerar; skickar webbplatsen inget ligger felet i dess handler eller nyckel.",
+          "401": "401 → nyckeln är felskriven, återkallad eller tillhör en annan webbplats.",
+          "422": "422 → ett fält i innehållet är ogiltigt; svaret anger vilket.",
+          "none": "Inget svar eller anslutningsfel → URL:en är fel eller hostingen blockerar utgående HTTPS."
+        }
       }
     },
     "search": {
