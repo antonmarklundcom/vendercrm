@@ -1,0 +1,46 @@
+Task:
+Repo vendercrm (Next.js App Router, Drizzle + MySQL, next-intl). Add a live visitors view for connected sites. Each site connected under /sites can show how many people are on it right now and on which pages. The browser side is a tiny public heartbeat script served from public/, like the existing public/vc-attribution.js. The CRM stores one row per active visitor per site with a last-seen timestamp, and the Sitios page shows a small live counter per site that refreshes itself. No personal data is stored: no IP, no user agent, no cookie beyond a random per-tab id kept in sessionStorage. The API key must never reach the browser, so the site identifies itself with a separate non-secret presence token that is stored on the site row and shown on the Sitios page.
+
+Files to touch:
+src/db/schema/sites.ts (add presenceToken column on sites, add new table sitePresence)
+src/db/migrations/ (one new migration generated with npm run db:generate, plus its meta entry; the next free number is the one after the highest existing file)
+src/modules/sites/presence.ts (new: token issue and lookup, heartbeat upsert, live counts read, cleanup)
+src/modules/sites/presence.test.ts (new: unit tests for the pure helpers, no DB)
+src/modules/sites/sites.ts (only if a helper is needed to expose presenceToken on the site row)
+src/app/api/v1/presence/route.ts (new: public POST heartbeat)
+src/app/api/presence/route.ts (new: authenticated GET live counts for the current tenant)
+public/vc-presence.js (new: the heartbeat script)
+src/app/(app)/sites/SitePresence.tsx (new: client component, polling counter)
+src/app/(app)/sites/SiteDiagnostics.tsx (add the presence snippet line to the connection facts)
+src/app/(app)/sites/page.tsx (render SitePresence in each site card, next to the health badge)
+src/app/(app)/sites/actions.ts (add an action to issue or rotate the presence token)
+messages/es.json, messages/en.json, messages/sv.json (new keys under app.sites.presence, same key set in all three)
+
+Do not touch:
+src/modules/sites/ingest.ts, src/modules/sites/keys.ts, src/modules/sites/health.ts, src/app/api/v1/leads/route.ts, public/vc-attribution.js, any other page or module. Do not add a dependency.
+
+Definition of done:
+sites gets a nullable column presence_token varchar(32) with a unique index. A new table site_presence has: id char(26) primary key, tenant_id char(26) not null, site_id char(26) not null, visitor_id varchar(40) not null, path varchar(500) not null, last_seen_at datetime not null, and a unique index on (site_id, visitor_id) plus an index on (site_id, last_seen_at). Use the same id helper (newId from src/lib/ids) and the same column conventions as siteIngestHealth in src/db/schema/sites.ts.
+src/modules/sites/presence.ts exports: generatePresenceToken() returning a random 24-char base64url string with prefix vcp_; issuePresenceToken(ctx, siteId) writing it through tenantDb; recordHeartbeat(token, visitorId, path) which resolves the site by token with raw db (same documented exemption as resolveSiteByApiKey in keys.ts), rejects when the site is inactive, upserts the row with INSERT ON DUPLICATE KEY UPDATE, and on roughly one call in twenty deletes rows for that site older than one hour; liveCounts(ctx, windowMs) returning for every site of the tenant the count of rows with last_seen_at within the window and the top five paths with counts. Default window is 120000 ms.
+POST /api/v1/presence accepts JSON { site, visitor, path }. site must start with vcp_, visitor is 8 to 40 chars of [A-Za-z0-9_-], path is trimmed to 500 chars. Any invalid input or unknown token answers 204 with no body, never an error body, so the endpoint reveals nothing. Valid input answers 204 after recording. Set Access-Control-Allow-Origin: * and handle OPTIONS with 204 and the CORS headers, because this endpoint IS meant to be called from browsers on other domains. Rate limit per token to 600 requests per minute using the same in-memory approach the repo already uses for ingest (look at rateLimited in ingest.ts and copy the pattern locally, do not import it).
+GET /api/presence requires requireTenantContext from src/modules/tenancy/context, admin only (same check as page.tsx), returns JSON { sites: [{ siteId, count, paths: [{ path, count }] }] } from liveCounts, with Cache-Control: no-store.
+public/vc-presence.js: plain ES5 like vc-attribution.js. Reads the token from the script tag attribute data-site (document.currentScript), builds or reuses a visitor id in sessionStorage under vc_visitor, then sends the heartbeat immediately and every 30 seconds while document.visibilityState is visible, using navigator.sendBeacon when available and fetch with keepalive otherwise. Sends only { site, visitor, path } where path is location.pathname. The CRM origin is taken from the script src itself, not hardcoded. No cookies. A header comment explains what it does and what it does not collect.
+SitePresence.tsx is a client component receiving siteId and labels. It fetches /api/presence every 15 seconds while the tab is visible, and shows either the visitor count with the label, or the no-visitors label, and below it the top paths as small muted text. It must render nothing broken if the fetch fails: keep the last good value.
+The Sitios page renders SitePresence under the health badge in each site card, and shows the presence token with an issue or rotate button (via the new action) inside the existing Conexión y diagnóstico panel, plus a copyable snippet line: <script src=APP_URL/vc-presence.js data-site=TOKEN defer></script>. Follow how SiteDiagnostics already receives appUrl. The existing copy button component CodeBlock from SiteGuide.tsx may be reused.
+All user-facing strings come from messages/*.json under app.sites.presence; add the same keys to es, en and sv. Spanish is the reference locale and uses the voseo tone already used in the file (vos, elegí, pegá). No hardcoded UI strings in components.
+presence.test.ts covers: generatePresenceToken prefix and length, the input validation function used by the route (valid and each invalid case), and the path trim. Keep tests DB-free.
+Stay within the listed files. If something outside them must change to satisfy the definition of done, stop and say so instead of changing it.
+
+Commands to run before reporting:
+npm run db:generate   (working directory: repo root)
+npm run check:migrations   (working directory: repo root)
+npm run typecheck   (working directory: repo root)
+npx eslint src/app/(app)/sites src/modules/sites src/app/api   (working directory: repo root)
+npx vitest run src/i18n src/modules/sites/presence.test.ts   (working directory: repo root)
+Run every listed command. Report FAIL with the error text rather than skipping or substituting another check. The vitest run needs these env vars set to dummy values in the shell first: DATABASE_URL=mysql://u:p@localhost/x APP_ENCRYPTION_KEY=<64 letters a> CRON_SECRET=x BETTER_AUTH_SECRET=<34 letters x> WHATSAPP_APP_SECRET=x WHATSAPP_WEBHOOK_VERIFY_TOKEN=x
+
+Report format:
+Files changed: each path with a one-line summary of the change.
+Commands run: each command with PASS or FAIL and a one-line result.
+Flagged or not done: anything skipped, blocked, ambiguous, or outside scope, or None.
+Keep the report under 30 lines. No diffs, no file dumps. Never print or write secrets, tokens, or API keys.
