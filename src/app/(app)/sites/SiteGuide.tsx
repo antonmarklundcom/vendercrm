@@ -27,7 +27,7 @@ export type GuideLabels = {
 
 type Snippet = { id: string; label: string; language: string; code: string };
 
-function CodeBlock({ code, copy, copied: copiedLabel }: { code: string; copy: string; copied: string }) {
+export function CodeBlock({ code, copy, copied: copiedLabel }: { code: string; copy: string; copied: string }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {

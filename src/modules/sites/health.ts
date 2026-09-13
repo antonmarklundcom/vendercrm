@@ -23,6 +23,7 @@ import type { IngestLane, SiteRow } from "./ingest";
  * Spanish through next-intl (§1.2) — the code itself is never shown raw. */
 export type IngestErrorReason =
   | "invalid-key"
+  | "revoked-key"
   | "site-inactive"
   | "tenant-unavailable"
   | "tenant-read-only"
@@ -34,6 +35,7 @@ export type IngestErrorReason =
 
 const REASONS = [
   "invalid-key",
+  "revoked-key",
   "site-inactive",
   "tenant-unavailable",
   "tenant-read-only",

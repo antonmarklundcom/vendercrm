@@ -1221,6 +1221,7 @@
         "errorCount": "{count} error(es) en total",
         "reasons": {
           "invalid-key": "clave inválida",
+          "revoked-key": "sigue mandando una clave revocada",
           "site-inactive": "sitio desactivado",
           "tenant-unavailable": "cuenta no disponible",
           "tenant-read-only": "cuenta en solo lectura",
@@ -1282,6 +1283,51 @@
             ]
           }
         ]
+      },
+      "jumpTo": "Ir a un sitio",
+      "keysTitle": "Claves de este sitio",
+      "diagnostics": {
+        "title": "Conexión y diagnóstico",
+        "summary": {
+          "idle": "nunca llegó nada",
+          "failing": "el último envío falló",
+          "ok": "funcionando"
+        },
+        "endpoint": "URL de la API",
+        "headers": "Encabezados",
+        "required": "Obligatorios",
+        "requiredNote": "el resto es opcional; no mandes campos vacíos (\"\").",
+        "checkTitle": "Qué revisar",
+        "steps": {
+          "idle1": "Mirá el log del servidor del sitio. Si dice 401: la clave que manda no es una clave activa de este sitio. Emití una clave nueva abajo y actualizá VENDERCRM_API_KEY en el hosting.",
+          "idle2": "Si el log no muestra ningún intento: el formulario no está llegando a su propio handler. Revisá el action y el method del <form>, y que el handler esté publicado.",
+          "idle3": "Si el log muestra timeout o error de conexión: revisá que la URL sea exactamente la de arriba, con https y sin barra final.",
+          "idle4": "Corré la prueba con curl de abajo con una clave activa. Si devuelve 201, el CRM está bien y el problema está en el sitio.",
+          "ok1": "Los envíos están llegando. Si un lead concreto no aparece, revisá el log del sitio para ese envío: la respuesta trae el motivo."
+        },
+        "fixes": {
+          "invalid-key": "La clave que mandó el sitio no corresponde a ninguna clave activa. Emití una clave nueva abajo, ponela en VENDERCRM_API_KEY y volvé a probar.",
+          "revoked-key": "El sitio sigue mandando una clave que ya revocaste. Cargale la clave activa (o emití una nueva abajo) en VENDERCRM_API_KEY y reiniciá la app del sitio si hace falta.",
+          "site-inactive": "El sitio está desactivado acá, así que todo envío se rechaza con 403. Activalo con el botón de arriba.",
+          "tenant-unavailable": "Tu cuenta no está disponible para recibir leads. Revisá el estado de la cuenta o escribinos.",
+          "tenant-read-only": "Tu cuenta está en solo lectura (suscripción vencida o en gracia). Al regularizarla los envíos vuelven a entrar.",
+          "rate-limited": "El sitio superó los 60 envíos por minuto. Si no es spam, revisá que el sitio no esté reintentando en loop.",
+          "turnstile-failed": "El token de Turnstile no pasó la verificación. Revisá que el sitio mande turnstile_token y que las claves de Cloudflare de abajo sean las del mismo widget.",
+          "invalid-body": "Los datos llegaron pero no pasaron la validación (422). Lo más común: email vacío (\"\") en vez de omitido, idempotency_key de menos de 8 caracteres, o un JSON mal formado. El log del sitio dice qué campo.",
+          "phone-missing": "El envío llegó sin teléfono, o el campo se llama distinto (tiene que ser phone, de 6 a 30 caracteres). Revisá el name del input y el mapeo en el handler.",
+          "unknown": "El último envío falló por un motivo que no reconocemos. Corré la prueba con curl y mirá la respuesta completa."
+        },
+        "noStageHint": "Los contactos entran pero no se crea negocio: elegí una etapa destino arriba y guardá.",
+        "testTitle": "Probar desde una terminal",
+        "testBody": "Reemplazá la clave y corré esto. Prueba el CRM sin pasar por el sitio, así sabés de qué lado está el problema. Crea un contacto de prueba real: borralo después.",
+        "copy": "Copiar",
+        "copied": "Copiado",
+        "expect": {
+          "201": "201 → el CRM funciona; si el sitio no manda, el problema está en su handler o su clave.",
+          "401": "401 → la clave está mal copiada, revocada o no es de este sitio.",
+          "422": "422 → el cuerpo tiene un campo inválido; la respuesta dice cuál.",
+          "none": "Sin respuesta o error de conexión → la URL está mal o el hosting bloquea salidas HTTPS."
+        }
       }
     },
     "products": {

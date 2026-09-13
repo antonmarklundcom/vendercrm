@@ -1599,6 +1599,7 @@
         "errorCount": "{count} error(s) in total",
         "reasons": {
           "invalid-key": "invalid key",
+          "revoked-key": "still sending a revoked key",
           "site-inactive": "site deactivated",
           "tenant-unavailable": "account unavailable",
           "tenant-read-only": "account read-only",
@@ -1660,6 +1661,51 @@
             ]
           }
         ]
+      },
+      "jumpTo": "Jump to a site",
+      "keysTitle": "Keys for this site",
+      "diagnostics": {
+        "title": "Connection & troubleshooting",
+        "summary": {
+          "idle": "nothing has arrived yet",
+          "failing": "the last submission failed",
+          "ok": "working"
+        },
+        "endpoint": "API URL",
+        "headers": "Headers",
+        "required": "Required",
+        "requiredNote": "everything else is optional; don't send empty fields (\"\").",
+        "checkTitle": "What to check",
+        "steps": {
+          "idle1": "Look at the site's server log. If it says 401: the key it sends isn't an active key for this site. Issue a new key below and update VENDERCRM_API_KEY on the hosting.",
+          "idle2": "If the log shows no attempt at all: the form isn't reaching its own handler. Check the <form>'s action and method, and that the handler is deployed.",
+          "idle3": "If the log shows a timeout or connection error: check the URL is exactly the one above, with https and no trailing slash.",
+          "idle4": "Run the curl test below with an active key. If it returns 201, the CRM is fine and the problem is on the site.",
+          "ok1": "Submissions are arriving. If one specific lead is missing, check the site's log for that submission: the response carries the reason."
+        },
+        "fixes": {
+          "invalid-key": "The key the site sent doesn't match any active key. Issue a new key below, put it in VENDERCRM_API_KEY and try again.",
+          "revoked-key": "The site is still sending a key you already revoked. Put the active key (or issue a new one below) in VENDERCRM_API_KEY and restart the site's app if needed.",
+          "site-inactive": "The site is deactivated here, so every submission is rejected with 403. Activate it with the button above.",
+          "tenant-unavailable": "Your account can't receive leads right now. Check the account status or contact us.",
+          "tenant-read-only": "Your account is read-only (subscription expired or in grace). Once it's back in good standing, submissions flow again.",
+          "rate-limited": "The site exceeded 60 submissions per minute. If it isn't spam, check the site isn't retrying in a loop.",
+          "turnstile-failed": "The Turnstile token failed verification. Check the site sends turnstile_token and that the Cloudflare keys below belong to the same widget.",
+          "invalid-body": "The data arrived but failed validation (422). Most common: empty email (\"\") instead of omitted, idempotency_key shorter than 8 characters, or malformed JSON. The site's log names the field.",
+          "phone-missing": "The submission arrived without a phone, or the field has a different name (it must be phone, 6 to 30 characters). Check the input's name and the mapping in the handler.",
+          "unknown": "The last submission failed for a reason we don't recognise. Run the curl test and read the full response."
+        },
+        "noStageHint": "Contacts are created but no deal: pick a target stage above and save.",
+        "testTitle": "Test from a terminal",
+        "testBody": "Replace the key and run this. It tests the CRM without going through the site, so you know which side is broken. It creates a real test contact: delete it afterwards.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "expect": {
+          "201": "201 → the CRM works; if the site isn't sending, the problem is its handler or its key.",
+          "401": "401 → the key is mistyped, revoked, or belongs to another site.",
+          "422": "422 → a field in the body is invalid; the response says which.",
+          "none": "No response or connection error → the URL is wrong or the hosting blocks outbound HTTPS."
+        }
       }
     },
     "search": {

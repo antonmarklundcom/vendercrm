@@ -20,6 +20,7 @@ import { NewSiteForm, SiteKeysPanel, type ApiKeyRow, type KeyLabels } from "./Si
 import { SiteTurnstileForm } from "./SiteTurnstileForm";
 import { SiteHookForm, type HookPanelProps } from "./SiteHookForm";
 import { SiteHookGuide, type HookGuideLabels } from "./SiteHookGuide";
+import { SiteDiagnostics } from "./SiteDiagnostics";
 import { hookGuidePlatforms } from "./hook-guide-labels";
 import { toggleSiteActiveAction, updateSiteRoutingAction } from "./actions";
 import { Select } from "@/components/ui/form-fields";
@@ -206,6 +207,22 @@ export default async function SitesPage() {
           </span>
         </div>
 
+        {/* One row of anchors so a site can be found in a click when the
+            list is long — every card carries an id keyed by slug. */}
+        {sites.length > 1 && (
+          <nav aria-label={t("jumpTo")} className="flex flex-wrap gap-2 text-sm">
+            {sites.map((site) => (
+              <a
+                key={site.id}
+                href={`#site-${site.slug}`}
+                className="rounded-full border px-3 py-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                {site.name}
+              </a>
+            ))}
+          </nav>
+        )}
+
         {sites.length === 0 ? (
           <EmptyState
             icon={Globe}
@@ -217,7 +234,11 @@ export default async function SitesPage() {
         ) : (
         <ul className="flex flex-col gap-4">
           {sites.map((site) => (
-            <li key={site.id} className="flex flex-col gap-3 rounded-md border px-4 py-3">
+            <li
+              key={site.id}
+              id={`site-${site.slug}`}
+              className="flex scroll-mt-6 flex-col gap-3 rounded-md border px-4 py-3"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium">
@@ -276,6 +297,14 @@ export default async function SitesPage() {
                 </Button>
               </form>
 
+              <SiteDiagnostics
+                site={{ id: site.id, slug: site.slug, isActive: site.isActive }}
+                health={healthBySite.get(site.id) ?? null}
+                appUrl={env.APP_URL}
+                hasStage={!!site.defaultStageId}
+              />
+
+              <p className="text-sm font-medium">{t("keysTitle")}</p>
               <SiteKeysPanel
                 siteId={site.id}
                 keys={keysBySite.get(site.id) ?? []}
