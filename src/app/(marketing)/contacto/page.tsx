@@ -56,16 +56,16 @@ export default async function ContactoPage({
 
           <div className="mk-split mk-split--mirror" style={{ marginTop: "3rem", alignItems: "start" }}>
             <aside className="mk-card mk-card--hair">
-              <h3>{t("contacto.aside.title")}</h3>
+              <h2 className="mk-h3">{t("contacto.aside.title")}</h2>
               <MarkedList items={t.raw("contacto.aside.steps") as string[]} />
 
-              <h3 style={{ marginTop: "2rem" }}>{t("contacto.aside.pricingTitle")}</h3>
+              <h2 className="mk-h3" style={{ marginTop: "2rem" }}>{t("contacto.aside.pricingTitle")}</h2>
               <p>{t("contacto.aside.pricingBody")}</p>
 
               {/* Rendered only when a WhatsApp number is configured. */}
               {contact.whatsappNumber ? (
                 <>
-                  <h3 style={{ marginTop: "2rem" }}>{t("contacto.aside.whatsappTitle")}</h3>
+                  <h2 className="mk-h3" style={{ marginTop: "2rem" }}>{t("contacto.aside.whatsappTitle")}</h2>
                   <p>{t("contacto.aside.whatsappBody")}</p>
                   <WhatsAppLink
                     label={t("cta.whatsapp")}
