@@ -314,6 +314,14 @@
   line-height: 1.15;
   margin-bottom: var(--mk-s-3);
 }
+/* An h2 that should look like an h3: keeps the document outline unbroken
+   (h1 → h2) where the design calls for the smaller size, e.g. the /contacto
+   aside, which sits directly under the page h1. */
+.mk .mk-h3 {
+  font-size: var(--mk-t-2);
+  line-height: 1.15;
+  margin-bottom: var(--mk-s-3);
+}
 .mk p {
   max-width: var(--mk-measure);
   color: var(--mk-ink-70);
