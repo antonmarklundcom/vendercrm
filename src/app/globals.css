@@ -319,7 +319,11 @@
   color: var(--mk-ink-70);
   margin: 0 0 var(--mk-s-4);
 }
-.mk a {
+/* Zero specificity on purpose: as `.mk a` (0,1,1) this outranked every
+   single-class link component, so `.mk-btn--wa` and `.mk-btn--primary` lost
+   their own text colour and inherited the page ink — an ink label on the ink
+   WhatsApp button, i.e. no visible label on light pages. */
+:where(.mk) a {
   color: inherit;
 }
 
