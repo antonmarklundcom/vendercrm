@@ -1,12 +1,12 @@
 import Script from "next/script";
 import { Eyebrow } from "./primitives";
 import { CtaPair } from "./cta";
-import { ProductPreview } from "./product-preview";
+import { LeadFeed, type FeedItem } from "./lead-feed";
 
 /**
  * The homepage hero, replacing the old imageless P1 split now that there is
  * a real asset to build around: a looping background video plus a "browser
- * window" preview of the pipeline the copy describes.
+ * window" of consultas arriving from each channel and closing as sales.
  *
  * Deliberately NOT a full viewport-height, nav-eating takeover (the WISA /
  * Apogee references this was adapted from both do that): the site's one
@@ -37,10 +37,9 @@ export function HeroCinematic({
   cta: { primaryLabel: string; whatsappLabel: string; whatsappPrefill: string };
   preview: {
     eyebrow: string;
-    url: string;
-    tabs: string[];
-    stages: string[];
+    title: string;
     stats: Array<{ label: string; value: string }>;
+    items: FeedItem[];
     disclaimer: string;
   };
   videoSrc: string;
@@ -77,7 +76,7 @@ export function HeroCinematic({
       </div>
 
       <div className="mk-hero-cine__preview-mount">
-        <ProductPreview {...preview} />
+        <LeadFeed {...preview} />
       </div>
 
       {/* ~350 bytes, no dependencies. Only starts the video fetch once we know

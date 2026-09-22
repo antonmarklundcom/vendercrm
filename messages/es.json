@@ -2596,10 +2596,10 @@
       "menu": "Menú"
     },
     "cta": {
-      "primary": "Agendá tu diagnóstico",
+      "primary": "Pedí tu diagnóstico gratis",
       "whatsapp": "Escribinos por WhatsApp",
       "secondary": "Ver cómo trabajamos",
-      "waPrefill": "Hola, vengo de clientes.com.py y quiero agendar un diagnóstico."
+      "waPrefill": "Hola, vengo de clientes.com.py y quiero conseguir más clientes para mi negocio."
     },
     "waFloating": {
       "ariaLabel": "Escribinos por WhatsApp",
@@ -2610,227 +2610,280 @@
       "existingClientPrefill": "Hola, ya soy cliente de clientes.com.py y necesito ayuda."
     },
     "ribbon": {
-      "monthly": "Mes a mes, sin permanencia obligatoria",
-      "measured": "Todo medido: sabés qué costó cada consulta",
-      "ownData": "La base de contactos es tuya",
-      "region": "Asunción y Gran Asunción",
+      "monthly": "Mes a mes, sin permanencia",
+      "measured": "Sabés cuánto te costó cada cliente",
+      "ownData": "Tus clientes y tus datos son tuyos",
+      "region": "Para pymes de todo Paraguay",
       "ruc": "RUC {ruc}"
     },
     "home": {
       "meta": {
-        "title": "Más clientes para tu empresa | clientes.com.py",
-        "description": "Ayudamos a empresas paraguayas establecidas a conseguir más clientes con un proceso de ventas ordenado: captación, seguimiento y medición."
+        "title": "Más clientes y más ventas para tu pyme | clientes.com.py",
+        "description": "Conseguimos clientes para pequeñas y medianas empresas de Paraguay: Google, Facebook, Instagram y WhatsApp, con seguimiento para que cada consulta termine en venta."
       },
       "hero": {
-        "eyebrow": "Crecimiento comercial en Paraguay",
-        "title": "Más clientes. Un proceso de ventas ordenado.",
-        "lead": "Ayudamos a empresas paraguayas ya establecidas a conseguir más clientes — con un sistema, no con suerte.",
-        "body": "Si ya tenés un producto que funciona y clientes que vuelven, el techo casi nunca es la demanda. Es que la captación depende de quién tenga tiempo esa semana.",
-        "points": [
-          "Un canal de consultas que no se apaga cuando el equipo está ocupado",
-          "Seguimiento que ocurre igual, esté quien esté de turno",
-          "Números claros: cuántas consultas entraron y cuántas se cerraron"
-        ],
-        "asideTitle": "Cómo empieza",
-        "asideBody": "Una conversación de diagnóstico de 30 minutos. Revisamos de dónde vienen hoy tus clientes, qué se pierde en el camino y qué se puede ordenar primero.",
-        "asideNote": "Sin costo y sin compromiso. Si no vemos con qué ayudarte, te lo decimos en la misma llamada.",
+        "eyebrow": "Clientes y ventas para pymes paraguayas",
+        "title": "Más clientes para tu negocio. Más ventas cada mes.",
+        "lead": "Ayudamos a pequeñas y medianas empresas de Paraguay a conseguir clientes nuevos y a cerrar más ventas: publicidad que se mide, WhatsApp que responde rápido y un seguimiento que no se olvida de nadie.",
         "preview": {
-          "eyebrow": "El sistema en acción",
-          "url": "app.clientes.com.py",
-          "tabs": [
-            "Pipeline",
-            "Contactos",
-            "WhatsApp",
-            "Reportes"
-          ],
-          "stages": [
-            "Nuevo",
-            "Contactado",
-            "Propuesta enviada",
-            "Cliente"
-          ],
+          "eyebrow": "Así se ve una semana con clientes entrando",
           "stats": [
             {
-              "label": "Consultas este mes",
-              "value": "184"
+              "label": "Consultas nuevas",
+              "value": "47"
             },
             {
-              "label": "Primera respuesta",
-              "value": "4 min"
+              "label": "Respondidas en menos de 5 min",
+              "value": "92%"
             },
             {
-              "label": "Tasa de cierre",
-              "value": "34%"
+              "label": "Ventas cerradas",
+              "value": "14"
             }
           ],
-          "disclaimer": "Vista ilustrativa del panel."
+          "disclaimer": "Ejemplo ilustrativo, no son datos de un cliente.",
+          "title": "Consultas de esta semana",
+          "items": [
+            {
+              "name": "Rocío B.",
+              "channel": "Google Maps",
+              "text": "Hola, ¿tienen turno para este sábado?",
+              "status": "Agendado",
+              "tone": "won"
+            },
+            {
+              "name": "Diego M.",
+              "channel": "Anuncio en Instagram",
+              "text": "¿Cuánto sale para un local de 80 m²?",
+              "status": "Presupuesto enviado"
+            },
+            {
+              "name": "Laura F.",
+              "channel": "Google",
+              "text": "¿Hacen envíos a Luque?",
+              "status": "Vendido",
+              "tone": "won"
+            },
+            {
+              "name": "Carlos N.",
+              "channel": "Facebook",
+              "text": "Quiero más información del plan para empresas",
+              "status": "En conversación"
+            },
+            {
+              "name": "Ana P.",
+              "channel": "Sitio web",
+              "text": "Necesito 20 unidades para el viernes",
+              "status": "Vendido",
+              "tone": "won"
+            }
+          ]
         }
       },
       "problem": {
-        "eyebrow": "El punto de partida",
-        "title": "No te faltan clientes. Te falta un proceso.",
-        "body": "La mayoría de las empresas con las que trabajamos no tienen un problema de producto ni de mercado. Tienen consultas que llegan por cinco lugares distintos, presupuestos que quedan sin respuesta y ninguna forma de saber qué funcionó el mes pasado.",
-        "bodyTwo": "Eso no se arregla con más publicidad. Se arregla ordenando lo que ya entra y agregando captación encima de una base que aguanta.",
-        "symptomsTitle": "Se nota en cosas concretas",
+        "eyebrow": "El problema de siempre",
+        "title": "Tu negocio es bueno. Falta que te encuentren y te compren.",
+        "body": "A la mayoría de las pymes paraguayas no les falta calidad. Les falta un flujo constante de clientes nuevos: dependen del boca a boca, publican en redes sin saber si sirve y pierden ventas por responder tarde.",
+        "bodyTwo": "Eso se arregla con un sistema simple: aparecer donde te buscan, responder rápido y hacer seguimiento hasta cerrar la venta. Eso es lo que armamos con vos.",
+        "symptomsTitle": "¿Te suena?",
         "symptoms": [
-          "Consultas que llegan por WhatsApp, teléfono, Instagram y el formulario, sin una sola lista",
-          "Presupuestos enviados que nadie vuelve a tocar",
-          "Vendedores que arrancan cada mes desde cero, sin saber a quién retomar",
-          "Meses buenos y meses malos sin una explicación clara de por qué"
+          "Dependés del boca a boca y hay meses en que el teléfono no suena",
+          "Publicás en Instagram y Facebook, pero las ventas no se mueven",
+          "Pagaste publicidad y no sabés qué clientes te trajo",
+          "Te escriben por WhatsApp y, cuando respondés, ya compraron en otro lado",
+          "Mandás presupuestos que nadie vuelve a seguir"
         ]
       },
       "services": {
-        "eyebrow": "Servicios",
-        "title": "Qué hacemos",
-        "lead": "Todo apunta a lo mismo: que entren consultas y que puedas atenderlas. Elegimos los canales en el diagnóstico, no antes.",
+        "eyebrow": "Qué hacemos",
+        "title": "Todo lo que hace falta para vender más",
+        "lead": "Elegimos los canales según tu rubro y tu presupuesto, en el diagnóstico. No te vendemos todo: te vendemos lo que te va a traer clientes.",
         "items": [
           {
             "name": "Google Ads",
-            "body": "Aparecé justo cuando alguien busca lo que vendés. Búsqueda, Performance Max y remarketing."
+            "body": "Aparecé primero cuando alguien busca lo que vendés en tu ciudad. Pagás solo cuando te hacen clic."
           },
           {
-            "name": "Meta Ads",
-            "body": "Campañas en Facebook e Instagram apuntadas a quien compra, no a quien mira. Creativos, segmentación y optimización semanal."
+            "name": "Facebook e Instagram Ads",
+            "body": "Anuncios que llegan a quien compra, no a quien mira. Creativos, segmentación por zona y ajustes cada semana."
           },
           {
-            "name": "SEO",
-            "body": "Posicionamiento local y nacional para que te encuentren sin pagar por cada clic."
+            "name": "Google Maps y SEO local",
+            "body": "Tu ficha de Google completa, con reseñas y fotos, para que te elijan cuando buscan «cerca de mí»."
           },
           {
-            "name": "Sitios web",
-            "body": "Páginas rápidas, pensadas para móvil y para convertir en WhatsApp. No folletos digitales."
+            "name": "WhatsApp que vende",
+            "body": "Respuesta inmediata con IA, mensajes de seguimiento y recordatorios, para que ninguna consulta se enfríe."
           },
           {
-            "name": "Redes sociales y contenido",
-            "body": "Presencia que sostiene la venta: contenido con intención y un calendario que se cumple, no publicar por publicar."
+            "name": "Sitios web que convierten",
+            "body": "Páginas rápidas, pensadas para el celular y para que te escriban. No folletos digitales."
           },
           {
-            "name": "Automatización con IA",
-            "body": "Respuesta inmediata a cada consulta y seguimiento automático por WhatsApp, para que nada dependa de quién tenga tiempo esa tarde."
+            "name": "Contenido para redes",
+            "body": "Publicaciones y videos con intención de venta, y un calendario que se cumple."
           }
         ],
         "fineprint": "La inversión publicitaria la pagás vos, directo a Google o a Meta. Nunca pasa por nosotros y siempre ves en qué se gastó."
       },
       "method": {
-        "eyebrow": "El método",
-        "title": "Cuatro etapas, en este orden",
-        "lead": "No empezamos por la publicidad. Empezamos por entender de dónde vienen tus clientes hoy y qué se está perdiendo.",
+        "eyebrow": "Cómo trabajamos",
+        "title": "De la consulta a la venta, en cuatro pasos",
+        "lead": "Primero entendemos tu negocio. Después traemos clientes. Y medimos todo para repetir lo que vende.",
         "linkLabel": "Ver el método completo",
         "steps": [
           {
             "title": "Diagnóstico",
-            "body": "Miramos tus canales actuales, tu ciclo de venta y qué pasa con una consulta desde que entra hasta que se cierra."
+            "body": "Vemos de dónde vienen hoy tus clientes, cuánto te cuesta cada uno y dónde se pierden ventas."
           },
           {
-            "title": "Captación",
-            "body": "Ordenamos la presencia y los puntos de entrada para que una persona interesada pueda contactarte sin fricción."
+            "title": "Atraer",
+            "body": "Google, Facebook, Instagram y tu ficha de Google Maps, para que te encuentre la gente que ya está buscando lo que vendés."
           },
           {
-            "title": "Seguimiento",
-            "body": "Cada consulta queda registrada y asignada, con recordatorios propios. Nada depende de la memoria de alguien."
+            "title": "Convertir",
+            "body": "Respuesta rápida por WhatsApp y seguimiento de cada consulta, hasta que compra o dice que no."
           },
           {
-            "title": "Medición",
-            "body": "Cuántas consultas entraron, de dónde, cuántas se cerraron. Con eso se decide qué repetir el mes siguiente."
+            "title": "Medir y crecer",
+            "body": "Cuántas consultas entraron, cuántas compraron y cuánto costó cada cliente. Lo que vende se repite y se escala."
           }
         ]
       },
       "verticals": {
-        "eyebrow": "Con quiénes trabajamos",
-        "title": "Rubros donde el método ya está probado",
-        "lead": "Empresas con oferta validada y equipo propio, donde el crecimiento se traba en la captación y el seguimiento, no en el producto.",
+        "eyebrow": "Para quién",
+        "title": "Pymes paraguayas que quieren vender más",
+        "lead": "Comercios, profesionales y empresas de servicios de todo el país. Si tus clientes te buscan en Google o te escriben por WhatsApp, podemos ayudarte.",
         "items": [
           {
             "name": "Clínicas y consultorios",
-            "body": "Pacientes que consultan por WhatsApp fuera de horario y turnos que se pierden por no responder a tiempo."
+            "body": "Pacientes que escriben fuera de horario y turnos que se pierden por no responder a tiempo."
           },
           {
             "name": "Constructoras",
-            "body": "Obras y presupuestos con ciclos largos, donde el seguimiento define quién termina firmando."
+            "body": "Presupuestos con ciclos largos, donde el seguimiento define quién termina firmando."
           },
           {
             "name": "Inmobiliarias",
-            "body": "Consultas y visitas que llegan por varios portales y terminan sin dueño ni registro."
+            "body": "Consultas de portales y redes que se convierten en visitas y en operaciones cerradas."
           },
           {
             "name": "Servicios profesionales",
-            "body": "Estudios y consultoras que crecen por referencia y quieren un segundo canal que no dependa de eso."
+            "body": "Estudios contables, jurídicos y consultoras que quieren clientes más allá de la recomendación."
           },
           {
-            "name": "Empresas B2B",
-            "body": "Ventas con varias personas decidiendo, donde perder el hilo cuesta meses."
+            "name": "Empresas B2B y distribuidoras",
+            "body": "Ventas a otras empresas, donde perder el hilo de un presupuesto cuesta meses."
+          },
+          {
+            "name": "Comercios y tiendas",
+            "body": "Locales y tiendas online que necesitan más gente comprando, no solo más seguidores."
+          },
+          {
+            "name": "Gastronomía",
+            "body": "Restaurantes, catering y delivery que quieren pedidos todos los días, no solo el fin de semana."
+          },
+          {
+            "name": "Talleres y servicios técnicos",
+            "body": "Talleres, climatización, electricistas y servicios a domicilio que viven de que los llamen."
           }
         ]
       },
       "statement": {
-        "text": "Un sistema que no depende de quién esté de turno.",
-        "sub": "Eso es lo que separa un buen mes de un buen año."
+        "text": "Clientes que llegan todos los meses, no cuando hay suerte.",
+        "sub": "Eso es lo que separa a una pyme que sobrevive de una que crece."
+      },
+      "faq": {
+        "eyebrow": "Preguntas frecuentes",
+        "title": "Lo que nos preguntan los dueños de pymes",
+        "items": [
+          {
+            "q": "¿Sirve para un negocio chico?",
+            "a": "Sí. Trabajamos con pymes de todos los tamaños, desde un local con dos personas hasta empresas con equipo de ventas. Ajustamos el alcance y la inversión a lo que tu negocio puede sostener."
+          },
+          {
+            "q": "¿Cuánto tengo que invertir en publicidad?",
+            "a": "Depende del rubro, la zona y cuántos clientes necesitás. En el diagnóstico te damos un rango realista antes de que gastes un guaraní. La publicidad la pagás directo a Google o a Meta, nunca pasa por nosotros."
+          },
+          {
+            "q": "¿En cuánto tiempo veo resultados?",
+            "a": "Las campañas en Google y en redes suelen traer consultas en las primeras semanas. Responder más rápido y hacer seguimiento recupera ventas casi de inmediato. El posicionamiento orgánico tarda más."
+          },
+          {
+            "q": "¿Me atan a un contrato largo?",
+            "a": "No. Trabajamos mes a mes. Si no ves resultados, te vas sin penalidad."
+          },
+          {
+            "q": "¿Trabajan fuera de Asunción?",
+            "a": "Sí. Casi todo el trabajo es remoto, así que trabajamos con pymes de cualquier ciudad del país."
+          }
+        ]
       },
       "closing": {
         "eyebrow": "El siguiente paso",
-        "title": "Empecemos por el diagnóstico",
-        "body": "Media hora, sin costo. Salís con un panorama claro de dónde se está perdiendo trabajo, trabajes con nosotros o no.",
-        "panelTitle": "Qué necesitamos de vos",
+        "title": "Hablemos de cómo conseguir más clientes",
+        "body": "Una llamada de 30 minutos, sin costo. Te decimos dónde están tus próximos clientes y qué haríamos primero, trabajes con nosotros o no.",
+        "panelTitle": "Traé estas respuestas",
         "panelItems": [
+          "Qué vendés y a quién",
           "De dónde vienen hoy tus clientes",
-          "Cuántas personas venden en tu equipo",
-          "Qué pasa con una consulta desde que entra"
+          "Cuántos clientes nuevos querés por mes"
         ]
       }
     },
     "metodo": {
       "meta": {
-        "title": "Nuestro método para conseguir más clientes | clientes.com.py",
-        "description": "Diagnóstico, captación, seguimiento y medición: las cuatro etapas con las que ordenamos la captación de clientes en empresas paraguayas."
+        "title": "Cómo conseguimos clientes para tu pyme | clientes.com.py",
+        "description": "Diagnóstico, atraer, convertir, medir y crecer: el método con el que conseguimos clientes y ventas para pymes paraguayas."
       },
       "header": {
         "eyebrow": "El método",
         "title": "Cómo trabajamos",
-        "lead": "Un orden fijo, cuatro etapas, y una regla: no agregamos captación encima de un proceso que todavía pierde consultas.",
-        "body": "Lo que sigue es literalmente lo que hacemos, en el orden en que lo hacemos. No hay una etapa opcional: cada una existe porque la siguiente no funciona sin ella."
+        "lead": "Cuatro pasos, siempre en este orden, y una regla: no gastamos en publicidad hasta que tu negocio pueda responder y cerrar las consultas que lleguen.",
+        "body": "Lo que sigue es exactamente lo que hacemos. Cada paso existe porque el siguiente no rinde sin él."
       },
       "steps": {
-        "eyebrow": "Las cuatro etapas",
-        "title": "Diagnóstico, captación, seguimiento, medición",
+        "eyebrow": "Los cuatro pasos",
+        "title": "Diagnóstico, atraer, convertir, medir y crecer",
         "items": [
           {
             "title": "Diagnóstico",
-            "lead": "Entender antes de tocar nada.",
-            "body": "Revisamos de dónde vienen tus clientes hoy, cuánto tarda tu ciclo de venta y qué pasa con una consulta desde que entra hasta que se cierra o se pierde. Casi siempre aparece una fuga que nadie estaba mirando.",
+            "lead": "Entender antes de gastar.",
+            "body": "Revisamos de dónde vienen hoy tus clientes, cuánto te cuesta cada uno y qué pasa con una consulta desde que llega hasta que compra o se pierde. Casi siempre aparece una venta que se estaba escapando.",
             "points": [
-              "Mapa de canales actuales y volumen real de consultas",
-              "Recorrido completo de una consulta, punto por punto",
-              "Dónde se pierde trabajo hoy, con ejemplos concretos"
+              "Canales actuales y cuántas consultas llegan de verdad",
+              "Tu competencia: quién aparece cuando te buscan",
+              "Dónde se pierden ventas hoy, con ejemplos concretos"
             ]
           },
           {
-            "title": "Captación",
-            "lead": "Que quien te quiere contactar, pueda.",
-            "body": "Ordenamos la presencia y los puntos de entrada: la página, el formulario, el número de WhatsApp, la ficha de Google. El objetivo no es más tráfico, es que el interesado que ya existe no se caiga en el camino.",
+            "title": "Atraer",
+            "lead": "Que te encuentren los que ya están buscando.",
+            "body": "Campañas en Google, Facebook e Instagram, tu ficha de Google Maps y una página que convierte. Empezamos por la gente que ya busca lo que vendés, que es la que compra más rápido.",
             "points": [
-              "Puntos de contacto claros y una sola forma de entrar",
-              "Formularios que llegan a una lista, no a un correo suelto",
-              "WhatsApp como canal de entrada, con registro de lo que llega"
+              "Google Ads y anuncios en Facebook e Instagram",
+              "Ficha de Google Maps completa, con reseñas",
+              "Página o landing pensada para que te escriban"
             ]
           },
           {
-            "title": "Seguimiento",
-            "lead": "Nada depende de la memoria de alguien.",
-            "body": "Cada consulta queda registrada, con un responsable y una próxima acción. Los presupuestos enviados vuelven a aparecer solos cuando toca retomarlos. Acá es donde se recupera la mayor parte del trabajo que hoy se pierde.",
+            "title": "Convertir",
+            "lead": "Que la consulta termine en venta.",
+            "body": "Cada consulta recibe respuesta rápida por WhatsApp, queda registrada y tiene seguimiento hasta que compra o dice que no. Acá es donde la mayoría de las pymes recupera ventas que hoy pierde sin darse cuenta.",
             "points": [
-              "Una lista única de consultas, con responsable asignado",
-              "Recordatorios de seguimiento que aparecen sin que nadie los cargue",
-              "Historial de cada conversación, disponible para todo el equipo"
+              "Respuesta inmediata por WhatsApp, también fuera de horario",
+              "Seguimiento de cada presupuesto enviado",
+              "Todas las consultas en una sola lista, con responsable"
             ]
           },
           {
-            "title": "Medición",
-            "lead": "Decidir con números, no con impresiones.",
-            "body": "Cuántas consultas entraron, por qué canal, cuántas se convirtieron y cuánto tardaron. Con eso se decide qué se repite el mes siguiente y qué se corta.",
+            "title": "Medir y crecer",
+            "lead": "Invertir en lo que vende.",
+            "body": "Cuántas consultas entraron, por qué canal, cuántas compraron y cuánto costó cada cliente. Con eso se decide dónde poner más plata el mes siguiente y qué se corta.",
             "points": [
-              "Consultas por canal y por mes",
-              "Tasa de cierre y tiempo promedio de ciclo",
-              "Una revisión periódica con decisiones, no solo reportes"
+              "Consultas y ventas por canal, cada mes",
+              "Costo por cliente conseguido",
+              "Una reunión mensual con decisiones, no solo reportes"
             ]
           }
         ]
@@ -2838,25 +2891,25 @@
       "included": {
         "eyebrow": "Qué incluye",
         "title": "Lo que queda funcionando",
-        "lead": "El trabajo termina cuando tu equipo puede sostenerlo sin nosotros encima.",
+        "lead": "No te dejamos un informe y nos vamos: te dejamos un sistema que sigue trayendo clientes.",
         "items": [
           {
-            "title": "La plataforma",
-            "body": "Incluye la plataforma donde tu equipo ve cada consulta y cada seguimiento. Es nuestra, se llama clientes.com.py, y no es un software que tenés que ir a comprar aparte."
+            "title": "Campañas funcionando",
+            "body": "Anuncios en Google y en redes activos, con presupuesto controlado y ajustes cada semana según lo que vende."
           },
           {
-            "title": "El proceso escrito",
-            "body": "Quién atiende qué, en cuánto tiempo se responde y cuándo se retoma un presupuesto. Corto y usable, no un manual que nadie abre."
+            "title": "WhatsApp y seguimiento",
+            "body": "Respuesta rápida y seguimiento de cada consulta, con nuestra plataforma incluida en el servicio. No tenés que comprar ningún software aparte."
           },
           {
-            "title": "El equipo entrenado",
-            "body": "Acompañamos a las personas que venden hasta que el proceso corre solo. Una herramienta que nadie usa no cambió nada."
+            "title": "Tu equipo entrenado",
+            "body": "Acompañamos a quienes atienden y venden hasta que el proceso corre solo. Una herramienta que nadie usa no vende nada."
           }
         ]
       },
       "statement": {
-        "text": "El método es el producto.",
-        "sub": "Las herramientas vienen después, y son las que hagan falta."
+        "text": "Clientes primero. Herramientas después.",
+        "sub": "Usamos las que hagan falta para vender más, nunca al revés."
       },
       "faq": {
         "eyebrow": "Preguntas frecuentes",
@@ -2864,15 +2917,15 @@
         "items": [
           {
             "q": "¿En cuánto tiempo se ven resultados?",
-            "a": "El seguimiento ordenado suele mostrar algo en las primeras semanas, porque recupera consultas que ya tenías. La captación nueva tarda más y depende del ciclo de venta de tu rubro."
+            "a": "Las campañas suelen traer consultas en las primeras semanas. Responder más rápido y hacer seguimiento recupera ventas casi de inmediato, porque son clientes que ya te estaban escribiendo. El posicionamiento orgánico tarda más."
           },
           {
-            "q": "¿Trabajan con empresas que recién arrancan?",
-            "a": "No. Trabajamos con empresas que ya tienen clientes, equipo y una oferta que funciona. Si todavía estás validando qué vender, no somos el socio indicado y te lo vamos a decir."
+            "q": "¿Sirve para un negocio chico?",
+            "a": "Sí. Trabajamos con pymes de todos los tamaños. Si tu negocio todavía no está listo para invertir en publicidad, te lo decimos en el diagnóstico y te decimos qué hacer primero."
           },
           {
-            "q": "¿Tenemos que cambiar las herramientas que ya usamos?",
-            "a": "Solo lo que haga falta. Si ya tenés algo que funciona, se queda. Lo que no puede quedarse es una consulta sin registrar."
+            "q": "¿Tengo que cambiar las herramientas que ya uso?",
+            "a": "Solo lo que haga falta. Si ya tenés algo que funciona, se queda. Lo que no puede quedarse es una consulta sin responder."
           },
           {
             "q": "¿Cuánto cuesta?",
@@ -2884,19 +2937,19 @@
     "nosotros": {
       "meta": {
         "title": "Quiénes somos | clientes.com.py",
-        "description": "Un equipo enfocado en el crecimiento comercial de empresas paraguayas establecidas: por qué Paraguay, por qué estos rubros y cómo trabajamos."
+        "description": "Un equipo paraguayo enfocado en conseguir clientes y ventas para pequeñas y medianas empresas: quiénes somos y cómo trabajamos."
       },
       "header": {
         "eyebrow": "Nosotros",
         "title": "Quiénes estamos detrás",
-        "lead": "Somos un equipo chico que trabaja con empresas paraguayas establecidas, en el punto donde el crecimiento deja de ser cuestión de esfuerzo y pasa a ser cuestión de proceso."
+        "lead": "Somos un equipo chico que ayuda a pymes paraguayas a conseguir clientes nuevos y a vender más, con marketing que se mide y un seguimiento que no deja ventas en el camino."
       },
       "story": {
         "eyebrow": "Por qué esto",
-        "title": "Por qué Paraguay y por qué estos rubros",
-        "body": "En Paraguay hay muchísimas empresas sólidas — clínicas con años de trayectoria, constructoras con obra constante, estudios con cartera propia — que crecieron por referencia y buen trabajo. Ese crecimiento funciona hasta que deja de escalar.",
-        "bodyTwo": "El salto siguiente casi nunca es una campaña. Es dejar de perder consultas y poder repetir lo que ya funciona. Eso es exactamente lo que hacemos, y es la razón por la que trabajamos con empresas que ya tienen algo, no con proyectos que están arrancando.",
-        "bodyThree": "Somos primeros en construir lo que usamos: la plataforma con la que tu equipo sigue cada consulta la desarrollamos nosotros. Cuando algo no funciona, no hay a quién derivarte."
+        "title": "Por qué pymes y por qué Paraguay",
+        "body": "Las pymes mueven la economía paraguaya: comercios, clínicas, talleres, estudios, constructoras. Muchas crecieron por el boca a boca y el buen trabajo, y llega un punto en que eso ya no alcanza para seguir creciendo.",
+        "bodyTwo": "Las agencias grandes están pensadas para marcas grandes, y un freelancer suele resolver una sola parte: los anuncios, o la página, o las redes. Nosotros nos hacemos cargo del recorrido completo, desde que alguien te encuentra hasta que te compra.",
+        "bodyThree": "Además, las herramientas son nuestras: el sistema donde se registra cada consulta y cada seguimiento lo desarrollamos nosotros. Cuando algo no funciona, no hay a quién derivarte."
       },
       "principles": {
         "eyebrow": "Cómo trabajamos",
@@ -2925,16 +2978,16 @@
     "contacto": {
       "meta": {
         "title": "Agendá tu diagnóstico | clientes.com.py",
-        "description": "Contanos de tu empresa y coordinamos una conversación de diagnóstico de 30 minutos, sin costo, para ver dónde se está perdiendo trabajo."
+        "description": "Contanos de tu negocio y coordinamos una llamada de 30 minutos, sin costo, para ver cómo conseguir más clientes y más ventas."
       },
       "header": {
         "eyebrow": "Contacto",
         "title": "Agendemos el diagnóstico",
-        "lead": "Contanos brevemente de tu empresa y coordinamos una conversación de 30 minutos. Sin costo y sin compromiso."
+        "lead": "Contanos brevemente de tu negocio y coordinamos una llamada de 30 minutos. Sin costo y sin compromiso."
       },
       "form": {
         "name": "Nombre y apellido",
-        "company": "Empresa",
+        "company": "Negocio o empresa",
         "phone": "Teléfono o WhatsApp",
         "phonePlaceholder": "0981 123 456",
         "phoneHint": "Es la forma más rápida de coordinar. Te escribimos antes de llamarte.",
@@ -2943,15 +2996,18 @@
         "sector": "Rubro",
         "sectorPlaceholder": "Elegí una opción",
         "sectorOptions": [
+          "Comercio o tienda",
+          "Gastronomía",
           "Clínica o consultorio",
-          "Constructora",
+          "Construcción",
           "Inmobiliaria",
           "Servicios profesionales",
-          "Empresa B2B",
+          "Taller o servicio técnico",
+          "Empresa B2B o distribuidora",
           "Otro"
         ],
-        "message": "Contanos brevemente qué querés resolver",
-        "messageOptional": "Contanos brevemente qué querés resolver (opcional)",
+        "message": "Contanos qué vendés y qué querés lograr",
+        "messageOptional": "Contanos qué vendés y qué querés lograr (opcional)",
         "submit": "Enviar y coordinar",
         "submitting": "Enviando…",
         "privacy": "Usamos tus datos únicamente para contactarte por esta consulta.",
@@ -2970,8 +3026,8 @@
         "title": "Qué pasa después",
         "steps": [
           "Te escribimos para coordinar día y horario",
-          "Conversamos 30 minutos sobre tu situación actual",
-          "Te dejamos un panorama claro, trabajemos juntos o no"
+          "Conversamos 30 minutos sobre tu negocio y tus clientes",
+          "Te decimos por dónde empezar a vender más, trabajemos juntos o no"
         ],
         "pricingTitle": "Sobre los precios",
         "pricingBody": "A medida, según diagnóstico. Preferimos decirte un número que podamos sostener antes que una lista que no se parece a tu caso.",
@@ -3568,7 +3624,7 @@
       }
     },
     "footer": {
-      "tagline": "Ayudamos a empresas paraguayas establecidas a conseguir más clientes, con un proceso de ventas ordenado.",
+      "tagline": "Conseguimos clientes y ventas para pymes paraguayas: publicidad, WhatsApp y seguimiento, todo medido.",
       "siteTitle": "El sitio",
       "contactTitle": "Contacto",
       "loginNote": "¿Sos cliente?",
