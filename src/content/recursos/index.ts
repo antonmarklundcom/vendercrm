@@ -4,6 +4,9 @@ import { cuantosPresupuestos, seguimientoDePresupuestos } from "./constructoras"
 import { ordenMinimoFichas, velocidadDeRespuesta } from "./inmobiliarias";
 import { agendaLlenaFacturacionIrregular, calificarEnDosMinutos } from "./servicios-profesionales";
 import { cicloDeVentaLargo, cuandoUnLeadEstaListo } from "./empresas-b2b";
+import { consultaDePrecio, publicacionPromocionada } from "./comercios";
+import { pedidoPorApp, promocionDiasFlojos } from "./gastronomia";
+import { consultasMientrasTrabajas, recordatorioDeMantenimiento } from "./talleres";
 import type { Article, ArticleBlock } from "./types";
 
 export type { Article, ArticleBlock };
@@ -22,6 +25,12 @@ export const ARTICLES: Article[] = [
   calificarEnDosMinutos,
   cicloDeVentaLargo,
   cuandoUnLeadEstaListo,
+  consultaDePrecio,
+  publicacionPromocionada,
+  pedidoPorApp,
+  promocionDiasFlojos,
+  consultasMientrasTrabajas,
+  recordatorioDeMantenimiento,
 ];
 
 export const ARTICLE_SLUGS = ARTICLES.map((article) => article.slug);
