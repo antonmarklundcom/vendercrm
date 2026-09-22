@@ -21,9 +21,9 @@ phase touches that file next.
 - **Web-chat conversations in `/inbox` have no filter or search of their
   own** (P3) — `?filter=` and `?q=` apply only to WhatsApp rows; only
   `/chat`'s own status filter narrows the web-chat ones.
-- **`/u/[token]` (email unsubscribe) mutates on a plain GET** (P4) — the
-  same pattern most one-click unsubscribe links use, but a mail client's
-  link-prefetcher visiting it early can trigger a false unsubscribe.
+- ~~`/u/[token]` (email unsubscribe) mutates on a plain GET~~ — **fixed**:
+  the page now only reads, and the opt-out is a POST behind a confirm
+  button (`u/[token]/actions.ts`), so a link prefetcher can't trigger it.
 - **Deleting a custom field definition leaves its values in
   `contacts.custom`** (P5) — dead JSON keys, harmless since nothing reads a
   key with no definition, but no cleanup pass exists.
@@ -34,9 +34,11 @@ phase touches that file next.
   on the platform per run** (P6, P7) — correct and fine at current scale;
   would want a per-tenant cursor or batching if the tenant count grows by
   orders of magnitude.
-- **The public quote accept/reject form has no CAPTCHA** (P6) — a per-IP
-  rate limit (10/min) is the only abuse guard, the same posture the
-  pre-existing `/q/[token]` view already had.
+- **The public quote accept/reject form has no CAPTCHA** (P6) — accepted
+  risk, not a gap: the link carries a 48-hex-char random token, a quote can
+  be decided exactly once (status check + unique index), and a per-IP rate
+  limit (10/min) sits in front. A CAPTCHA would only add friction for the
+  customer accepting the quote.
 - ~~`negocio.*` template variables are not resolvable yet~~ — **fixed by
   K3** (`docs/log/k3.md`): registered in `contracts/render.ts` and wired
   into the quote/nota de venta PDF footers.

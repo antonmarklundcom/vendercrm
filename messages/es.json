@@ -3979,7 +3979,10 @@
     },
     "unsubscribe": {
       "title": "Listo, te sacamos de la lista",
-      "body": "{name}, no vas a recibir más emails automáticos de este negocio."
+      "body": "{name}, no vas a recibir más emails automáticos de este negocio.",
+      "confirmTitle": "¿Dejar de recibir emails?",
+      "confirmBody": "{name}, confirmá y no vas a recibir más emails automáticos de este negocio.",
+      "confirmButton": "Sí, darme de baja"
     },
     "receipt": {
       "title": "Recibo",

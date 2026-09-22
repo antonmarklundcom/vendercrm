@@ -3979,7 +3979,10 @@
     },
     "unsubscribe": {
       "title": "Klart — du har avanmält dig",
-      "body": "{name}, du kommer inte längre få automatiska e-postmeddelanden från det här företaget."
+      "body": "{name}, du kommer inte längre få automatiska e-postmeddelanden från det här företaget.",
+      "confirmTitle": "Sluta ta emot mejl?",
+      "confirmBody": "{name}, bekräfta så får du inga fler automatiska mejl från det här företaget.",
+      "confirmButton": "Ja, avregistrera mig"
     },
     "receipt": {
       "title": "Kvitto",
