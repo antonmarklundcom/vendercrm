@@ -3103,15 +3103,15 @@
               "body": "Miramos por dónde llegan hoy tus pacientes, cuántas consultas se responden tarde y cuántos turnos se pierden entre la primera pregunta y la agenda."
             },
             {
-              "title": "Captación",
+              "title": "Atraer",
               "body": "Presencia ordenada donde el paciente busca: la ficha de Google, la página con turno por WhatsApp, y campañas solo si el diagnóstico las justifica."
             },
             {
-              "title": "Seguimiento",
+              "title": "Convertir",
               "body": "Cada consulta queda registrada con un responsable. El paciente que no agendó reaparece solo para retomarlo, sin depender de la recepción."
             },
             {
-              "title": "Medición",
+              "title": "Medir y crecer",
               "body": "Cuántas consultas entraron, cuántas terminaron en turno y qué tratamiento las trajo. Con eso decidís dónde invertir el mes siguiente."
             }
           ]
@@ -3202,15 +3202,15 @@
               "body": "Revisamos cuántos presupuestos hacés por mes, cuánto tarda una decisión y en qué punto se pierde el contacto con cada obra potencial."
             },
             {
-              "title": "Captación",
+              "title": "Atraer",
               "body": "Presencia que da confianza para montos altos: obras hechas, una página seria y un canal claro para pedir presupuesto."
             },
             {
-              "title": "Seguimiento",
+              "title": "Convertir",
               "body": "Cada presupuesto queda con fecha, responsable y próxima acción. Meses después, el recordatorio aparece solo — antes de que el cliente firme con otro."
             },
             {
-              "title": "Medición",
+              "title": "Medir y crecer",
               "body": "Presupuestos emitidos, obras firmadas, tiempo de decisión. Sabés cuánto vale cada consulta que entra."
             }
           ]
@@ -3301,15 +3301,15 @@
               "body": "Miramos por dónde entran hoy las consultas, cuánto tardan en responderse y qué pasa después de cada visita."
             },
             {
-              "title": "Captación",
+              "title": "Atraer",
               "body": "Presencia que capta interesados y propietarios: fichas claras, respuesta inmediata y un canal directo por WhatsApp."
             },
             {
-              "title": "Seguimiento",
+              "title": "Convertir",
               "body": "Cada interesado queda asignado a un agente, con historial y próxima acción. El que visitó y no ofertó no desaparece."
             },
             {
-              "title": "Medición",
+              "title": "Medir y crecer",
               "body": "Consultas por canal y por propiedad, visitas agendadas y operaciones cerradas — por agente y por mes."
             }
           ]
@@ -3400,15 +3400,15 @@
               "body": "Miramos de dónde salieron tus últimos veinte clientes, qué pasó con las propuestas que no se firmaron y dónde se corta el ciclo."
             },
             {
-              "title": "Captación",
+              "title": "Atraer",
               "body": "Presencia que transmite criterio: una página seria, contenido que muestra cómo pensás y un canal claro para consultar."
             },
             {
-              "title": "Seguimiento",
+              "title": "Convertir",
               "body": "Cada consulta y cada propuesta queda con próxima acción. Retomar deja de sentirse incómodo porque está pautado."
             },
             {
-              "title": "Medición",
+              "title": "Medir y crecer",
               "body": "Consultas, propuestas, cierres y honorarios promedio. El pipeline deja de ser una sensación."
             }
           ]
@@ -3499,15 +3499,15 @@
               "body": "Revisamos tu ciclo real: de dónde salen las oportunidades, cuánto tardan, dónde se caen y qué registra hoy cada vendedor."
             },
             {
-              "title": "Captación",
+              "title": "Atraer",
               "body": "Entrada constante de oportunidades: presencia seria, prospección ordenada y un canal claro para el que llega preguntando."
             },
             {
-              "title": "Seguimiento",
+              "title": "Convertir",
               "body": "Cada oportunidad con etapa, responsable, monto y próxima acción. El historial queda en la empresa, no en el celular."
             },
             {
-              "title": "Medición",
+              "title": "Medir y crecer",
               "body": "Pipeline por etapa, tasa de cierre, ciclo promedio y un pronóstico del mes con datos, no con optimismo."
             }
           ]
@@ -3558,6 +3558,303 @@
             {
               "q": "¿Cómo arrancamos?",
               "a": "Con el diagnóstico: media hora sobre tu ciclo de venta actual. De ahí sale qué ordenar primero y si tiene sentido trabajar juntos."
+            }
+          ]
+        }
+      },
+      "comercios": {
+        "name": "Comercios y tiendas",
+        "meta": {
+          "title": "Más clientes y ventas para tu comercio | clientes.com.py",
+          "description": "Conseguimos clientes para comercios y tiendas de Paraguay: Google Maps, anuncios en Facebook e Instagram y WhatsApp que responde rápido, para vender más cada mes."
+        },
+        "waPrefill": "Hola, tengo un comercio y quiero conseguir más clientes.",
+        "header": {
+          "eyebrow": "Soluciones · Comercios y tiendas",
+          "title": "Más gente entrando a tu local, y comprando",
+          "lead": "Tu comercio tiene buenos productos y buenos precios. Lo que falta es que más gente de tu zona lo sepa, y que quien pregunta por WhatsApp termine comprando.",
+          "body": "Trabajamos con locales, tiendas online y comercios con delivery que quieren ventas todos los días, no solo seguidores."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en comercios",
+          "title": "Seguidores no es lo mismo que ventas",
+          "body": "Muchos comercios publican todos los días en Instagram y las ventas no se mueven. Los likes no pagan el alquiler: lo que vende es aparecer cuando alguien busca lo que tenés, y responder antes que la competencia.",
+          "bodyTwo": "Y cada consulta cuenta. El que pregunta \"¿tenés en talle M?\" o \"¿cuánto sale?\" ya quiere comprar. Si la respuesta llega tres horas después, compró en otro lado.",
+          "symptomsTitle": "¿Te suena?",
+          "symptoms": [
+            "Publicás en redes todos los días y las ventas siguen iguales",
+            "Tu local no aparece cuando alguien busca en Google Maps lo que vendés",
+            "Te preguntan precios por WhatsApp y la mayoría no vuelve a escribir",
+            "Pagaste un \"promocionar publicación\" y no sabés si vendió algo"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu comercio",
+          "title": "De la búsqueda a la venta",
+          "lead": "Los mismos cuatro pasos de siempre, con el vocabulario de tu mostrador.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Vemos cómo te encuentran hoy, qué productos preguntan más y cuántas consultas de WhatsApp terminan en venta."
+            },
+            {
+              "title": "Atraer",
+              "body": "Tu ficha de Google Maps completa con fotos y reseñas, anuncios en Facebook e Instagram para tu zona y Google Ads para lo que la gente busca."
+            },
+            {
+              "title": "Convertir",
+              "body": "Respuesta rápida por WhatsApp con precios y stock a mano, y un mensaje de seguimiento al que preguntó y no compró."
+            },
+            {
+              "title": "Medir y crecer",
+              "body": "Cuántas consultas entraron, cuántas compraron y qué anuncio las trajo. Lo que vende recibe más presupuesto."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu comercio",
+          "lead": "No es una promoción de una semana: es un flujo de clientes que sigue andando.",
+          "items": [
+            {
+              "name": "Visible en tu zona",
+              "body": "Aparecés en Google Maps y en los anuncios de la gente que vive o trabaja cerca de tu local."
+            },
+            {
+              "name": "WhatsApp que vende",
+              "body": "Cada consulta recibe respuesta al momento, también fuera de horario, con lo que necesita para decidir."
+            },
+            {
+              "name": "Clientes que vuelven",
+              "body": "Quien ya te compró recibe novedades y promociones por WhatsApp, sin que tengas que acordarte."
+            },
+            {
+              "name": "Números claros",
+              "body": "Sabés cuánto te costó cada venta que vino de un anuncio, en vez de intuirlo."
+            }
+          ]
+        },
+        "statement": {
+          "text": "El cliente compra donde le responden primero.",
+          "sub": "Que sea en tu comercio no depende de la suerte."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan los comercios",
+          "items": [
+            {
+              "q": "¿Sirve si vendo solo en el local, sin tienda online?",
+              "a": "Sí. La mayoría de los comercios con los que trabajamos venden en el local y por WhatsApp. El objetivo es que más gente de tu zona te encuentre y te escriba."
+            },
+            {
+              "q": "¿Cuánto tengo que invertir en anuncios?",
+              "a": "Depende de tu zona y de lo que vendés. En el diagnóstico te damos un rango realista, y se puede empezar con poco y subir solo cuando los números acompañan."
+            },
+            {
+              "q": "¿Me manejan las redes sociales?",
+              "a": "Podemos, pero no es lo primero. Primero hacemos que te encuentren quienes ya están buscando lo que vendés, que es lo que más rápido se convierte en ventas."
+            },
+            {
+              "q": "¿Qué pasa con las reseñas en Google?",
+              "a": "Te ayudamos a pedirlas a tus clientes de forma simple y constante. Las reseñas son de lo que más pesa para aparecer en Google Maps."
+            }
+          ]
+        }
+      },
+      "gastronomia": {
+        "name": "Gastronomía",
+        "meta": {
+          "title": "Más clientes y pedidos para tu restaurante | clientes.com.py",
+          "description": "Conseguimos clientes para restaurantes, catering y delivery en Paraguay: Google Maps, anuncios y WhatsApp que toma pedidos, para vender todos los días de la semana."
+        },
+        "waPrefill": "Hola, tengo un negocio gastronómico y quiero más clientes.",
+        "header": {
+          "eyebrow": "Soluciones · Gastronomía",
+          "title": "Pedidos y mesas llenas, también de lunes a jueves",
+          "lead": "La comida ya es buena. Lo que cuesta es llenar los días flojos, que te encuentren cuando alguien busca dónde comer y no perder pedidos por WhatsApp en la hora pico.",
+          "body": "Trabajamos con restaurantes, bares, catering, rotiserías y delivery que quieren ventas todos los días, no solo el fin de semana."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en gastronomía",
+          "title": "El fin de semana se llena solo. El resto, no.",
+          "body": "Cuando alguien busca \"dónde comer cerca\" o \"delivery de pizza\", elige entre los tres primeros de Google Maps. Si no estás ahí, con buenas fotos y reseñas, no existís para esa persona.",
+          "bodyTwo": "Y en la hora pico, el WhatsApp explota. Mensajes que se responden tarde son pedidos que se van a la app de delivery o a la competencia.",
+          "symptomsTitle": "¿Te suena?",
+          "symptoms": [
+            "Viernes y sábado lleno, de lunes a jueves medio vacío",
+            "No aparecés en Google Maps cuando buscan comida en tu zona",
+            "Pedidos por WhatsApp que se pierden en la hora pico",
+            "Pagás comisiones altas a las apps de delivery por clientes que podrían pedirte directo"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu negocio",
+          "title": "De la búsqueda al pedido",
+          "lead": "Los mismos cuatro pasos de siempre, con el vocabulario de tu cocina.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Vemos cómo te encuentran hoy, qué días y horarios flojean y cuántos pedidos entran por WhatsApp, apps y teléfono."
+            },
+            {
+              "title": "Atraer",
+              "body": "Tu ficha de Google Maps con fotos, menú y reseñas, y anuncios en Instagram y Facebook para tu zona en los días que querés llenar."
+            },
+            {
+              "title": "Convertir",
+              "body": "WhatsApp que responde al momento con el menú, toma pedidos y reservas, y no deja a nadie esperando en la hora pico."
+            },
+            {
+              "title": "Medir y crecer",
+              "body": "Cuántos pedidos y reservas entraron por canal y qué promoción los trajo. Lo que llena los días flojos se repite."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu negocio",
+          "lead": "No es una promo de un día: es un flujo de clientes para toda la semana.",
+          "items": [
+            {
+              "name": "Primero en Google Maps",
+              "body": "Ficha completa, fotos que dan hambre y reseñas que crecen cada semana."
+            },
+            {
+              "name": "Pedidos directos",
+              "body": "Más pedidos por tu propio WhatsApp, sin pagar comisión por cada uno."
+            },
+            {
+              "name": "Días flojos con movimiento",
+              "body": "Promociones y anuncios apuntados a los días y horarios que más necesitás llenar."
+            },
+            {
+              "name": "Clientes que vuelven",
+              "body": "Quien ya pidió recibe novedades por WhatsApp y vuelve a pedir, sin que tengas que acordarte."
+            }
+          ]
+        },
+        "statement": {
+          "text": "La gente pide donde es fácil pedir.",
+          "sub": "Hacemos que ese lugar sea el tuyo."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan los negocios gastronómicos",
+          "items": [
+            {
+              "q": "¿Tengo que dejar las apps de delivery?",
+              "a": "No. Las apps siguen sumando. La idea es que cada vez más clientes te pidan directo, donde no pagás comisión y el cliente queda con vos."
+            },
+            {
+              "q": "¿Sirve para un local chico o un emprendimiento de delivery?",
+              "a": "Sí. Justamente ahí se nota más: un buen perfil en Google Maps y un WhatsApp que responde rápido cambian el mes."
+            },
+            {
+              "q": "¿Cuánto tengo que invertir en anuncios?",
+              "a": "Depende de tu zona y de tu ticket promedio. En el diagnóstico te damos un rango realista antes de gastar un guaraní."
+            },
+            {
+              "q": "¿Pueden automatizar las respuestas de WhatsApp?",
+              "a": "Sí. Una respuesta automática con el menú, los horarios y cómo pedir, para que nadie espere, y tu equipo retoma para cerrar el pedido."
+            }
+          ]
+        }
+      },
+      "talleres": {
+        "name": "Talleres y servicios técnicos",
+        "meta": {
+          "title": "Más clientes para tu taller o servicio técnico | clientes.com.py",
+          "description": "Conseguimos clientes para talleres mecánicos, climatización, electricistas y servicios a domicilio en Paraguay: Google, Google Maps y WhatsApp que responde rápido."
+        },
+        "waPrefill": "Hola, tengo un taller o servicio técnico y quiero más clientes.",
+        "header": {
+          "eyebrow": "Soluciones · Talleres y servicios técnicos",
+          "title": "Que te llamen a vos cuando algo se rompe",
+          "lead": "Cuando a alguien se le rompe el auto, el aire o la instalación, busca en Google y llama al primero que aparece y responde. Esa llamada tiene que ser para vos.",
+          "body": "Trabajamos con talleres mecánicos, técnicos de aire acondicionado, electricistas, plomeros y servicios a domicilio que viven de que suene el teléfono."
+        },
+        "pains": {
+          "eyebrow": "Lo que vemos en talleres y servicios",
+          "title": "Trabajo hay. Falta que te encuentren.",
+          "body": "Casi todos los clientes de un servicio técnico llegan con urgencia: buscan en Google \"técnico de aire cerca\" o \"taller mecánico en Luque\" y eligen entre los primeros resultados. El boca a boca es bueno, pero no llega a esa persona.",
+          "bodyTwo": "Y cuando estás con las manos en un trabajo, no podés contestar el WhatsApp. El cliente no espera: llama al siguiente.",
+          "symptomsTitle": "¿Te suena?",
+          "symptoms": [
+            "Dependés de la recomendación y hay semanas sin trabajo nuevo",
+            "No aparecés en Google cuando buscan tu servicio en tu zona",
+            "Perdés clientes porque estabas trabajando y no pudiste responder",
+            "Mandás presupuestos por WhatsApp y nadie hace el seguimiento"
+          ]
+        },
+        "method": {
+          "eyebrow": "El método, aplicado a tu taller",
+          "title": "De la urgencia al trabajo agendado",
+          "lead": "Los mismos cuatro pasos de siempre, con el vocabulario de tu taller.",
+          "steps": [
+            {
+              "title": "Diagnóstico",
+              "body": "Vemos cómo te encuentran hoy, qué servicios dejan más margen y cuántas consultas se pierden por no responder a tiempo."
+            },
+            {
+              "title": "Atraer",
+              "body": "Tu ficha de Google Maps con reseñas y zona de cobertura, y Google Ads para las búsquedas urgentes de tu servicio."
+            },
+            {
+              "title": "Convertir",
+              "body": "Respuesta automática por WhatsApp mientras estás trabajando, y seguimiento de cada presupuesto enviado hasta que se decide."
+            },
+            {
+              "title": "Medir y crecer",
+              "body": "Cuántas consultas entraron, cuántas se convirtieron en trabajo y cuánto costó cada cliente. Lo que funciona se escala."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Qué cambia",
+          "title": "Lo que queda funcionando en tu negocio",
+          "lead": "Un flujo de trabajo nuevo que no depende de que alguien te recomiende esa semana.",
+          "items": [
+            {
+              "name": "Visible en las urgencias",
+              "body": "Aparecés cuando alguien de tu zona busca tu servicio, con reseñas que dan confianza."
+            },
+            {
+              "name": "Nadie queda sin respuesta",
+              "body": "Una respuesta automática por WhatsApp avisa que lo atendés en breve, aunque estés con las manos ocupadas."
+            },
+            {
+              "name": "Presupuestos que se cierran",
+              "body": "Cada presupuesto enviado tiene seguimiento, en vez de quedar olvidado en el chat."
+            },
+            {
+              "name": "Clientes de mantenimiento",
+              "body": "Recordatorios de service y mantenimiento que traen de vuelta a los clientes que ya tenés."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Cuando algo se rompe, gana el que responde.",
+          "sub": "Que seas vos no depende de la suerte."
+        },
+        "faq": {
+          "eyebrow": "Preguntas frecuentes",
+          "title": "Lo que preguntan los talleres y técnicos",
+          "items": [
+            {
+              "q": "Trabajo solo o con un ayudante. ¿Me sirve?",
+              "a": "Sí. Justamente cuando trabajás solo es cuando más se pierden consultas. Lo ajustamos al volumen que podés atender."
+            },
+            {
+              "q": "¿Pueden apuntar solo a mi zona?",
+              "a": "Sí. Los anuncios y tu ficha de Google se configuran para las ciudades y barrios donde trabajás, así no pagás por clientes que no podés atender."
+            },
+            {
+              "q": "¿Cuánto tengo que invertir en publicidad?",
+              "a": "Depende del servicio y la zona. En el diagnóstico te damos un rango realista. Muchos servicios técnicos arrancan solo con Google Maps y reseñas."
+            },
+            {
+              "q": "¿Qué pasa con los recordatorios de mantenimiento?",
+              "a": "Configuramos avisos por WhatsApp para service, cambio de aceite o limpieza de aire, así el cliente vuelve a vos y no busca a otro."
             }
           ]
         }

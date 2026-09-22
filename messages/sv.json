@@ -3099,19 +3099,19 @@
           "lead": "Samma fyra steg som alltid, med kalenderns eget språk.",
           "steps": [
             {
-              "title": "Diagnos",
+              "title": "Genomgång",
               "body": "Vi ser var dina patienter kommer ifrån i dag, hur många förfrågningar som besvaras sent och hur många bokningar som tappas mellan första frågan och kalendern."
             },
             {
-              "title": "Anskaffning",
+              "title": "Locka",
               "body": "Ordnad närvaro där patienten söker: Google-profilen, en sida med bokning via WhatsApp, och kampanjer bara om diagnosen motiverar dem."
             },
             {
-              "title": "Uppföljning",
+              "title": "Konvertera",
               "body": "Varje förfrågan registreras med en ansvarig. Patienten som inte bokade dyker upp igen av sig själv för uppföljning, utan att receptionen behöver minnas."
             },
             {
-              "title": "Mätning",
+              "title": "Mät och väx",
               "body": "Hur många förfrågningar som kom in, hur många som blev bokningar och vilken behandling som lockade dem. Utifrån det bestämmer du var du satsar nästa månad."
             }
           ]
@@ -3198,19 +3198,19 @@
           "lead": "Samma fyra steg som alltid, med byggets eget språk.",
           "steps": [
             {
-              "title": "Diagnos",
+              "title": "Genomgång",
               "body": "Vi går igenom hur många offerter du gör per månad, hur lång tid ett beslut tar och var kontakten med varje potentiellt projekt tappas."
             },
             {
-              "title": "Anskaffning",
+              "title": "Locka",
               "body": "Närvaro som inger förtroende för stora belopp: utförda projekt, en seriös webbplats och en tydlig kanal för att begära offert."
             },
             {
-              "title": "Uppföljning",
+              "title": "Konvertera",
               "body": "Varje offert får datum, ansvarig och nästa åtgärd. Månader senare dyker påminnelsen upp av sig själv — innan kunden skriver på hos någon annan."
             },
             {
-              "title": "Mätning",
+              "title": "Mät och väx",
               "body": "Utfärdade offerter, tecknade projekt, beslutstid. Du vet vad varje inkommande förfrågan är värd."
             }
           ]
@@ -3297,19 +3297,19 @@
           "lead": "Samma fyra steg som alltid, med portföljens eget språk.",
           "steps": [
             {
-              "title": "Diagnos",
+              "title": "Genomgång",
               "body": "Vi ser var förfrågningarna kommer in i dag, hur lång tid de tar att besvara och vad som händer efter varje visning."
             },
             {
-              "title": "Anskaffning",
+              "title": "Locka",
               "body": "Närvaro som lockar både spekulanter och säljare: tydliga objektbeskrivningar, omedelbart svar och en direkt WhatsApp-kanal."
             },
             {
-              "title": "Uppföljning",
+              "title": "Konvertera",
               "body": "Varje spekulant tilldelas en mäklare, med historik och nästa åtgärd. Den som var på visning men inte la bud försvinner inte."
             },
             {
-              "title": "Mätning",
+              "title": "Mät och väx",
               "body": "Förfrågningar per kanal och objekt, bokade visningar och avslutade affärer — per mäklare och månad."
             }
           ]
@@ -3396,19 +3396,19 @@
           "lead": "Samma fyra steg som alltid, med arvodenas eget språk.",
           "steps": [
             {
-              "title": "Diagnos",
+              "title": "Genomgång",
               "body": "Vi ser var dina senaste tjugo klienter kom ifrån, vad som hände med förslagen som inte signerades och var cykeln bryts."
             },
             {
-              "title": "Anskaffning",
+              "title": "Locka",
               "body": "Närvaro som förmedlar omdöme: en seriös webbplats, innehåll som visar hur du tänker och en tydlig kanal för förfrågningar."
             },
             {
-              "title": "Uppföljning",
+              "title": "Konvertera",
               "body": "Varje förfrågan och varje förslag får en nästa åtgärd. Att följa upp slutar kännas obekvämt eftersom det är schemalagt."
             },
             {
-              "title": "Mätning",
+              "title": "Mät och väx",
               "body": "Förfrågningar, förslag, avslut och genomsnittliga arvoden. Pipelinen slutar vara en känsla."
             }
           ]
@@ -3495,19 +3495,19 @@
           "lead": "Samma fyra steg som alltid, med pipelinens eget språk.",
           "steps": [
             {
-              "title": "Diagnos",
+              "title": "Genomgång",
               "body": "Vi går igenom din verkliga cykel: var möjligheterna kommer ifrån, hur lång tid de tar, var de faller och vad varje säljare registrerar i dag."
             },
             {
-              "title": "Anskaffning",
+              "title": "Locka",
               "body": "Ett konstant inflöde av möjligheter: seriös närvaro, ordnad prospektering och en tydlig kanal för den som hör av sig."
             },
             {
-              "title": "Uppföljning",
+              "title": "Konvertera",
               "body": "Varje möjlighet med steg, ansvarig, belopp och nästa åtgärd. Historiken stannar i företaget, inte i mobilen."
             },
             {
-              "title": "Mätning",
+              "title": "Mät och väx",
               "body": "Pipeline per steg, avslutsfrekvens, genomsnittlig cykel och en månadsprognos byggd på data, inte optimism."
             }
           ]
@@ -3558,6 +3558,303 @@
             {
               "q": "Hur kommer vi igång?",
               "a": "Med diagnosen: en halvtimme om din nuvarande säljcykel. Därifrån kommer vad som ska ordnas först och om det är rimligt att arbeta ihop."
+            }
+          ]
+        }
+      },
+      "comercios": {
+        "name": "Butiker",
+        "meta": {
+          "title": "Fler kunder och mer försäljning för din butik | clientes.com.py",
+          "description": "Vi skaffar kunder till butiker i Paraguay: Google Maps, annonser på Facebook och Instagram och WhatsApp som svarar snabbt, så du säljer mer varje månad."
+        },
+        "waPrefill": "Hej, jag driver en butik och vill ha fler kunder.",
+        "header": {
+          "eyebrow": "Lösningar · Butiker",
+          "title": "Fler som går in i din butik, och köper",
+          "lead": "Din butik har redan bra produkter och bra priser. Det som saknas är att fler i ditt område vet om det, och att den som frågar på WhatsApp faktiskt köper.",
+          "body": "Vi arbetar med butiker, nätbutiker och verksamheter med hemleverans som vill ha försäljning varje dag, inte bara följare."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser i butiker",
+          "title": "Följare är inte samma sak som försäljning",
+          "body": "Många butiker postar på Instagram varje dag utan att försäljningen rör sig. Gilla-markeringar betalar inte hyran: det som säljer är att synas när någon söker efter det du har, och att svara före konkurrenterna.",
+          "bodyTwo": "Och varje förfrågan räknas. Den som frågar \"har ni storlek M?\" eller \"vad kostar den?\" vill redan köpa. Kommer svaret tre timmar senare har personen köpt någon annanstans.",
+          "symptomsTitle": "Känns det igen?",
+          "symptoms": [
+            "Du postar på sociala medier varje dag och försäljningen ligger still",
+            "Din butik syns inte när någon söker på Google Maps efter det du säljer",
+            "Folk frågar om priser på WhatsApp och de flesta hör aldrig av sig igen",
+            "Du betalade för att \"boosta ett inlägg\" och vet inte om det gav en enda sälj"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din butik",
+          "title": "Från sökning till försäljning",
+          "lead": "Samma fyra steg som alltid, med diskens eget språk.",
+          "steps": [
+            {
+              "title": "Genomgång",
+              "body": "Vi ser hur kunder hittar dig i dag, vilka produkter som får flest frågor och hur många WhatsApp-förfrågningar som blir köp."
+            },
+            {
+              "title": "Locka",
+              "body": "En komplett Google Maps-profil med foton och recensioner, annonser på Facebook och Instagram i ditt område, och Google Ads för det folk söker efter."
+            },
+            {
+              "title": "Konvertera",
+              "body": "Snabba svar på WhatsApp med priser och lagerstatus till hands, plus ett uppföljningsmeddelande till den som frågade men inte köpte."
+            },
+            {
+              "title": "Mät och väx",
+              "body": "Hur många förfrågningar som kom in, hur många som köpte och vilken annons som lockade dem. Det som säljer får mer budget."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera i din butik",
+          "lead": "Det är ingen enveckas-kampanj: det är ett kundflöde som fortsätter rulla.",
+          "items": [
+            {
+              "name": "Synlig i ditt område",
+              "body": "Du syns på Google Maps och i annonser för dem som bor eller jobbar nära din butik."
+            },
+            {
+              "name": "WhatsApp som säljer",
+              "body": "Varje förfrågan får ett omedelbart svar, även utanför öppettider, med det som behövs för att bestämma sig."
+            },
+            {
+              "name": "Kunder som kommer tillbaka",
+              "body": "Den som redan köpt får nyheter och erbjudanden på WhatsApp, utan att du behöver komma ihåg det."
+            },
+            {
+              "name": "Tydliga siffror",
+              "body": "Du vet vad varje försäljning från en annons faktiskt kostade, i stället för att gissa."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Kunden köper där den får svar först.",
+          "sub": "Att det blir i din butik är inget som beror på tur."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Det butiksägare frågar om",
+          "items": [
+            {
+              "q": "Fungerar det om jag bara säljer i butiken, utan nätbutik?",
+              "a": "Ja. De flesta butiker vi arbetar med säljer i butiken och via WhatsApp. Målet är att fler i ditt område ska hitta dig och skriva till dig."
+            },
+            {
+              "q": "Hur mycket behöver jag lägga på annonser?",
+              "a": "Det beror på ditt område och vad du säljer. I genomgången får du ett realistiskt intervall, och du kan börja smått och öka när siffrorna visar att det lönar sig."
+            },
+            {
+              "q": "Sköter ni mina sociala medier?",
+              "a": "Det kan vi göra, men det är inte det första steget. Först ser vi till att de som redan söker efter det du säljer hittar dig — det ger snabbast resultat i kassan."
+            },
+            {
+              "q": "Vad gäller för recensioner på Google?",
+              "a": "Vi hjälper dig be dina kunder om dem, enkelt och kontinuerligt. Recensioner väger tyngst för att synas på Google Maps."
+            }
+          ]
+        }
+      },
+      "gastronomia": {
+        "name": "Restaurang och mat",
+        "meta": {
+          "title": "Fler kunder och beställningar till din restaurang | clientes.com.py",
+          "description": "Vi skaffar kunder till restauranger, catering och hemleverans i Paraguay: Google Maps, annonser och WhatsApp som tar emot beställningar, så du säljer alla veckans dagar."
+        },
+        "waPrefill": "Hej, jag driver en restaurangverksamhet och vill ha fler kunder.",
+        "header": {
+          "eyebrow": "Lösningar · Restaurang och mat",
+          "title": "Fulla bord och beställningar, även måndag till torsdag",
+          "lead": "Maten är redan bra. Det svåra är att fylla de tunna dagarna, synas när någon letar efter ett ställe att äta på, och inte tappa beställningar på WhatsApp under rusningen.",
+          "body": "Vi arbetar med restauranger, barer, catering, delikatessbutiker och hemleverans som vill sälja varje dag, inte bara i helgen."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser inom restaurang och mat",
+          "title": "Helgen fyller sig själv. Resten av veckan gör det inte.",
+          "body": "När någon söker \"var kan man äta nära mig\" eller \"pizza hemkörning\" väljer de bland de tre första på Google Maps. Är du inte där, med bra foton och recensioner, finns du inte för den personen.",
+          "bodyTwo": "Och under rusningen exploderar WhatsApp. Meddelanden som besvaras sent blir beställningar som går till en leveransapp eller till konkurrenten i stället.",
+          "symptomsTitle": "Känns det igen?",
+          "symptoms": [
+            "Fredag och lördag är fullbokat, måndag till torsdag är halvtomt",
+            "Du syns inte på Google Maps när folk söker mat i ditt område",
+            "Beställningar på WhatsApp försvinner under rusningen",
+            "Du betalar hög provision till leveransappar för kunder som kunde beställt direkt"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din verksamhet",
+          "title": "Från sökning till beställning",
+          "lead": "Samma fyra steg som alltid, med kökets eget språk.",
+          "steps": [
+            {
+              "title": "Genomgång",
+              "body": "Vi ser hur kunder hittar dig i dag, vilka dagar och tider som är tunna och hur många beställningar som kommer via WhatsApp, appar och telefon."
+            },
+            {
+              "title": "Locka",
+              "body": "Din Google Maps-profil med foton, meny och recensioner, plus annonser på Instagram och Facebook i ditt område de dagar du vill fylla."
+            },
+            {
+              "title": "Konvertera",
+              "body": "WhatsApp som svarar direkt med menyn, tar emot beställningar och bordsbokningar, och inte låter någon vänta under rusningen."
+            },
+            {
+              "title": "Mät och väx",
+              "body": "Hur många beställningar och bokningar som kom in per kanal och vilket erbjudande som lockade dem. Det som fyller de tunna dagarna upprepas."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera i din verksamhet",
+          "lead": "Det är ingen endagskampanj: det är ett kundflöde för hela veckan.",
+          "items": [
+            {
+              "name": "Först på Google Maps",
+              "body": "Komplett profil, aptitretande foton och recensioner som växer varje vecka."
+            },
+            {
+              "name": "Direktbeställningar",
+              "body": "Fler beställningar via ditt eget WhatsApp, utan provision på varje köp."
+            },
+            {
+              "name": "Liv i de tunna dagarna",
+              "body": "Erbjudanden och annonser riktade mot de dagar och tider du mest behöver fylla."
+            },
+            {
+              "name": "Kunder som kommer tillbaka",
+              "body": "Den som redan beställt får nyheter på WhatsApp och beställer igen, utan att du behöver komma ihåg det."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Folk beställer där det är enkelt att beställa.",
+          "sub": "Vi ser till att det stället är ditt."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Det restaurang- och matverksamheter frågar om",
+          "items": [
+            {
+              "q": "Måste jag lämna leveransapparna?",
+              "a": "Nej. Apparna fortsätter att bidra. Tanken är att fler och fler kunder beställer direkt, där du slipper provision och kunden blir din."
+            },
+            {
+              "q": "Fungerar det för ett litet ställe eller en ren hemleveransverksamhet?",
+              "a": "Ja. Det är just där det märks mest: en bra Google Maps-profil och ett WhatsApp som svarar snabbt kan förändra hela månaden."
+            },
+            {
+              "q": "Hur mycket behöver jag lägga på annonser?",
+              "a": "Det beror på ditt område och din genomsnittliga notan. I genomgången får du ett realistiskt intervall innan du spenderar en enda guaraní."
+            },
+            {
+              "q": "Kan ni automatisera svaren på WhatsApp?",
+              "a": "Ja. Ett automatiskt svar med menyn, öppettider och hur man beställer, så ingen behöver vänta, och ditt team tar över för att slutföra beställningen."
+            }
+          ]
+        }
+      },
+      "talleres": {
+        "name": "Verkstäder och tekniska tjänster",
+        "meta": {
+          "title": "Fler kunder till din verkstad eller tekniska tjänst | clientes.com.py",
+          "description": "Vi skaffar kunder till bilverkstäder, kyl- och luftteknik, elektriker och hemservice i Paraguay: Google, Google Maps och WhatsApp som svarar snabbt."
+        },
+        "waPrefill": "Hej, jag driver en verkstad eller teknisk tjänst och vill ha fler kunder.",
+        "header": {
+          "eyebrow": "Lösningar · Verkstäder och tekniska tjänster",
+          "title": "Se till att det är dig de ringer när något går sönder",
+          "lead": "När någons bil, luftkonditionering eller elinstallation går sönder söker de på Google och ringer den första som syns och svarar. Det samtalet ska vara ditt.",
+          "body": "Vi arbetar med bilverkstäder, luftkonditioneringstekniker, elektriker, rörmokare och hemservice som lever på att telefonen ringer."
+        },
+        "pains": {
+          "eyebrow": "Vad vi ser i verkstäder och tjänster",
+          "title": "Jobb finns det gott om. Det som saknas är att bli hittad.",
+          "body": "Nästan alla kunder till en teknisk tjänst kommer med brådska: de söker på Google efter \"luftteknik nära mig\" eller \"bilverkstad i Luque\" och väljer bland de första träffarna. Munt-till-mun är bra, men det når inte den personen.",
+          "bodyTwo": "Och när du har händerna fulla med ett jobb kan du inte svara på WhatsApp. Kunden väntar inte — den ringer nästa nummer.",
+          "symptomsTitle": "Känns det igen?",
+          "symptoms": [
+            "Du är beroende av rekommendationer och vissa veckor kommer inget nytt jobb",
+            "Du syns inte på Google när folk söker din tjänst i ditt område",
+            "Du tappar kunder för att du jobbade och inte kunde svara",
+            "Du skickar offerter på WhatsApp och ingen följer upp dem"
+          ]
+        },
+        "method": {
+          "eyebrow": "Metoden, tillämpad på din verkstad",
+          "title": "Från akut behov till bokat jobb",
+          "lead": "Samma fyra steg som alltid, med verkstadens eget språk.",
+          "steps": [
+            {
+              "title": "Genomgång",
+              "body": "Vi ser hur kunder hittar dig i dag, vilka tjänster som ger bäst marginal och hur många förfrågningar som går förlorade för att svaret dröjer."
+            },
+            {
+              "title": "Locka",
+              "body": "Din Google Maps-profil med recensioner och upptagningsområde, plus Google Ads för de akuta sökningarna efter din tjänst."
+            },
+            {
+              "title": "Konvertera",
+              "body": "Automatiskt WhatsApp-svar medan du jobbar, och uppföljning av varje skickad offert tills kunden bestämt sig."
+            },
+            {
+              "title": "Mät och väx",
+              "body": "Hur många förfrågningar som kom in, hur många som blev jobb och vad varje kund kostade. Det som fungerar skalas upp."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "Vad som förändras",
+          "title": "Det som fortsätter fungera i din verksamhet",
+          "lead": "Ett nytt flöde av jobb som inte beror på att någon rekommenderar dig just den veckan.",
+          "items": [
+            {
+              "name": "Synlig vid akuta behov",
+              "body": "Du syns när någon i ditt område söker din tjänst, med recensioner som skapar förtroende."
+            },
+            {
+              "name": "Ingen blir utan svar",
+              "body": "Ett automatiskt WhatsApp-svar meddelar att du hör av dig snart, även med händerna fulla."
+            },
+            {
+              "name": "Offerter som stängs",
+              "body": "Varje skickad offert följs upp, i stället för att glömmas bort i chatten."
+            },
+            {
+              "name": "Kunder som kommer tillbaka för underhåll",
+              "body": "Påminnelser om service och underhåll som tar tillbaka de kunder du redan har."
+            }
+          ]
+        },
+        "statement": {
+          "text": "När något går sönder vinner den som svarar först.",
+          "sub": "Att det är du är inget som beror på tur."
+        },
+        "faq": {
+          "eyebrow": "Vanliga frågor",
+          "title": "Det verkstäder och tekniker frågar om",
+          "items": [
+            {
+              "q": "Jag jobbar ensam eller med en medhjälpare. Fungerar det för mig?",
+              "a": "Ja. Det är just när du jobbar ensam som flest förfrågningar går förlorade. Vi anpassar det efter den volym du faktiskt kan ta emot."
+            },
+            {
+              "q": "Kan ni rikta annonserna bara mot mitt område?",
+              "a": "Ja. Annonserna och din Google-profil ställs in för de städer och stadsdelar där du jobbar, så du slipper betala för kunder du ändå inte kan ta emot."
+            },
+            {
+              "q": "Hur mycket behöver jag lägga på annonsering?",
+              "a": "Det beror på tjänsten och området. I genomgången får du ett realistiskt intervall. Många tekniska tjänster börjar med enbart Google Maps och recensioner."
+            },
+            {
+              "q": "Vad gäller för underhållspåminnelser?",
+              "a": "Vi ställer in aviseringar på WhatsApp för service, oljebyte eller rengöring av luftkonditionering, så kunden kommer tillbaka till dig i stället för att leta upp någon annan."
             }
           ]
         }

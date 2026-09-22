@@ -3103,15 +3103,15 @@
               "body": "We look at where your patients come from today, how many inquiries are answered late, and how many appointments are lost between the first question and the schedule."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "An organized presence where patients search: the Google listing, a page with WhatsApp booking, and campaigns only if the diagnosis justifies them."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every inquiry is recorded with an owner. The patient who didn't book resurfaces on their own for follow-up, without depending on reception."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "How many inquiries came in, how many ended in appointments, and which treatment brought them. That's how you decide where to invest next month."
             }
           ]
@@ -3202,15 +3202,15 @@
               "body": "We review how many quotes you produce per month, how long a decision takes, and where contact with each potential project gets lost."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that builds trust for large amounts: completed projects, a serious website, and a clear channel to request a quote."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every quote gets a date, an owner and a next action. Months later, the reminder appears on its own — before the client signs with someone else."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Quotes issued, projects signed, decision time. You know what every incoming inquiry is worth."
             }
           ]
@@ -3301,15 +3301,15 @@
               "body": "We look at where inquiries come in today, how long they take to be answered, and what happens after each showing."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that attracts both buyers and owners: clear listings, immediate response and a direct WhatsApp channel."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every prospect is assigned to an agent, with history and a next action. Whoever visited and didn't make an offer doesn't disappear."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Inquiries per channel and per property, showings booked and deals closed — per agent and per month."
             }
           ]
@@ -3400,15 +3400,15 @@
               "body": "We look at where your last twenty clients came from, what happened to the proposals that weren't signed, and where the cycle breaks."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that conveys judgment: a serious website, content that shows how you think, and a clear channel to inquire."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every inquiry and every proposal gets a next action. Following up stops feeling awkward because it's scheduled."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Inquiries, proposals, closings and average fees. The pipeline stops being a feeling."
             }
           ]
@@ -3499,15 +3499,15 @@
               "body": "We review your real cycle: where opportunities come from, how long they take, where they fall through, and what each salesperson records today."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A constant intake of opportunities: a serious presence, organized prospecting and a clear channel for whoever arrives asking."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every opportunity with a stage, an owner, an amount and a next action. The history stays with the company, not on a phone."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Pipeline by stage, close rate, average cycle and a monthly forecast built on data, not optimism."
             }
           ]
@@ -3558,6 +3558,303 @@
             {
               "q": "How do we start?",
               "a": "With the diagnosis: half an hour on your current sales cycle. From there comes what to organize first and whether it makes sense to work together."
+            }
+          ]
+        }
+      },
+      "comercios": {
+        "name": "Shops and stores",
+        "meta": {
+          "title": "More customers and sales for your shop | clientes.com.py",
+          "description": "We bring customers to shops and stores in Paraguay: Google Maps, Facebook and Instagram ads, and WhatsApp that replies fast, so you sell more every month."
+        },
+        "waPrefill": "Hi, I run a shop and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Shops and stores",
+          "title": "More people walking in, and buying",
+          "lead": "Your shop already has good products and good prices. What's missing is more people in your area knowing about it, and turning WhatsApp questions into sales.",
+          "body": "We work with stores, online shops and delivery businesses that want sales every day, not just followers."
+        },
+        "pains": {
+          "eyebrow": "What we see in shops",
+          "title": "Followers aren't the same as sales",
+          "body": "Many shops post on Instagram every day and sales don't move. Likes don't pay the rent: what sells is showing up when someone searches for what you carry, and answering before the competition does.",
+          "bodyTwo": "And every inquiry counts. Someone asking \"do you have it in size M?\" or \"how much does it cost?\" already wants to buy. If the answer comes three hours later, they bought somewhere else.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "You post on social media every day and sales stay the same",
+            "Your shop doesn't show up when someone searches Google Maps for what you sell",
+            "People ask prices on WhatsApp and most never write back",
+            "You paid to \"boost a post\" and don't know if it sold anything"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your shop",
+          "title": "From search to sale",
+          "lead": "The same four steps as always, in the language of your storefront.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which products get asked about most, and how many WhatsApp inquiries turn into sales."
+            },
+            {
+              "title": "Attract",
+              "body": "A complete Google Maps listing with photos and reviews, Facebook and Instagram ads for your area, and Google Ads for what people are searching for."
+            },
+            {
+              "title": "Convert",
+              "body": "Fast WhatsApp replies with prices and stock on hand, plus a follow-up message to anyone who asked but didn't buy."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many inquiries came in, how many bought, and which ad brought them. What sells gets more budget."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your shop",
+          "lead": "It's not a one-week promotion: it's a flow of customers that keeps going.",
+          "items": [
+            {
+              "name": "Visible in your area",
+              "body": "You show up on Google Maps and in ads to people who live or work near your store."
+            },
+            {
+              "name": "WhatsApp that sells",
+              "body": "Every inquiry gets an instant reply, even after hours, with what they need to decide."
+            },
+            {
+              "name": "Customers who come back",
+              "body": "Past buyers get news and promotions on WhatsApp, without you having to remember."
+            },
+            {
+              "name": "Clear numbers",
+              "body": "You know what each sale from an ad actually cost, instead of guessing."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Customers buy from whoever replies first.",
+          "sub": "Making that be your shop isn't down to luck."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What shop owners ask",
+          "items": [
+            {
+              "q": "Does this work if I only sell in-store, with no online shop?",
+              "a": "Yes. Most of the shops we work with sell in-store and over WhatsApp. The goal is for more people in your area to find you and write to you."
+            },
+            {
+              "q": "How much do I need to spend on ads?",
+              "a": "It depends on your area and what you sell. In the diagnosis we give you a realistic range, and you can start small and scale up once the numbers back it up."
+            },
+            {
+              "q": "Do you manage my social media?",
+              "a": "We can, but it's not the first step. First we make sure the people already searching for what you sell can find you — that's what turns into sales fastest."
+            },
+            {
+              "q": "What about Google reviews?",
+              "a": "We help you ask your customers for them, simply and consistently. Reviews matter more than almost anything else for showing up on Google Maps."
+            }
+          ]
+        }
+      },
+      "gastronomia": {
+        "name": "Food and hospitality",
+        "meta": {
+          "title": "More customers and orders for your restaurant | clientes.com.py",
+          "description": "We bring customers to restaurants, catering and delivery businesses in Paraguay: Google Maps, ads and WhatsApp that takes orders, so you sell every day of the week."
+        },
+        "waPrefill": "Hi, I run a food business and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Food and hospitality",
+          "title": "Full orders and tables, Monday through Thursday too",
+          "lead": "The food is already good. What's hard is filling the slow days, getting found when someone's looking for somewhere to eat, and not losing orders on WhatsApp during the rush.",
+          "body": "We work with restaurants, bars, caterers, rotiserías and delivery businesses that want sales every day, not just on weekends."
+        },
+        "pains": {
+          "eyebrow": "What we see in food and hospitality",
+          "title": "Weekends fill up on their own. The rest of the week doesn't.",
+          "body": "When someone searches \"where to eat nearby\" or \"pizza delivery\", they pick from the top three on Google Maps. If you're not there, with good photos and reviews, you don't exist for that person.",
+          "bodyTwo": "And during the rush, WhatsApp explodes. Messages answered late are orders that go to a delivery app or the competition instead.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "Friday and Saturday are packed, Monday through Thursday are half empty",
+            "You don't show up on Google Maps when people search for food in your area",
+            "WhatsApp orders get lost during the rush",
+            "You pay high commissions to delivery apps for customers who could order directly"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your business",
+          "title": "From search to order",
+          "lead": "The same four steps as always, in the language of your kitchen.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which days and hours run slow, and how many orders come in by WhatsApp, apps and phone."
+            },
+            {
+              "title": "Attract",
+              "body": "Your Google Maps listing with photos, menu and reviews, plus Instagram and Facebook ads for your area on the days you want to fill."
+            },
+            {
+              "title": "Convert",
+              "body": "WhatsApp that replies instantly with the menu, takes orders and reservations, and doesn't leave anyone waiting during the rush."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many orders and reservations came in per channel, and which promotion brought them. What fills the slow days gets repeated."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your business",
+          "lead": "It's not a one-day promo: it's a flow of customers for the whole week.",
+          "items": [
+            {
+              "name": "First on Google Maps",
+              "body": "A complete listing, mouth-watering photos and reviews that grow every week."
+            },
+            {
+              "name": "Direct orders",
+              "body": "More orders through your own WhatsApp, with no commission on each one."
+            },
+            {
+              "name": "Slow days with traffic",
+              "body": "Promotions and ads targeted at the days and hours you most need to fill."
+            },
+            {
+              "name": "Customers who come back",
+              "body": "Past customers get news on WhatsApp and order again, without you having to remember."
+            }
+          ]
+        },
+        "statement": {
+          "text": "People order from wherever's easiest to order from.",
+          "sub": "We make sure that place is yours."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What food businesses ask",
+          "items": [
+            {
+              "q": "Do I have to drop the delivery apps?",
+              "a": "No. The apps keep adding value. The idea is that more and more customers order directly, where you don't pay a commission and the customer stays yours."
+            },
+            {
+              "q": "Does this work for a small place or a delivery-only business?",
+              "a": "Yes. That's actually where it shows the most: a good Google Maps profile and a WhatsApp that replies fast can change your whole month."
+            },
+            {
+              "q": "How much do I need to spend on ads?",
+              "a": "It depends on your area and your average ticket. In the diagnosis we give you a realistic range before you spend a single guaraní."
+            },
+            {
+              "q": "Can you automate WhatsApp replies?",
+              "a": "Yes. An automatic reply with the menu, hours and how to order, so nobody waits, and your team steps in to close the order."
+            }
+          ]
+        }
+      },
+      "talleres": {
+        "name": "Workshops and technical services",
+        "meta": {
+          "title": "More customers for your workshop or technical service | clientes.com.py",
+          "description": "We bring customers to auto shops, HVAC technicians, electricians and home-service providers in Paraguay: Google, Google Maps and WhatsApp that replies fast."
+        },
+        "waPrefill": "Hi, I run a workshop or technical service and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Workshops and technical services",
+          "title": "Be the one they call when something breaks",
+          "lead": "When someone's car, air conditioner or wiring breaks down, they search Google and call the first one who shows up and answers. That call needs to be yours.",
+          "body": "We work with auto shops, HVAC technicians, electricians, plumbers and home-service providers whose business depends on the phone ringing."
+        },
+        "pains": {
+          "eyebrow": "What we see in workshops and services",
+          "title": "There's work out there. You just need to be found.",
+          "body": "Almost every technical-service customer arrives in a hurry: they search Google for \"AC technician nearby\" or \"auto shop in Luque\" and pick from the first results. Word of mouth is good, but it doesn't reach that person.",
+          "bodyTwo": "And when your hands are busy with a job, you can't answer WhatsApp. The customer doesn't wait — they call the next number.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "You rely on referrals and some weeks bring no new work",
+            "You don't show up on Google when people search for your service in your area",
+            "You lose customers because you were working and couldn't reply",
+            "You send quotes on WhatsApp and nobody follows up"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your workshop",
+          "title": "From urgent call to booked job",
+          "lead": "The same four steps as always, in the language of your workshop.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which services pay off best, and how many inquiries you lose by not replying in time."
+            },
+            {
+              "title": "Attract",
+              "body": "Your Google Maps listing with reviews and coverage area, plus Google Ads for the urgent searches for your service."
+            },
+            {
+              "title": "Convert",
+              "body": "Automatic WhatsApp replies while you're working, and follow-up on every quote you send until the customer decides."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many inquiries came in, how many turned into jobs, and what each customer cost. What works gets scaled up."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your business",
+          "lead": "A new flow of work that doesn't depend on someone recommending you that week.",
+          "items": [
+            {
+              "name": "Visible in emergencies",
+              "body": "You show up when someone in your area searches for your service, backed by reviews that build trust."
+            },
+            {
+              "name": "No one goes unanswered",
+              "body": "An automatic WhatsApp reply lets people know you'll get back to them soon, even with your hands full."
+            },
+            {
+              "name": "Quotes that close",
+              "body": "Every quote sent gets followed up, instead of sitting forgotten in the chat."
+            },
+            {
+              "name": "Repeat maintenance customers",
+              "body": "Service and maintenance reminders that bring back the customers you already have."
+            }
+          ]
+        },
+        "statement": {
+          "text": "When something breaks, whoever answers first wins.",
+          "sub": "Being that person isn't down to luck."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What workshops and technicians ask",
+          "items": [
+            {
+              "q": "I work alone or with one helper. Does this still work for me?",
+              "a": "Yes. It's exactly when you work alone that you lose the most inquiries. We adjust it to the volume you can actually handle."
+            },
+            {
+              "q": "Can you target only my area?",
+              "a": "Yes. Ads and your Google listing are set up for the cities and neighborhoods where you work, so you don't pay for customers you can't serve."
+            },
+            {
+              "q": "How much do I need to spend on advertising?",
+              "a": "It depends on the service and the area. In the diagnosis we give you a realistic range. Many technical services start with just Google Maps and reviews."
+            },
+            {
+              "q": "What about maintenance reminders?",
+              "a": "We set up WhatsApp alerts for service, oil changes or AC cleaning, so the customer comes back to you instead of looking elsewhere."
             }
           ]
         }

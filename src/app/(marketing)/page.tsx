@@ -124,8 +124,6 @@ export default async function Home() {
         items={(t.raw("home.verticals.items") as VerticalItem[]).map(
           // The copy list and the slug list share their order; zipping them
           // here keeps the card copy in messages/ and the routing in code.
-          // Rubros past the last slug have no /soluciones page yet and
-          // render as plain cards.
           (item, index) => ({
             ...item,
             href: MARKETING_VERTICALS[index]
