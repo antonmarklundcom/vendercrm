@@ -89,10 +89,14 @@ describe.skipIf(!hasDb)("mysql driver (MySQL integration)", () => {
   it("starts a new window once the old one has expired", async () => {
     const driver = createMysqlDriver();
     const key = `mysql-window-${Math.random()}`;
-    expect((await driver.check(key, 1, 50)).limited).toBe(false);
-    expect((await driver.check(key, 1, 50)).limited).toBe(true);
-    await new Promise((resolve) => setTimeout(resolve, 80));
-    expect((await driver.check(key, 1, 50)).limited).toBe(false);
+    // A one-second window, not a few milliseconds: the window starts when the
+    // first check is called, and on a cold CI database that first round trip
+    // alone can outlast a 50ms window, so the second check used to land in a
+    // fresh window and not be limited.
+    expect((await driver.check(key, 1, 1_000)).limited).toBe(false);
+    expect((await driver.check(key, 1, 1_000)).limited).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 1_200));
+    expect((await driver.check(key, 1, 1_000)).limited).toBe(false);
   });
 
   it("keeps separate buckets per key", async () => {
