@@ -550,19 +550,6 @@
   color: var(--mk-on-ink-70);
   font-family: var(--mk-font-text);
 }
-.mk-preview__tabs {
-  display: flex;
-  gap: var(--mk-s-6);
-  padding: var(--mk-s-3) var(--mk-s-6) 0;
-  font-size: var(--mk-t--1);
-  color: var(--mk-ink-62);
-}
-.mk-preview__tabs .is-active {
-  color: var(--mk-ink);
-  font-weight: 500;
-  border-bottom: 2px solid var(--mk-accent);
-  padding-bottom: var(--mk-s-2);
-}
 .mk-preview__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -584,52 +571,66 @@
   font-size: var(--mk-t--1);
   color: var(--mk-ink-62);
 }
-.mk-preview__board {
+/* Lead feed rows (lead-feed.tsx) — consultas arriving, channel + status. */
+.mk-feed {
+  list-style: none;
+  margin: 0;
+  padding: var(--mk-s-2) var(--mk-s-6) var(--mk-s-4);
+}
+.mk-feed__row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--mk-s-4);
-  padding: var(--mk-s-6);
-}
-/* Specificity note: `.mk-section--ink p` (globals.css ink-section defaults)
-   outranks a single class selector, so every <p> in this window needs the
-   two-class form below to actually win — otherwise it inherits the ink
-   section's light-on-dark colour meant for the video backdrop, not this
-   window's own near-white surface. */
-.mk-preview__window .mk-preview__column-title {
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--mk-s-3);
+  padding: var(--mk-s-3) 0;
+  border-bottom: 1px solid var(--mk-hairline);
   font-size: var(--mk-t--1);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--mk-ink-70);
-  margin: 0 0 var(--mk-s-3);
 }
-.mk-preview__card {
-  position: relative;
-  background: var(--mk-surface);
-  border: 1px solid var(--mk-hairline);
-  border-radius: var(--mk-r-sm);
-  padding: var(--mk-s-2) var(--mk-s-3);
-  margin-bottom: var(--mk-s-2);
+.mk-feed__row:last-child {
+  border-bottom: 0;
+}
+.mk-feed__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--mk-accent) 14%, var(--mk-surface));
+  color: var(--mk-ink);
+}
+.mk-feed__body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
-.mk-preview__card-name {
-  font-size: var(--mk-t--1);
-  font-weight: 500;
+.mk-feed__meta {
+  display: flex;
+  gap: var(--mk-s-2);
+  align-items: baseline;
+  flex-wrap: wrap;
 }
-.mk-preview__card-amount {
-  font-size: var(--mk-t--1);
+.mk-feed__channel {
   color: var(--mk-ink-62);
 }
-.mk-preview__card-wa {
-  position: absolute;
-  top: var(--mk-s-2);
-  right: var(--mk-s-2);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #25d366;
+.mk-feed__text {
+  color: var(--mk-ink-70);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk-feed__status {
+  white-space: nowrap;
+  border: 1px solid var(--mk-hairline-strong);
+  border-radius: 999px;
+  padding: 2px var(--mk-s-2);
+  color: var(--mk-ink-70);
+}
+.mk-feed__status.is-won {
+  border-color: #25d366;
+  background: color-mix(in srgb, #25d366 14%, var(--mk-surface));
+  color: var(--mk-ink);
 }
 .mk-preview__disclaimer {
   /* Outside .mk-preview__window, back on the ink field — on-ink-70 here is
@@ -644,10 +645,11 @@
     transform: none;
   }
   .mk-preview__stats {
-    grid-template-columns: 1fr;
+    gap: var(--mk-s-3);
+    padding: var(--mk-s-4);
   }
-  .mk-preview__board {
-    grid-template-columns: 1fr;
+  .mk-feed {
+    padding-inline: var(--mk-s-4);
   }
 }
 

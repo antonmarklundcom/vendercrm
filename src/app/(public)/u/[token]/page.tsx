@@ -2,21 +2,23 @@ import { notFound } from "next/navigation";
 import { verifyUnsubscribeToken } from "@/lib/email/unsubscribe";
 import { buildSystemTenantContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
-import { getContact, listTags, createTag, addTagToContact } from "@/modules/crm/contacts";
-import { OPTOUT_TAG } from "@/modules/automations/actions";
+import { getContact } from "@/modules/crm/contacts";
 import { getTranslator } from "@/lib/i18n/translator";
+import { confirmUnsubscribeAction } from "./actions";
 
-// Unsubscribe from automated email (PLAN.md §15.1, §15.8 P4). Sets the same
-// `optout` tag the WhatsApp BAJA/STOP keyword sets
-// (modules/automations/triggers.ts's maybeOptOut) — one flag, both channels.
-// No session, no confirmation step beyond loading the page: this is exactly
-// the one-click unsubscribe every mailbox provider expects.
+// Unsubscribe from automated email (PLAN.md §15.1, §15.8 P4). Loading the
+// page only reads: the opt-out itself is the button's POST (./actions.ts).
+// It used to write on GET, which let a mail client's link prefetcher
+// unsubscribe a contact who never clicked anything.
 export default async function UnsubscribePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ listo?: string }>;
 }) {
   const { token } = await params;
+  const { listo } = await searchParams;
   const resolved = verifyUnsubscribeToken(token);
   if (!resolved) notFound();
 
@@ -26,18 +28,30 @@ export default async function UnsubscribePage({
   const contact = await getContact(ctx, resolved.contactId);
   if (!contact) notFound();
 
-  const tags = await listTags(ctx);
-  const existing = tags.find((tag) => tag.name.toLowerCase() === OPTOUT_TAG);
-  const tag = existing ?? (await createTag(ctx, { name: OPTOUT_TAG }));
-  if (tag) await addTagToContact(ctx, contact.id, tag.id);
-
   const tenant = await getTenant(resolved.tenantId);
   const t = await getTranslator(tenant?.locale ?? "es", "public.unsubscribe");
 
+  if (listo === "1") {
+    return (
+      <main className="mx-auto max-w-md p-6 text-center text-sm">
+        <h1 className="text-lg font-semibold">{t("title")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("body", { name: contact.name })}</p>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-md p-6 text-center text-sm">
-      <h1 className="text-lg font-semibold">{t("title")}</h1>
-      <p className="mt-2 text-muted-foreground">{t("body", { name: contact.name })}</p>
+      <h1 className="text-lg font-semibold">{t("confirmTitle")}</h1>
+      <p className="mt-2 text-muted-foreground">{t("confirmBody", { name: contact.name })}</p>
+      <form action={confirmUnsubscribeAction.bind(null, token)} className="mt-4">
+        <button
+          type="submit"
+          className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+        >
+          {t("confirmButton")}
+        </button>
+      </form>
     </main>
   );
 }

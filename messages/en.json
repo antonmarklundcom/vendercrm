@@ -2596,10 +2596,10 @@
       "menu": "Menu"
     },
     "cta": {
-      "primary": "Book your diagnostic",
+      "primary": "Get your free diagnosis",
       "whatsapp": "Message us on WhatsApp",
       "secondary": "See how we work",
-      "waPrefill": "Hi, I came from clientes.com.py and I'd like to book a diagnostic."
+      "waPrefill": "Hi, I found you on clientes.com.py and I want more customers for my business."
     },
     "waFloating": {
       "ariaLabel": "Message us on WhatsApp",
@@ -2611,226 +2611,279 @@
     },
     "ribbon": {
       "monthly": "Month to month, no lock-in",
-      "measured": "Everything measured: you know what each enquiry cost",
-      "ownData": "The contact database is yours",
-      "region": "Asunción and Greater Asunción",
+      "measured": "You know what each customer cost",
+      "ownData": "Your customers and your data are yours",
+      "region": "For SMBs across Paraguay",
       "ruc": "Tax ID {ruc}"
     },
     "home": {
       "meta": {
-        "title": "More customers for your company | clientes.com.py",
-        "description": "We help established Paraguayan companies win more customers with an orderly sales process: lead capture, follow-up and measurement."
+        "title": "More customers and more sales for your SMB | clientes.com.py",
+        "description": "We bring customers to small and medium-sized businesses in Paraguay: Google, Facebook, Instagram and WhatsApp, with follow-up so every enquiry ends in a sale."
       },
       "hero": {
-        "eyebrow": "Commercial growth in Paraguay",
-        "title": "More customers. An orderly sales process.",
-        "lead": "We help established Paraguayan companies win more customers — with a system, not with luck.",
-        "body": "If you already have a product that works and customers who come back, the ceiling is almost never demand. It's that lead capture depends on whoever has time that week.",
-        "points": [
-          "An enquiry channel that doesn't shut down when the team is busy",
-          "Follow-up that happens either way, whoever is on shift",
-          "Clear numbers: how many enquiries came in and how many closed"
-        ],
-        "asideTitle": "How it starts",
-        "asideBody": "A 30-minute diagnostic conversation. We look at where your customers come from today, what gets lost along the way, and what can be put in order first.",
-        "asideNote": "Free and with no commitment. If we can't see how to help you, we'll say so on the same call.",
+        "eyebrow": "Customers and sales for Paraguayan SMBs",
+        "title": "More customers for your business. More sales every month.",
+        "lead": "We help small and medium-sized businesses in Paraguay win new customers and close more sales: advertising you can measure, WhatsApp that answers fast and follow-up that forgets no one.",
         "preview": {
-          "eyebrow": "The system at work",
-          "url": "app.clientes.com.py",
-          "tabs": [
-            "Pipeline",
-            "Contacts",
-            "WhatsApp",
-            "Reports"
-          ],
-          "stages": [
-            "New",
-            "Contacted",
-            "Proposal sent",
-            "Customer"
-          ],
+          "eyebrow": "What a week with customers coming in looks like",
           "stats": [
             {
-              "label": "Enquiries this month",
-              "value": "184"
+              "label": "New enquiries",
+              "value": "47"
             },
             {
-              "label": "First response",
-              "value": "4 min"
+              "label": "Answered in under 5 min",
+              "value": "92%"
             },
             {
-              "label": "Close rate",
-              "value": "34%"
+              "label": "Sales closed",
+              "value": "14"
             }
           ],
-          "disclaimer": "Illustrative preview of the panel."
+          "disclaimer": "Illustrative example, not a client's data.",
+          "title": "This week's enquiries",
+          "items": [
+            {
+              "name": "Rocío B.",
+              "channel": "Google Maps",
+              "text": "Hi, do you have an appointment this Saturday?",
+              "status": "Booked",
+              "tone": "won"
+            },
+            {
+              "name": "Diego M.",
+              "channel": "Instagram ad",
+              "text": "How much for an 80 m² store?",
+              "status": "Quote sent"
+            },
+            {
+              "name": "Laura F.",
+              "channel": "Google",
+              "text": "Do you deliver to Luque?",
+              "status": "Sold",
+              "tone": "won"
+            },
+            {
+              "name": "Carlos N.",
+              "channel": "Facebook",
+              "text": "I'd like more info on the business plan",
+              "status": "In conversation"
+            },
+            {
+              "name": "Ana P.",
+              "channel": "Website",
+              "text": "I need 20 units by Friday",
+              "status": "Sold",
+              "tone": "won"
+            }
+          ]
         }
       },
       "problem": {
-        "eyebrow": "The starting point",
-        "title": "You're not short of customers. You're short of a process.",
-        "body": "Most of the companies we work with have no product or market problem. They have enquiries arriving through five different places, quotes that never get an answer, and no way to know what worked last month.",
-        "bodyTwo": "That isn't fixed with more advertising. It's fixed by putting what already comes in in order, and adding lead capture on top of a base that holds.",
-        "symptomsTitle": "You can see it in concrete things",
+        "eyebrow": "The usual problem",
+        "title": "Your business is good. People still need to find you and buy.",
+        "body": "Most Paraguayan SMBs don't lack quality. They lack a steady flow of new customers: they rely on word of mouth, post on social media without knowing if it works and lose sales by answering late.",
+        "bodyTwo": "That's fixed with a simple system: show up where people search, answer fast and follow up until the sale closes. That's what we build with you.",
+        "symptomsTitle": "Sound familiar?",
         "symptoms": [
-          "Enquiries arriving on WhatsApp, by phone, on Instagram and through the form, with no single list",
-          "Quotes that were sent and never touched again",
-          "Salespeople starting each month from zero, not knowing who to pick back up",
-          "Good months and bad months with no clear explanation why"
+          "You rely on word of mouth and some months the phone doesn't ring",
+          "You post on Instagram and Facebook, but sales don't move",
+          "You paid for ads and don't know which customers they brought",
+          "People message you on WhatsApp and, by the time you answer, they've bought elsewhere",
+          "You send quotes nobody ever follows up on"
         ]
       },
       "services": {
-        "eyebrow": "Services",
-        "title": "What we do",
-        "lead": "It all points at the same thing: enquiries come in, and you can handle them. We choose the channels during the diagnostic, not before.",
+        "eyebrow": "What we do",
+        "title": "Everything it takes to sell more",
+        "lead": "We pick the channels for your industry and budget during the diagnosis. We don't sell you everything: we sell you what will bring customers.",
         "items": [
           {
             "name": "Google Ads",
-            "body": "Show up exactly when someone searches for what you sell. Search, Performance Max and remarketing."
+            "body": "Show up first when someone searches for what you sell in your city. You only pay when they click."
           },
           {
-            "name": "Meta Ads",
-            "body": "Facebook and Instagram campaigns aimed at people who buy, not people who scroll. Creative, targeting and weekly optimisation."
+            "name": "Facebook and Instagram Ads",
+            "body": "Ads that reach buyers, not browsers. Creatives, local targeting and weekly adjustments."
           },
           {
-            "name": "SEO",
-            "body": "Local and national rankings, so people find you without paying for every click."
+            "name": "Google Maps and local SEO",
+            "body": "A complete Google profile with reviews and photos, so you get picked when people search \"near me\"."
           },
           {
-            "name": "Websites",
-            "body": "Fast pages, built for mobile and for converting into WhatsApp. Not digital brochures."
+            "name": "WhatsApp that sells",
+            "body": "Instant AI replies, follow-up messages and reminders, so no enquiry goes cold."
           },
           {
-            "name": "Social media and content",
-            "body": "A presence that supports the sale: content with intent and a calendar that is actually kept, not posting for the sake of it."
+            "name": "Websites that convert",
+            "body": "Fast pages built for mobile and for getting people to message you. Not digital brochures."
           },
           {
-            "name": "AI automation",
-            "body": "An immediate answer to every enquiry and automatic WhatsApp follow-up, so nothing depends on who has time that afternoon."
+            "name": "Social media content",
+            "body": "Posts and videos made to sell, on a calendar that actually gets kept."
           }
         ],
         "fineprint": "You pay the ad spend yourself, directly to Google or Meta. It never goes through us, and you always see what it was spent on."
       },
       "method": {
-        "eyebrow": "The method",
-        "title": "Four stages, in this order",
-        "lead": "We don't start with advertising. We start by understanding where your customers come from today and what is being lost.",
+        "eyebrow": "How we work",
+        "title": "From enquiry to sale, in four steps",
+        "lead": "First we understand your business. Then we bring customers. And we measure everything to repeat what sells.",
         "linkLabel": "See the full method",
         "steps": [
           {
-            "title": "Diagnostic",
-            "body": "We look at your current channels, your sales cycle, and what happens to an enquiry from the moment it arrives until it closes."
+            "title": "Diagnosis",
+            "body": "We look at where your customers come from today, what each one costs and where sales are lost."
           },
           {
-            "title": "Lead capture",
-            "body": "We put the presence and the entry points in order so an interested person can contact you without friction."
+            "title": "Attract",
+            "body": "Google, Facebook, Instagram and your Google Maps profile, so people already searching for what you sell find you."
           },
           {
-            "title": "Follow-up",
-            "body": "Every enquiry is recorded and assigned, with reminders of its own. Nothing depends on anyone's memory."
+            "title": "Convert",
+            "body": "Fast WhatsApp replies and follow-up on every enquiry, until they buy or say no."
           },
           {
-            "title": "Measurement",
-            "body": "How many enquiries came in, from where, how many closed. That's what decides what to repeat next month."
+            "title": "Measure and grow",
+            "body": "How many enquiries came in, how many bought and what each customer cost. What sells gets repeated and scaled."
           }
         ]
       },
       "verticals": {
-        "eyebrow": "Who we work with",
-        "title": "Sectors where the method is already proven",
-        "lead": "Companies with a validated offer and their own team, where growth gets stuck in capture and follow-up, not in the product.",
+        "eyebrow": "Who it's for",
+        "title": "Paraguayan SMBs that want to sell more",
+        "lead": "Shops, professionals and service businesses across the country. If your customers search for you on Google or message you on WhatsApp, we can help.",
         "items": [
           {
             "name": "Clinics and practices",
-            "body": "Patients who ask on WhatsApp after hours, and appointments lost because nobody answered in time."
+            "body": "Patients who write after hours and appointments lost by not answering in time."
           },
           {
             "name": "Construction companies",
-            "body": "Projects and quotes with long cycles, where follow-up decides who ends up signing."
+            "body": "Quotes with long cycles, where follow-up decides who ends up signing."
           },
           {
             "name": "Real estate agencies",
-            "body": "Enquiries and viewings arriving from several portals and ending up with no owner and no record."
+            "body": "Enquiries from portals and social media that become viewings and closed deals."
           },
           {
             "name": "Professional services",
-            "body": "Firms and consultancies that grow by referral and want a second channel that doesn't depend on it."
+            "body": "Accounting firms, law firms and consultancies that want clients beyond referrals."
           },
           {
-            "name": "B2B companies",
-            "body": "Sales with several people deciding, where losing the thread costs months."
+            "name": "B2B companies and distributors",
+            "body": "Selling to other businesses, where losing track of a quote costs months."
+          },
+          {
+            "name": "Shops and stores",
+            "body": "Physical and online stores that need more people buying, not just more followers."
+          },
+          {
+            "name": "Food and hospitality",
+            "body": "Restaurants, catering and delivery that want orders every day, not just at the weekend."
+          },
+          {
+            "name": "Workshops and technical services",
+            "body": "Workshops, air conditioning, electricians and home services that live off the phone ringing."
           }
         ]
       },
       "statement": {
-        "text": "A system that doesn't depend on who's on shift.",
-        "sub": "That's what separates a good month from a good year."
+        "text": "Customers who arrive every month, not when you get lucky.",
+        "sub": "That's what separates an SMB that survives from one that grows."
+      },
+      "faq": {
+        "eyebrow": "FAQ",
+        "title": "What SMB owners ask us",
+        "items": [
+          {
+            "q": "Does it work for a small business?",
+            "a": "Yes. We work with SMBs of every size, from a two-person store to companies with a sales team. We fit the scope and the investment to what your business can sustain."
+          },
+          {
+            "q": "How much do I need to spend on advertising?",
+            "a": "It depends on your industry, area and how many customers you need. In the diagnosis we give you a realistic range before you spend a single guaraní. You pay ad spend directly to Google or Meta; it never goes through us."
+          },
+          {
+            "q": "How soon will I see results?",
+            "a": "Google and social media campaigns usually bring enquiries within the first weeks. Answering faster and following up recovers sales almost immediately. Organic ranking takes longer."
+          },
+          {
+            "q": "Am I locked into a long contract?",
+            "a": "No. We work month to month. If you don't see results, you leave with no penalty."
+          },
+          {
+            "q": "Do you work outside Asunción?",
+            "a": "Yes. Almost all the work is remote, so we work with SMBs in any city in the country."
+          }
+        ]
       },
       "closing": {
         "eyebrow": "The next step",
-        "title": "Let's start with the diagnostic",
-        "body": "Half an hour, free. You leave with a clear picture of where work is being lost, whether you work with us or not.",
-        "panelTitle": "What we need from you",
+        "title": "Let's talk about getting more customers",
+        "body": "A 30-minute call, free of charge. We'll tell you where your next customers are and what we'd do first, whether you work with us or not.",
+        "panelTitle": "Bring these answers",
         "panelItems": [
+          "What you sell and to whom",
           "Where your customers come from today",
-          "How many people sell on your team",
-          "What happens to an enquiry once it arrives"
+          "How many new customers you want per month"
         ]
       }
     },
     "metodo": {
       "meta": {
-        "title": "Our method for winning more customers | clientes.com.py",
-        "description": "Diagnostic, lead capture, follow-up and measurement: the four stages we use to put customer acquisition in order at Paraguayan companies."
+        "title": "How we win customers for your SMB | clientes.com.py",
+        "description": "Diagnosis, attract, convert, measure and grow: the method we use to win customers and sales for Paraguayan SMBs."
       },
       "header": {
         "eyebrow": "The method",
         "title": "How we work",
-        "lead": "A fixed order, four stages, and one rule: we don't add lead capture on top of a process that is still losing enquiries.",
-        "body": "What follows is literally what we do, in the order we do it. No stage is optional: each one exists because the next doesn't work without it."
+        "lead": "Four steps, always in this order, and one rule: we don't spend on advertising until your business can answer and close the enquiries that come in.",
+        "body": "What follows is exactly what we do. Each step exists because the next one doesn't pay off without it."
       },
       "steps": {
-        "eyebrow": "The four stages",
-        "title": "Diagnostic, capture, follow-up, measurement",
+        "eyebrow": "The four steps",
+        "title": "Diagnosis, attract, convert, measure and grow",
         "items": [
           {
-            "title": "Diagnostic",
-            "lead": "Understand before touching anything.",
-            "body": "We look at where your customers come from today, how long your sales cycle takes, and what happens to an enquiry from arrival to close or loss. There is almost always a leak nobody was watching.",
+            "title": "Diagnosis",
+            "lead": "Understand before spending.",
+            "body": "We review where your customers come from today, what each one costs and what happens to an enquiry from arrival until it buys or is lost. There's almost always a sale slipping away.",
             "points": [
-              "A map of current channels and the real volume of enquiries",
-              "The full journey of an enquiry, point by point",
-              "Where work is being lost today, with concrete examples"
+              "Current channels and how many enquiries really come in",
+              "Your competition: who shows up when people search for you",
+              "Where sales are lost today, with concrete examples"
             ]
           },
           {
-            "title": "Lead capture",
-            "lead": "Whoever wants to contact you, can.",
-            "body": "We put the presence and entry points in order: the page, the form, the WhatsApp number, the Google listing. The goal isn't more traffic, it's that the interested person who already exists doesn't fall through.",
+            "title": "Attract",
+            "lead": "Be found by people already searching.",
+            "body": "Google, Facebook and Instagram campaigns, your Google Maps profile and a page that converts. We start with people already looking for what you sell, who buy fastest.",
             "points": [
-              "Clear points of contact and one way in",
-              "Forms that land in a list, not in a stray inbox",
-              "WhatsApp as an entry channel, with a record of what comes in"
+              "Google Ads and Facebook and Instagram ads",
+              "A complete Google Maps profile, with reviews",
+              "A page or landing built to get people messaging you"
             ]
           },
           {
-            "title": "Follow-up",
-            "lead": "Nothing depends on anyone's memory.",
-            "body": "Every enquiry is recorded, with an owner and a next action. Quotes that were sent come back up on their own when it's time. This is where most of the work being lost today is recovered.",
+            "title": "Convert",
+            "lead": "Turn the enquiry into a sale.",
+            "body": "Every enquiry gets a fast WhatsApp reply, is recorded and followed up until it buys or says no. This is where most SMBs recover sales they lose today without noticing.",
             "points": [
-              "One single list of enquiries, each with an owner",
-              "Follow-up reminders that appear without anyone entering them",
-              "A history of every conversation, available to the whole team"
+              "Instant WhatsApp replies, after hours too",
+              "Follow-up on every quote sent",
+              "All enquiries in one list, each with an owner"
             ]
           },
           {
-            "title": "Measurement",
-            "lead": "Decide with numbers, not impressions.",
-            "body": "How many enquiries came in, through which channel, how many converted and how long they took. That's what decides what gets repeated next month and what gets cut.",
+            "title": "Measure and grow",
+            "lead": "Invest in what sells.",
+            "body": "How many enquiries came in, from which channel, how many bought and what each customer cost. That decides where more money goes next month and what gets cut.",
             "points": [
-              "Enquiries by channel and by month",
-              "Close rate and average cycle time",
-              "A regular review with decisions, not just reports"
+              "Enquiries and sales by channel, every month",
+              "Cost per customer won",
+              "A monthly meeting with decisions, not just reports"
             ]
           }
         ]
@@ -2838,45 +2891,45 @@
       "included": {
         "eyebrow": "What's included",
         "title": "What's left running",
-        "lead": "The work ends when your team can keep it going without us standing over them.",
+        "lead": "We don't leave you a report and walk away: we leave you a system that keeps bringing customers.",
         "items": [
           {
-            "title": "The platform",
-            "body": "It includes the platform where your team sees every enquiry and every follow-up. It's ours, it's called clientes.com.py, and it isn't software you have to go and buy separately."
+            "title": "Campaigns running",
+            "body": "Google and social ads live, with a controlled budget and weekly adjustments based on what sells."
           },
           {
-            "title": "The written process",
-            "body": "Who handles what, how fast an answer goes out, and when a quote gets picked back up. Short and usable, not a manual nobody opens."
+            "title": "WhatsApp and follow-up",
+            "body": "Fast replies and follow-up on every enquiry, with our platform included in the service. No extra software to buy."
           },
           {
-            "title": "The trained team",
-            "body": "We stay with the people who sell until the process runs by itself. A tool nobody uses has changed nothing."
+            "title": "Your team trained",
+            "body": "We work alongside the people who answer and sell until the process runs on its own. A tool nobody uses sells nothing."
           }
         ]
       },
       "statement": {
-        "text": "The method is the product.",
-        "sub": "The tools come afterwards, and they're whichever ones are needed."
+        "text": "Customers first. Tools second.",
+        "sub": "We use whatever it takes to sell more, never the other way round."
       },
       "faq": {
         "eyebrow": "Frequently asked",
         "title": "What people usually ask us",
         "items": [
           {
-            "q": "How long until results show?",
-            "a": "Orderly follow-up usually shows something within the first few weeks, because it recovers enquiries you already had. New lead capture takes longer and depends on your sector's sales cycle."
+            "q": "How soon do results show?",
+            "a": "Campaigns usually bring enquiries within the first weeks. Answering faster and following up recovers sales almost immediately, because those are customers who were already writing to you. Organic ranking takes longer."
           },
           {
-            "q": "Do you work with companies that are just starting?",
-            "a": "No. We work with companies that already have customers, a team and an offer that works. If you're still validating what to sell, we're not the right partner and we'll tell you so."
+            "q": "Does it work for a small business?",
+            "a": "Yes. We work with SMBs of every size. If your business isn't ready to invest in advertising yet, we'll tell you in the diagnosis and tell you what to do first."
           },
           {
-            "q": "Do we have to change the tools we already use?",
-            "a": "Only what needs changing. If something already works, it stays. What can't stay is an enquiry going unrecorded."
+            "q": "Do I have to change the tools I already use?",
+            "a": "Only what's needed. If something already works, it stays. What can't stay is an unanswered enquiry."
           },
           {
             "q": "How much does it cost?",
-            "a": "It depends on the scope, and it comes out of the diagnostic. We'd rather give you a number we can stand behind than a price list that looks nothing like your case."
+            "a": "It depends on the scope, and it comes out of the diagnosis. We'd rather give you a number we can stand behind than a price list that doesn't fit your case."
           }
         ]
       }
@@ -2884,19 +2937,19 @@
     "nosotros": {
       "meta": {
         "title": "Who we are | clientes.com.py",
-        "description": "A team focused on the commercial growth of established Paraguayan companies: why Paraguay, why these sectors, and how we work."
+        "description": "A Paraguayan team focused on winning customers and sales for small and medium-sized businesses: who we are and how we work."
       },
       "header": {
         "eyebrow": "About",
         "title": "Who's behind this",
-        "lead": "We're a small team working with established Paraguayan companies, at the point where growth stops being a matter of effort and becomes a matter of process."
+        "lead": "We're a small team helping Paraguayan SMBs win new customers and sell more, with marketing you can measure and follow-up that leaves no sale behind."
       },
       "story": {
         "eyebrow": "Why this",
-        "title": "Why Paraguay and why these sectors",
-        "body": "Paraguay has a great many solid companies — clinics with years behind them, construction firms with steady work, practices with their own client base — that grew through referrals and good work. That growth works until it stops scaling.",
-        "bodyTwo": "The next jump is almost never a campaign. It's stopping the loss of enquiries and being able to repeat what already works. That is exactly what we do, and it's why we work with companies that already have something, not with projects that are just starting.",
-        "bodyThree": "We build what we use, first: the platform your team follows each enquiry in is developed by us. When something doesn't work, there's nobody to pass you on to."
+        "title": "Why SMBs and why Paraguay",
+        "body": "SMBs drive Paraguay's economy: shops, clinics, workshops, firms, construction companies. Many grew through word of mouth and good work, and there comes a point where that's no longer enough to keep growing.",
+        "bodyTwo": "Big agencies are built for big brands, and a freelancer usually solves just one piece: the ads, or the website, or social media. We take care of the whole journey, from someone finding you to them buying from you.",
+        "bodyThree": "And the tools are our own: we built the system where every enquiry and every follow-up is recorded. When something doesn't work, there's nobody to pass you on to."
       },
       "principles": {
         "eyebrow": "How we work",
@@ -2925,16 +2978,16 @@
     "contacto": {
       "meta": {
         "title": "Book your diagnostic | clientes.com.py",
-        "description": "Tell us about your company and we'll arrange a free 30-minute diagnostic conversation to see where work is being lost."
+        "description": "Tell us about your business and we'll set up a free 30-minute call to see how to win more customers and more sales."
       },
       "header": {
         "eyebrow": "Contact",
         "title": "Let's book the diagnostic",
-        "lead": "Tell us briefly about your company and we'll arrange a 30-minute conversation. Free and with no commitment."
+        "lead": "Tell us briefly about your business and we'll set up a 30-minute call. Free and no commitment."
       },
       "form": {
         "name": "Full name",
-        "company": "Company",
+        "company": "Business or company",
         "phone": "Phone or WhatsApp",
         "phonePlaceholder": "0981 123 456",
         "phoneHint": "It's the fastest way to arrange things. We message before we call.",
@@ -2943,15 +2996,18 @@
         "sector": "Sector",
         "sectorPlaceholder": "Choose an option",
         "sectorOptions": [
+          "Shop or store",
+          "Food and hospitality",
           "Clinic or practice",
-          "Construction company",
+          "Construction",
           "Real estate agency",
           "Professional services",
-          "B2B company",
+          "Workshop or technical service",
+          "B2B company or distributor",
           "Other"
         ],
-        "message": "Tell us briefly what you want to solve",
-        "messageOptional": "Tell us briefly what you want to solve (optional)",
+        "message": "Tell us what you sell and what you want to achieve",
+        "messageOptional": "Tell us what you sell and what you want to achieve (optional)",
         "submit": "Send and arrange",
         "submitting": "Sending…",
         "privacy": "We use your details only to contact you about this enquiry.",
@@ -2969,9 +3025,9 @@
       "aside": {
         "title": "What happens next",
         "steps": [
-          "We write to arrange a day and time",
-          "We talk for 30 minutes about your current situation",
-          "You leave with a clear picture, whether we work together or not"
+          "We write to set a day and time",
+          "We talk for 30 minutes about your business and your customers",
+          "We tell you where to start selling more, whether we work together or not"
         ],
         "pricingTitle": "About pricing",
         "pricingBody": "Tailored, based on the diagnostic. We'd rather give you a number we can stand behind than a list that looks nothing like your case.",
@@ -3047,15 +3103,15 @@
               "body": "We look at where your patients come from today, how many inquiries are answered late, and how many appointments are lost between the first question and the schedule."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "An organized presence where patients search: the Google listing, a page with WhatsApp booking, and campaigns only if the diagnosis justifies them."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every inquiry is recorded with an owner. The patient who didn't book resurfaces on their own for follow-up, without depending on reception."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "How many inquiries came in, how many ended in appointments, and which treatment brought them. That's how you decide where to invest next month."
             }
           ]
@@ -3146,15 +3202,15 @@
               "body": "We review how many quotes you produce per month, how long a decision takes, and where contact with each potential project gets lost."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that builds trust for large amounts: completed projects, a serious website, and a clear channel to request a quote."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every quote gets a date, an owner and a next action. Months later, the reminder appears on its own — before the client signs with someone else."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Quotes issued, projects signed, decision time. You know what every incoming inquiry is worth."
             }
           ]
@@ -3245,15 +3301,15 @@
               "body": "We look at where inquiries come in today, how long they take to be answered, and what happens after each showing."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that attracts both buyers and owners: clear listings, immediate response and a direct WhatsApp channel."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every prospect is assigned to an agent, with history and a next action. Whoever visited and didn't make an offer doesn't disappear."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Inquiries per channel and per property, showings booked and deals closed — per agent and per month."
             }
           ]
@@ -3344,15 +3400,15 @@
               "body": "We look at where your last twenty clients came from, what happened to the proposals that weren't signed, and where the cycle breaks."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A presence that conveys judgment: a serious website, content that shows how you think, and a clear channel to inquire."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every inquiry and every proposal gets a next action. Following up stops feeling awkward because it's scheduled."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Inquiries, proposals, closings and average fees. The pipeline stops being a feeling."
             }
           ]
@@ -3443,15 +3499,15 @@
               "body": "We review your real cycle: where opportunities come from, how long they take, where they fall through, and what each salesperson records today."
             },
             {
-              "title": "Acquisition",
+              "title": "Attract",
               "body": "A constant intake of opportunities: a serious presence, organized prospecting and a clear channel for whoever arrives asking."
             },
             {
-              "title": "Follow-up",
+              "title": "Convert",
               "body": "Every opportunity with a stage, an owner, an amount and a next action. The history stays with the company, not on a phone."
             },
             {
-              "title": "Measurement",
+              "title": "Measure and grow",
               "body": "Pipeline by stage, close rate, average cycle and a monthly forecast built on data, not optimism."
             }
           ]
@@ -3502,6 +3558,303 @@
             {
               "q": "How do we start?",
               "a": "With the diagnosis: half an hour on your current sales cycle. From there comes what to organize first and whether it makes sense to work together."
+            }
+          ]
+        }
+      },
+      "comercios": {
+        "name": "Shops and stores",
+        "meta": {
+          "title": "More customers and sales for your shop | clientes.com.py",
+          "description": "We bring customers to shops and stores in Paraguay: Google Maps, Facebook and Instagram ads, and WhatsApp that replies fast, so you sell more every month."
+        },
+        "waPrefill": "Hi, I run a shop and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Shops and stores",
+          "title": "More people walking in, and buying",
+          "lead": "Your shop already has good products and good prices. What's missing is more people in your area knowing about it, and turning WhatsApp questions into sales.",
+          "body": "We work with stores, online shops and delivery businesses that want sales every day, not just followers."
+        },
+        "pains": {
+          "eyebrow": "What we see in shops",
+          "title": "Followers aren't the same as sales",
+          "body": "Many shops post on Instagram every day and sales don't move. Likes don't pay the rent: what sells is showing up when someone searches for what you carry, and answering before the competition does.",
+          "bodyTwo": "And every inquiry counts. Someone asking \"do you have it in size M?\" or \"how much does it cost?\" already wants to buy. If the answer comes three hours later, they bought somewhere else.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "You post on social media every day and sales stay the same",
+            "Your shop doesn't show up when someone searches Google Maps for what you sell",
+            "People ask prices on WhatsApp and most never write back",
+            "You paid to \"boost a post\" and don't know if it sold anything"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your shop",
+          "title": "From search to sale",
+          "lead": "The same four steps as always, in the language of your storefront.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which products get asked about most, and how many WhatsApp inquiries turn into sales."
+            },
+            {
+              "title": "Attract",
+              "body": "A complete Google Maps listing with photos and reviews, Facebook and Instagram ads for your area, and Google Ads for what people are searching for."
+            },
+            {
+              "title": "Convert",
+              "body": "Fast WhatsApp replies with prices and stock on hand, plus a follow-up message to anyone who asked but didn't buy."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many inquiries came in, how many bought, and which ad brought them. What sells gets more budget."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your shop",
+          "lead": "It's not a one-week promotion: it's a flow of customers that keeps going.",
+          "items": [
+            {
+              "name": "Visible in your area",
+              "body": "You show up on Google Maps and in ads to people who live or work near your store."
+            },
+            {
+              "name": "WhatsApp that sells",
+              "body": "Every inquiry gets an instant reply, even after hours, with what they need to decide."
+            },
+            {
+              "name": "Customers who come back",
+              "body": "Past buyers get news and promotions on WhatsApp, without you having to remember."
+            },
+            {
+              "name": "Clear numbers",
+              "body": "You know what each sale from an ad actually cost, instead of guessing."
+            }
+          ]
+        },
+        "statement": {
+          "text": "Customers buy from whoever replies first.",
+          "sub": "Making that be your shop isn't down to luck."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What shop owners ask",
+          "items": [
+            {
+              "q": "Does this work if I only sell in-store, with no online shop?",
+              "a": "Yes. Most of the shops we work with sell in-store and over WhatsApp. The goal is for more people in your area to find you and write to you."
+            },
+            {
+              "q": "How much do I need to spend on ads?",
+              "a": "It depends on your area and what you sell. In the diagnosis we give you a realistic range, and you can start small and scale up once the numbers back it up."
+            },
+            {
+              "q": "Do you manage my social media?",
+              "a": "We can, but it's not the first step. First we make sure the people already searching for what you sell can find you — that's what turns into sales fastest."
+            },
+            {
+              "q": "What about Google reviews?",
+              "a": "We help you ask your customers for them, simply and consistently. Reviews matter more than almost anything else for showing up on Google Maps."
+            }
+          ]
+        }
+      },
+      "gastronomia": {
+        "name": "Food and hospitality",
+        "meta": {
+          "title": "More customers and orders for your restaurant | clientes.com.py",
+          "description": "We bring customers to restaurants, catering and delivery businesses in Paraguay: Google Maps, ads and WhatsApp that takes orders, so you sell every day of the week."
+        },
+        "waPrefill": "Hi, I run a food business and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Food and hospitality",
+          "title": "Full orders and tables, Monday through Thursday too",
+          "lead": "The food is already good. What's hard is filling the slow days, getting found when someone's looking for somewhere to eat, and not losing orders on WhatsApp during the rush.",
+          "body": "We work with restaurants, bars, caterers, rotiserías and delivery businesses that want sales every day, not just on weekends."
+        },
+        "pains": {
+          "eyebrow": "What we see in food and hospitality",
+          "title": "Weekends fill up on their own. The rest of the week doesn't.",
+          "body": "When someone searches \"where to eat nearby\" or \"pizza delivery\", they pick from the top three on Google Maps. If you're not there, with good photos and reviews, you don't exist for that person.",
+          "bodyTwo": "And during the rush, WhatsApp explodes. Messages answered late are orders that go to a delivery app or the competition instead.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "Friday and Saturday are packed, Monday through Thursday are half empty",
+            "You don't show up on Google Maps when people search for food in your area",
+            "WhatsApp orders get lost during the rush",
+            "You pay high commissions to delivery apps for customers who could order directly"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your business",
+          "title": "From search to order",
+          "lead": "The same four steps as always, in the language of your kitchen.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which days and hours run slow, and how many orders come in by WhatsApp, apps and phone."
+            },
+            {
+              "title": "Attract",
+              "body": "Your Google Maps listing with photos, menu and reviews, plus Instagram and Facebook ads for your area on the days you want to fill."
+            },
+            {
+              "title": "Convert",
+              "body": "WhatsApp that replies instantly with the menu, takes orders and reservations, and doesn't leave anyone waiting during the rush."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many orders and reservations came in per channel, and which promotion brought them. What fills the slow days gets repeated."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your business",
+          "lead": "It's not a one-day promo: it's a flow of customers for the whole week.",
+          "items": [
+            {
+              "name": "First on Google Maps",
+              "body": "A complete listing, mouth-watering photos and reviews that grow every week."
+            },
+            {
+              "name": "Direct orders",
+              "body": "More orders through your own WhatsApp, with no commission on each one."
+            },
+            {
+              "name": "Slow days with traffic",
+              "body": "Promotions and ads targeted at the days and hours you most need to fill."
+            },
+            {
+              "name": "Customers who come back",
+              "body": "Past customers get news on WhatsApp and order again, without you having to remember."
+            }
+          ]
+        },
+        "statement": {
+          "text": "People order from wherever's easiest to order from.",
+          "sub": "We make sure that place is yours."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What food businesses ask",
+          "items": [
+            {
+              "q": "Do I have to drop the delivery apps?",
+              "a": "No. The apps keep adding value. The idea is that more and more customers order directly, where you don't pay a commission and the customer stays yours."
+            },
+            {
+              "q": "Does this work for a small place or a delivery-only business?",
+              "a": "Yes. That's actually where it shows the most: a good Google Maps profile and a WhatsApp that replies fast can change your whole month."
+            },
+            {
+              "q": "How much do I need to spend on ads?",
+              "a": "It depends on your area and your average ticket. In the diagnosis we give you a realistic range before you spend a single guaraní."
+            },
+            {
+              "q": "Can you automate WhatsApp replies?",
+              "a": "Yes. An automatic reply with the menu, hours and how to order, so nobody waits, and your team steps in to close the order."
+            }
+          ]
+        }
+      },
+      "talleres": {
+        "name": "Workshops and technical services",
+        "meta": {
+          "title": "More customers for your workshop or technical service | clientes.com.py",
+          "description": "We bring customers to auto shops, HVAC technicians, electricians and home-service providers in Paraguay: Google, Google Maps and WhatsApp that replies fast."
+        },
+        "waPrefill": "Hi, I run a workshop or technical service and I'd like more customers.",
+        "header": {
+          "eyebrow": "Solutions · Workshops and technical services",
+          "title": "Be the one they call when something breaks",
+          "lead": "When someone's car, air conditioner or wiring breaks down, they search Google and call the first one who shows up and answers. That call needs to be yours.",
+          "body": "We work with auto shops, HVAC technicians, electricians, plumbers and home-service providers whose business depends on the phone ringing."
+        },
+        "pains": {
+          "eyebrow": "What we see in workshops and services",
+          "title": "There's work out there. You just need to be found.",
+          "body": "Almost every technical-service customer arrives in a hurry: they search Google for \"AC technician nearby\" or \"auto shop in Luque\" and pick from the first results. Word of mouth is good, but it doesn't reach that person.",
+          "bodyTwo": "And when your hands are busy with a job, you can't answer WhatsApp. The customer doesn't wait — they call the next number.",
+          "symptomsTitle": "Sound familiar?",
+          "symptoms": [
+            "You rely on referrals and some weeks bring no new work",
+            "You don't show up on Google when people search for your service in your area",
+            "You lose customers because you were working and couldn't reply",
+            "You send quotes on WhatsApp and nobody follows up"
+          ]
+        },
+        "method": {
+          "eyebrow": "The method, applied to your workshop",
+          "title": "From urgent call to booked job",
+          "lead": "The same four steps as always, in the language of your workshop.",
+          "steps": [
+            {
+              "title": "Diagnosis",
+              "body": "We look at how people find you today, which services pay off best, and how many inquiries you lose by not replying in time."
+            },
+            {
+              "title": "Attract",
+              "body": "Your Google Maps listing with reviews and coverage area, plus Google Ads for the urgent searches for your service."
+            },
+            {
+              "title": "Convert",
+              "body": "Automatic WhatsApp replies while you're working, and follow-up on every quote you send until the customer decides."
+            },
+            {
+              "title": "Measure and grow",
+              "body": "How many inquiries came in, how many turned into jobs, and what each customer cost. What works gets scaled up."
+            }
+          ]
+        },
+        "outcomes": {
+          "eyebrow": "What changes",
+          "title": "What stays running in your business",
+          "lead": "A new flow of work that doesn't depend on someone recommending you that week.",
+          "items": [
+            {
+              "name": "Visible in emergencies",
+              "body": "You show up when someone in your area searches for your service, backed by reviews that build trust."
+            },
+            {
+              "name": "No one goes unanswered",
+              "body": "An automatic WhatsApp reply lets people know you'll get back to them soon, even with your hands full."
+            },
+            {
+              "name": "Quotes that close",
+              "body": "Every quote sent gets followed up, instead of sitting forgotten in the chat."
+            },
+            {
+              "name": "Repeat maintenance customers",
+              "body": "Service and maintenance reminders that bring back the customers you already have."
+            }
+          ]
+        },
+        "statement": {
+          "text": "When something breaks, whoever answers first wins.",
+          "sub": "Being that person isn't down to luck."
+        },
+        "faq": {
+          "eyebrow": "Frequently asked questions",
+          "title": "What workshops and technicians ask",
+          "items": [
+            {
+              "q": "I work alone or with one helper. Does this still work for me?",
+              "a": "Yes. It's exactly when you work alone that you lose the most inquiries. We adjust it to the volume you can actually handle."
+            },
+            {
+              "q": "Can you target only my area?",
+              "a": "Yes. Ads and your Google listing are set up for the cities and neighborhoods where you work, so you don't pay for customers you can't serve."
+            },
+            {
+              "q": "How much do I need to spend on advertising?",
+              "a": "It depends on the service and the area. In the diagnosis we give you a realistic range. Many technical services start with just Google Maps and reviews."
+            },
+            {
+              "q": "What about maintenance reminders?",
+              "a": "We set up WhatsApp alerts for service, oil changes or AC cleaning, so the customer comes back to you instead of looking elsewhere."
             }
           ]
         }
@@ -3568,7 +3921,7 @@
       }
     },
     "footer": {
-      "tagline": "We help established Paraguayan companies win more customers, with an orderly sales process.",
+      "tagline": "We win customers and sales for Paraguayan SMBs: advertising, WhatsApp and follow-up, all measured.",
       "siteTitle": "The site",
       "contactTitle": "Contact",
       "loginNote": "Already a client?",
@@ -3923,7 +4276,10 @@
     },
     "unsubscribe": {
       "title": "Done — you're unsubscribed",
-      "body": "{name}, you won't receive more automated emails from this business."
+      "body": "{name}, you won't receive more automated emails from this business.",
+      "confirmTitle": "Stop receiving emails?",
+      "confirmBody": "{name}, confirm and you won't receive any more automated emails from this business.",
+      "confirmButton": "Yes, unsubscribe me"
     },
     "receipt": {
       "title": "Receipt",

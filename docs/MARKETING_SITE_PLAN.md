@@ -25,7 +25,7 @@ Built inside this same Next.js repo, replacing the current placeholder in
 | Decision | Value |
 |---|---|
 | Brand | clientes.com.py = growth-partner service brand. VenderCRM named at most once on the site (as "nuestra plataforma", on /metodo or /nosotros). The word "CRM" never appears above the fold. |
-| Audience | **Established** Paraguayan SMBs with validated offers: clínicas, constructoras, inmobiliarias, servicios profesionales, empresas B2B. Not early-stage entrepreneurs. |
+| Audience | Paraguayan **small and medium-sized businesses (pymes)** that want more clients and sales — the five vertical pages (clínicas, constructoras, inmobiliarias, servicios profesionales, empresas B2B) plus comercios, gastronomía and talleres/servicios técnicos. Messaging leads with clients and sales, not process or the CRM. *(Changed 2026-09-22 by the owner; was "established SMBs only".)* |
 | Conversion goal | Booked diagnostic conversation. Every page's CTA pair = short qualifying form + WhatsApp deep link (`wa.me`). |
 | Lead capture | Contact form posts to this app's own `POST /api/v1/leads` (tenant-scoped, `X-Api-Key`, server-to-server per PLAN.md §5.1) — the brand's own leads land in the owner's VenderCRM pipeline. |
 | Language | Paraguayan Spanish, **voseo** (tenés, querés), consistent sitewide. All copy through `next-intl` (`messages/es.json`) from day one. |

@@ -12,6 +12,9 @@ import { MethodRail, type MethodStep } from "@/components/marketing/method-steps
 import { VerticalCards, type VerticalItem } from "@/components/marketing/vertical-cards";
 import { Statement } from "@/components/marketing/statement";
 import { CtaBand } from "@/components/marketing/cta-band";
+import { Faq, type FaqItem } from "@/components/marketing/faq";
+import { JsonLd } from "@/components/marketing/json-ld";
+import type { FeedItem } from "@/components/marketing/lead-feed";
 import { contact } from "@/lib/site-config";
 import { MARKETING_VERTICALS } from "./soluciones/verticals";
 
@@ -55,10 +58,12 @@ export default async function Home() {
     whatsappPrefill: t("cta.waPrefill"),
   };
 
+  const faqItems = t.raw("home.faq.items") as FaqItem[];
+
   // Section → pattern map (web-design-system step 2), no two consecutive
   // sections sharing a pattern:
   //   hero cinematic (ink) · ribbon P8 · problem P4 · services hairline rail
-  //   method P5 · verticals P3 · statement P9 · closing overlap + ink band
+  //   method P5 · verticals P3 · statement P9 · faq P4 · closing overlap + ink band
   return (
     <>
       <HeroCinematic
@@ -68,10 +73,9 @@ export default async function Home() {
         cta={cta}
         preview={{
           eyebrow: t("home.hero.preview.eyebrow"),
-          url: t("home.hero.preview.url"),
-          tabs: t.raw("home.hero.preview.tabs") as string[],
-          stages: t.raw("home.hero.preview.stages") as string[],
+          title: t("home.hero.preview.title"),
           stats: t.raw("home.hero.preview.stats") as Array<{ label: string; value: string }>,
+          items: t.raw("home.hero.preview.items") as FeedItem[],
           disclaimer: t("home.hero.preview.disclaimer"),
         }}
         videoSrc={HERO_VIDEO_SRC}
@@ -82,6 +86,7 @@ export default async function Home() {
           t("ribbon.monthly"),
           t("ribbon.measured"),
           t("ribbon.ownData"),
+          t("ribbon.region"),
           // Only once the owner has supplied it (site-config TODO).
           ...(contact.ruc ? [t("ribbon.ruc", { ruc: contact.ruc })] : []),
         ]}
@@ -129,6 +134,24 @@ export default async function Home() {
       />
 
       <Statement text={t("home.statement.text")} sub={t("home.statement.sub")} />
+
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqItems.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        }}
+      />
+      <Faq
+        eyebrow={t("home.faq.eyebrow")}
+        title={t("home.faq.title")}
+        items={faqItems}
+        id="mk-home-faq-title"
+      />
 
       <CtaBand
         eyebrow={t("home.closing.eyebrow")}
