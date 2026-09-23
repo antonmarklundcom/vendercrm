@@ -2444,7 +2444,28 @@
           "confirmMismatch": "The text does not match the business slug.",
           "unknown": "Could not delete the business. Try again."
         }
-      }
+      },
+      "edit": "Edit",
+      "editTitle": "Edit business",
+      "locale": "Language",
+      "timezone": "Time zone",
+      "enter": "Enter",
+      "enterDisabled": "This business has no active admin",
+      "exportCsv": "Export CSV",
+      "selectAllVisible": "Select all visible",
+      "createdColumn": "Created",
+      "pageRange": "{from}–{to} of {total}",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "selectedCount": "{count, plural, one {# business selected} other {# businesses selected}}",
+      "bulkGrantAccess": "Grant access to…",
+      "bulkGrantAccessIntro": "{count, plural, one {Added to the selected business.} other {Added to the # selected businesses.}}",
+      "bulkSuspended": "{count, plural, one {# business suspended} other {# businesses suspended}}",
+      "bulkActivated": "{count, plural, one {# business activated} other {# businesses activated}}",
+      "bulkGranted": "{added, plural, one {# access granted} other {# accesses granted}}{skipped, plural, =0 {} other {, # already a member}}",
+      "bulkDeleted": "{count, plural, one {# business deleted} other {# businesses deleted}}",
+      "bulkDeleteBody": "{count, plural, one {This permanently deletes the selected business and everything in it.} other {This permanently deletes the # selected businesses and everything in them.}} This cannot be undone.",
+      "bulkDeleteConfirmLabel": "Type “{expected}” to confirm"
     },
     "subscriptions": {
       "title": "Subscription",

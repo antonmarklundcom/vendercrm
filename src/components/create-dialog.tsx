@@ -46,6 +46,7 @@ export function CreateDialog({
   closeOnSubmit = false,
   wide = false,
   variant = "default",
+  icon,
   children,
 }: {
   /** Hash that opens the dialog on arrival, without the `#`. */
@@ -57,6 +58,10 @@ export function CreateDialog({
   /** For forms with line items (quotes, sale notes). */
   wide?: boolean;
   variant?: "default" | "outline";
+  /** Trigger icon; defaults to the "+" this component is named for. Pass a
+   * different icon (or null) for a trigger that isn't a creation form, e.g.
+   * "Editar". */
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -115,7 +120,7 @@ export function CreateDialog({
   return (
     <>
       <Button type="button" variant={variant} onClick={() => setOpen(true)}>
-        <Plus className="size-4" aria-hidden="true" />
+        {icon === undefined ? <Plus className="size-4" aria-hidden="true" /> : icon}
         {triggerLabel}
       </Button>
       <Dialog
