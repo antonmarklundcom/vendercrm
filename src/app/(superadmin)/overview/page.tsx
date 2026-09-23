@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { requireSuperadminContext } from "@/modules/tenancy/context";
 import {
+  getMonthlyRevenue,
   getPlatformActivity,
   getPlatformTotals,
   listExpiringSubscriptions,
@@ -12,7 +13,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { cn } from "@/lib/utils";
-import { formatDate, formatNumber } from "@/lib/i18n/format";
+import { formatDate, formatMoney, formatNumber } from "@/lib/i18n/format";
 
 // How the platform itself is doing. The console could already show one
 // tenant's billing and every tenant's WhatsApp health; what it could not show
@@ -33,11 +34,12 @@ export default async function PlatformOverviewPage() {
   const locale = await getLocale();
 
   const window = windowOf(WINDOW_DAYS);
-  const [totals, activity, tenantActivity, expiring] = await Promise.all([
+  const [totals, activity, tenantActivity, expiring, revenue] = await Promise.all([
     getPlatformTotals(),
     getPlatformActivity(window),
     listTenantActivity(window),
     listExpiringSubscriptions(30),
+    getMonthlyRevenue(),
   ]);
 
   const n = (value: number) => formatNumber(value, locale);
@@ -62,6 +64,11 @@ export default async function PlatformOverviewPage() {
           : t("allHealthy"),
       alert: totals.whatsappAccountsInError > 0,
     },
+    {
+      key: "monthlyRevenue",
+      value: formatMoney(revenue.monthlyRevenue, "PYG", locale),
+      hint: t("payingTenants", { count: revenue.payingTenants }),
+    },
   ] as const;
 
   const flow = [
@@ -78,7 +85,7 @@ export default async function PlatformOverviewPage() {
     <div className="flex flex-col gap-8">
       <PageHeader title={t("title")} description={t("intro", { days: WINDOW_DAYS })} />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.key}>
             <span className="text-sm text-muted-foreground">

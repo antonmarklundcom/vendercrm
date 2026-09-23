@@ -2452,6 +2452,14 @@
       "plan": "Plan",
       "expiresAt": "Går ut",
       "accessStatus": "Åtkomst",
+      "accessStatusValues": {
+        "active": "Aktuell",
+        "grace": "Anståndsperiod",
+        "locked": "Låst"
+      },
+      "daysLeft": "{count, plural, one {# dag} other {# dagar}} kvar",
+      "daysOverdue": "{count, plural, one {# dag} other {# dagar}} försenad",
+      "renew": "Förnya",
       "createTitle": "Ny prenumeration",
       "recordPaymentTitle": "Registrera betalning",
       "amount": "Belopp (PYG)",
@@ -2522,7 +2530,11 @@
       "noResults": "Ingen matchar sökningen.",
       "person": "Person",
       "businesses": "Företag",
+      "businessCount": "Antal företag",
+      "lastLogin": "Senaste inloggning",
+      "neverLoggedIn": "Har aldrig loggat in",
       "created": "Skapad",
+      "actionsColumn": "Åtgärder",
       "noBusinesses": "Är inte med i något företag ännu",
       "chooseBusiness": "Välj företag",
       "connect": "Koppla på",
@@ -2532,6 +2544,23 @@
       "superadminReach": "Når alla företag via \"visa som\".",
       "platformBanned": "Blockerad i hela plattformen",
       "truncated": "Visar de första {count} personerna. Förfina sökningen för att se fler.",
+      "merge": {
+        "trigger": "Flytta åtkomst",
+        "title": "Flytta åtkomst till ett annat konto",
+        "body": "Kopierar all åtkomst från det här kontot till ett annat, och blockerar det här kontot i hela plattformen:",
+        "targetEmail": "Målkontots e-post",
+        "submit": "Flytta och blockera",
+        "cancel": "Avbryt",
+        "close": "Stäng",
+        "success": "Klart: åtkomsten flyttades och käll-kontot är nu blockerat.",
+        "errors": {
+          "invalid": "Ange en giltig e-postadress",
+          "notFound": "Personen finns inte",
+          "targetNotFound": "Inget konto med den e-postadressen",
+          "same": "Välj ett annat konto än käll-kontot",
+          "superadmin": "En superadmin kan inte vara källa eller mål för det här"
+        }
+      },
       "errors": {
         "invalid": "Kontrollera uppgifterna",
         "userNotFound": "Personen finns inte",
@@ -2548,13 +2577,15 @@
         "tenants": "Företag",
         "users": "Personer",
         "contacts": "Kontakter",
-        "whatsapp": "WhatsApp-nummer"
+        "whatsapp": "WhatsApp-nummer",
+        "monthlyRevenue": "Förväntad månadsintäkt"
       },
       "activeOf": "{count} aktiva",
       "multiBusiness": "{count} når fler än ett företag",
       "openDeals": "{count} öppna affärer",
       "inError": "{count} med fel",
       "allHealthy": "Alla i ordning",
+      "payingTenants": "{count} betalande företag",
       "flowTitle": "Rörelse de senaste {days} dagarna",
       "flow": {
         "leads": "Inkomna leads",
@@ -4086,7 +4117,24 @@
     "actor": "Användare",
     "tenant": "Företag",
     "via": "(via {user})",
-    "empty": "Ingen aktivitet är registrerad ännu."
+    "empty": "Ingen aktivitet är registrerad ännu.",
+    "recentActivityTitle": "Senaste aktivitet",
+    "viewAll": "Se all aktivitet",
+    "filters": {
+      "tenant": "Företag",
+      "allTenants": "Alla företag",
+      "action": "Åtgärd",
+      "actionPlaceholder": "t.ex. payment",
+      "actor": "Användarens e-post",
+      "actorPlaceholder": "epost@exempel.com",
+      "from": "Från",
+      "to": "Till",
+      "apply": "Filtrera",
+      "clear": "Rensa filter",
+      "pageOf": "Sida {page} av {total}",
+      "prev": "Föregående",
+      "next": "Nästa"
+    }
   },
   "email": {
     "invitation": {

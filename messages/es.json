@@ -2452,6 +2452,14 @@
       "plan": "Plan",
       "expiresAt": "Vence",
       "accessStatus": "Acceso",
+      "accessStatusValues": {
+        "active": "Al día",
+        "grace": "En gracia",
+        "locked": "Bloqueado"
+      },
+      "daysLeft": "quedan {count, plural, one {# día} other {# días}}",
+      "daysOverdue": "vencido hace {count, plural, one {# día} other {# días}}",
+      "renew": "Renovar",
       "createTitle": "Nueva suscripción",
       "recordPaymentTitle": "Registrar pago",
       "amount": "Monto (PYG)",
@@ -2522,7 +2530,11 @@
       "noResults": "Ninguna persona coincide con la búsqueda.",
       "person": "Persona",
       "businesses": "Empresas",
+      "businessCount": "N.º empresas",
+      "lastLogin": "Último ingreso",
+      "neverLoggedIn": "Nunca ingresó",
       "created": "Alta",
+      "actionsColumn": "Acciones",
       "noBusinesses": "Todavía no entra a ninguna empresa",
       "chooseBusiness": "Elegir empresa",
       "connect": "Conectar",
@@ -2532,6 +2544,23 @@
       "superadminReach": "Entra a todas las empresas con \"ver como\".",
       "platformBanned": "Bloqueado en la plataforma",
       "truncated": "Se muestran las primeras {count} personas. Afiná la búsqueda para ver otras.",
+      "merge": {
+        "trigger": "Mover accesos",
+        "title": "Mover accesos a otra cuenta",
+        "body": "Copia todos los accesos de esta cuenta a otra, y bloquea esta cuenta en la plataforma:",
+        "targetEmail": "Correo de la cuenta destino",
+        "submit": "Mover y bloquear",
+        "cancel": "Cancelar",
+        "close": "Cerrar",
+        "success": "Listo: los accesos se movieron y la cuenta de origen quedó bloqueada.",
+        "errors": {
+          "invalid": "Ingresá un correo válido",
+          "notFound": "No existe esa persona",
+          "targetNotFound": "No existe ninguna cuenta con ese correo",
+          "same": "Elegí una cuenta distinta a la de origen",
+          "superadmin": "Un superadmin no puede ser origen ni destino de este cambio"
+        }
+      },
       "errors": {
         "invalid": "Revisá los datos",
         "userNotFound": "No existe esa persona",
@@ -2548,13 +2577,15 @@
         "tenants": "Empresas",
         "users": "Personas",
         "contacts": "Contactos",
-        "whatsapp": "Números de WhatsApp"
+        "whatsapp": "Números de WhatsApp",
+        "monthlyRevenue": "Ingreso mensual esperado"
       },
       "activeOf": "{count} activas",
       "multiBusiness": "{count} entran a más de una empresa",
       "openDeals": "{count} negocios abiertos",
       "inError": "{count} con error",
       "allHealthy": "Todos en orden",
+      "payingTenants": "{count} empresas pagando",
       "flowTitle": "Movimiento de los últimos {days} días",
       "flow": {
         "leads": "Leads recibidos",
@@ -4086,7 +4117,24 @@
     "actor": "Usuario",
     "tenant": "Empresa",
     "via": "(vía {user})",
-    "empty": "Todavía no hay actividad registrada."
+    "empty": "Todavía no hay actividad registrada.",
+    "recentActivityTitle": "Actividad reciente",
+    "viewAll": "Ver toda la actividad",
+    "filters": {
+      "tenant": "Empresa",
+      "allTenants": "Todas las empresas",
+      "action": "Acción",
+      "actionPlaceholder": "ej: payment",
+      "actor": "Correo del usuario",
+      "actorPlaceholder": "correo@ejemplo.com",
+      "from": "Desde",
+      "to": "Hasta",
+      "apply": "Filtrar",
+      "clear": "Limpiar filtros",
+      "pageOf": "Página {page} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    }
   },
   "email": {
     "invitation": {

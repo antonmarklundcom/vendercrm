@@ -2452,6 +2452,14 @@
       "plan": "Plan",
       "expiresAt": "Expires",
       "accessStatus": "Access",
+      "accessStatusValues": {
+        "active": "Current",
+        "grace": "Grace period",
+        "locked": "Locked"
+      },
+      "daysLeft": "{count, plural, one {# day} other {# days}} left",
+      "daysOverdue": "{count, plural, one {# day} other {# days}} overdue",
+      "renew": "Renew",
       "createTitle": "New subscription",
       "recordPaymentTitle": "Record payment",
       "amount": "Amount (PYG)",
@@ -2522,7 +2530,11 @@
       "noResults": "Nobody matches that search.",
       "person": "Person",
       "businesses": "Businesses",
+      "businessCount": "# businesses",
+      "lastLogin": "Last login",
+      "neverLoggedIn": "Never logged in",
       "created": "Joined",
+      "actionsColumn": "Actions",
       "noBusinesses": "Not in any business yet",
       "chooseBusiness": "Choose a business",
       "connect": "Connect",
@@ -2532,6 +2544,23 @@
       "superadminReach": "Reaches every business through \"view as\".",
       "platformBanned": "Blocked platform-wide",
       "truncated": "Showing the first {count} people. Narrow the search to see others.",
+      "merge": {
+        "trigger": "Move access",
+        "title": "Move access to another account",
+        "body": "Copies every access this account has to another one, and blocks this account platform-wide:",
+        "targetEmail": "Target account e-mail",
+        "submit": "Move and block",
+        "cancel": "Cancel",
+        "close": "Close",
+        "success": "Done: access was moved and the source account is now blocked.",
+        "errors": {
+          "invalid": "Enter a valid e-mail",
+          "notFound": "No such person",
+          "targetNotFound": "No account with that e-mail",
+          "same": "Pick an account other than the source",
+          "superadmin": "A superadmin cannot be the source or target of this change"
+        }
+      },
       "errors": {
         "invalid": "Check the details",
         "userNotFound": "No such person",
@@ -2548,13 +2577,15 @@
         "tenants": "Businesses",
         "users": "People",
         "contacts": "Contacts",
-        "whatsapp": "WhatsApp numbers"
+        "whatsapp": "WhatsApp numbers",
+        "monthlyRevenue": "Expected monthly revenue"
       },
       "activeOf": "{count} active",
       "multiBusiness": "{count} reach more than one business",
       "openDeals": "{count} open deals",
       "inError": "{count} in error",
       "allHealthy": "All healthy",
+      "payingTenants": "{count} paying businesses",
       "flowTitle": "Movement in the last {days} days",
       "flow": {
         "leads": "Leads received",
@@ -4086,7 +4117,24 @@
     "actor": "User",
     "tenant": "Company",
     "via": "(via {user})",
-    "empty": "No activity recorded yet."
+    "empty": "No activity recorded yet.",
+    "recentActivityTitle": "Recent activity",
+    "viewAll": "View all activity",
+    "filters": {
+      "tenant": "Business",
+      "allTenants": "All businesses",
+      "action": "Action",
+      "actionPlaceholder": "e.g. payment",
+      "actor": "User e-mail",
+      "actorPlaceholder": "email@example.com",
+      "from": "From",
+      "to": "To",
+      "apply": "Filter",
+      "clear": "Clear filters",
+      "pageOf": "Page {page} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    }
   },
   "email": {
     "invitation": {

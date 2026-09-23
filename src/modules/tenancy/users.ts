@@ -9,6 +9,7 @@ import {
   getActiveMembership,
   getMembership,
   listMembershipsForTenant,
+  listMembershipsForUser,
   MembershipError,
   removeMembership,
   setActiveTenant,
@@ -390,4 +391,71 @@ export async function setUserTaskReminders(userId: string, enabled: boolean): Pr
  */
 export async function setUserPushPrefs(userId: string, prefs: unknown): Promise<void> {
   await db.update(users).set({ pushPrefs: prefs }).where(eq(users.id, userId));
+}
+
+// --- Merging two platform accounts (superadmin console: "Mover accesos") ---
+//
+// The recurring support case this exists for: the same person signed up
+// twice with different e-mails (or a colleague set them up on two
+// businesses under different addresses), and now their deals, quotes and
+// audit trail are split across two accounts. Merging copies the *access*
+// from one account onto the other and bans the source rather than deleting
+// it — every deal/quote/audit_log row that still points at the source
+// user's id stays resolvable, exactly the same reasoning setTenantUserBanned
+// already leans on for a single business.
+
+export class UserMergeError extends Error {
+  constructor(readonly code: "notFound" | "same" | "superadmin") {
+    super(code);
+  }
+}
+
+export type MergeUsersResult = {
+  copiedTenantIds: string[];
+  skippedTenantIds: string[];
+};
+
+/**
+ * Copies every membership of `sourceUserId` onto `targetUserId` — skipping
+ * businesses the target already belongs to (the target's own role there
+ * wins, since it is the account staying alive), keeping the source's role
+ * for every business copied — then bans the source account platform-wide.
+ * Neither account may be a superadmin: a superadmin's "access" is
+ * impersonation, not memberships, so there is nothing here to move.
+ */
+export async function mergeUsers(
+  sourceUserId: string,
+  targetUserId: string,
+): Promise<MergeUsersResult> {
+  if (sourceUserId === targetUserId) throw new UserMergeError("same");
+
+  const [source, target] = await Promise.all([
+    getUserById(sourceUserId),
+    getUserById(targetUserId),
+  ]);
+  if (!source || !target) throw new UserMergeError("notFound");
+  if (source.isSuperadmin || target.isSuperadmin) throw new UserMergeError("superadmin");
+
+  const sourceMemberships = await listMembershipsForUser(sourceUserId);
+  const targetMemberships = await listMembershipsForUser(targetUserId);
+  const targetTenantIds = new Set(targetMemberships.map((m) => m.tenant.id));
+
+  const copiedTenantIds: string[] = [];
+  const skippedTenantIds: string[] = [];
+  for (const { membership, tenant } of sourceMemberships) {
+    if (targetTenantIds.has(tenant.id)) {
+      skippedTenantIds.push(tenant.id);
+      continue;
+    }
+    await addMembership({ userId: targetUserId, tenantId: tenant.id, role: membership.role });
+    copiedTenantIds.push(tenant.id);
+  }
+
+  await db
+    .update(users)
+    .set({ banned: true, banReason: `fusionada con ${target.email}`.slice(0, 500) })
+    .where(eq(users.id, sourceUserId));
+  await revokeUserSessions(sourceUserId);
+
+  return { copiedTenantIds, skippedTenantIds };
 }

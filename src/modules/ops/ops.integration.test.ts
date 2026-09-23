@@ -166,7 +166,7 @@ describe.skipIf(!hasDb)("claude ops provisioning", () => {
     await ops.provisionSite(token, row.id);
 
     const { listAuditLog } = await import("@/modules/tenancy/audit");
-    const entries = await listAuditLog(200);
+    const entries = await listAuditLog({}, { limit: 200 });
     const mine = entries.filter(
       (entry) => (entry.payload as { row_id?: string })?.row_id === row.id,
     );

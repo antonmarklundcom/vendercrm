@@ -5,6 +5,7 @@ import {
   deals,
   leadSubmissions,
   messages,
+  plans,
   quotes,
   stages,
   subscriptions,
@@ -241,6 +242,63 @@ export async function listTenantActivity(window: PlatformWindow): Promise<Tenant
       };
     })
     .sort((a, b) => b.messages + b.leads - (a.messages + a.leads));
+}
+
+/** A plan's price normalised to what one month of it is worth — plans are
+ * prepaid for 3, 6 or 12 months (schema/tenancy.ts), so the sticker price
+ * alone overstates a month's revenue by 3x-12x. Exported on its own so the
+ * normalisation is unit-testable without a database. */
+export function monthlyPrice(price: number, durationMonths: number): number {
+  return price / durationMonths;
+}
+
+export type RevenueTotals = {
+  /** Sum of every active subscription's plan price, normalised to a month
+   * (price / durationMonths — plans are prepaid for 3, 6 or 12 months, so a
+   * plan's price alone overstates what a month of it is worth). */
+  monthlyRevenue: number;
+  /** Businesses with a currently-active subscription — "active" meaning not
+   * yet past its expiry, the same test computeAccessStatus uses for the
+   * "active" access status. */
+  payingTenants: number;
+};
+
+/**
+ * Expected monthly revenue from every tenant's *latest* subscription that
+ * hasn't expired yet — one row per tenant, exactly like
+ * getLatestSubscriptionForTenant, so a renewed subscription doesn't get
+ * double-counted against its own superseded row.
+ */
+export async function getMonthlyRevenue(): Promise<RevenueTotals> {
+  const rows = await db
+    .select({
+      tenantId: subscriptions.tenantId,
+      startsAt: subscriptions.startsAt,
+      expiresAt: subscriptions.expiresAt,
+      price: plans.price,
+      durationMonths: plans.durationMonths,
+    })
+    .from(subscriptions)
+    .innerJoin(plans, eq(plans.id, subscriptions.planId));
+
+  const latestByTenant = new Map<string, (typeof rows)[number]>();
+  for (const row of rows) {
+    const current = latestByTenant.get(row.tenantId);
+    if (!current || row.startsAt > current.startsAt) {
+      latestByTenant.set(row.tenantId, row);
+    }
+  }
+
+  const now = new Date();
+  let monthlyRevenue = 0;
+  let payingTenants = 0;
+  for (const row of latestByTenant.values()) {
+    if (row.expiresAt <= now) continue;
+    payingTenants += 1;
+    monthlyRevenue += monthlyPrice(row.price, row.durationMonths);
+  }
+
+  return { monthlyRevenue: Math.round(monthlyRevenue), payingTenants };
 }
 
 /** Subscriptions expiring inside `days`, soonest first — the list the manual
