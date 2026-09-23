@@ -986,7 +986,23 @@
         "wabaIdRequired": "Ingresá el WABA ID.",
         "phoneNumberIdRequired": "Ingresá el Phone Number ID.",
         "accessTokenRequired": "Ingresá el token de acceso.",
-        "unknown": "No se pudo conectar el número. Intentá de nuevo."
+        "unknown": "No se pudo conectar el número. Intentá de nuevo.",
+        "embeddedInvalid": "Facebook devolvió datos incompletos. Intentá de nuevo.",
+        "embedded": {
+          "notConfigured": "La conexión con Facebook no está configurada en esta instalación.",
+          "codeExchangeFailed": "No pudimos validar el permiso de Facebook (puede haber vencido). Intentá de nuevo.",
+          "phoneLookupFailed": "No pudimos leer los números de la cuenta de WhatsApp Business. Intentá de nuevo.",
+          "phoneNumberNotFound": "No encontramos el número en esa cuenta de WhatsApp Business. Si la cuenta tiene varios números, conectá con el formulario de abajo.",
+          "numberAlreadyConnected": "Ese número ya está conectado en la plataforma.",
+          "subscribeFailed": "No pudimos activar la recepción de mensajes para esa cuenta. No se guardó nada; intentá de nuevo.",
+          "registerFailed": "No pudimos activar el número en la API de WhatsApp. Si tiene verificación en dos pasos, desactivala en WhatsApp Manager y probá de nuevo.",
+          "storeFailed": "El número se conectó en Meta pero no pudimos guardarlo. Intentá de nuevo.",
+          "incomplete": "Facebook no devolvió todos los datos de la conexión. Intentá de nuevo.",
+          "unsupported": "El proceso terminó sin un número de WhatsApp para conectar. Volvé a intentarlo y agregá un número.",
+          "metaError": "Facebook informó un error: {message}",
+          "flowFailed": "El proceso de Facebook falló. Intentá de nuevo.",
+          "sdkFailed": "No se pudo cargar Facebook. Revisá tu conexión o si un bloqueador lo está frenando."
+        }
       },
       "bookingTemplatesTitle": "Plantillas de reservas",
       "bookingTemplatesHelp": "Meta tiene que aprobar estas plantillas en tu propia cuenta antes de que se puedan enviar avisos a clientes que nunca te escribieron. Mientras tanto, los avisos salen por email.",
@@ -998,6 +1014,16 @@
         "PAUSED": "Pausada",
         "DISABLED": "Deshabilitada",
         "MISSING": "Sin enviar"
+      },
+      "embedded": {
+        "help": "La forma más rápida: iniciá sesión con Facebook, elegí o creá la cuenta de WhatsApp Business de la empresa y verificá el número. Nosotros hacemos el resto.",
+        "button": "Conectar con Facebook",
+        "coexistenceButton": "Conectar y seguir usando la app WhatsApp Business",
+        "coexistenceHelp": "Usá la segunda opción si el número ya está en la app WhatsApp Business del celular y lo querés seguir usando ahí también.",
+        "working": "Conectando…",
+        "success": "Listo, el número quedó conectado.",
+        "cancelled": "Cerraste la ventana de Facebook antes de terminar. Podés intentar de nuevo cuando quieras.",
+        "manualTitle": "O cargá los datos a mano"
       }
     },
     "inbox": {
@@ -2611,7 +2637,33 @@
         "wabaIdRequired": "Ingresá el WABA ID.",
         "phoneNumberIdRequired": "Ingresá el Phone Number ID.",
         "accessTokenRequired": "Ingresá el token de acceso.",
-        "unknown": "No se pudo conectar el número. Intentá de nuevo."
+        "unknown": "No se pudo conectar el número. Intentá de nuevo.",
+        "embeddedInvalid": "Facebook devolvió datos incompletos. Intentá de nuevo.",
+        "embedded": {
+          "notConfigured": "La conexión con Facebook no está configurada en esta instalación.",
+          "codeExchangeFailed": "No pudimos validar el permiso de Facebook (puede haber vencido). Intentá de nuevo.",
+          "phoneLookupFailed": "No pudimos leer los números de la cuenta de WhatsApp Business. Intentá de nuevo.",
+          "phoneNumberNotFound": "No encontramos el número en esa cuenta de WhatsApp Business. Si la cuenta tiene varios números, conectá con el formulario de abajo.",
+          "numberAlreadyConnected": "Ese número ya está conectado en la plataforma.",
+          "subscribeFailed": "No pudimos activar la recepción de mensajes para esa cuenta. No se guardó nada; intentá de nuevo.",
+          "registerFailed": "No pudimos activar el número en la API de WhatsApp. Si tiene verificación en dos pasos, desactivala en WhatsApp Manager y probá de nuevo.",
+          "storeFailed": "El número se conectó en Meta pero no pudimos guardarlo. Intentá de nuevo.",
+          "incomplete": "Facebook no devolvió todos los datos de la conexión. Intentá de nuevo.",
+          "unsupported": "El proceso terminó sin un número de WhatsApp para conectar. Volvé a intentarlo y agregá un número.",
+          "metaError": "Facebook informó un error: {message}",
+          "flowFailed": "El proceso de Facebook falló. Intentá de nuevo.",
+          "sdkFailed": "No se pudo cargar Facebook. Revisá tu conexión o si un bloqueador lo está frenando."
+        }
+      },
+      "embedded": {
+        "help": "La forma más rápida: iniciá sesión con Facebook, elegí o creá la cuenta de WhatsApp Business de la empresa y verificá el número. Nosotros hacemos el resto.",
+        "button": "Conectar con Facebook",
+        "coexistenceButton": "Conectar y seguir usando la app WhatsApp Business",
+        "coexistenceHelp": "Usá la segunda opción si el número ya está en la app WhatsApp Business del celular y lo querés seguir usando ahí también.",
+        "working": "Conectando…",
+        "success": "Listo, el número quedó conectado.",
+        "cancelled": "Cerraste la ventana de Facebook antes de terminar. Podés intentar de nuevo cuando quieras.",
+        "manualTitle": "O cargá los datos a mano"
       }
     },
     "tenantSites": {

@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { bookingTemplateStatuses } from "@/modules/booking/notification-registration";
-import { submitBookingTemplatesAction, syncTemplatesAction } from "./actions";
+import { embeddedSignupClientConfig } from "@/modules/whatsapp/embedded-signup";
+import { WhatsappEmbeddedSignup } from "@/components/whatsapp-embedded-signup";
+import {
+  completeEmbeddedSignupAction,
+  submitBookingTemplatesAction,
+  syncTemplatesAction,
+} from "./actions";
 import { WhatsappConnectForm } from "./WhatsappConnectForm";
 
 export default async function WhatsappPage() {
@@ -19,6 +25,10 @@ export default async function WhatsappPage() {
   }
 
   const accounts = await listAccountsForTenant(ctx);
+  // Null until the owner configures Meta Embedded Signup — then the
+  // one-click button appears above the manual form, which stays as the
+  // fallback either way.
+  const embeddedSignup = embeddedSignupClientConfig();
   // The booking chain falls back to email until these are APPROVED, so the
   // page has to say where they stand rather than leave a tenant assuming
   // their customers are being told (plan-booking.md §5.1).
@@ -108,6 +118,16 @@ export default async function WhatsappPage() {
 
       <section id="conectar-numero" className="scroll-mt-6">
         <h2 className="mb-4 text-lg font-semibold">{t("connectTitle")}</h2>
+        {embeddedSignup && (
+          <div className="mb-6">
+            <WhatsappEmbeddedSignup
+              config={embeddedSignup}
+              namespace="app.whatsapp"
+              complete={completeEmbeddedSignupAction}
+            />
+            <h3 className="mt-6 text-base font-medium">{t("embedded.manualTitle")}</h3>
+          </div>
+        )}
         <p className="mb-4 max-w-md text-sm text-muted-foreground">{t("connectHelp")}</p>
         <WhatsappConnectForm />
       </section>

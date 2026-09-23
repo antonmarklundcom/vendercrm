@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireTenantAdmin } from "@/modules/tenancy/context";
 import { connectAccountManually } from "@/modules/whatsapp/accounts";
+import { completeEmbeddedSignup } from "@/modules/whatsapp/embedded-signup";
 import { syncTemplates } from "@/modules/whatsapp/templates";
 import { submitBookingTemplates } from "@/modules/booking/notification-registration";
 
@@ -71,6 +72,34 @@ export async function connectAccountAction(
 
   revalidatePath("/whatsapp");
   return { error: null, field: null, values: {} };
+}
+
+// Meta Embedded Signup (modules/whatsapp/embedded-signup.ts). Not a form
+// action: the popup's callback supplies these values, not an input the
+// admin types, so there is no field for an error to sit under — the button
+// shows the returned key inline instead. Meta ids are numeric, which is
+// also what keeps a tampered value from reaching a Graph URL path.
+const embeddedSignupSchema = z.object({
+  code: z.string().min(1).max(4096),
+  wabaId: z.string().regex(/^\d{1,40}$/),
+  phoneNumberId: z.string().regex(/^\d{1,40}$/).optional(),
+  mode: z.enum(["cloud_api", "coexistence"]),
+});
+
+export type EmbeddedSignupActionInput = z.input<typeof embeddedSignupSchema>;
+
+export async function completeEmbeddedSignupAction(
+  input: EmbeddedSignupActionInput,
+): Promise<{ error: string | null }> {
+  const ctx = await requireTenantAdmin();
+  const parsed = embeddedSignupSchema.safeParse(input);
+  if (!parsed.success) return { error: "embeddedInvalid" };
+
+  const result = await completeEmbeddedSignup(ctx, parsed.data);
+  if (!result.ok) return { error: `embedded.${result.error}` };
+
+  revalidatePath("/whatsapp");
+  return { error: null };
 }
 
 // Manual "sync" button (§6.4). Runs inline rather than through the

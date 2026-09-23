@@ -960,7 +960,23 @@
         "wabaIdRequired": "Ange WABA-ID.",
         "phoneNumberIdRequired": "Ange Phone Number ID.",
         "accessTokenRequired": "Ange åtkomsttoken.",
-        "unknown": "Vi kunde inte ansluta numret. Försök igen."
+        "unknown": "Vi kunde inte ansluta numret. Försök igen.",
+        "embeddedInvalid": "Facebook returnerade ofullständiga uppgifter. Försök igen.",
+        "embedded": {
+          "notConfigured": "Anslutning via Facebook är inte konfigurerad i den här installationen.",
+          "codeExchangeFailed": "Vi kunde inte validera Facebook-behörigheten (den kan ha gått ut). Försök igen.",
+          "phoneLookupFailed": "Vi kunde inte läsa WhatsApp Business-kontots nummer. Försök igen.",
+          "phoneNumberNotFound": "Vi hittade inte numret i det WhatsApp Business-kontot. Om kontot har flera nummer, anslut med formuläret nedan.",
+          "numberAlreadyConnected": "Det numret är redan anslutet på plattformen.",
+          "subscribeFailed": "Vi kunde inte aktivera inkommande meddelanden för kontot. Inget sparades; försök igen.",
+          "registerFailed": "Vi kunde inte aktivera numret i WhatsApp-API:t. Om det har tvåstegsverifiering, stäng av den i WhatsApp Manager och försök igen.",
+          "storeFailed": "Numret anslöts hos Meta men vi kunde inte spara det. Försök igen.",
+          "incomplete": "Facebook skickade inte alla uppgifter om anslutningen. Försök igen.",
+          "unsupported": "Processen avslutades utan något WhatsApp-nummer att ansluta. Försök igen och lägg till ett nummer.",
+          "metaError": "Facebook rapporterade ett fel: {message}",
+          "flowFailed": "Facebook-processen misslyckades. Försök igen.",
+          "sdkFailed": "Facebook kunde inte laddas. Kontrollera anslutningen eller om en blockerare stoppar det."
+        }
       },
       "bookingTemplatesTitle": "Bokningsmallar",
       "bookingTemplatesHelp": "Meta måste godkänna de här mallarna i ditt eget konto innan aviseringar kan nå kunder som aldrig har skrivit till dig. Fram till dess går aviseringarna via e-post.",
@@ -972,6 +988,16 @@
         "PAUSED": "Pausad",
         "DISABLED": "Inaktiverad",
         "MISSING": "Inte skickad"
+      },
+      "embedded": {
+        "help": "Snabbaste sättet: logga in med Facebook, välj eller skapa företagets WhatsApp Business-konto och verifiera numret. Vi sköter resten.",
+        "button": "Anslut med Facebook",
+        "coexistenceButton": "Anslut och fortsätt använda WhatsApp Business-appen",
+        "coexistenceHelp": "Välj det andra alternativet om numret redan finns i WhatsApp Business-appen på en telefon och du vill fortsätta använda det där också.",
+        "working": "Ansluter…",
+        "success": "Klart, numret är anslutet.",
+        "cancelled": "Du stängde Facebook-fönstret innan det var klart. Du kan försöka igen när du vill.",
+        "manualTitle": "Eller fyll i uppgifterna manuellt"
       }
     },
     "quotes": {
@@ -2611,7 +2637,33 @@
         "wabaIdRequired": "Ange WABA-ID.",
         "phoneNumberIdRequired": "Ange Phone Number ID.",
         "accessTokenRequired": "Ange åtkomsttoken.",
-        "unknown": "Kunde inte ansluta numret. Försök igen."
+        "unknown": "Kunde inte ansluta numret. Försök igen.",
+        "embeddedInvalid": "Facebook returnerade ofullständiga uppgifter. Försök igen.",
+        "embedded": {
+          "notConfigured": "Anslutning via Facebook är inte konfigurerad i den här installationen.",
+          "codeExchangeFailed": "Vi kunde inte validera Facebook-behörigheten (den kan ha gått ut). Försök igen.",
+          "phoneLookupFailed": "Vi kunde inte läsa WhatsApp Business-kontots nummer. Försök igen.",
+          "phoneNumberNotFound": "Vi hittade inte numret i det WhatsApp Business-kontot. Om kontot har flera nummer, anslut med formuläret nedan.",
+          "numberAlreadyConnected": "Det numret är redan anslutet på plattformen.",
+          "subscribeFailed": "Vi kunde inte aktivera inkommande meddelanden för kontot. Inget sparades; försök igen.",
+          "registerFailed": "Vi kunde inte aktivera numret i WhatsApp-API:t. Om det har tvåstegsverifiering, stäng av den i WhatsApp Manager och försök igen.",
+          "storeFailed": "Numret anslöts hos Meta men vi kunde inte spara det. Försök igen.",
+          "incomplete": "Facebook skickade inte alla uppgifter om anslutningen. Försök igen.",
+          "unsupported": "Processen avslutades utan något WhatsApp-nummer att ansluta. Försök igen och lägg till ett nummer.",
+          "metaError": "Facebook rapporterade ett fel: {message}",
+          "flowFailed": "Facebook-processen misslyckades. Försök igen.",
+          "sdkFailed": "Facebook kunde inte laddas. Kontrollera anslutningen eller om en blockerare stoppar det."
+        }
+      },
+      "embedded": {
+        "help": "Snabbaste sättet: logga in med Facebook, välj eller skapa företagets WhatsApp Business-konto och verifiera numret. Vi sköter resten.",
+        "button": "Anslut med Facebook",
+        "coexistenceButton": "Anslut och fortsätt använda WhatsApp Business-appen",
+        "coexistenceHelp": "Välj det andra alternativet om numret redan finns i WhatsApp Business-appen på en telefon och du vill fortsätta använda det där också.",
+        "working": "Ansluter…",
+        "success": "Klart, numret är anslutet.",
+        "cancelled": "Du stängde Facebook-fönstret innan det var klart. Du kan försöka igen när du vill.",
+        "manualTitle": "Eller fyll i uppgifterna manuellt"
       }
     },
     "tenantSites": {

@@ -61,6 +61,21 @@ const envSchema = z
     WHATSAPP_WEBHOOK_VERIFY_TOKEN: z
       .string()
       .min(1, "WHATSAPP_WEBHOOK_VERIFY_TOKEN is required"),
+    /**
+     * Meta Embedded Signup — the "Conectar con Facebook" button
+     * (modules/whatsapp/embedded-signup.ts, docs/DEPLOY.md). Optional by the
+     * same rule as web push: while either is unset the button is hidden and
+     * only the manual connect form shows. META_APP_ID must be the id of the
+     * same Meta app whose secret is WHATSAPP_APP_SECRET — the code exchange
+     * authenticates with that pair. Neither value is secret; they are read
+     * server-side and passed down as props so enabling the feature needs a
+     * restart, not a rebuild.
+     */
+    META_APP_ID: z.string().regex(/^\d+$/, "META_APP_ID must be numeric").optional(),
+    META_EMBEDDED_SIGNUP_CONFIG_ID: z
+      .string()
+      .regex(/^\d+$/, "META_EMBEDDED_SIGNUP_CONFIG_ID must be numeric")
+      .optional(),
     // Transactional email (PLAN.md §10 1M). Optional, same pattern as Sentry
     // in next.config.ts: absent means email sending no-ops (logs instead of
     // throwing) rather than the app refusing to boot. Lets every environment
