@@ -593,6 +593,7 @@
       "title": "Kontakter",
       "intro": "Dina kunder och prospekt. Telefonnumret är varje kontakts identitet: WhatsApp-meddelanden, affärer och offerter kopplas automatiskt till det.",
       "searchPlaceholder": "Sök på namn, telefon eller e-post",
+      "moreFilters": "Fler filter",
       "allTags": "Alla taggar",
       "filter": "Filtrera",
       "name": "Namn",

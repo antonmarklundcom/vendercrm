@@ -593,6 +593,7 @@
       "title": "Contacts",
       "intro": "Your customers and prospects. The phone number is each contact's identity: WhatsApp messages, deals and quotes attach themselves to it.",
       "searchPlaceholder": "Search by name, phone or email",
+      "moreFilters": "More filters",
       "allTags": "All tags",
       "filter": "Filter",
       "name": "Name",

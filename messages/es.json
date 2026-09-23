@@ -360,6 +360,7 @@
       "title": "Contactos",
       "intro": "Tu base de clientes y prospectos. El teléfono es la identidad de cada contacto: los mensajes de WhatsApp, los negocios y los presupuestos se enganchan solos con él.",
       "searchPlaceholder": "Buscar por nombre, teléfono o correo",
+      "moreFilters": "Más filtros",
       "allTags": "Todas las etiquetas",
       "filter": "Filtrar",
       "name": "Nombre",
