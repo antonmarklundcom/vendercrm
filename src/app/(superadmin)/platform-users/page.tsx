@@ -7,8 +7,9 @@ import { listTenants } from "@/modules/tenancy/tenants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form-fields";
 import { PageHeader } from "@/components/page-header";
-import { formatDate } from "@/lib/i18n/format";
+import { formatDate, formatDateTime } from "@/lib/i18n/format";
 import { UserMemberships } from "./UserMemberships";
+import { MergeUserDialog, type MergeUserLabels } from "./MergeUserDialog";
 
 // Everyone on the platform, and which businesses each one can reach. The
 // console could already add a person to a business from the business's own
@@ -40,6 +41,23 @@ export default async function PlatformUsersPage({
 
   const roleLabels = { admin: tRoles("admin"), agent: tRoles("agent") };
   const tenantOptions = tenants.map((tenant) => ({ id: tenant.id, name: tenant.name }));
+  const mergeLabels: MergeUserLabels = {
+    trigger: t("merge.trigger"),
+    title: t("merge.title"),
+    body: t("merge.body"),
+    targetEmail: t("merge.targetEmail"),
+    submit: t("merge.submit"),
+    cancel: t("merge.cancel"),
+    close: t("merge.close"),
+    success: t("merge.success"),
+    errors: {
+      invalid: t("merge.errors.invalid"),
+      notFound: t("merge.errors.notFound"),
+      targetNotFound: t("merge.errors.targetNotFound"),
+      same: t("merge.errors.same"),
+      superadmin: t("merge.errors.superadmin"),
+    },
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -69,7 +87,10 @@ export default async function PlatformUsersPage({
               <tr className="border-b">
                 <th className="py-2 font-medium">{t("person")}</th>
                 <th className="py-2 font-medium">{t("businesses")}</th>
+                <th className="py-2 text-right font-medium">{t("businessCount")}</th>
+                <th className="py-2 font-medium">{t("lastLogin")}</th>
                 <th className="py-2 font-medium">{t("created")}</th>
+                <th className="py-2 text-right font-medium">{t("actionsColumn")}</th>
               </tr>
             </thead>
             <tbody>
@@ -109,8 +130,23 @@ export default async function PlatformUsersPage({
                       />
                     )}
                   </td>
+                  <td className="py-3 text-right text-xs tabular-nums text-muted-foreground">
+                    {person.businessCount}
+                  </td>
+                  <td className="py-3 text-xs whitespace-nowrap text-muted-foreground">
+                    {person.lastLoginAt ? formatDateTime(person.lastLoginAt, locale) : t("neverLoggedIn")}
+                  </td>
                   <td className="py-3 text-xs whitespace-nowrap text-muted-foreground">
                     {formatDate(person.createdAt, locale)}
+                  </td>
+                  <td className="py-3 text-right">
+                    {!person.isSuperadmin && (
+                      <MergeUserDialog
+                        sourceUserId={person.id}
+                        sourceEmail={person.email}
+                        labels={mergeLabels}
+                      />
+                    )}
                   </td>
                 </tr>
               ))}

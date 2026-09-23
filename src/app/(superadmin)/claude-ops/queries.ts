@@ -118,7 +118,7 @@ export async function listNeedsYouViews(): Promise<OpsRowView[]> {
 export async function listOpsAuditEntries(
   limit = 200,
 ): Promise<Awaited<ReturnType<typeof listAuditLog>>> {
-  const entries = await listAuditLog(limit);
+  const entries = await listAuditLog({}, { limit });
   return entries.filter((entry) => {
     const via = (entry.payload as Record<string, unknown> | null)?.via;
     return typeof via === "string" && (via.startsWith("ops_token:") || via.startsWith("console:"));

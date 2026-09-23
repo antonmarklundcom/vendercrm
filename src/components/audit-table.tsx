@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 // Shared by the superadmin (cross-tenant) and tenant-settings (own tenant)
@@ -13,6 +14,10 @@ export type AuditEntryRow = {
   entity: string;
   entityId: string;
   createdAt: Date;
+  /** Joined in by the caller when available — a raw id is useless on its
+   * own, so the table prefers these and falls back to the id. */
+  actorEmail?: string | null;
+  tenantName?: string | null;
 };
 
 export async function AuditTable({
@@ -50,8 +55,8 @@ export async function AuditTable({
               <td className="py-2 font-mono text-xs">
                 {entry.entity}/{entry.entityId}
               </td>
-              <td className="py-2 font-mono text-xs">
-                {entry.actorUserId}
+              <td className="py-2 text-xs">
+                {entry.actorEmail ?? <span className="font-mono">{entry.actorUserId}</span>}
                 {entry.impersonatorUserId && (
                   <span className="ml-1 text-muted-foreground">
                     {t("via", { user: entry.impersonatorUserId })}
@@ -59,7 +64,18 @@ export async function AuditTable({
                 )}
               </td>
               {showTenant && (
-                <td className="py-2 font-mono text-xs">{entry.tenantId ?? "—"}</td>
+                <td className="py-2 text-xs">
+                  {entry.tenantId ? (
+                    <Link
+                      href={`/tenants/${entry.tenantId}`}
+                      className="underline underline-offset-4"
+                    >
+                      {entry.tenantName ?? entry.tenantId}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </td>
               )}
             </tr>
           ))}
