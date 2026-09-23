@@ -95,6 +95,17 @@ export default async function ContactsPage({
   );
 
   const filtered = hasActiveFilters(params);
+  const moreFiltersActive = Boolean(
+    params.tagId ||
+      params.source ||
+      params.ownerUserId ||
+      params.pipelineId ||
+      params.stageId ||
+      params.from ||
+      params.to ||
+      params.openDeal ||
+      params.customKey,
+  );
   const isFirstTime = page.total === 0 && !filtered;
   const userNames = new Map(users.map((user) => [user.id, user.name]));
 
@@ -236,132 +247,6 @@ export default async function ContactsPage({
                 placeholder={t("searchPlaceholder")}
               />
             </label>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("tag")}
-              <Select
-                name="tagId"
-                defaultValue={params.tagId ?? ""}
-              >
-                <option value="">{t("allTags")}</option>
-                {tags.map((tag) => (
-                  <option key={tag.id} value={tag.id}>
-                    {tag.name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("source")}
-              <Select
-                name="source"
-                defaultValue={params.source ?? ""}
-              >
-                <option value="">{t("allSources")}</option>
-                {sources.map((source) => (
-                  <option key={source} value={source}>
-                    {source}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("owner")}
-              <Select
-                name="ownerUserId"
-                defaultValue={params.ownerUserId ?? ""}
-              >
-                <option value="">{t("allOwners")}</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            {pipelines.length > 0 && (
-              <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-                {t("pipeline")}
-                <Select name="pipelineId" defaultValue={params.pipelineId ?? ""}>
-                  <option value="">{t("allPipelines")}</option>
-                  {pipelines.map((pipeline) => (
-                    <option key={pipeline.id} value={pipeline.id}>
-                      {pipeline.name}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-            )}
-            {stageOptions.length > 0 && (
-              <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-                {t("stage")}
-                {/* Grouped by pipeline and independent of the pipeline select:
-                    picking a stage is the narrower answer, and queryContacts
-                    lets it win rather than making the two agree. */}
-                <Select name="stageId" defaultValue={params.stageId ?? ""}>
-                  <option value="">{t("allStages")}</option>
-                  {pipelineStages.map(({ pipeline, stages }) => (
-                    <optgroup key={pipeline.id} label={pipeline.name}>
-                      {stages.map((stage) => (
-                        <option key={stage.id} value={stage.id}>
-                          {stage.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </Select>
-              </label>
-            )}
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("createdFrom")}
-              <Input
-                name="from"
-                type="date"
-                defaultValue={params.from ?? ""}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("createdTo")}
-              <Input
-                name="to"
-                type="date"
-                defaultValue={params.to ?? ""}
-              />
-            </label>
-            <label className="flex items-center gap-2 py-2 text-sm">
-              <input
-                type="checkbox"
-                name="openDeal"
-                value="1"
-                defaultChecked={params.openDeal === "1"}
-              />
-              {t("onlyOpenDeal")}
-            </label>
-            {customFields.length > 0 && (
-              <>
-                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-                  {t("customFilterLabel")}
-                  <Select name="customKey" defaultValue={params.customKey ?? ""}>
-                    <option value="">{t("customFilterNone")}</option>
-                    {customFields.map((field) => (
-                      <option key={field.key} value={field.key}>
-                        {field.label}
-                      </option>
-                    ))}
-                  </Select>
-                </label>
-                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-                  {t("customFilterOperator")}
-                  <Select name="customOp" defaultValue={params.customOp ?? "equals"}>
-                    <option value="equals">{t("customFilterEquals")}</option>
-                    <option value="contains">{t("customFilterContains")}</option>
-                  </Select>
-                </label>
-                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-                  {t("customFilterValue")}
-                  <Input name="customValue" defaultValue={params.customValue ?? ""} />
-                </label>
-              </>
-            )}
             {/* Sorting lives in the URL too, so it must survive a filter submit. */}
             {params.sort && <input type="hidden" name="sort" value={params.sort} />}
             {params.dir && <input type="hidden" name="dir" value={params.dir} />}
@@ -376,6 +261,142 @@ export default async function ContactsPage({
                 {t("clearFilters")}
               </Link>
             )}
+            {/* Search and the two buttons are what most visits need; the other
+                nine fields fold away, and open by themselves whenever one of
+                them is set in the URL so an active filter is never hidden. */}
+            <details className="w-full" open={moreFiltersActive}>
+              <summary className="w-fit cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                {t("moreFilters")}
+              </summary>
+              <div className="mt-3 flex flex-wrap items-end gap-2">
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("tag")}
+                  <Select
+                    name="tagId"
+                    defaultValue={params.tagId ?? ""}
+                  >
+                    <option value="">{t("allTags")}</option>
+                    {tags.map((tag) => (
+                      <option key={tag.id} value={tag.id}>
+                        {tag.name}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("source")}
+                  <Select
+                    name="source"
+                    defaultValue={params.source ?? ""}
+                  >
+                    <option value="">{t("allSources")}</option>
+                    {sources.map((source) => (
+                      <option key={source} value={source}>
+                        {source}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("owner")}
+                  <Select
+                    name="ownerUserId"
+                    defaultValue={params.ownerUserId ?? ""}
+                  >
+                    <option value="">{t("allOwners")}</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                {pipelines.length > 0 && (
+                  <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    {t("pipeline")}
+                    <Select name="pipelineId" defaultValue={params.pipelineId ?? ""}>
+                      <option value="">{t("allPipelines")}</option>
+                      {pipelines.map((pipeline) => (
+                        <option key={pipeline.id} value={pipeline.id}>
+                          {pipeline.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                )}
+                {stageOptions.length > 0 && (
+                  <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    {t("stage")}
+                    {/* Grouped by pipeline and independent of the pipeline select:
+                        picking a stage is the narrower answer, and queryContacts
+                        lets it win rather than making the two agree. */}
+                    <Select name="stageId" defaultValue={params.stageId ?? ""}>
+                      <option value="">{t("allStages")}</option>
+                      {pipelineStages.map(({ pipeline, stages }) => (
+                        <optgroup key={pipeline.id} label={pipeline.name}>
+                          {stages.map((stage) => (
+                            <option key={stage.id} value={stage.id}>
+                              {stage.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </Select>
+                  </label>
+                )}
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("createdFrom")}
+                  <Input
+                    name="from"
+                    type="date"
+                    defaultValue={params.from ?? ""}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  {t("createdTo")}
+                  <Input
+                    name="to"
+                    type="date"
+                    defaultValue={params.to ?? ""}
+                  />
+                </label>
+                <label className="flex items-center gap-2 py-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="openDeal"
+                    value="1"
+                    defaultChecked={params.openDeal === "1"}
+                  />
+                  {t("onlyOpenDeal")}
+                </label>
+                {customFields.length > 0 && (
+                  <>
+                    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                      {t("customFilterLabel")}
+                      <Select name="customKey" defaultValue={params.customKey ?? ""}>
+                        <option value="">{t("customFilterNone")}</option>
+                        {customFields.map((field) => (
+                          <option key={field.key} value={field.key}>
+                            {field.label}
+                          </option>
+                        ))}
+                      </Select>
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                      {t("customFilterOperator")}
+                      <Select name="customOp" defaultValue={params.customOp ?? "equals"}>
+                        <option value="equals">{t("customFilterEquals")}</option>
+                        <option value="contains">{t("customFilterContains")}</option>
+                      </Select>
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                      {t("customFilterValue")}
+                      <Input name="customValue" defaultValue={params.customValue ?? ""} />
+                    </label>
+                  </>
+                )}
+              </div>
+            </details>
           </form>
         )}
 
