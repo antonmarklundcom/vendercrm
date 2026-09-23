@@ -4,24 +4,46 @@
 #   node scripts/provision-sites.mjs scripts/domains.txt --dry-run
 #   node scripts/provision-sites.mjs scripts/domains.txt
 #
-# These 27 have no business in the CRM yet. The other 23 domains in the
-# owner's list already have one and must NOT be re-provisioned — a second
-# tenant for the same domain is not what "already provisioned" should mean.
+# Full list of businesses purged on 2026-09-23, re-provisioned here in one
+# batch. All 53 need a fresh tenant — none of them exist in the CRM anymore.
 
+agroveterinaria.com.py, Agroveterinaria
+anillos.com.py, Anillos
 arq.com.py, Arquitectura
 asado.com.py, Asado
+banco.com.py, Banco
+bolsadetrabajoparaguay.com.py, Bolsadetrabajoparaguay
+branding.com.py, Branding
 camiones.com.py, Camiones
 china.com.py, China
 ciberseguridad.com.py, Ciberseguridad
+clinicas.com.py, Clinicas
+comida.com.py, Comida
+contador.com.py, Contador
+contenido.com.py, Contenido
+criptomonedas.com.py, Criptomonedas
+dentista.com.py, Dentista
+desarrollador.com.py, Desarrollador
+desarrolladores.com.py, Desarrolladores
 desarrollo.com.py, Desarrollo
+edificio.com.py, Edificio
+educacion.com.py, Educacion
 embarazo.com.py, Embarazo
 estudio.com.py, Estudio
+floreria.com.py, Floreria
+gruas.com.py, Gruas
+hospital.com.py, Hospital
+inmobiliaria.com.py, Inmobiliaria
+inmobiliarios.com.py, Inmobiliarios
+inteligenciaartificial.com.py, Inteligenciaartificial
 lenceria.com.py, Lencería
+mascota.com.py, Mascota
 moto.com.py, Moto
 negocio.com.py, Negocio
 nombres.com.py, Nombres
 obra.com.py, Obra
 perro.com.py, Perro
+pozo.com.py, Pozo
 prestamo.com.py, Préstamo
 productos.com.py, Productos
 redessociales.com.py, Redes Sociales
@@ -29,6 +51,9 @@ rentparaguay.com, Rent Paraguay
 retratos.com.py, Retratos
 ropa.com.py, Ropa
 seguro.com.py, Seguro
+sitiosweb.com.py, Sitiosweb.com.py
+tasacion.com.py, Tasacion
+terreno.com.py, Terreno
 trabajo.com.py, Trabajo
 universidad.com.py, Universidad
 veterinarios.com.py, Veterinarios
