@@ -2,11 +2,11 @@ import { Eyebrow, Lead, MarkedList } from "./primitives";
 import { CtaPair } from "./cta";
 
 /**
- * The page's one intentional overlap: a raised panel that crosses the
- * boundary into the dark closing band below it. The skill's P6 does this with
- * a full-bleed image; the imagery step hasn't run yet, so the overlap is
- * built from the panel and the ink field instead of shipping an empty image
- * slot.
+ * The closing band. The raised checklist panel sits beside the ask it
+ * supports, not before it: it used to precede the heading, so the page asked
+ * visitors to "bring these answers" before saying what for. On desktop the
+ * panel still rises across the band's top edge, which keeps the page's one
+ * intentional overlap; on a phone it simply follows the CTA.
  */
 export function CtaBand({
   eyebrow,
@@ -24,19 +24,12 @@ export function CtaBand({
   cta: { primaryLabel: string; whatsappLabel: string; whatsappPrefill: string };
 }) {
   return (
-    <>
-      <div className="mk-wrap">
-        <div className="mk-card mk-card--raised mk-overlap">
-          <h3>{panelTitle}</h3>
-          <MarkedList items={panelItems} />
-        </div>
-      </div>
-
-      <section
-        className="mk-section mk-section--ink mk-grain"
-        aria-labelledby="mk-closing-title"
-      >
-        <div className="mk-wrap" style={{ paddingTop: "3rem" }}>
+    <section
+      className="mk-section mk-section--ink mk-grain mk-closing"
+      aria-labelledby="mk-closing-title"
+    >
+      <div className="mk-wrap mk-split">
+        <div>
           <Eyebrow>{eyebrow}</Eyebrow>
           <h2 id="mk-closing-title">{title}</h2>
           <Lead>{body}</Lead>
@@ -47,7 +40,11 @@ export function CtaBand({
             location="cierre"
           />
         </div>
-      </section>
-    </>
+        <div className="mk-card mk-card--raised mk-overlap">
+          <h3>{panelTitle}</h3>
+          <MarkedList items={panelItems} />
+        </div>
+      </div>
+    </section>
   );
 }

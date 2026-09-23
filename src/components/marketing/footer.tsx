@@ -47,7 +47,7 @@ export async function MarketingFooter() {
               label={t("cta.whatsapp")}
               prefill={t("cta.waPrefill")}
               location="footer"
-              className="mk-btn mk-btn--ghost"
+              className="mk-btn mk-btn--wa"
             />
           </div>
 

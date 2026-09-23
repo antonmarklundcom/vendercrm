@@ -91,6 +91,38 @@ none more than four times on a page.
 band, not from an image.** The skill's P6 wants a full-bleed image there; the
 imagery step has not run, and a marked-but-empty image slot must never ship.
 When step 5 fills the slots, P6 can replace this without touching the copy.
+Since the 2026-09-23 design pass the panel sits *beside* the closing heading
+(P1 split inside the band) and rises 48px above the band's top edge on
+desktop; before, it came first and asked visitors to "bring these answers"
+before the page said what for.
+
+### Design pass, 2026-09-23
+
+Audited from a production build at 390px and 1366px. What changed:
+
+- **Header:** a compact primary "Diagnóstico gratis" button (`data-ev-loc="header"`),
+  and below 768px a `<details>` menu (`mobile-menu.tsx`) — the inline nav was
+  hidden on phones with no replacement. "Ingresar" stays a quiet text link.
+- **Specificity:** `.mk p` is now `:where(.mk) p`, the same fix as the link rule.
+  At (0,1,1) it outranked every single-class paragraph, so the P9 statement
+  rendered in muted grey and `.mk-eyebrow`, `.mk-meta`, `.mk-articles__cta`
+  lost their colour or spacing. The statement is now full ink.
+- **Rhythm:** section padding `clamp(48px, 6.5vw, 96px)` (was 64/9vw/128px):
+  ~30% less dead air between sections on desktop.
+- **CTA pair:** full-width stacked buttons under 480px; centred in the hero.
+  The WhatsApp button takes the ghost edge on ink fields and in the footer,
+  where ink-on-ink made it read as bare text.
+- **P3 grid:** `spansTwo()` in `vertical-cards.tsx` spans the first card, and
+  the last one too when needed, so the grid always ends on a full row (the
+  4-item sector grids left an empty cell).
+- **Sector pages:** "Otros rubros" is a text-link row, not seven bordered
+  buttons competing with the page CTA.
+- **Articles:** header and body share the offset reading column; `/recursos`
+  header is no longer offset over un-offset clusters.
+
+Left for the owner: the two floating WhatsApp triggers (owner request; the
+top one covers content under the header on phones — proposal is to move it
+into the header), and a sector-specific visual in each `/soluciones` hero.
 
 ## 4. Motion
 

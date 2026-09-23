@@ -47,8 +47,10 @@ export default async function RecursosPage() {
         }}
       />
 
+      {/* Not offset: the clusters below start at the gutter, and an indented
+          header over them read as misalignment. */}
       <section className="mk-section" aria-labelledby="mk-recursos-title">
-        <div className="mk-wrap mk-offset">
+        <div className="mk-wrap">
           <Eyebrow>{t("header.eyebrow")}</Eyebrow>
           <h1 id="mk-recursos-title">{t("header.title")}</h1>
           <Lead>{t("header.lead")}</Lead>

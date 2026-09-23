@@ -2593,7 +2593,8 @@
       "contacto": "Contact",
       "login": "Sign in",
       "skipToContent": "Skip to content",
-      "menu": "Menu"
+      "menu": "Menu",
+      "cta": "Free diagnosis"
     },
     "cta": {
       "primary": "Get your free diagnosis",
