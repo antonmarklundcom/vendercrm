@@ -176,6 +176,7 @@ function DealCard({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: deal.id,
   });
+  const locale = useLocale();
   const enteredAt = new Date(deal.stageEnteredAt);
   const days = daysInStage(enteredAt);
   const stale = isStale(enteredAt, staleAfterDays);
@@ -201,9 +202,9 @@ function DealCard({
         {deal.title}
       </Link>
       <p className="text-muted-foreground">{deal.contactName}</p>
-      <p className="text-muted-foreground">
-        {deal.value} {deal.currency}
-      </p>
+      {/* Same formatter as the column total above it: the card used to print
+          the raw integer ("2500000 PYG") under a "PYG 12.500.000" header. */}
+      <p className="font-medium tabular-nums">{formatMoney(deal.value, deal.currency, locale)}</p>
       <p className={`text-xs ${stale ? "font-medium text-warning" : "text-muted-foreground"}`}>
         {t("daysInStage", { count: days })}
         {stale ? ` · ${t("stale")}` : ""}

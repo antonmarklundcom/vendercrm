@@ -1,9 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  ChevronDown,
+  ChevronRight,
+  Menu,
   CalendarDays,
   CalendarClock,
   ChartNoAxesColumn,
@@ -77,6 +81,12 @@ export type NavGroup = {
   /** Translated group heading, or null for the ungrouped top item. */
   label: string | null;
   items: NavItem[];
+  /**
+   * Folds behind its heading. Open on first render only when it holds the
+   * current page, so the sidebar shows the daily items plus where you are,
+   * not every route the product has.
+   */
+  collapsible?: boolean;
 };
 
 function isActive(pathname: string, href: string): boolean {
@@ -125,12 +135,83 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
+function NavGroups({ groups, pathname }: { groups: NavGroup[]; pathname: string }) {
+  return (
+    <nav className="flex flex-col gap-4">
+      {groups.map((group, index) => {
+        const key = group.label ?? `group-${index}`;
+        const links = group.items.map((item) => (
+          <NavLink key={item.href} item={item} active={isActive(pathname, item.href)} />
+        ));
+        if (group.collapsible && group.label) {
+          return (
+            <CollapsibleGroup
+              key={key}
+              label={group.label}
+              containsActive={group.items.some((item) => isActive(pathname, item.href))}
+            >
+              {links}
+            </CollapsibleGroup>
+          );
+        }
+        return (
+          <div key={key} className="flex flex-col gap-0.5">
+            {group.label && (
+              <span className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground/70 uppercase">
+                {group.label}
+              </span>
+            )}
+            {links}
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+function CollapsibleGroup({
+  label,
+  containsActive,
+  children,
+}: {
+  label: string;
+  containsActive: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(containsActive);
+  // Navigating into a folded group (⌘K, a link on the page) unfolds it, so
+  // the active item is never hidden. Navigating out leaves it as the user
+  // left it.
+  useEffect(() => {
+    if (containsActive) setOpen(true);
+  }, [containsActive]);
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex items-center justify-between rounded-md px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground/70 uppercase transition-colors hover:text-foreground"
+      >
+        {label}
+        <ChevronRight
+          className={cn("size-3.5 transition-transform", open && "rotate-90")}
+          aria-hidden="true"
+        />
+      </button>
+      {open && children}
+    </div>
+  );
+}
+
 export function AppNav({
   groups,
   appName,
   header,
   footer,
   mobileHeader,
+  menuLabel,
 }: {
   groups: NavGroup[];
   appName: string;
@@ -141,46 +222,60 @@ export function AppNav({
   header?: React.ReactNode;
   /** Sits at the bottom of the desktop sidebar — the user menu. */
   footer?: React.ReactNode;
-  /** Same identity, in the single-row form, above the mobile nav strip. */
+  /** Same identity, in the single-row form, at the top on mobile. */
   mobileHeader?: React.ReactNode;
+  /** Accessible name of the mobile menu button. */
+  menuLabel: string;
 }) {
   const pathname = usePathname();
-  const flatItems = groups.flatMap((group) => group.items);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const current = groups
+    .flatMap((group) => group.items)
+    .find((item) => isActive(pathname, item.href));
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   return (
     <>
-      {/* Desktop: grouped sidebar. */}
-      <aside className="hidden w-56 shrink-0 flex-col gap-6 border-r bg-card px-3 py-4 md:flex">
+      {/* Desktop: pinned daily items, then folding groups. */}
+      <aside className="hidden w-60 shrink-0 flex-col gap-5 border-r bg-card px-3 py-4 md:flex">
         <Wordmark name={appName} className="px-3" />
         {header && <div className="-mx-3 -my-2">{header}</div>}
-        <nav className="flex flex-col gap-5">
-          {groups.map((group, index) => (
-            <div key={group.label ?? `group-${index}`} className="flex flex-col gap-1">
-              {group.label && (
-                <span className="px-3 pb-1 text-xs font-medium tracking-wide text-muted-foreground/70 uppercase">
-                  {group.label}
-                </span>
-              )}
-              {group.items.map((item) => (
-                <NavLink key={item.href} item={item} active={isActive(pathname, item.href)} />
-              ))}
-            </div>
-          ))}
-        </nav>
+        <NavGroups groups={groups} pathname={pathname} />
         {footer && <div className="mt-auto">{footer}</div>}
       </aside>
 
-      {/* Mobile: identity row, then one scrollable strip — grouping costs
-          more than it buys on a phone, but the icons and the active state
-          still carry over. */}
-      <div className="flex flex-col bg-card md:hidden">
+      {/* Mobile: identity row and one bar naming where you are; everything
+          else — switcher, notifications, the full nav — is one tap away
+          instead of a 23-item strip scrolling sideways above every page. */}
+      <div className="flex flex-col border-b bg-card md:hidden">
         {mobileHeader}
-        {header}
-        <nav className="flex gap-1 overflow-x-auto border-b px-3 py-2">
-          {flatItems.map((item) => (
-            <NavLink key={item.href} item={item} active={isActive(pathname, item.href)} />
-          ))}
-        </nav>
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-expanded={mobileOpen}
+          aria-controls="app-mobile-nav"
+          aria-label={menuLabel}
+          className="flex items-center gap-2 border-t px-4 py-2.5 text-left text-sm font-medium"
+        >
+          <Menu className="size-4 text-muted-foreground" aria-hidden="true" />
+          <span className="truncate">{current?.label ?? appName}</span>
+          <ChevronDown
+            className={cn(
+              "ml-auto size-4 text-muted-foreground transition-transform",
+              mobileOpen && "rotate-180",
+            )}
+            aria-hidden="true"
+          />
+        </button>
+        {mobileOpen && (
+          <div id="app-mobile-nav" className="flex flex-col gap-3 border-t px-3 pb-4">
+            {header && <div className="-mx-3">{header}</div>}
+            <NavGroups groups={groups} pathname={pathname} />
+          </div>
+        )}
       </div>
     </>
   );

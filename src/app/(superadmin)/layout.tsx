@@ -47,6 +47,7 @@ export default async function SuperadminLayout({
       <AppNav
         groups={groups}
         appName={tc("appName")}
+        menuLabel={tc("menu")}
         footer={<UserMenu {...identity} />}
         mobileHeader={<UserMenu {...identity} variant="bar" />}
       />
