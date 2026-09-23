@@ -324,10 +324,21 @@ const updateTenantSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9-]+$/),
   locale: z.enum(SUPPORTED_LOCALES),
-  timezone: z.string().min(1).max(60),
+  // Free text like the tenant's own settings form, but it has to be a zone
+  // Intl knows: a typo here would break every date the business renders.
+  timezone: z.string().min(1).max(60).refine(isKnownTimeZone),
 });
 
-export type UpdateTenantField = "name" | "slug";
+function isKnownTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export type UpdateTenantField = "name" | "slug" | "timezone";
 
 export type UpdateTenantState = {
   error: string | null;
@@ -339,6 +350,7 @@ export type UpdateTenantState = {
 const UPDATE_TENANT_FIELD_ERRORS: Record<UpdateTenantField, string> = {
   name: "nameRequired",
   slug: "slugInvalid",
+  timezone: "timezoneInvalid",
 };
 
 export async function updateTenantAction(

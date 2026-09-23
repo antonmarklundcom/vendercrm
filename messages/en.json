@@ -2417,7 +2417,8 @@
         "nameRequired": "Give the company a name.",
         "slugInvalid": "The slug is lowercase, with no spaces or accents (e.g. my-company).",
         "slugTaken": "A company with that slug already exists.",
-        "unknown": "We couldn't create the company. Try again."
+        "unknown": "We couldn't create the company. Try again.",
+        "timezoneInvalid": "That time zone does not exist. Use the Region/City format, e.g. America/Asuncion."
       },
       "slugPlaceholder": "Generated from the name; you can change it",
       "configureWithAi": "Set up with AI",
@@ -2465,7 +2466,8 @@
       "bulkGranted": "{added, plural, one {# access granted} other {# accesses granted}}{skipped, plural, =0 {} other {, # already a member}}",
       "bulkDeleted": "{count, plural, one {# business deleted} other {# businesses deleted}}",
       "bulkDeleteBody": "{count, plural, one {This permanently deletes the selected business and everything in it.} other {This permanently deletes the # selected businesses and everything in them.}} This cannot be undone.",
-      "bulkDeleteConfirmLabel": "Type “{expected}” to confirm"
+      "bulkDeleteConfirmLabel": "Type “{expected}” to confirm",
+      "slugChangeHelp": "Changing the slug moves the public booking links (/b/slug/…): update them wherever they are published."
     },
     "subscriptions": {
       "title": "Subscription",

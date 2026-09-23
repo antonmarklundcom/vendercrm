@@ -15,6 +15,8 @@ export type EditTenantLabels = {
   close: string;
   name: string;
   slug: string;
+  /** Changing the slug moves the public booking links (/b/<slug>/…). */
+  slugHelp: string;
   locale: string;
   timezone: string;
   save: string;
@@ -22,6 +24,7 @@ export type EditTenantLabels = {
     nameRequired: string;
     slugInvalid: string;
     slugTaken: string;
+    timezoneInvalid: string;
     unknown: string;
   };
 };
@@ -76,6 +79,7 @@ function EditTenantForm({
           pattern="[a-z0-9-]+"
           required
         />
+        <span className="text-xs text-muted-foreground">{labels.slugHelp}</span>
       </label>
       <label className="flex flex-col gap-1 text-sm">
         {labels.locale}
@@ -89,7 +93,12 @@ function EditTenantForm({
       </label>
       <label className="flex flex-col gap-1 text-sm">
         {labels.timezone}
-        <Input name="timezone" defaultValue={state.values.timezone ?? tenant.timezone} required />
+        <Input
+          name="timezone"
+          defaultValue={state.values.timezone ?? tenant.timezone}
+          placeholder="America/Asuncion"
+          required
+        />
       </label>
       {state.error && (
         <p role="alert" className="text-sm text-destructive">

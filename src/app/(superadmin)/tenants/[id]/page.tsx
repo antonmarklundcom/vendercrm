@@ -133,6 +133,7 @@ export default async function TenantDetailPage({
     close: tc("close"),
     name: t("name"),
     slug: t("slug"),
+    slugHelp: t("slugChangeHelp"),
     locale: t("locale"),
     timezone: t("timezone"),
     save: tc("save"),
@@ -140,6 +141,7 @@ export default async function TenantDetailPage({
       nameRequired: t("errors.nameRequired"),
       slugInvalid: t("errors.slugInvalid"),
       slugTaken: t("errors.slugTaken"),
+      timezoneInvalid: t("errors.timezoneInvalid"),
       unknown: t("errors.unknown"),
     },
   };
