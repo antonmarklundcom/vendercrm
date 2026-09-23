@@ -6,6 +6,10 @@ import { buildSystemTenantContext, requireSuperadminContext } from "@/modules/te
 import { createSubscription, recordPayment } from "@/modules/tenancy/subscriptions";
 import { connectAccountManually, disconnectAccount } from "@/modules/whatsapp/accounts";
 import {
+  completeEmbeddedSignup,
+  embeddedSignupClientConfig,
+} from "@/modules/whatsapp/embedded-signup";
+import {
   createTenantAdminUser,
   getUserByEmail,
   getUserById,
@@ -646,4 +650,64 @@ export async function disconnectTenantWhatsappAction(formData: FormData) {
   });
 
   revalidatePath(`/tenants/${parsed.data.tenantId}`);
+}
+
+// --- Meta Embedded Signup on the tenant's behalf. Same service the tenant
+// admin's own /whatsapp button calls (modules/whatsapp/embedded-signup.ts),
+// run in the viewed business's system context like the manual connect
+// above, and audited the same way. The superadmin completes Meta's popup
+// with whichever Facebook account has access to the business's portfolio;
+// the resulting WABA still belongs to that business, not to the platform.
+
+const embeddedSignupTenantSchema = z.object({
+  tenantId: z.string().min(1).max(26),
+  code: z.string().min(1).max(4096),
+  wabaId: z.string().regex(/^\d{1,40}$/),
+  phoneNumberId: z.string().regex(/^\d{1,40}$/).optional(),
+  mode: z.enum(["cloud_api", "coexistence"]),
+});
+
+export type EmbeddedSignupTenantInput = z.input<typeof embeddedSignupTenantSchema>;
+
+export async function completeTenantEmbeddedSignupAction(
+  input: EmbeddedSignupTenantInput,
+): Promise<{ error: string | null }> {
+  const superadmin = await requireSuperadminContext();
+  const parsed = embeddedSignupTenantSchema.safeParse(input);
+  if (!parsed.success) return { error: "embeddedInvalid" };
+
+  const { tenantId, ...signup } = parsed.data;
+  const tenantCtx = await buildSystemTenantContext(tenantId);
+  if (!tenantCtx) return { error: "unknown" };
+
+  const result = await completeEmbeddedSignup(tenantCtx, signup);
+  if (!result.ok) return { error: `embedded.${result.error}` };
+
+  await writeAuditLog({
+    tenantId,
+    actorUserId: superadmin.userId,
+    action: "whatsapp.connected_by_superadmin",
+    entity: "tenant",
+    entityId: tenantId,
+    payload: {
+      wabaId: result.wabaId,
+      phoneNumberId: result.phoneNumberId,
+      connectedVia: "embedded",
+      mode: signup.mode,
+    },
+  });
+
+  revalidatePath(`/tenants/${tenantId}`);
+  return { error: null };
+}
+
+/**
+ * The Embedded Signup client config for WhatsappSection, or null while the
+ * owner has not configured it. An action rather than a prop because the
+ * section is a client component whose page is shared with other work; the
+ * values are public Meta ids, never the app secret.
+ */
+export async function getEmbeddedSignupConfigAction() {
+  await requireSuperadminContext();
+  return embeddedSignupClientConfig();
 }

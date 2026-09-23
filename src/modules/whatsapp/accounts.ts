@@ -7,10 +7,11 @@ import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import { scheduleTemplateSync } from "./sync-schedule";
 
-// wa_accounts (PLAN.md §4, §6.2). Manual connect is the bootstrap path
-// (build first); embedded signup lands later behind a flag. Access tokens
-// are encrypted at rest (§3.4) — plaintext only ever exists in memory for
-// the duration of a Graph API call.
+// wa_accounts (PLAN.md §4, §6.2). Manual connect is the bootstrap path;
+// Meta Embedded Signup (embedded-signup.ts) is the one-click path, shown only
+// once the owner has configured it, and it stores through the same
+// `storeConnectedAccount` below. Access tokens are encrypted at rest (§3.4) —
+// plaintext only ever exists in memory for the duration of a Graph API call.
 
 export type ConnectAccountManuallyInput = {
   wabaId: string;
@@ -23,6 +24,25 @@ export async function connectAccountManually(
   ctx: TenantContext,
   input: ConnectAccountManuallyInput,
 ) {
+  return storeConnectedAccount(ctx, { ...input, connectedVia: "manual" });
+}
+
+export type StoreConnectedAccountInput = ConnectAccountManuallyInput & {
+  connectedVia: "manual" | "embedded";
+  verifiedName?: string;
+  /** Set when this app itself subscribed to the WABA's webhooks. */
+  webhookSubscribedAt?: Date;
+};
+
+/**
+ * The one write path for a new wa_accounts row, shared by manual connect and
+ * embedded signup so both encrypt the token and seed template sync the same
+ * way.
+ */
+export async function storeConnectedAccount(
+  ctx: TenantContext,
+  input: StoreConnectedAccountInput,
+) {
   const id = newId();
   const encrypted = encrypt(input.accessToken);
 
@@ -33,11 +53,13 @@ export async function connectAccountManually(
       wabaId: input.wabaId,
       phoneNumberId: input.phoneNumberId,
       displayNumber: input.displayNumber,
+      verifiedName: input.verifiedName,
       status: "connected",
       accessTokenCiphertext: encrypted.ciphertext,
       accessTokenIv: encrypted.iv,
       accessTokenTag: encrypted.tag,
-      connectedVia: "manual",
+      connectedVia: input.connectedVia,
+      webhookSubscribedAt: input.webhookSubscribedAt,
     });
 
   // "Fetch templates from Meta on connect" (§6.4) — enqueued rather than

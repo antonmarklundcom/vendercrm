@@ -59,6 +59,9 @@ first deploy and every routine redeploy after it.
      configured version is past its documented review date, which is the cue
      to bump this rather than wait for Meta to retire it out from under every
      tenant.
+   - `META_APP_ID`, `META_EMBEDDED_SIGNUP_CONFIG_ID` — optional; turn on the
+     one-click "Conectar con Facebook" button (§4.1). Leave unset and only
+     the manual connect form shows.
    - `RATE_LIMIT_DRIVER` — optional; leave unset. Unset means the rate-limit
      windows live in MySQL (PLAN.md §14 I1), which is what makes a limit
      survive a redeploy and hold if the app is ever run as more than one
@@ -133,6 +136,78 @@ One endpoint serves every tenant; Meta routes by `phone_number_id`
 
 Meta pauses a subscription that keeps failing, so re-check this after any
 domain change. `docs/SMOKE_TEST.md` §2 verifies inbound delivery end-to-end.
+
+### 4.1 One-click connect (Meta Embedded Signup) — optional
+
+Without this, a business connects WhatsApp by pasting a WABA ID, Phone
+Number ID and access token into /whatsapp (or the superadmin tenant view).
+With it, both pages show **Conectar con Facebook**: the business logs in with
+Facebook, picks or creates its WhatsApp Business account, verifies the number,
+and the app exchanges the result for a token, subscribes itself to that
+account's webhooks, registers the number on the Cloud API and stores it —
+no IDs or tokens to copy. A second button, **Conectar y seguir usando la app
+WhatsApp Business**, runs Meta's *coexistence* onboarding: the number stays
+on the WhatsApp Business app on the phone and is also reachable from here
+(no registration step; contacts/history sync is not wired up yet). The
+manual form stays below the buttons as the fallback.
+
+Everything below happens once, in the **same Meta app** whose secret is
+`WHATSAPP_APP_SECRET` — the code exchange authenticates with that app's id and
+secret, and webhooks keep arriving at §4's endpoint.
+
+1. **App type.** The app must be a *Business* type app owned by the owner's
+   business portfolio, with the **WhatsApp** product added (§4 already needs
+   this).
+2. **Add Facebook Login for Business** (App dashboard → Add product).
+   Under its **Settings**: turn on *Client OAuth login*, *Web OAuth login*,
+   *Enforce HTTPS*, *Embedded Browser OAuth Login* and *Login with the
+   JavaScript SDK*; add `https://<app-domain>` (e.g.
+   `https://crm.clientes.com.py`) to **Allowed Domains for the JavaScript
+   SDK** and `https://<app-domain>/` to **Valid OAuth Redirect URIs**. Meta
+   only posts the WABA / phone ids back to a page whose domain is listed in
+   both — a missing domain looks like a popup that finishes and nothing
+   happens.
+3. **Create the configuration.** Facebook Login for Business →
+   **Configurations → Create configuration** → login variation **WhatsApp
+   Embedded Signup**. Assets: *WhatsApp accounts*. Permissions:
+   `whatsapp_business_management` and `whatsapp_business_messaging`
+   (`business_management` is not needed — the app never reads the business
+   portfolio itself). Save and copy the **Configuration ID**.
+4. **Set the env vars** in hPanel and restart (no rebuild needed — they are
+   read server-side):
+   - `META_APP_ID` — App dashboard → App settings → Basic → App ID.
+   - `META_EMBEDDED_SIGNUP_CONFIG_ID` — the Configuration ID from step 3.
+   The buttons appear on the next page load. Test with an account that has a
+   role on the app (step 5 explains why).
+5. **Going beyond your own team — what needs Meta's approval.** Until the
+   steps below are done the app runs with *standard access*: Embedded Signup
+   works only for people who have a role on the Meta app (admins,
+   developers, testers). To let any business connect itself:
+   - **Business verification** of the owner's business portfolio (Business
+     settings → Security Center). Required before anything else below; Meta
+     asks for legal company documents and may take days.
+   - **App Review** for **advanced access** to `whatsapp_business_management`
+     and `whatsapp_business_messaging`, with a screen recording of the
+     signup flow and of sending a message from the app.
+   - **Tech Provider** onboarding (App dashboard → WhatsApp → the Tech
+     Provider / "become a Tech Provider" steps), which also requires the
+     business verification and App Review above, then switching the app to
+     **Live** mode. Meta may add an access verification step for the
+     business.
+   - Businesses onboarded this way are billed by Meta directly on their own
+     WhatsApp Business account unless the owner later becomes a Solution
+     Partner with a credit line; nothing in this app handles billing.
+6. **Coexistence caveats.** Meta requires a recent WhatsApp Business app
+   version on the phone and does not offer coexistence in every country;
+   check Meta's "Onboard WhatsApp Business app users" page before promising
+   it. If the button finishes with "sin un número para conectar", the flow
+   ended without a number (e.g. the person only created a WABA).
+
+Two-step verification: the Cloud API registration sets a random six-digit
+PIN on a number that has none. If the number already has a two-step PIN, the
+registration is refused ("No pudimos activar el número…"); turn two-step
+verification off in WhatsApp Manager and retry, or use the manual form. The
+PIN is not stored — reset it from WhatsApp Manager if it is ever needed.
 
 ## 5. Cron fallback (worker safety net)
 
