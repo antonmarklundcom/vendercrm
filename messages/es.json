@@ -2420,7 +2420,31 @@
         "unknown": "No se pudo crear la empresa. Intentá de nuevo."
       },
       "slugPlaceholder": "Se genera del nombre; podés cambiarlo",
-      "configureWithAi": "Configurar con IA"
+      "configureWithAi": "Configurar con IA",
+      "search": "Buscar",
+      "searchPlaceholder": "Nombre, slug o dominio",
+      "filterAll": "Todas",
+      "noMatches": "Ninguna empresa coincide con la búsqueda.",
+      "sitesColumn": "Sitios",
+      "membersColumn": "Usuarios",
+      "contactsColumn": "Contactos",
+      "lastLeadColumn": "Último lead",
+      "noSite": "Sin sitio",
+      "siteInactive": "inactivo",
+      "never": "Nunca",
+      "emptyTitle": "Todavía no hay empresas",
+      "emptyBody": "Creá la primera acá, o provisioná muchas de una vez desde Claude Ops.",
+      "backToList": "Empresas",
+      "danger": {
+        "title": "Zona de peligro",
+        "body": "Eliminar la empresa borra para siempre sus contactos, negocios, sitios, claves API, conversaciones y todo lo demás. Los usuarios no se borran: solo pierden el acceso a esta empresa. No se puede deshacer; si solo querés cortar el acceso, suspendela.",
+        "confirmLabel": "Escribí <slug></slug> para confirmar",
+        "submit": "Eliminar empresa para siempre",
+        "errors": {
+          "confirmMismatch": "El texto no coincide con el slug de la empresa.",
+          "unknown": "No se pudo eliminar la empresa. Intentá de nuevo."
+        }
+      }
     },
     "subscriptions": {
       "title": "Suscripción",
@@ -2588,6 +2612,42 @@
         "phoneNumberIdRequired": "Ingresá el Phone Number ID.",
         "accessTokenRequired": "Ingresá el token de acceso.",
         "unknown": "No se pudo conectar el número. Intentá de nuevo."
+      }
+    },
+    "tenantSites": {
+      "title": "Sitios y claves API",
+      "intro": "Cada sitio web manda sus leads con su propia clave a",
+      "copyNow": "Copiala ahora: esta clave no se vuelve a mostrar. Va en el entorno del hosting del sitio.",
+      "copyKey": "Copiar clave",
+      "copyEnv": "Copiar variables de entorno",
+      "copied": "Copiado",
+      "lastLead": "último lead {when}",
+      "noLeadsYet": "todavía no recibió leads",
+      "health": {
+        "ok": "Funcionando",
+        "failing": "Con errores",
+        "idle": "Sin actividad"
+      },
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "activate": "Activar",
+      "deactivate": "Desactivar",
+      "keysTitle": "Claves activas",
+      "noKeys": "Sin claves activas: el sitio no puede mandar leads.",
+      "keyUsed": "usada {when}",
+      "keyNeverUsed": "nunca usada",
+      "revoke": "Revocar",
+      "revokeConfirm": "¿Revocar esta clave? El sitio que la use deja de poder mandar leads.",
+      "newKey": "Nueva clave",
+      "addSite": "Agregar sitio",
+      "addSiteSubmit": "Agregar",
+      "addSiteHelp": "Se crea activo, con el primer pipeline de la empresa como destino, y te muestra su clave.",
+      "errors": {
+        "domainInvalid": "Escribí un dominio válido (ej: dentista.com.py).",
+        "siteExists": "Esta empresa ya tiene un sitio con ese nombre.",
+        "noPipeline": "La empresa no tiene pipeline: creá uno antes, o los leads no tienen a dónde ir.",
+        "tooManyKeys": "Ya tiene 2 claves activas: revocá una antes de crear otra.",
+        "unknown": "No se pudo completar. Intentá de nuevo."
       }
     }
   },

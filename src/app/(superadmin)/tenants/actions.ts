@@ -2,13 +2,16 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireSuperadminContext, buildSystemTenantContext } from "@/modules/tenancy/context";
 import {
   createTenant,
   suspendTenant,
   activateTenant,
+  getTenant,
   getTenantBySlug,
 } from "@/modules/tenancy/tenants";
+import { deleteTenant } from "@/modules/tenancy/purge";
 import { seedDefaultPipeline } from "@/modules/crm/pipelines";
 import { uniqueSlug } from "@/lib/slug";
 
@@ -90,12 +93,13 @@ export async function createTenantAction(
     return { error: "slugTaken", field: "slug", values };
   }
 
-  if (tenant) {
-    const tenantCtx = await buildSystemTenantContext(tenant.id);
-    if (tenantCtx) await seedDefaultPipeline(tenantCtx);
-  }
+  if (!tenant) return { error: "unknown", field: null, values };
+  const tenantCtx = await buildSystemTenantContext(tenant.id);
+  if (tenantCtx) await seedDefaultPipeline(tenantCtx);
   revalidatePath("/tenants");
-  return { error: null, field: null, values: {} };
+  // Straight to the new business: its next step (a site and its API key,
+  // people) lives on that page, not on the list.
+  redirect(`/tenants/${tenant.id}`);
 }
 
 export async function suspendTenantAction(formData: FormData) {
@@ -103,7 +107,8 @@ export async function suspendTenantAction(formData: FormData) {
   const parsed = z.string().min(1).safeParse(formData.get("tenantId"));
   if (!parsed.success) return;
   await suspendTenant(ctx, parsed.data);
-  revalidatePath("/tenants");
+  // The list and the business page both show the status.
+  revalidatePath("/tenants", "layout");
 }
 
 export async function activateTenantAction(formData: FormData) {
@@ -111,5 +116,37 @@ export async function activateTenantAction(formData: FormData) {
   const parsed = z.string().min(1).safeParse(formData.get("tenantId"));
   if (!parsed.success) return;
   await activateTenant(ctx, parsed.data);
-  revalidatePath("/tenants");
+  // The list and the business page both show the status.
+  revalidatePath("/tenants", "layout");
+}
+
+export type DeleteTenantState = { error: string | null };
+
+/**
+ * Deletes a business and everything under it (src/modules/tenancy/purge.ts).
+ * The form makes the operator type the business's slug: suspending is one
+ * click because it can be undone, and this cannot.
+ */
+export async function deleteTenantAction(
+  _prev: DeleteTenantState,
+  formData: FormData,
+): Promise<DeleteTenantState> {
+  const ctx = await requireSuperadminContext();
+  const parsed = z
+    .object({ tenantId: z.string().min(1).max(26), confirm: z.string() })
+    .safeParse({ tenantId: formData.get("tenantId"), confirm: formData.get("confirm") });
+  if (!parsed.success) return { error: "unknown" };
+
+  const tenant = await getTenant(parsed.data.tenantId);
+  if (!tenant) return { error: "unknown" };
+  if (parsed.data.confirm.trim() !== tenant.slug) return { error: "confirmMismatch" };
+
+  try {
+    await deleteTenant(ctx, tenant.id);
+  } catch {
+    return { error: "unknown" };
+  }
+
+  revalidatePath("/tenants", "layout");
+  redirect("/tenants");
 }
