@@ -1,11 +1,12 @@
-import Link from "next/link";
+import { Building2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { requireSuperadminContext } from "@/modules/tenancy/context";
-import { listTenants } from "@/modules/tenancy/tenants";
-import { Button } from "@/components/ui/button";
+import { listTenantsForConsole } from "@/modules/tenancy/console";
+import { CreateDialog } from "@/components/create-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { suspendTenantAction, activateTenantAction } from "./actions";
 import { CreateTenantForm } from "./CreateTenantForm";
+import { TenantTable } from "./TenantTable";
 
 // Defense in depth (§3.3): the (superadmin) layout already redirects a
 // non-superadmin, but a layout is not an authorization boundary — this page
@@ -13,63 +14,44 @@ import { CreateTenantForm } from "./CreateTenantForm";
 export default async function TenantsPage() {
   await requireSuperadminContext();
   const t = await getTranslations("superadmin.tenants");
-  const tenants = await listTenants();
+  const tc = await getTranslations("common");
+  const tenants = await listTenantsForConsole();
 
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader title={t("title")} description={t("intro")} />
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t("title")}
+        description={t("intro")}
+        action={
+          <CreateDialog
+            id="nueva-empresa"
+            triggerLabel={t("createTitle")}
+            title={t("createTitle")}
+            closeLabel={tc("close")}
+          >
+            <CreateTenantForm />
+          </CreateDialog>
+        }
+      />
 
-      <section>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2">{t("name")}</th>
-                <th className="py-2">{t("slug")}</th>
-                <th className="py-2">{t("status")}</th>
-                <th className="py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {tenants.map((tenant) => (
-                <tr key={tenant.id} className="border-b">
-                  <td className="py-2">
-                    <Link href={`/tenants/${tenant.id}`} className="underline">
-                      {tenant.name}
-                    </Link>
-                  </td>
-                  <td className="py-2">{tenant.slug}</td>
-                  <td className="py-2">
-                    {t(`statusValues.${tenant.status}` as "statusValues.active")}
-                  </td>
-                  <td className="py-2">
-                    {tenant.status === "suspended" ? (
-                      <form action={activateTenantAction}>
-                        <input type="hidden" name="tenantId" value={tenant.id} />
-                        <Button type="submit" size="sm" variant="outline">
-                          {t("activate")}
-                        </Button>
-                      </form>
-                    ) : (
-                      <form action={suspendTenantAction}>
-                        <input type="hidden" name="tenantId" value={tenant.id} />
-                        <Button type="submit" size="sm" variant="outline">
-                          {t("suspend")}
-                        </Button>
-                      </form>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        <CreateTenantForm />
-      </section>
+      {tenants.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title={t("emptyTitle")}
+          description={t("emptyBody")}
+          actionLabel={t("createTitle")}
+          actionHref="#nueva-empresa"
+        />
+      ) : (
+        <TenantTable
+          now={new Date().toISOString()}
+          rows={tenants.map((tenant) => ({
+            ...tenant,
+            createdAt: tenant.createdAt.toISOString(),
+            lastLeadAt: tenant.lastLeadAt?.toISOString() ?? null,
+          }))}
+        />
+      )}
     </div>
   );
 }

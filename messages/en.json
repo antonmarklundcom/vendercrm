@@ -2420,7 +2420,31 @@
         "unknown": "We couldn't create the company. Try again."
       },
       "slugPlaceholder": "Generated from the name; you can change it",
-      "configureWithAi": "Set up with AI"
+      "configureWithAi": "Set up with AI",
+      "search": "Search",
+      "searchPlaceholder": "Name, slug or domain",
+      "filterAll": "All",
+      "noMatches": "No business matches the search.",
+      "sitesColumn": "Sites",
+      "membersColumn": "Users",
+      "contactsColumn": "Contacts",
+      "lastLeadColumn": "Last lead",
+      "noSite": "No site",
+      "siteInactive": "inactive",
+      "never": "Never",
+      "emptyTitle": "No businesses yet",
+      "emptyBody": "Create the first one here, or provision many at once from Claude Ops.",
+      "backToList": "Businesses",
+      "danger": {
+        "title": "Danger zone",
+        "body": "Deleting the business permanently removes its contacts, deals, sites, API keys, conversations and everything else. Users are not deleted: they only lose access to this business. This cannot be undone; to just cut access, suspend it.",
+        "confirmLabel": "Type <slug></slug> to confirm",
+        "submit": "Delete business permanently",
+        "errors": {
+          "confirmMismatch": "The text does not match the business slug.",
+          "unknown": "Could not delete the business. Try again."
+        }
+      }
     },
     "subscriptions": {
       "title": "Subscription",
@@ -2588,6 +2612,42 @@
         "phoneNumberIdRequired": "Enter the Phone Number ID.",
         "accessTokenRequired": "Enter the access token.",
         "unknown": "Could not connect the number. Try again."
+      }
+    },
+    "tenantSites": {
+      "title": "Sites and API keys",
+      "intro": "Each website sends its leads with its own key to",
+      "copyNow": "Copy it now: this key is not shown again. It goes in the site hosting environment.",
+      "copyKey": "Copy key",
+      "copyEnv": "Copy environment variables",
+      "copied": "Copied",
+      "lastLead": "last lead {when}",
+      "noLeadsYet": "no leads received yet",
+      "health": {
+        "ok": "Working",
+        "failing": "Failing",
+        "idle": "No activity"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "keysTitle": "Active keys",
+      "noKeys": "No active keys: the site cannot send leads.",
+      "keyUsed": "used {when}",
+      "keyNeverUsed": "never used",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke this key? The site using it will stop being able to send leads.",
+      "newKey": "New key",
+      "addSite": "Add site",
+      "addSiteSubmit": "Add",
+      "addSiteHelp": "Created active, with the business’s first pipeline as destination, and shows you its key.",
+      "errors": {
+        "domainInvalid": "Enter a valid domain (e.g. dentista.com.py).",
+        "siteExists": "This business already has a site with that name.",
+        "noPipeline": "The business has no pipeline: create one first, or leads have nowhere to go.",
+        "tooManyKeys": "It already has 2 active keys: revoke one before creating another.",
+        "unknown": "Could not complete. Try again."
       }
     }
   },

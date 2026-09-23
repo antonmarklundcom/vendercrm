@@ -2420,7 +2420,31 @@
         "unknown": "Vi kunde inte skapa företaget. Försök igen."
       },
       "slugPlaceholder": "Skapas från namnet; du kan ändra det",
-      "configureWithAi": "Ställ in med AI"
+      "configureWithAi": "Ställ in med AI",
+      "search": "Sök",
+      "searchPlaceholder": "Namn, slug eller domän",
+      "filterAll": "Alla",
+      "noMatches": "Inget företag matchar sökningen.",
+      "sitesColumn": "Sajter",
+      "membersColumn": "Användare",
+      "contactsColumn": "Kontakter",
+      "lastLeadColumn": "Senaste lead",
+      "noSite": "Ingen sajt",
+      "siteInactive": "inaktiv",
+      "never": "Aldrig",
+      "emptyTitle": "Inga företag än",
+      "emptyBody": "Skapa det första här, eller skapa många på en gång från Claude Ops.",
+      "backToList": "Företag",
+      "danger": {
+        "title": "Farozon",
+        "body": "Att radera företaget tar bort dess kontakter, affärer, sajter, API-nycklar, konversationer och allt annat för alltid. Användare raderas inte: de förlorar bara åtkomst till det här företaget. Det går inte att ångra; vill du bara stänga av åtkomsten, pausa det istället.",
+        "confirmLabel": "Skriv <slug></slug> för att bekräfta",
+        "submit": "Radera företaget för alltid",
+        "errors": {
+          "confirmMismatch": "Texten matchar inte företagets slug.",
+          "unknown": "Kunde inte radera företaget. Försök igen."
+        }
+      }
     },
     "subscriptions": {
       "title": "Prenumeration",
@@ -2588,6 +2612,42 @@
         "phoneNumberIdRequired": "Ange Phone Number ID.",
         "accessTokenRequired": "Ange åtkomsttoken.",
         "unknown": "Kunde inte ansluta numret. Försök igen."
+      }
+    },
+    "tenantSites": {
+      "title": "Sajter och API-nycklar",
+      "intro": "Varje webbplats skickar sina leads med sin egen nyckel till",
+      "copyNow": "Kopiera den nu: nyckeln visas inte igen. Den ska in i sajtens hostingmiljö.",
+      "copyKey": "Kopiera nyckel",
+      "copyEnv": "Kopiera miljövariabler",
+      "copied": "Kopierat",
+      "lastLead": "senaste lead {when}",
+      "noLeadsYet": "inga leads mottagna än",
+      "health": {
+        "ok": "Fungerar",
+        "failing": "Fel",
+        "idle": "Ingen aktivitet"
+      },
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "activate": "Aktivera",
+      "deactivate": "Inaktivera",
+      "keysTitle": "Aktiva nycklar",
+      "noKeys": "Inga aktiva nycklar: sajten kan inte skicka leads.",
+      "keyUsed": "använd {when}",
+      "keyNeverUsed": "aldrig använd",
+      "revoke": "Återkalla",
+      "revokeConfirm": "Återkalla nyckeln? Sajten som använder den kan inte längre skicka leads.",
+      "newKey": "Ny nyckel",
+      "addSite": "Lägg till sajt",
+      "addSiteSubmit": "Lägg till",
+      "addSiteHelp": "Skapas aktiv, med företagets första pipeline som mål, och visar dig nyckeln.",
+      "errors": {
+        "domainInvalid": "Ange en giltig domän (t.ex. dentista.com.py).",
+        "siteExists": "Företaget har redan en sajt med det namnet.",
+        "noPipeline": "Företaget har ingen pipeline: skapa en först, annars har leads ingenstans att ta vägen.",
+        "tooManyKeys": "Den har redan 2 aktiva nycklar: återkalla en innan du skapar en ny.",
+        "unknown": "Kunde inte slutföras. Försök igen."
       }
     }
   },

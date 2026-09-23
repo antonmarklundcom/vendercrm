@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { buildSystemTenantContext, requireSuperadminContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
@@ -6,8 +8,14 @@ import { getLatestSubscriptionForTenant } from "@/modules/tenancy/subscriptions"
 import { listPlans, getPlan } from "@/modules/tenancy/plans";
 import { listUsersForTenant } from "@/modules/tenancy/users";
 import { listAccountsForTenant } from "@/modules/whatsapp/accounts";
+import { listSites } from "@/modules/sites/sites";
+import { listActiveApiKeys } from "@/modules/sites/keys";
+import { listSiteHealth, siteHealthStatus } from "@/modules/sites/health";
+import { env } from "@/lib/config/env";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { CreateUserForm, type CreateUserLabels } from "./CreateUserForm";
 import { AddExistingUserForm, type AddExistingUserLabels } from "./AddExistingUserForm";
 import { CreateSubscriptionForm, RecordPaymentForm } from "./SubscriptionForms";
@@ -15,6 +23,9 @@ import { configureWithAiAction, impersonateAction } from "./actions";
 import { MemberEditDialog, type MemberEditLabels } from "./MemberEditDialog";
 import { ResetPasswordButton, type ResetPasswordLabels } from "./ResetPasswordButton";
 import { WhatsappSection } from "./WhatsappSection";
+import { SitesSection, type ConsoleSite } from "./SitesSection";
+import { DangerZone } from "./DangerZone";
+import { activateTenantAction, suspendTenantAction } from "../actions";
 
 // Defense in depth (§3.3): the (superadmin) layout already redirects a
 // non-superadmin, but a layout is not an authorization boundary — this page
@@ -40,7 +51,35 @@ export default async function TenantDetailPage({
   // be scoped to *this* tenant regardless of which businesses the operator
   // is a member of (§3.3).
   const tenantCtx = await buildSystemTenantContext(id);
-  const waAccounts = tenantCtx ? await listAccountsForTenant(tenantCtx) : [];
+  const [waAccounts, siteRows, healthRows] = tenantCtx
+    ? await Promise.all([
+        listAccountsForTenant(tenantCtx),
+        listSites(tenantCtx),
+        listSiteHealth(tenantCtx),
+      ])
+    : [[], [], []];
+  const healthBySite = new Map(healthRows.map((row) => [row.siteId, row]));
+  const consoleSites: ConsoleSite[] = await Promise.all(
+    siteRows.map(async (site) => {
+      const health = healthBySite.get(site.id);
+      const keys = tenantCtx ? await listActiveApiKeys(tenantCtx, site.id) : [];
+      return {
+        id: site.id,
+        slug: site.slug,
+        domain: site.domain,
+        isActive: site.isActive,
+        health: siteHealthStatus(health),
+        lastSuccessAt: health?.lastSuccessAt?.toISOString() ?? null,
+        keys: keys.map((key) => ({
+          id: key.id,
+          prefix: key.apiKeyPrefix,
+          label: key.label,
+          createdAt: key.createdAt.toISOString(),
+          lastUsedAt: key.lastUsedAt?.toISOString() ?? null,
+        })),
+      };
+    }),
+  );
 
   const t = await getTranslations("superadmin.tenants");
   const ts = await getTranslations("superadmin.subscriptions");
@@ -106,51 +145,82 @@ export default async function TenantDetailPage({
     <div className="flex flex-col gap-8">
       {/* The id is what the ops token allowlist and the ops API key on; until
           now it was only readable from the address bar. */}
-      <PageHeader title={tenant.name} description={`${tenant.slug} · ID ${tenant.id}`} />
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/tenants"
+          className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          {t("backToList")}
+        </Link>
+        <PageHeader
+          title={tenant.name}
+          description={`${tenant.slug} · ID ${tenant.id}`}
+          action={
+            <>
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-xs",
+                  tenant.status === "active" && "bg-success-surface text-success",
+                  tenant.status === "trial" && "bg-muted text-muted-foreground",
+                  tenant.status === "suspended" && "bg-destructive-surface text-destructive",
+                )}
+              >
+                {t(`statusValues.${tenant.status}` as "statusValues.active")}
+              </span>
+              <form
+                action={tenant.status === "suspended" ? activateTenantAction : suspendTenantAction}
+              >
+                <input type="hidden" name="tenantId" value={tenant.id} />
+                <Button type="submit" size="sm" variant="outline">
+                  {tenant.status === "suspended" ? t("activate") : t("suspend")}
+                </Button>
+              </form>
+            </>
+          }
+        />
+      </div>
+
+      <SitesSection
+        tenantId={tenant.id}
+        sites={consoleSites}
+        appUrl={env.APP_URL}
+        now={new Date().toISOString()}
+      />
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold">{ts("title")}</h2>
-        {subscription ? (
-          <div className="text-sm">
-            <p>
-              {ts("plan")}: {plan?.name ?? subscription.planId}
-            </p>
-            <p>
-              {ts("expiresAt")}: {subscription.expiresAt.toISOString()}
-            </p>
-            <p>
-              {ts("accessStatus")}: {subscription.status}
-            </p>
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="mb-1 text-lg font-semibold">{tu("title")}</h2>
+            <p className="max-w-2xl text-sm text-muted-foreground">{tu("intro")}</p>
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">{ts("none")}</p>
-        )}
-      </section>
-
-      {!subscription && (
-        <section>
-          <h2 className="mb-2 text-lg font-semibold">{ts("createTitle")}</h2>
-          <CreateSubscriptionForm
-            tenantId={tenant.id}
-            plans={plans.map((p) => ({ id: p.id, name: p.name }))}
-          />
-        </section>
-      )}
-
-      {subscription && (
-        <section>
-          <h2 className="mb-2 text-lg font-semibold">{ts("recordPaymentTitle")}</h2>
-          <RecordPaymentForm tenantId={tenant.id} subscriptionId={subscription.id} />
-        </section>
-      )}
-
-      <section>
-        <h2 className="mb-2 text-lg font-semibold">{tu("title")}</h2>
-        <p className="mb-3 max-w-2xl text-sm text-muted-foreground">{tu("intro")}</p>
+          {/* Occasional forms open in dialogs (create-dialog.tsx), so the page
+              is the business at a glance rather than two empty forms. */}
+          <div className="flex flex-wrap gap-2">
+            <CreateDialog
+              id="sumar-usuario"
+              triggerLabel={tu("addExisting.title")}
+              title={tu("addExisting.title")}
+              closeLabel={tc("close")}
+              variant="outline"
+            >
+              <p className="mb-3 text-sm text-muted-foreground">{tu("addExisting.intro")}</p>
+              <AddExistingUserForm tenantId={tenant.id} labels={addExistingLabels} />
+            </CreateDialog>
+            <CreateDialog
+              id="crear-usuario"
+              triggerLabel={tu("createTitle")}
+              title={tu("createTitle")}
+              closeLabel={tc("close")}
+            >
+              <CreateUserForm tenantId={tenant.id} labels={userLabels} />
+            </CreateDialog>
+          </div>
+        </div>
         {users.length === 0 ? (
-          <p className="mb-6 text-sm text-muted-foreground">{tu("noUsers")}</p>
+          <p className="text-sm text-muted-foreground">{tu("noUsers")}</p>
         ) : (
-          <div className="mb-6 overflow-x-auto">
+          <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b">
@@ -214,18 +284,6 @@ export default async function TenantDetailPage({
             </table>
           </div>
         )}
-
-        <h3 className="mb-3 text-base font-medium">{tu("createTitle")}</h3>
-        <CreateUserForm tenantId={tenant.id} labels={userLabels} />
-
-        {/* The other door: someone who already has an account elsewhere on the
-            platform gets a membership here too, keeping the access they have
-            (PLAN.md §3.1, reopened). */}
-        <h3 className="mt-8 mb-1 text-base font-medium">{tu("addExisting.title")}</h3>
-        <p className="mb-3 max-w-2xl text-sm text-muted-foreground">
-          {tu("addExisting.intro")}
-        </p>
-        <AddExistingUserForm tenantId={tenant.id} labels={addExistingLabels} />
       </section>
 
       <WhatsappSection
@@ -241,6 +299,44 @@ export default async function TenantDetailPage({
           connectedVia: account.connectedVia,
         }))}
       />
+
+      <section>
+        <h2 className="mb-2 text-lg font-semibold">{ts("title")}</h2>
+        {subscription ? (
+          <div className="text-sm">
+            <p>
+              {ts("plan")}: {plan?.name ?? subscription.planId}
+            </p>
+            <p>
+              {ts("expiresAt")}: {subscription.expiresAt.toISOString()}
+            </p>
+            <p>
+              {ts("accessStatus")}: {subscription.status}
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">{ts("none")}</p>
+        )}
+      </section>
+
+      {!subscription && (
+        <section>
+          <h2 className="mb-2 text-lg font-semibold">{ts("createTitle")}</h2>
+          <CreateSubscriptionForm
+            tenantId={tenant.id}
+            plans={plans.map((p) => ({ id: p.id, name: p.name }))}
+          />
+        </section>
+      )}
+
+      {subscription && (
+        <section>
+          <h2 className="mb-2 text-lg font-semibold">{ts("recordPaymentTitle")}</h2>
+          <RecordPaymentForm tenantId={tenant.id} subscriptionId={subscription.id} />
+        </section>
+      )}
+
+      <DangerZone tenantId={tenant.id} slug={tenant.slug} />
     </div>
   );
 }
