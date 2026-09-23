@@ -78,3 +78,45 @@ describe.skipIf(!hasDb)("deleteTenant (MySQL integration)", () => {
     expect(await purge.deleteTenant(superadmin, "01NOPE0000000000000000000")).toBe(false);
   });
 });
+
+describe.skipIf(!hasDb)("deleteTenant storage cleanup (local driver)", () => {
+  const superadmin = { userId: "sa-purge-storage", impersonatorUserId: null } as const;
+  let purge: typeof import("./purge");
+  let storage: (typeof import("@/lib/storage"))["storage"];
+  let doomed: string;
+  let neighbour: string;
+  let doomedFileKeys: string[];
+  let neighbourKey: string;
+
+  beforeAll(async () => {
+    purge = await import("./purge");
+    ({ storage } = await import("@/lib/storage"));
+    const { newId } = await import("@/lib/ids");
+    const { createTenant } = await import("./tenants");
+    doomed = (await createTenant(superadmin, { name: "Borrar-storage", slug: `borrar-storage-${newId()}`.toLowerCase() }))!.id;
+    neighbour = (await createTenant(superadmin, { name: "Vecino-storage", slug: `vecino-storage-${newId()}`.toLowerCase() }))!.id;
+
+    // Two kinds for the doomed business, one for its neighbour — exercising
+    // both the per-kind prefix sweep and that it never crosses tenants.
+    doomedFileKeys = [`quotes/${doomed}/${newId()}.bin`, `whatsapp-media/${doomed}/${newId()}.bin`];
+    for (const key of doomedFileKeys) {
+      await storage.put(key, Buffer.from("bye"), "application/octet-stream");
+    }
+    neighbourKey = `quotes/${neighbour}/${newId()}.bin`;
+    await storage.put(neighbourKey, Buffer.from("stay"), "application/octet-stream");
+  });
+
+  afterAll(async () => {
+    await storage.delete(neighbourKey).catch(() => {});
+    await purge.deleteTenant(superadmin, neighbour).catch(() => {});
+  });
+
+  it("deletes the business's files and leaves its neighbour's alone", async () => {
+    expect(await purge.deleteTenant(superadmin, doomed)).toBe(true);
+
+    for (const key of doomedFileKeys) {
+      await expect(storage.get(key)).rejects.toThrow();
+    }
+    await expect(storage.get(neighbourKey)).resolves.toEqual(Buffer.from("stay"));
+  });
+});
