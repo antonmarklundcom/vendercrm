@@ -447,7 +447,18 @@ export async function mergeUsers(
       skippedTenantIds.push(tenant.id);
       continue;
     }
-    await addMembership({ userId: targetUserId, tenantId: tenant.id, role: membership.role });
+    try {
+      await addMembership({ userId: targetUserId, tenantId: tenant.id, role: membership.role });
+    } catch (err) {
+      // The target was deactivated in this business (listMembershipsForUser
+      // hides that row). Reactivating it is that business's call, not a
+      // side effect of a merge, so it is skipped like any other overlap.
+      if (err instanceof MembershipError && err.code === "alreadyMember") {
+        skippedTenantIds.push(tenant.id);
+        continue;
+      }
+      throw err;
+    }
     copiedTenantIds.push(tenant.id);
   }
 
