@@ -80,27 +80,33 @@ export default async function AppLayout({
     role: tRoles(membership.role),
   }));
 
-  // Grouped so the nav reads as a product rather than a list of routes: what
-  // you work in daily, what feeds it, and what you configure once.
+  // The owner runs 27 businesses and the full list is 23 routes, so the nav
+  // is ranked rather than merely grouped (prompts/fable-crm-design-calm-down.md,
+  // goal 2): the handful used every day sit pinned at the top, and everything
+  // else folds behind three headings that open by themselves when they hold
+  // the current page. ⌘K still reaches any page directly.
   const groups: NavGroup[] = [
     {
       label: null,
-      items: [{ href: "/dashboard", label: t("dashboard"), icon: "dashboard" }],
-    },
-    {
-      label: t("groups.crm"),
       items: [
-        { href: "/contacts", label: t("contacts"), icon: "contacts" },
-        { href: "/companies", label: t("companies"), icon: "companies" },
-        { href: "/contracts", label: t("contracts"), icon: "contracts" },
-        { href: "/pipeline", label: t("pipeline"), icon: "pipeline" },
+        { href: "/dashboard", label: t("dashboard"), icon: "dashboard" },
         { href: "/inbox", label: t("inbox"), icon: "inbox" },
         // A surface of its own rather than a tab inside /inbox: the WhatsApp
         // inbox has its own assignment and 24h-window rules, and a unified
         // inbox is a decision that deserves to be made on purpose.
         { href: "/chat", label: t("chat"), icon: "chat" },
+        { href: "/pipeline", label: t("pipeline"), icon: "pipeline" },
+        { href: "/contacts", label: t("contacts"), icon: "contacts" },
         { href: "/calendar", label: t("calendar"), icon: "calendar" },
         { href: "/quotes", label: t("quotes"), icon: "quotes" },
+      ],
+    },
+    {
+      label: t("groups.sales"),
+      collapsible: true,
+      items: [
+        { href: "/companies", label: t("companies"), icon: "companies" },
+        { href: "/contracts", label: t("contracts"), icon: "contracts" },
         { href: "/documents", label: t("documents"), icon: "documents" },
         { href: "/products", label: t("products"), icon: "products" },
         { href: "/reports", label: t("reports"), icon: "reports" },
@@ -113,6 +119,7 @@ export default async function AppLayout({
       // every button throws. The whole group disappears for an agent, so it
       // is dropped below rather than rendered as a bare heading.
       label: t("groups.capture"),
+      collapsible: true,
       items: isAdmin
         ? [
             { href: "/automations", label: t("automations"), icon: "automations" as const },
@@ -127,6 +134,7 @@ export default async function AppLayout({
     },
     {
       label: t("groups.settings"),
+      collapsible: true,
       items: [
         ...(isAdmin
           ? [
@@ -191,6 +199,7 @@ export default async function AppLayout({
         <AppNav
           groups={visibleGroups}
           appName={tc("appName")}
+          menuLabel={tc("menu")}
           header={
             <>
               <NotificationBell
@@ -209,6 +218,10 @@ export default async function AppLayout({
                 labels={{
                   title: tBusiness("switcherTitle"),
                   current: tBusiness("switcherCurrent"),
+                  search: tBusiness("switcherSearch"),
+                  recent: tBusiness("switcherRecent"),
+                  all: tBusiness("switcherAll"),
+                  empty: tBusiness("switcherEmpty"),
                 }}
               />
             </>

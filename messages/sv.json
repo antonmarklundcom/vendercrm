@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "clientes.com.py",
+    "menu": "Meny",
     "loading": "Laddar…",
     "save": "Spara",
     "saved": "Ändringarna sparades",
@@ -90,7 +91,7 @@
       "automations": "Automationer",
       "users": "Team",
       "groups": {
-        "crm": "CRM",
+        "sales": "Försäljning & dokument",
         "capture": "Leadfångst",
         "settings": "Inställningar"
       },
@@ -1793,7 +1794,11 @@
     },
     "business": {
       "switcherTitle": "Företag",
-      "switcherCurrent": "Välj företag"
+      "switcherCurrent": "Välj företag",
+      "switcherSearch": "Sök företag…",
+      "switcherRecent": "Senaste",
+      "switcherAll": "Alla",
+      "switcherEmpty": "Inget företag matchar"
     },
     "reports": {
       "title": "Rapporter",

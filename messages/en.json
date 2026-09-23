@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "clientes.com.py",
+    "menu": "Menu",
     "loading": "Loading…",
     "save": "Save",
     "saved": "Changes saved",
@@ -90,7 +91,7 @@
       "automations": "Automations",
       "users": "Team",
       "groups": {
-        "crm": "CRM",
+        "sales": "Sales & documents",
         "capture": "Lead capture",
         "settings": "Settings"
       },
@@ -1793,7 +1794,11 @@
     },
     "business": {
       "switcherTitle": "Business",
-      "switcherCurrent": "Choose a business"
+      "switcherCurrent": "Choose a business",
+      "switcherSearch": "Search businesses…",
+      "switcherRecent": "Recent",
+      "switcherAll": "All",
+      "switcherEmpty": "No business matches"
     },
     "reports": {
       "title": "Reports",
