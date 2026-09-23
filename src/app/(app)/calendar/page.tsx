@@ -18,6 +18,7 @@ import { isDayKey, startOfDay, todayIn, weekdayOf } from "@/modules/calendar/zon
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select } from "@/components/ui/form-fields";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { cn } from "@/lib/utils";
 import { DEFAULT_TIMEZONE, formatDate, formatTime } from "@/lib/i18n/format";
 import { EventForm } from "./EventForm";
@@ -56,6 +57,7 @@ export default async function CalendarPage({
   const params = await searchParams;
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.calendar");
+  const tc = await getTranslations("common");
   const locale = await getLocale();
 
   const tenant = await getTenant(ctx.tenantId);
@@ -101,26 +103,41 @@ export default async function CalendarPage({
           title={t("title")}
           description={t("intro")}
           action={
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={href({ view: "week" })}
-                className={cn(
-                  buttonVariants({ variant: view === "week" ? "default" : "outline", size: "sm" }),
-                )}
-              >
-                {t("week")}
-              </Link>
-              <Link
-                href={href({ view: "month" })}
-                className={cn(
-                  buttonVariants({ variant: isMonth ? "default" : "outline", size: "sm" }),
-                )}
-              >
-                {t("month")}
-              </Link>
-            </div>
+            <CreateDialog
+              id="nueva-cita"
+              triggerLabel={t("createTitle")}
+              title={t("createTitle")}
+              closeLabel={tc("close")}
+              wide
+            >
+              <EventForm
+                action={createCalendarEventAction}
+                defaults={{ startDate: anchor, endDate: anchor }}
+                users={users.map((user) => ({ id: user.id, name: user.name }))}
+                submitLabel={t("createAction")}
+              />
+            </CreateDialog>
           }
-        />
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={href({ view: "week" })}
+              className={cn(
+                buttonVariants({ variant: view === "week" ? "default" : "outline", size: "sm" }),
+              )}
+            >
+              {t("week")}
+            </Link>
+            <Link
+              href={href({ view: "month" })}
+              className={cn(
+                buttonVariants({ variant: isMonth ? "default" : "outline", size: "sm" }),
+              )}
+            >
+              {t("month")}
+            </Link>
+          </div>
+        </PageHeader>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -406,18 +423,6 @@ export default async function CalendarPage({
             {t("emptyRange")}
           </p>
         )}
-      </section>
-
-      <section id="nueva-cita" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        <div className="max-w-2xl">
-          <EventForm
-            action={createCalendarEventAction}
-            defaults={{ startDate: anchor, endDate: anchor }}
-            users={users.map((user) => ({ id: user.id, name: user.name }))}
-            submitLabel={t("createAction")}
-          />
-        </div>
       </section>
     </div>
   );

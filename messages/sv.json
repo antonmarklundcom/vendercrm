@@ -2,6 +2,7 @@
   "common": {
     "appName": "clientes.com.py",
     "menu": "Meny",
+    "close": "Stäng",
     "loading": "Laddar…",
     "save": "Spara",
     "saved": "Ändringarna sparades",

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { useCloseCreateDialogOnSuccess } from "@/components/create-dialog";
 import { Button } from "@/components/ui/button";
 import { createDealAction, type DealField, type DealFormState } from "./actions";
 import { Input, Select } from "@/components/ui/form-fields";
@@ -36,6 +37,8 @@ export function CreateDealForm({
     createDealAction,
     initialState,
   );
+  // Inside the page header's CreateDialog: close once the record exists.
+  useCloseCreateDialogOnSuccess(state, (s) => s.created);
 
   function FieldError({ field }: { field: DealField }) {
     if (state.field !== field || !state.error) return null;

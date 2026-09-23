@@ -5,18 +5,47 @@ import { requireTenantContext } from "@/modules/tenancy/context";
 import { listCompanies } from "@/modules/crm/companies";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { CompanyForm } from "./CompanyForm";
 import { createCompanyAction } from "./actions";
 
 export default async function CompaniesPage() {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.companies");
+  const tc = await getTranslations("common");
 
   const companies = await listCompanies(ctx);
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={t("title")} description={t("intro")} />
+      <PageHeader
+        title={t("title")}
+        description={t("intro")}
+        action={
+          <>
+            <CreateDialog
+              id="nueva-empresa"
+              triggerLabel={t("createTitle")}
+              title={t("createTitle")}
+              closeLabel={tc("close")}
+            >
+              <CompanyForm
+                action={createCompanyAction}
+                labels={{
+                  name: t("name"),
+                  ruc: t("ruc"),
+                  phone: t("phone"),
+                  email: t("email"),
+                  address: t("address"),
+                  notes: t("notes"),
+                  submit: t("createTitle"),
+                  errors: { invalid: t("errors.invalid"), nameTaken: t("errors.nameTaken") },
+                }}
+              />
+            </CreateDialog>
+          </>
+        }
+      />
 
       {companies.length === 0 ? (
         <EmptyState
@@ -52,23 +81,6 @@ export default async function CompaniesPage() {
           </table>
         </div>
       )}
-
-      <section id="nueva-empresa" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        <CompanyForm
-          action={createCompanyAction}
-          labels={{
-            name: t("name"),
-            ruc: t("ruc"),
-            phone: t("phone"),
-            email: t("email"),
-            address: t("address"),
-            notes: t("notes"),
-            submit: t("createTitle"),
-            errors: { invalid: t("errors.invalid"), nameTaken: t("errors.nameTaken") },
-          }}
-        />
-      </section>
     </div>
   );
 }

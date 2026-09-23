@@ -2,6 +2,7 @@
   "common": {
     "appName": "clientes.com.py",
     "menu": "Menu",
+    "close": "Close",
     "loading": "Loading…",
     "save": "Save",
     "saved": "Changes saved",

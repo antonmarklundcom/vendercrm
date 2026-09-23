@@ -17,6 +17,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { ContactsTable, type StageOption } from "./ContactsTable";
 import { ContactCreateForm } from "./ContactCreateForm";
 import { SavedViews } from "./SavedViews";
@@ -143,34 +144,46 @@ export default async function ContactsPage({
           title={t("title")}
           description={t("intro")}
           action={
-            <div className="flex flex-wrap gap-2">
+            <>
               {/* Import is offered even on an empty list — a brand-new
                   tenant migrating off GoHighLevel starts here (§13 H6). */}
-              <Link
-                href="/contacts/import"
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-              >
+              <Link href="/contacts/import" className={cn(buttonVariants({ variant: "ghost" }))}>
                 <Upload className="size-4" aria-hidden="true" />
                 {t("importAction")}
               </Link>
               {page.total > 0 && (
-                <a
-                  href={exportHref}
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                >
+                <a href={exportHref} className={cn(buttonVariants({ variant: "ghost" }))}>
                   <Download className="size-4" aria-hidden="true" />
                   {t("exportCsv")}
                 </a>
               )}
               {ctx.role === "admin" && (
-                <Link
-                  href="/contacts/campos"
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                >
+                <Link href="/contacts/campos" className={cn(buttonVariants({ variant: "ghost" }))}>
                   {t("manageCustomFields")}
                 </Link>
               )}
-            </div>
+              <CreateDialog
+                id="nueva-etiqueta"
+                triggerLabel={t("createTagTitle")}
+                title={t("createTagTitle")}
+                closeLabel={tc("close")}
+                variant="outline"
+                closeOnSubmit
+              >
+                <form action={createTagAction} className="flex gap-2">
+                  <Input name="name" required className="flex-1" aria-label={t("createTagTitle")} />
+                  <Button type="submit">{tc("create")}</Button>
+                </form>
+              </CreateDialog>
+              <CreateDialog
+                id="nuevo-contacto"
+                triggerLabel={t("createTitle")}
+                title={t("createTitle")}
+                closeLabel={tc("close")}
+              >
+                <ContactCreateForm />
+              </CreateDialog>
+            </>
           }
         />
 
@@ -473,24 +486,6 @@ export default async function ContactsPage({
         )}
       </section>
 
-      <section id="nuevo-contacto" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        <ContactCreateForm />
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold">{t("createTagTitle")}</h2>
-        <form action={createTagAction} className="flex max-w-sm gap-2">
-          <Input
-            name="name"
-            required
-            className="flex-1"
-          />
-          <Button type="submit" variant="outline">
-            {tc("create")}
-          </Button>
-        </form>
-      </section>
     </div>
   );
 }

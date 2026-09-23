@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { useCloseCreateDialogOnSuccess } from "@/components/create-dialog";
 import { Button } from "@/components/ui/button";
 import { createProductAction, type ProductField, type ProductFormState } from "./actions";
 import { Input, Textarea } from "@/components/ui/form-fields";
@@ -14,6 +15,8 @@ export function ProductCreateForm() {
   const t = useTranslations("app.products");
   const tc = useTranslations("common");
   const [state, formAction, pending] = useActionState(createProductAction, initialState);
+  // Inside the page header's CreateDialog: close once the record exists.
+  useCloseCreateDialogOnSuccess(state, (s) => s.error === null);
 
   function FieldError({ field }: { field: ProductField }) {
     if (state.field !== field || !state.error) return null;

@@ -6,6 +6,7 @@ import { listProducts } from "@/modules/quotes/products";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { toggleProductAction } from "./actions";
 import { ProductCreateForm } from "./ProductCreateForm";
 import { formatMoney } from "@/lib/i18n/format";
@@ -31,16 +32,26 @@ export default async function ProductsPage() {
           title={t("title")}
           description={t("intro")}
           action={
-            <div className="flex gap-2">
-              <Button asChild size="sm" variant="outline">
+            <>
+              <Button asChild variant="ghost">
                 <a href="/api/exports/products">{t("exportCsv")}</a>
               </Button>
               {isAdmin && (
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/products/import">{t("importAction")}</Link>
-                </Button>
+                <>
+                  <Button asChild variant="ghost">
+                    <Link href="/products/import">{t("importAction")}</Link>
+                  </Button>
+                  <CreateDialog
+                    id="nuevo-producto"
+                    triggerLabel={t("createTitle")}
+                    title={t("createTitle")}
+                    closeLabel={tc("close")}
+                  >
+                    <ProductCreateForm />
+                  </CreateDialog>
+                </>
               )}
-            </div>
+            </>
           }
         />
 
@@ -97,12 +108,6 @@ export default async function ProductsPage() {
         )}
       </section>
 
-      {isAdmin && (
-        <section id="nuevo-producto" className="scroll-mt-6">
-          <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-          <ProductCreateForm />
-        </section>
-      )}
     </div>
   );
 }

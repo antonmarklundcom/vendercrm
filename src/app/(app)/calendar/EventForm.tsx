@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useCloseCreateDialogOnSuccess } from "@/components/create-dialog";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,9 @@ export function EventForm({
 }) {
   const t = useTranslations("app.calendar");
   const [state, formAction, pending] = useActionState(action, EMPTY_CALENDAR_FORM);
+  // Inside the agenda's CreateDialog: close once the event is saved. A no-op
+  // where this form is rendered inline (editing an existing event).
+  useCloseCreateDialogOnSuccess(state, (s) => s.saved);
   // Controlled so the time boxes can disappear for an all-day event — an
   // empty pair of times next to "todo el día" is a question with no answer.
   const [allDay, setAllDay] = useState(defaults.allDay ?? false);
