@@ -12,8 +12,17 @@ import {
   getTenantBySlug,
 } from "@/modules/tenancy/tenants";
 import { deleteTenant } from "@/modules/tenancy/purge";
+import { getUserByEmail } from "@/modules/tenancy/users";
+import { addMembership, MembershipError } from "@/modules/tenancy/memberships";
+import { writeAuditLog } from "@/modules/tenancy/audit";
 import { seedDefaultPipeline } from "@/modules/crm/pipelines";
 import { uniqueSlug } from "@/lib/slug";
+
+// A batch action never touches more rows than a click could plausibly mean
+// to select on one page of the list; it is a backstop against a malformed
+// request, not a real-world limit (the list itself paginates at 50).
+const MAX_BATCH = 200;
+const idsSchema = z.array(z.string().min(1).max(26)).min(1).max(MAX_BATCH);
 
 const createTenantSchema = z.object({
   name: z.string().min(1).max(200),
@@ -149,4 +158,156 @@ export async function deleteTenantAction(
 
   revalidatePath("/tenants", "layout");
   redirect("/tenants");
+}
+
+// --- Bulk actions on the business list (checkbox selection, PLAN.md's
+// console list needs the same batch tools a list of ~50-200 businesses
+// eventually calls for: suspending a cohort, granting an operator access to
+// several at once, cleaning up demo/trial businesses). Every one starts with
+// requireSuperadminContext, validates ids with zod and caps the batch at
+// MAX_BATCH — the same guardrails the single-row actions above already
+// carry, just per id in a loop. -------------------------------------------
+
+export type BulkResultState = { message: string | null; error: string | null };
+
+const bulkIdsFormSchema = z.object({ tenantIds: idsSchema });
+
+function parseBulkIds(formData: FormData) {
+  return bulkIdsFormSchema.safeParse({ tenantIds: formData.getAll("tenantId") });
+}
+
+export async function bulkSuspendTenantsAction(
+  _prev: BulkResultState,
+  formData: FormData,
+): Promise<BulkResultState> {
+  const ctx = await requireSuperadminContext();
+  const parsed = parseBulkIds(formData);
+  if (!parsed.success) return { message: null, error: "unknown" };
+
+  for (const tenantId of parsed.data.tenantIds) {
+    await suspendTenant(ctx, tenantId);
+  }
+
+  revalidatePath("/tenants", "layout");
+  return { message: `bulkSuspended:${parsed.data.tenantIds.length}`, error: null };
+}
+
+export async function bulkActivateTenantsAction(
+  _prev: BulkResultState,
+  formData: FormData,
+): Promise<BulkResultState> {
+  const ctx = await requireSuperadminContext();
+  const parsed = parseBulkIds(formData);
+  if (!parsed.success) return { message: null, error: "unknown" };
+
+  for (const tenantId of parsed.data.tenantIds) {
+    await activateTenant(ctx, tenantId);
+  }
+
+  revalidatePath("/tenants", "layout");
+  return { message: `bulkActivated:${parsed.data.tenantIds.length}`, error: null };
+}
+
+const bulkGrantAccessSchema = z.object({
+  tenantIds: idsSchema,
+  email: z.string().email().max(320),
+  role: z.enum(["admin", "agent"]),
+});
+
+export type BulkGrantAccessState = {
+  message: string | null;
+  error: string | null;
+  values: Record<string, string>;
+};
+
+/**
+ * "Dar acceso a…" on several businesses at once: adds one membership per
+ * selected business for an existing user, reusing `addMembership` and the
+ * same superadmin-target guard `addExistingUserToTenantAction`
+ * ([id]/actions.ts) enforces one row at a time. Businesses where the user is
+ * already a member are skipped, not failed — the point of "select several"
+ * is not having to know in advance which ones already have them.
+ */
+export async function bulkGrantAccessAction(
+  _prev: BulkGrantAccessState,
+  formData: FormData,
+): Promise<BulkGrantAccessState> {
+  const superadmin = await requireSuperadminContext();
+  const values = { email: String(formData.get("email") ?? ""), role: String(formData.get("role") ?? "") };
+
+  const parsed = bulkGrantAccessSchema.safeParse({
+    tenantIds: formData.getAll("tenantId"),
+    email: formData.get("email"),
+    role: formData.get("role"),
+  });
+  if (!parsed.success) return { message: null, error: "invalid", values };
+
+  const user = await getUserByEmail(parsed.data.email);
+  if (!user) return { message: null, error: "userNotFound", values };
+  if (user.isSuperadmin) return { message: null, error: "superadminTarget", values };
+
+  let added = 0;
+  let skipped = 0;
+  for (const tenantId of parsed.data.tenantIds) {
+    try {
+      await addMembership({ userId: user.id, tenantId, role: parsed.data.role });
+    } catch (err) {
+      if (err instanceof MembershipError && err.code === "alreadyMember") {
+        skipped += 1;
+        continue;
+      }
+      throw err;
+    }
+    await writeAuditLog({
+      tenantId,
+      actorUserId: superadmin.userId,
+      action: "membership.added",
+      entity: "user",
+      entityId: user.id,
+    });
+    added += 1;
+  }
+
+  revalidatePath("/tenants", "layout");
+  return { message: `bulkGranted:${added}:${skipped}`, error: null, values: {} };
+}
+
+const bulkDeleteSchema = z.object({
+  tenantIds: idsSchema,
+  confirm: z.string(),
+});
+
+export type BulkDeleteState = { message: string | null; error: string | null };
+
+/**
+ * Bulk "Eliminar": the same hard delete as the single-business danger zone
+ * (`deleteTenant`, src/modules/tenancy/purge.ts), looped, behind a typed
+ * "ELIMINAR <n>" confirmation the client renders with the exact selected
+ * count — checked again here so a stale form can't slip a bigger batch
+ * through than what was typed.
+ */
+export async function bulkDeleteTenantsAction(
+  _prev: BulkDeleteState,
+  formData: FormData,
+): Promise<BulkDeleteState> {
+  const ctx = await requireSuperadminContext();
+  const parsed = bulkDeleteSchema.safeParse({
+    tenantIds: formData.getAll("tenantId"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) return { message: null, error: "unknown" };
+
+  const expected = `ELIMINAR ${parsed.data.tenantIds.length}`;
+  if (parsed.data.confirm.trim() !== expected) {
+    return { message: null, error: "confirmMismatch" };
+  }
+
+  let deleted = 0;
+  for (const tenantId of parsed.data.tenantIds) {
+    const ok = await deleteTenant(ctx, tenantId);
+    if (ok) deleted += 1;
+  }
+
+  revalidatePath("/tenants", "layout");
+  return { message: `bulkDeleted:${deleted}`, error: null };
 }
