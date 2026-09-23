@@ -2255,7 +2255,8 @@
       "superadmin": "Superadministratör",
       "audit": "Granskningslogg",
       "users": "Användare",
-      "overview": "Översikt"
+      "overview": "Översikt",
+      "sites": "Sajter"
     },
     "ops": {
       "title": "Claude Ops",
@@ -2347,6 +2348,31 @@
       },
       "common": {
         "cancel": "Avbryt"
+      },
+      "provision": {
+        "title": "Skapa från domäner",
+        "intro": "Klistra in en lista med domäner (en per rad, eventuellt följt av komma och företagsnamnet). Varje domän får företag, sajt, pipeline, API-nyckel och en testlead, precis som med skriptet. Sajterna är inaktiva tills du godkänner dem.",
+        "submit": "Skapa",
+        "help": "Domäner som redan har en sajt i CRM:et hoppas över.",
+        "errors": {
+          "empty": "Hittade inga domäner i listan.",
+          "tooMany": "För många på en gång: klistra in högst 200.",
+          "unknown": "Kunde inte förbereda omgången. Försök igen."
+        },
+        "invalid": "Inte domäner: {lines}",
+        "existing": "Har redan en sajt, hoppades över: {domains}",
+        "progress": "{done} av {total} klara{failed, plural, =0 {} one { · # misslyckades} other { · # misslyckades}}",
+        "rowPending": "Väntar",
+        "rowRunning": "Skapar…",
+        "rowDone": "Klar, med nyckel",
+        "rowDoneNoKey": "Klar (nyckeln skapades i ett tidigare försök: skapa en ny från företaget)",
+        "rowFailed": "Misslyckades vid ”{step}”: {reason}",
+        "retryFailed": "Försök igen med de som misslyckades",
+        "keysWarning": "{count, plural, one {Ladda ner nyckeln nu: den visas inte igen.} other {Ladda ner de # nycklarna nu: de visas inte igen.}}",
+        "downloadEnv": "Miljövariabler (.txt)",
+        "approveAll": "Godkänn och aktivera alla",
+        "approveHelp": "Aktiverar alla sajter som väntar på ditt godkännande och tar bort deras testleads.",
+        "networkError": "anslutningen bröts"
       }
     },
     "tenantUsers": {
@@ -2648,6 +2674,69 @@
         "noPipeline": "Företaget har ingen pipeline: skapa en först, annars har leads ingenstans att ta vägen.",
         "tooManyKeys": "Den har redan 2 aktiva nycklar: återkalla en innan du skapar en ny.",
         "unknown": "Kunde inte slutföras. Försök igen."
+      },
+      "test": {
+        "send": "Testa",
+        "help": "Skickar en testlead till sajtens CRM för att se att den hamnar i rätt pipeline. Testar inte formuläret på webbplatsen.",
+        "ok": "Kom fram: kontakten skapades.",
+        "okWithDeal": "Kom fram: kontakten och affären skapades.",
+        "retire": "Ta bort testlead",
+        "retired": "Testlead borttagen.",
+        "errors": {
+          "testRejected": "CRM:et avvisade testleaden: kontrollera sajtens inställningar.",
+          "unknown": "Kunde inte skicka. Försök igen."
+        }
+      },
+      "settings": {
+        "open": "Inställningar",
+        "title": "Sajtens inställningar",
+        "name": "Namn",
+        "domain": "Domän",
+        "stage": "Leads hamnar i",
+        "owner": "Ansvarig",
+        "whatsapp": "WhatsApp-nummer",
+        "keep": "Ingen ändring",
+        "errors": {
+          "invalid": "Kontrollera uppgifterna: något hör inte till det här företaget.",
+          "unknown": "Kunde inte spara. Försök igen."
+        }
+      }
+    },
+    "platformSites": {
+      "title": "Sajter",
+      "intro": "Alla webbplatser för alla företag: vilka som felar, vilka som slutat få leads och vilka som saknar nyckel. Markera flera för att skapa nycklar på en gång.",
+      "emptyTitle": "Inga sajter än",
+      "emptyBody": "Skapa från domäner i Claude Ops eller lägg till en sajt från ett företags sida.",
+      "emptyAction": "Till Claude Ops",
+      "search": "Sök",
+      "searchPlaceholder": "Domän eller företag",
+      "filter": "Filter",
+      "filters": {
+        "all": "Alla",
+        "failing": "Med fel",
+        "quiet": "Inga leads på {days}+ dagar",
+        "inactive": "Inaktiva",
+        "noKey": "Utan nyckel"
+      },
+      "issued": "{count, plural, one {# nyckel skapad. Ladda ner den nu: den visas inte igen.} other {# nycklar skapade. Ladda ner dem nu: de visas inte igen.}}",
+      "downloadEnv": "Miljövariabler (.txt)",
+      "refused": "Ingen ny nyckel (har redan 2 aktiva; kryssa i ”Ersätt”): {domains}{more, plural, =0 {} other { och # till}}",
+      "selected": "{count, plural, one {# sajt markerad} other {# sajter markerade}}",
+      "replace": "Ersätt (återkallar nuvarande nycklar: de sajterna slutar skicka leads tills den nya är på plats)",
+      "issueKeys": "{count, plural, one {Skapa nyckel} other {Skapa # nycklar}}",
+      "noMatches": "Ingen sajt matchar.",
+      "selectAll": "Markera alla synliga",
+      "site": "Sajt",
+      "business": "Företag",
+      "health": "Status",
+      "lastLead": "Senaste lead",
+      "keys": "Nycklar",
+      "inactive": "inaktiv",
+      "never": "Aldrig",
+      "healthValues": {
+        "ok": "Fungerar",
+        "failing": "Fel",
+        "idle": "Ingen aktivitet"
       }
     }
   },
