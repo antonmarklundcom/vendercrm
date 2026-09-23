@@ -2255,7 +2255,8 @@
       "superadmin": "Superadmin",
       "audit": "Audit log",
       "users": "Users",
-      "overview": "Overview"
+      "overview": "Overview",
+      "sites": "Sites"
     },
     "ops": {
       "title": "Claude Ops",
@@ -2347,6 +2348,31 @@
       },
       "common": {
         "cancel": "Cancel"
+      },
+      "provision": {
+        "title": "Provision domains",
+        "intro": "Paste a list of domains (one per line, optionally followed by a comma and the business name). Each gets its business, site, pipeline, API key and a test lead, just like the script. Sites stay inactive until you approve them.",
+        "submit": "Provision",
+        "help": "Domains that already have a site in the CRM are skipped.",
+        "errors": {
+          "empty": "No domains found in the list.",
+          "tooMany": "Too many at once: paste up to 200.",
+          "unknown": "Could not prepare the batch. Try again."
+        },
+        "invalid": "Not domains: {lines}",
+        "existing": "Already have a site, skipped: {domains}",
+        "progress": "{done} of {total} done{failed, plural, =0 {} one { · # failed} other { · # failed}}",
+        "rowPending": "Waiting",
+        "rowRunning": "Creating…",
+        "rowDone": "Done, with key",
+        "rowDoneNoKey": "Done (the key was issued in an earlier attempt: issue a new one from the business)",
+        "rowFailed": "Failed at “{step}”: {reason}",
+        "retryFailed": "Retry the failed ones",
+        "keysWarning": "{count, plural, one {Download the key now: it is not shown again.} other {Download the # keys now: they are not shown again.}}",
+        "downloadEnv": "Environment variables (.txt)",
+        "approveAll": "Approve and activate all",
+        "approveHelp": "Activates every site awaiting your approval and deletes their test leads.",
+        "networkError": "connection lost"
       }
     },
     "tenantUsers": {
@@ -2679,6 +2705,69 @@
         "noPipeline": "The business has no pipeline: create one first, or leads have nowhere to go.",
         "tooManyKeys": "It already has 2 active keys: revoke one before creating another.",
         "unknown": "Could not complete. Try again."
+      },
+      "test": {
+        "send": "Test",
+        "help": "Sends a test lead into this site’s CRM to check it lands in the right pipeline. Does not test the website form.",
+        "ok": "Arrived: the contact was created.",
+        "okWithDeal": "Arrived: the contact and the deal were created.",
+        "retire": "Delete test lead",
+        "retired": "Test lead deleted.",
+        "errors": {
+          "testRejected": "The CRM rejected the test lead: check the site settings.",
+          "unknown": "Could not send. Try again."
+        }
+      },
+      "settings": {
+        "open": "Settings",
+        "title": "Site settings",
+        "name": "Name",
+        "domain": "Domain",
+        "stage": "Leads land in",
+        "owner": "Owner",
+        "whatsapp": "WhatsApp number",
+        "keep": "No change",
+        "errors": {
+          "invalid": "Check the data: something does not belong to this business.",
+          "unknown": "Could not save. Try again."
+        }
+      }
+    },
+    "platformSites": {
+      "title": "Sites",
+      "intro": "Every website of every business: which are failing, which stopped receiving leads and which have no key. Select several to issue keys at once.",
+      "emptyTitle": "No sites yet",
+      "emptyBody": "Provision domains from Claude Ops or add a site from a business page.",
+      "emptyAction": "Go to Claude Ops",
+      "search": "Search",
+      "searchPlaceholder": "Domain or business",
+      "filter": "Filter",
+      "filters": {
+        "all": "All",
+        "failing": "Failing",
+        "quiet": "No leads for {days}+ days",
+        "inactive": "Inactive",
+        "noKey": "No key"
+      },
+      "issued": "{count, plural, one {# key issued. Download it now: it is not shown again.} other {# keys issued. Download them now: they are not shown again.}}",
+      "downloadEnv": "Environment variables (.txt)",
+      "refused": "No new key (already 2 active; tick “Replace”): {domains}{more, plural, =0 {} other { and # more}}",
+      "selected": "{count, plural, one {# site selected} other {# sites selected}}",
+      "replace": "Replace (revokes current keys: those sites stop sending leads until the new key is deployed)",
+      "issueKeys": "{count, plural, one {Issue key} other {Issue # keys}}",
+      "noMatches": "No site matches.",
+      "selectAll": "Select all visible",
+      "site": "Site",
+      "business": "Business",
+      "health": "Status",
+      "lastLead": "Last lead",
+      "keys": "Keys",
+      "inactive": "inactive",
+      "never": "Never",
+      "healthValues": {
+        "ok": "Working",
+        "failing": "Failing",
+        "idle": "No activity"
       }
     }
   },

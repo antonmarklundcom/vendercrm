@@ -8,6 +8,8 @@ import { TokenPanel, type TokenPanelLabels } from "./TokenPanel";
 import { BatchBar, type BatchBarLabels } from "./BatchBar";
 import { Worksheet, type WorksheetLabels } from "./Worksheet";
 import { NeedsYou, type NeedsYouLabels } from "./NeedsYou";
+import { ProvisionPanel } from "./ProvisionPanel";
+import { env } from "@/lib/config/env";
 import {
   getBatchRowViews,
   listNeedsYouViews,
@@ -77,6 +79,9 @@ export default async function ClaudeOpsPage({
     return (
       <div className="flex flex-col gap-6">
         <PageHeader title={t("title")} description={t("intro")} />
+        {/* Pasting domains needs no token of the owner's: the console mints
+            its own on first use (modules/ops/console-provision.ts). */}
+        <ProvisionPanel appUrl={env.APP_URL} />
         <p className="max-w-2xl text-sm text-muted-foreground">{t("noTokenIntro")}</p>
         <TokenPanel
           tokens={tokens}
@@ -140,13 +145,16 @@ export default async function ClaudeOpsPage({
     awaitingApproval: t("states.awaitingApproval"),
     needsInput: t("states.needsInput"),
     failed: t("states.failed"),
-    approveAll: t("needsYou.approveAll"),
+    // Raw: NeedsYou fills {count} itself, and t() would throw without it.
+    approveAll: t.raw("needsYou.approveAll") as string,
     approveAllHint: t("needsYou.approveAllHint"),
   };
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("intro")} />
+
+      <ProvisionPanel appUrl={env.APP_URL} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-4">

@@ -1,6 +1,8 @@
 import {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -76,5 +78,42 @@ export const s3Storage: StorageAdapter = {
     await client().send(
       new DeleteObjectCommand({ Bucket: env.S3_BUCKET!, Key: key }),
     );
+  },
+
+  async deletePrefix(prefix) {
+    const s3 = client();
+    const bucket = env.S3_BUCKET!;
+    let deleted = 0;
+    let failed = 0;
+    let ContinuationToken: string | undefined;
+
+    do {
+      const listed = await s3.send(
+        new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix, ContinuationToken }),
+      );
+      const keys = (listed.Contents ?? [])
+        .map((o) => o.Key)
+        .filter((k): k is string => Boolean(k));
+
+      // DeleteObjects caps at 1000 keys per call regardless of how many a
+      // single ListObjectsV2 page returned (it can't exceed that either, but
+      // chunking here keeps the two limits independent of each other).
+      for (let i = 0; i < keys.length; i += 1000) {
+        const batch = keys.slice(i, i + 1000);
+        const result = await s3.send(
+          new DeleteObjectsCommand({
+            Bucket: bucket,
+            Delete: { Objects: batch.map((Key) => ({ Key })), Quiet: true },
+          }),
+        );
+        const batchFailed = result.Errors?.length ?? 0;
+        failed += batchFailed;
+        deleted += batch.length - batchFailed;
+      }
+
+      ContinuationToken = listed.IsTruncated ? listed.NextContinuationToken : undefined;
+    } while (ContinuationToken);
+
+    return { deleted, failed };
   },
 };

@@ -90,6 +90,13 @@ export type IngestRequestMeta = {
  */
 export type IngestOptions = {
   allowInactive?: boolean;
+  /**
+   * Leaves the site's health row alone. For the console's "send a test lead"
+   * button, which exercises the CRM side (routing, pipeline) from inside the
+   * server: recording it as a success would paint a site whose real form is
+   * broken green on /platform-sites, which is the one thing health is for.
+   */
+  skipHealth?: boolean;
 };
 
 export async function ingestLead(
@@ -134,7 +141,9 @@ export async function ingestLeadForSite(
   // lanes are covered by one call site and no failure path can forget. Never
   // awaited into the caller's error handling: bookkeeping must not fail an
   // ingest, and it stores no payload and no credential.
-  if (outcome.ok) {
+  if (options.skipHealth) {
+    // See IngestOptions.skipHealth.
+  } else if (outcome.ok) {
     await recordIngestSuccess(site, lane);
   } else {
     await recordIngestFailure(
