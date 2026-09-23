@@ -13,6 +13,9 @@ import {
   setTenantSiteActiveAction,
   type SiteKeyState,
 } from "./sites-actions";
+import { SiteSettingsDialog, SiteTestLead, type SiteOptions } from "./SiteTools";
+
+export type { SiteOptions };
 
 // A business's sites and their API keys, managed from the console. The goal
 // is that getting a live site's key is one click from the business page:
@@ -21,8 +24,12 @@ import {
 export type ConsoleSite = {
   id: string;
   slug: string;
+  name: string;
   domain: string | null;
   isActive: boolean;
+  defaultStageId: string | null;
+  defaultOwnerUserId: string | null;
+  waAccountId: string | null;
   health: "ok" | "failing" | "idle";
   lastSuccessAt: string | null;
   keys: Array<{
@@ -81,11 +88,13 @@ function KeyReveal({ apiKey, appUrl }: { apiKey: string; appUrl: string }) {
 function SiteRow({
   tenantId,
   site,
+  options,
   appUrl,
   now,
 }: {
   tenantId: string;
   site: ConsoleSite;
+  options: SiteOptions;
   appUrl: string;
   now: Date;
 }) {
@@ -132,6 +141,11 @@ function SiteRow({
             </Button>
           </form>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <SiteSettingsDialog tenantId={tenantId} site={site} options={options} />
+        <SiteTestLead tenantId={tenantId} siteId={site.id} />
       </div>
 
       {state.apiKey && state.siteId === site.id && <KeyReveal apiKey={state.apiKey} appUrl={appUrl} />}
@@ -193,11 +207,13 @@ function SiteRow({
 export function SitesSection({
   tenantId,
   sites,
+  options,
   appUrl,
   now,
 }: {
   tenantId: string;
   sites: ConsoleSite[];
+  options: SiteOptions;
   appUrl: string;
   /** Server render time, so relative times match on both sides. */
   now: string;
@@ -221,6 +237,7 @@ export function SitesSection({
               key={site.id}
               tenantId={tenantId}
               site={site}
+              options={options}
               appUrl={appUrl}
               now={new Date(now)}
             />

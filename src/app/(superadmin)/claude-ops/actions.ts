@@ -19,7 +19,9 @@ import {
   setBatchRawText,
   setOpsTokenAllowlist,
 } from "@/modules/ops";
-import type { OpsRow } from "@/modules/ops";
+import { provisionConsoleRow, startConsoleBatch } from "@/modules/ops";
+import type { ConsoleRowResult, OpsRow } from "@/modules/ops";
+import { parseDomainList } from "@/modules/ops/domain-list";
 // Imported by path, not through the module index: it is pure, and the
 // console's authorization test mocks "@/modules/ops" wholesale.
 import { resolveTenantRefs } from "@/modules/ops/tenant-refs";
@@ -265,4 +267,56 @@ export async function rejectRowAction(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/claude-ops");
+}
+
+// --- Provisioning from the console -------------------------------------
+
+export type StartProvisionState = {
+  error: "empty" | "tooMany" | "unknown" | null;
+  batchId: string | null;
+  rows: Array<{ id: string; domain: string; name: string }>;
+  existing: string[];
+  invalid: string[];
+  duplicates: string[];
+};
+
+/** The same ceiling the ops API's rate limit makes practical in one sitting. */
+const MAX_CONSOLE_DOMAINS = 200;
+
+/**
+ * Parses the pasted list and creates the batch and its rows. The five steps
+ * then run one row per request (provisionRowAction), driven by the page, so
+ * fifty domains are fifty short requests with live progress rather than one
+ * request that outlives the host's timeout.
+ */
+export async function startProvisionAction(
+  _prev: StartProvisionState,
+  formData: FormData,
+): Promise<StartProvisionState> {
+  const ctx = await requireSuperadminContext();
+  const parsed = parseDomainList(String(formData.get("domains") ?? ""));
+  const base = {
+    batchId: null,
+    rows: [],
+    existing: [],
+    invalid: parsed.invalid,
+    duplicates: parsed.duplicates,
+  };
+  if (parsed.entries.length === 0) return { ...base, error: "empty" };
+  if (parsed.entries.length > MAX_CONSOLE_DOMAINS) return { ...base, error: "tooMany" };
+
+  try {
+    const batch = await startConsoleBatch(ctx, parsed.entries);
+    revalidatePath("/claude-ops");
+    return { ...base, error: null, ...batch };
+  } catch {
+    return { ...base, error: "unknown" };
+  }
+}
+
+export async function provisionRowAction(rowId: string): Promise<ConsoleRowResult> {
+  const ctx = await requireSuperadminContext();
+  const parsed = z.string().min(1).max(26).safeParse(rowId);
+  if (!parsed.success) return { ok: false, step: "tenant", reason: "invalid row" };
+  return provisionConsoleRow(ctx, parsed.data);
 }
