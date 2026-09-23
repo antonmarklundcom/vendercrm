@@ -8,6 +8,7 @@ import { listProducts } from "@/modules/quotes/products";
 import { listContacts } from "@/modules/crm/contacts";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
 import { DocumentBuilder, type DocumentBuilderLabels } from "./DocumentBuilder";
 import { formatMoney } from "@/lib/i18n/format";
 import { getLocale } from "next-intl/server";
@@ -15,6 +16,7 @@ import { getLocale } from "next-intl/server";
 export default async function DocumentsPage() {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.documents");
+  const tc = await getTranslations("common");
   const locale = await getLocale();
 
   const [documents, contacts, products] = await Promise.all([
@@ -53,7 +55,35 @@ export default async function DocumentsPage() {
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
-        <PageHeader title={t("title")} description={t("intro")} />
+        <PageHeader
+          title={t("title")}
+          description={t("intro")}
+          action={
+            <CreateDialog
+              id="nueva-nota"
+              triggerLabel={t("createTitle")}
+              title={t("createTitle")}
+              closeLabel={tc("close")}
+              wide
+            >
+              {contacts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("needContact")}{" "}
+                  <Link href="/contacts" className="underline underline-offset-4">
+                    {t("goToContacts")}
+                  </Link>
+                </p>
+              ) : (
+                <DocumentBuilder
+                  mode="create"
+                  contacts={contacts.map((c) => ({ id: c.id, label: `${c.name} — ${c.phone}` }))}
+                  products={products.map((p) => ({ id: p.id, name: p.name, unitPrice: p.unitPrice }))}
+                  labels={labels}
+                />
+              )}
+            </CreateDialog>
+          }
+        />
 
         {documents.length === 0 ? (
           <EmptyState
@@ -107,25 +137,6 @@ export default async function DocumentsPage() {
               </tbody>
             </table>
           </div>
-        )}
-      </section>
-
-      <section id="nueva-nota" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        {contacts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t("needContact")}{" "}
-            <Link href="/contacts" className="underline underline-offset-4">
-              {t("goToContacts")}
-            </Link>
-          </p>
-        ) : (
-          <DocumentBuilder
-            mode="create"
-            contacts={contacts.map((c) => ({ id: c.id, label: `${c.name} — ${c.phone}` }))}
-            products={products.map((p) => ({ id: p.id, name: p.name, unitPrice: p.unitPrice }))}
-            labels={labels}
-          />
         )}
       </section>
     </div>

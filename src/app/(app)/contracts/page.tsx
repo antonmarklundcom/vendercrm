@@ -10,6 +10,9 @@ import {
 import { listContacts } from "@/modules/crm/contacts";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { CreateDialog } from "@/components/create-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { createContractAction } from "./actions";
 import { ContractCreateForm } from "./ContractCreateForm";
 
@@ -20,6 +23,7 @@ export default async function ContractsPage({
 }) {
   const ctx = await requireTenantContext();
   const t = await getTranslations("app.contracts");
+  const tc = await getTranslations("common");
   const { contactId, dealId, quoteId } = await searchParams;
 
   await ensureDefaultContractTemplates(ctx);
@@ -39,9 +43,46 @@ export default async function ContractsPage({
         title={t("title")}
         description={t("intro")}
         action={
-          <Link href="/contracts/templates" className="text-sm underline underline-offset-4">
-            {t("manageTemplates")}
-          </Link>
+          <>
+            <Link href="/contracts/templates" className={cn(buttonVariants({ variant: "ghost" }))}>
+              {t("manageTemplates")}
+            </Link>
+            <CreateDialog
+              id="nuevo-contrato"
+              triggerLabel={t("createTitle")}
+              title={t("createTitle")}
+              closeLabel={tc("close")}
+            >
+              {contacts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("needContact")}{" "}
+                  <Link href="/contacts" className="underline underline-offset-4">
+                    {t("goToContacts")}
+                  </Link>
+                </p>
+              ) : activeTemplates.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t("needTemplate")}{" "}
+                  <Link href="/contracts/templates" className="underline underline-offset-4">
+                    {t("manageTemplates")}
+                  </Link>
+                </p>
+              ) : (
+                <ContractCreateForm
+                  action={createContractAction}
+                  contacts={contacts.map((c) => ({ id: c.id, label: `${c.name} — ${c.phone}` }))}
+                  templates={activeTemplates.map((tpl) => ({ id: tpl.id, name: tpl.name }))}
+                  defaults={{ contactId: contactId ?? "", dealId: dealId ?? "", quoteId: quoteId ?? "" }}
+                  labels={{
+                    contact: t("contact"),
+                    template: t("template"),
+                    submit: t("createTitle"),
+                    errors: { invalid: t("errors.invalid") },
+                  }}
+                />
+              )}
+            </CreateDialog>
+          </>
         }
       />
 
@@ -83,38 +124,6 @@ export default async function ContractsPage({
           </table>
         </div>
       )}
-
-      <section id="nuevo-contrato" className="scroll-mt-6">
-        <h2 className="mb-4 text-lg font-semibold">{t("createTitle")}</h2>
-        {contacts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t("needContact")}{" "}
-            <Link href="/contacts" className="underline underline-offset-4">
-              {t("goToContacts")}
-            </Link>
-          </p>
-        ) : activeTemplates.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t("needTemplate")}{" "}
-            <Link href="/contracts/templates" className="underline underline-offset-4">
-              {t("manageTemplates")}
-            </Link>
-          </p>
-        ) : (
-          <ContractCreateForm
-            action={createContractAction}
-            contacts={contacts.map((c) => ({ id: c.id, label: `${c.name} — ${c.phone}` }))}
-            templates={activeTemplates.map((tpl) => ({ id: tpl.id, name: tpl.name }))}
-            defaults={{ contactId: contactId ?? "", dealId: dealId ?? "", quoteId: quoteId ?? "" }}
-            labels={{
-              contact: t("contact"),
-              template: t("template"),
-              submit: t("createTitle"),
-              errors: { invalid: t("errors.invalid") },
-            }}
-          />
-        )}
-      </section>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { useCloseCreateDialogOnSuccess } from "@/components/create-dialog";
 import { Button } from "@/components/ui/button";
 import {
   createContactAction,
@@ -36,6 +37,8 @@ export function ContactCreateForm() {
     createContactAction,
     initialState,
   );
+  // Inside the page header's CreateDialog: close once the record exists.
+  useCloseCreateDialogOnSuccess(state, (s) => s.saved);
 
   function FieldError({ field }: { field: ContactField }) {
     if (state.field !== field || !state.error) return null;
