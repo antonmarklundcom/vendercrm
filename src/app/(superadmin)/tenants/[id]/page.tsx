@@ -1,21 +1,24 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { buildSystemTenantContext, requireSuperadminContext } from "@/modules/tenancy/context";
 import { getTenant } from "@/modules/tenancy/tenants";
-import { getLatestSubscriptionForTenant } from "@/modules/tenancy/subscriptions";
+import { computeAccessStatus, getLatestSubscriptionForTenant } from "@/modules/tenancy/subscriptions";
 import { listPlans, getPlan } from "@/modules/tenancy/plans";
 import { listUsersForTenant } from "@/modules/tenancy/users";
 import { listAccountsForTenant } from "@/modules/whatsapp/accounts";
 import { listSites } from "@/modules/sites/sites";
 import { listActiveApiKeys } from "@/modules/sites/keys";
 import { listSiteHealth, siteHealthStatus } from "@/modules/sites/health";
+import { listAuditLogForTenant } from "@/modules/tenancy/audit";
 import { env } from "@/lib/config/env";
 import { cn } from "@/lib/utils";
+import { formatDate, formatMoney } from "@/lib/i18n/format";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { CreateDialog } from "@/components/create-dialog";
+import { AuditTable } from "@/components/audit-table";
 import { CreateUserForm, type CreateUserLabels } from "./CreateUserForm";
 import { AddExistingUserForm, type AddExistingUserLabels } from "./AddExistingUserForm";
 import { CreateSubscriptionForm, RecordPaymentForm } from "./SubscriptionForms";
@@ -49,6 +52,8 @@ export default async function TenantDetailPage({
     listUsersForTenant(id),
   ]);
   const plan = subscription ? await getPlan(subscription.planId) : null;
+  const accessStatus = await computeAccessStatus(tenant.id, tenant.status);
+  const recentAudit = await listAuditLogForTenant(tenant.id, 10);
 
   // System context, not the superadmin's own — the wa_accounts read has to
   // be scoped to *this* tenant regardless of which businesses the operator
@@ -114,6 +119,23 @@ export default async function TenantDetailPage({
   const ts = await getTranslations("superadmin.subscriptions");
   const tu = await getTranslations("superadmin.tenantUsers");
   const tc = await getTranslations("common");
+  const ta = await getTranslations("audit");
+  const locale = await getLocale();
+
+  // Days left and a tone for it — the number that matters more than the raw
+  // date, since it's what tells the superadmin whether to worry today or
+  // next month.
+  const daysLeft = subscription
+    ? Math.ceil((subscription.expiresAt.getTime() - Date.now()) / 86_400_000)
+    : null;
+  const expiryTone =
+    daysLeft === null
+      ? ""
+      : daysLeft < 0
+        ? "bg-destructive-surface text-destructive"
+        : daysLeft <= 7
+          ? "bg-warning-surface text-warning"
+          : "bg-success-surface text-success";
 
   const userLabels: CreateUserLabels = {
     name: tu("name"),
@@ -380,18 +402,51 @@ export default async function TenantDetailPage({
       />
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold">{ts("title")}</h2>
+        <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
+          <h2 className="text-lg font-semibold">{ts("title")}</h2>
+          {/* Recording a payment is occasional, so it opens in a dialog
+              rather than sitting as a whole extra section on the page
+              (matches the "occasional forms in dialogs" pattern above). */}
+          {subscription && (
+            <CreateDialog
+              id="renovar-suscripcion"
+              triggerLabel={ts("renew")}
+              title={ts("recordPaymentTitle")}
+              closeLabel={tc("close")}
+              variant="outline"
+            >
+              <RecordPaymentForm tenantId={tenant.id} subscriptionId={subscription.id} />
+            </CreateDialog>
+          )}
+        </div>
         {subscription ? (
-          <div className="text-sm">
-            <p>
-              {ts("plan")}: {plan?.name ?? subscription.planId}
-            </p>
-            <p>
-              {ts("expiresAt")}: {subscription.expiresAt.toISOString()}
-            </p>
-            <p>
-              {ts("accessStatus")}: {subscription.status}
-            </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <span>
+              {ts("plan")}: <strong>{plan?.name ?? subscription.planId}</strong>
+              {plan && (
+                <span className="ml-1 text-muted-foreground">
+                  ({formatMoney(plan.price, "PYG", locale)})
+                </span>
+              )}
+            </span>
+            <span>
+              {ts("expiresAt")}: {formatDate(subscription.expiresAt, locale)}
+            </span>
+            <span className={cn("rounded-full px-2.5 py-1 text-xs", expiryTone)}>
+              {daysLeft !== null && daysLeft >= 0
+                ? ts("daysLeft", { count: daysLeft })
+                : ts("daysOverdue", { count: Math.abs(daysLeft ?? 0) })}
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-xs",
+                accessStatus === "active" && "bg-success-surface text-success",
+                accessStatus === "grace" && "bg-warning-surface text-warning",
+                accessStatus === "locked" && "bg-destructive-surface text-destructive",
+              )}
+            >
+              {ts(`accessStatusValues.${accessStatus}` as "accessStatusValues.active")}
+            </span>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">{ts("none")}</p>
@@ -408,12 +463,18 @@ export default async function TenantDetailPage({
         </section>
       )}
 
-      {subscription && (
-        <section>
-          <h2 className="mb-2 text-lg font-semibold">{ts("recordPaymentTitle")}</h2>
-          <RecordPaymentForm tenantId={tenant.id} subscriptionId={subscription.id} />
-        </section>
-      )}
+      <section>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">{ta("recentActivityTitle")}</h2>
+          <Link
+            href={`/audit?tenant=${tenant.id}`}
+            className="text-sm underline underline-offset-4"
+          >
+            {ta("viewAll")}
+          </Link>
+        </div>
+        <AuditTable entries={recentAudit} />
+      </section>
 
       <DangerZone tenantId={tenant.id} slug={tenant.slug} />
     </div>

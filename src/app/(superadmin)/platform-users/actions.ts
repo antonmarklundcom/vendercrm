@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireSuperadminContext } from "@/modules/tenancy/context";
 import { writeAuditLog } from "@/modules/tenancy/audit";
-import { getUserById } from "@/modules/tenancy/users";
+import { getUserByEmail, getUserById, mergeUsers, UserMergeError } from "@/modules/tenancy/users";
 import { addMembership, removeMembership, MembershipError } from "@/modules/tenancy/memberships";
 
 // Connecting and disconnecting people from businesses, from the platform side
@@ -68,6 +68,70 @@ export async function connectUserToTenantAction(
 
   revalidatePath("/platform-users");
   revalidatePath(`/tenants/${parsed.data.tenantId}`);
+  return { error: null, ok: true };
+}
+
+// "Mover accesos": the duplicate-account merge (PLAN.md §13 H4 follow-up).
+// Superadmin-only for the same reason the connect/disconnect actions above
+// are — banning one account and re-pointing another's memberships is a
+// cross-tenant write. Neither side may be a superadmin (mergeUsers refuses
+// it): a superadmin's reach is impersonation, not memberships, so there is
+// nothing to move and nothing to ban.
+
+const mergeSchema = z.object({
+  sourceUserId: z.string().min(1).max(26),
+  targetEmail: z.string().email().max(320),
+});
+
+export type MergeUsersState = {
+  error: string | null;
+  ok: boolean;
+};
+
+export async function mergeUsersAction(
+  _prevState: MergeUsersState,
+  formData: FormData,
+): Promise<MergeUsersState> {
+  const superadmin = await requireSuperadminContext();
+  const parsed = mergeSchema.safeParse({
+    sourceUserId: formData.get("sourceUserId"),
+    targetEmail: formData.get("targetEmail"),
+  });
+  if (!parsed.success) return { error: "invalid", ok: false };
+
+  const source = await getUserById(parsed.data.sourceUserId);
+  if (!source) return { error: "notFound", ok: false };
+
+  const target = await getUserByEmail(parsed.data.targetEmail);
+  if (!target) return { error: "targetNotFound", ok: false };
+
+  let result;
+  try {
+    result = await mergeUsers(source.id, target.id);
+  } catch (err) {
+    if (err instanceof UserMergeError) {
+      if (err.code === "same") return { error: "same", ok: false };
+      if (err.code === "superadmin") return { error: "superadmin", ok: false };
+      return { error: "notFound", ok: false };
+    }
+    throw err;
+  }
+
+  await writeAuditLog({
+    tenantId: null,
+    actorUserId: superadmin.userId,
+    action: "user.merged",
+    entity: "user",
+    entityId: source.id,
+    payload: {
+      targetUserId: target.id,
+      targetEmail: target.email,
+      copiedTenantIds: result.copiedTenantIds,
+      skippedTenantIds: result.skippedTenantIds,
+    },
+  });
+
+  revalidatePath("/platform-users");
   return { error: null, ok: true };
 }
 
