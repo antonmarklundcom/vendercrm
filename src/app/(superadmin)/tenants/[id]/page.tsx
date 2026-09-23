@@ -26,7 +26,9 @@ import { WhatsappSection } from "./WhatsappSection";
 import { SitesSection, type ConsoleSite, type SiteOptions } from "./SitesSection";
 import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { DangerZone } from "./DangerZone";
+import { EditTenantDialog, type EditTenantLabels } from "./EditTenantDialog";
 import { activateTenantAction, suspendTenantAction } from "../actions";
+import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n/locales";
 
 // Defense in depth (§3.3): the (superadmin) layout already redirects a
 // non-superadmin, but a layout is not an authorization boundary — this page
@@ -152,6 +154,31 @@ export default async function TenantDetailPage({
     error: tu("resetPasswordError"),
   };
 
+  const editTenantLabels: EditTenantLabels = {
+    trigger: t("edit"),
+    title: t("editTitle"),
+    close: tc("close"),
+    name: t("name"),
+    slug: t("slug"),
+    slugHelp: t("slugChangeHelp"),
+    locale: t("locale"),
+    timezone: t("timezone"),
+    save: tc("save"),
+    errors: {
+      nameRequired: t("errors.nameRequired"),
+      slugInvalid: t("errors.slugInvalid"),
+      slugTaken: t("errors.slugTaken"),
+      timezoneInvalid: t("errors.timezoneInvalid"),
+      unknown: t("errors.unknown"),
+    },
+  };
+
+  // "Entrar al CRM": impersonate this business's first active admin in one
+  // click, same as the per-user "Ver como" button below but without having
+  // to find the right row first. Disabled (with a title tooltip) when there
+  // is no active admin to become.
+  const firstAdmin = users.find((user) => user.role === "admin" && !user.banned) ?? null;
+
   const addExistingLabels: AddExistingUserLabels = {
     email: tu("email"),
     role: tu("role"),
@@ -203,6 +230,30 @@ export default async function TenantDetailPage({
                   {tenant.status === "suspended" ? t("activate") : t("suspend")}
                 </Button>
               </form>
+              <EditTenantDialog
+                tenant={{
+                  id: tenant.id,
+                  name: tenant.name,
+                  slug: tenant.slug,
+                  locale: tenant.locale,
+                  timezone: tenant.timezone,
+                }}
+                locales={SUPPORTED_LOCALES.map((value) => ({ value, label: LOCALE_LABELS[value] }))}
+                labels={editTenantLabels}
+              />
+              {firstAdmin ? (
+                <form action={impersonateAction}>
+                  <input type="hidden" name="userId" value={firstAdmin.id} />
+                  <input type="hidden" name="tenantId" value={tenant.id} />
+                  <Button type="submit" size="sm">
+                    {t("enter")}
+                  </Button>
+                </form>
+              ) : (
+                <Button type="button" size="sm" disabled title={t("enterDisabled")}>
+                  {t("enter")}
+                </Button>
+              )}
             </>
           }
         />

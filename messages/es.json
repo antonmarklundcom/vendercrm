@@ -2443,7 +2443,8 @@
         "nameRequired": "Poné un nombre para la empresa.",
         "slugInvalid": "El slug va en minúsculas, sin espacios ni acentos (ej: mi-empresa).",
         "slugTaken": "Ya existe una empresa con ese slug.",
-        "unknown": "No se pudo crear la empresa. Intentá de nuevo."
+        "unknown": "No se pudo crear la empresa. Intentá de nuevo.",
+        "timezoneInvalid": "Esa zona horaria no existe. Usá el formato Región/Ciudad, por ejemplo America/Asuncion."
       },
       "slugPlaceholder": "Se genera del nombre; podés cambiarlo",
       "configureWithAi": "Configurar con IA",
@@ -2470,7 +2471,29 @@
           "confirmMismatch": "El texto no coincide con el slug de la empresa.",
           "unknown": "No se pudo eliminar la empresa. Intentá de nuevo."
         }
-      }
+      },
+      "edit": "Editar",
+      "editTitle": "Editar empresa",
+      "locale": "Idioma",
+      "timezone": "Zona horaria",
+      "enter": "Entrar",
+      "enterDisabled": "Esta empresa no tiene un administrador activo",
+      "exportCsv": "Exportar CSV",
+      "selectAllVisible": "Seleccionar todas las visibles",
+      "createdColumn": "Creada",
+      "pageRange": "{from}–{to} de {total}",
+      "prevPage": "Anterior",
+      "nextPage": "Siguiente",
+      "selectedCount": "{count, plural, one {# empresa seleccionada} other {# empresas seleccionadas}}",
+      "bulkGrantAccess": "Dar acceso a…",
+      "bulkGrantAccessIntro": "{count, plural, one {Se suma a la empresa seleccionada.} other {Se suma a las # empresas seleccionadas.}}",
+      "bulkSuspended": "{count, plural, one {# empresa suspendida} other {# empresas suspendidas}}",
+      "bulkActivated": "{count, plural, one {# empresa activada} other {# empresas activadas}}",
+      "bulkGranted": "{added, plural, one {# acceso otorgado} other {# accesos otorgados}}{skipped, plural, =0 {} other {, # ya era miembro}}",
+      "bulkDeleted": "{count, plural, one {# empresa eliminada} other {# empresas eliminadas}}",
+      "bulkDeleteBody": "{count, plural, one {Se elimina para siempre la empresa seleccionada y todo lo suyo.} other {Se eliminan para siempre las # empresas seleccionadas y todo lo suyo.}} No se puede deshacer.",
+      "bulkDeleteConfirmLabel": "Escribí «{expected}» para confirmar",
+      "slugChangeHelp": "Cambiar el slug mueve los links públicos de reservas (/b/slug/…): actualizalos donde estén publicados."
     },
     "subscriptions": {
       "title": "Suscripción",

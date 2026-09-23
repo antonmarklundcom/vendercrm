@@ -2443,7 +2443,8 @@
         "nameRequired": "Ge företaget ett namn.",
         "slugInvalid": "Sluggen skrivs med små bokstäver, utan mellanslag eller accenter (t.ex. mitt-foretag).",
         "slugTaken": "Det finns redan ett företag med den sluggen.",
-        "unknown": "Vi kunde inte skapa företaget. Försök igen."
+        "unknown": "Vi kunde inte skapa företaget. Försök igen.",
+        "timezoneInvalid": "Den tidszonen finns inte. Använd formatet Region/Stad, t.ex. Europe/Stockholm."
       },
       "slugPlaceholder": "Skapas från namnet; du kan ändra det",
       "configureWithAi": "Ställ in med AI",
@@ -2470,7 +2471,29 @@
           "confirmMismatch": "Texten matchar inte företagets slug.",
           "unknown": "Kunde inte radera företaget. Försök igen."
         }
-      }
+      },
+      "edit": "Redigera",
+      "editTitle": "Redigera företag",
+      "locale": "Språk",
+      "timezone": "Tidszon",
+      "enter": "Gå in",
+      "enterDisabled": "Det här företaget har ingen aktiv administratör",
+      "exportCsv": "Exportera CSV",
+      "selectAllVisible": "Markera alla synliga",
+      "createdColumn": "Skapad",
+      "pageRange": "{from}–{to} av {total}",
+      "prevPage": "Föregående",
+      "nextPage": "Nästa",
+      "selectedCount": "{count, plural, one {# företag valt} other {# företag valda}}",
+      "bulkGrantAccess": "Ge åtkomst till…",
+      "bulkGrantAccessIntro": "{count, plural, one {Läggs till i det valda företaget.} other {Läggs till i de # valda företagen.}}",
+      "bulkSuspended": "{count, plural, one {# företag avstängt} other {# företag avstängda}}",
+      "bulkActivated": "{count, plural, one {# företag aktiverat} other {# företag aktiverade}}",
+      "bulkGranted": "{added, plural, one {# åtkomst tillagd} other {# åtkomster tillagda}}{skipped, plural, =0 {} other {, # var redan medlem}}",
+      "bulkDeleted": "{count, plural, one {# företag borttaget} other {# företag borttagna}}",
+      "bulkDeleteBody": "{count, plural, one {Detta tar bort det valda företaget och allt i det permanent.} other {Detta tar bort de # valda företagen och allt i dem permanent.}} Går inte att ångra.",
+      "bulkDeleteConfirmLabel": "Skriv “{expected}” för att bekräfta",
+      "slugChangeHelp": "Att ändra slug flyttar de publika bokningslänkarna (/b/slug/…): uppdatera dem där de är publicerade."
     },
     "subscriptions": {
       "title": "Prenumeration",
