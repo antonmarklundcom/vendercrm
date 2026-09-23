@@ -18,11 +18,14 @@ import {
 // backed up (docs/BACKUPS.md). There is no undo.
 //
 // What it removes (src/modules/tenancy/purge.ts): every business and every
-// row under it, all Claude Ops history, and every user who is neither a
-// superadmin nor named with --keep-user, with their sessions and logins.
+// row under it, all Claude Ops history, every user who is neither a
+// superadmin nor named with --keep-user (with their sessions and logins),
+// and every uploaded file those businesses own in storage (quote/document/
+// contract PDFs, WhatsApp media, memory-import PDFs) — swept after the
+// database commit, best-effort: a storage failure is counted, never allowed
+// to fail or undo the deletion itself.
 // What it keeps: superadmins, the --keep-user accounts, plans, ops tokens
-// (allowlists emptied) and platform-level rows. Uploaded files in storage are
-// not touched — their rows go, the bytes stay until the bucket is cleaned.
+// (allowlists emptied) and platform-level rows.
 //
 // Before it deletes anything it writes every site domain to a file in
 // scripts/domains.txt format, so the list to re-provision survives the wipe.
@@ -95,8 +98,11 @@ async function main() {
     process.exit(0);
   }
 
-  await executeServerPurge(plan);
-  console.log(`\nDeleted ${plan.tenants.length} businesses and ${plan.deletedUsers.length} users.\n`);
+  const files = await executeServerPurge(plan);
+  console.log(`\nDeleted ${plan.tenants.length} businesses and ${plan.deletedUsers.length} users.`);
+  console.log(
+    `Storage: ${files.deleted} file(s) deleted${files.failed ? `, ${files.failed} failed (see logs above)` : ""}.\n`,
+  );
   process.exit(0);
 }
 
