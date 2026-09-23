@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, normalize, resolve } from "node:path";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, normalize, resolve, sep } from "node:path";
 import { env } from "@/lib/config/env";
 import type { StorageAdapter } from "./types";
 
@@ -16,6 +16,21 @@ function resolveKeyPath(key: string): string {
   const path = normalize(join(root, key));
   if (!path.startsWith(root)) {
     throw new Error(`Storage key escapes root: ${key}`);
+  }
+  return path;
+}
+
+// Same escape guard as resolveKeyPath, plus two rules specific to deleting a
+// whole subtree: the result must be a strict descendant of root (an empty or
+// "." prefix would otherwise `rm -rf` every tenant's files at once), and it
+// is resolved without ever being handed to a single unguarded `rm`.
+function resolvePrefixPath(prefix: string): string {
+  const path = normalize(join(root, prefix));
+  if (path !== root && !path.startsWith(`${root}${sep}`)) {
+    throw new Error(`Storage prefix escapes root: ${prefix}`);
+  }
+  if (path === root) {
+    throw new Error(`Refusing to delete the whole storage root: ${prefix}`);
   }
   return path;
 }
@@ -84,5 +99,27 @@ export const localStorage: StorageAdapter = {
   async delete(key) {
     await rm(resolveKeyPath(key), { force: true });
     await rm(contentTypePath(key), { force: true });
+  },
+
+  async deletePrefix(prefix) {
+    const path = resolvePrefixPath(prefix);
+    let deleted = 0;
+    try {
+      // Counted before the rm, and sidecar `.contenttype` files excluded —
+      // they ride along with the object they describe, not a second object.
+      const entries = await readdir(path, { recursive: true, withFileTypes: true });
+      deleted = entries.filter((e) => e.isFile() && !e.name.endsWith(".contenttype")).length;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        return { deleted: 0, failed: 0 };
+      }
+      return { deleted: 0, failed: 1 };
+    }
+    try {
+      await rm(path, { recursive: true, force: true });
+      return { deleted, failed: 0 };
+    } catch {
+      return { deleted: 0, failed: deleted || 1 };
+    }
   },
 };

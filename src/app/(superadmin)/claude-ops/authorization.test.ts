@@ -44,6 +44,8 @@ const ops = {
   markRowRejected: vi.fn(async () => undefined),
   listRowsAwaitingOwner: vi.fn(async () => []),
   retireTestLead: vi.fn(async () => undefined),
+  startConsoleBatch: vi.fn(async () => ({ batchId: "batch-2", rows: [], existing: [] })),
+  provisionConsoleRow: vi.fn(async () => ({ ok: false, step: "tenant", reason: "x" })),
 };
 vi.mock("@/modules/ops", () => ops);
 
@@ -120,6 +122,20 @@ describe("Claude Ops console actions", () => {
       name: "rejectRowAction",
       call: () => actions.rejectRowAction(form({ rowId: "row-1", note: "missing owner email" })),
       service: () => ops.markRowRejected,
+    },
+    {
+      name: "startProvisionAction",
+      call: () =>
+        actions.startProvisionAction(
+          { error: null, batchId: null, rows: [], existing: [], invalid: [], duplicates: [] },
+          form({ domains: "gruas.com.py" }),
+        ),
+      service: () => ops.startConsoleBatch,
+    },
+    {
+      name: "provisionRowAction",
+      call: () => actions.provisionRowAction("row-1"),
+      service: () => ops.provisionConsoleRow,
     },
     {
       name: "approveRowAction",

@@ -16,6 +16,7 @@ import {
   updateUserProfile,
   UserProfileError,
 } from "@/modules/tenancy/users";
+import { updateTenant, TenantUpdateError } from "@/modules/tenancy/tenants";
 import { addMembership, MembershipError } from "@/modules/tenancy/memberships";
 import { writeAuditLog } from "@/modules/tenancy/audit";
 import { startImpersonation } from "@/modules/auth/impersonation";
@@ -23,6 +24,7 @@ import { redirect } from "next/navigation";
 import { env } from "@/lib/config/env";
 import { auth } from "@/lib/auth/server";
 import { withResetUrlCapture } from "@/lib/auth/reset-capture";
+import { SUPPORTED_LOCALES } from "@/lib/i18n/locales";
 
 const createSubscriptionSchema = z.object({
   tenantId: z.string().min(1),
@@ -314,6 +316,94 @@ export async function configureWithAiAction(formData: FormData) {
   redirect("/onboarding");
 }
 
+
+// --- Edit business (name, slug, locale, timezone) -------------------------
+
+const updateTenantSchema = z.object({
+  tenantId: z.string().min(1).max(26),
+  name: z.string().min(1).max(200),
+  slug: z
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z0-9-]+$/),
+  locale: z.enum(SUPPORTED_LOCALES),
+  // Free text like the tenant's own settings form, but it has to be a zone
+  // Intl knows: a typo here would break every date the business renders.
+  timezone: z.string().min(1).max(60).refine(isKnownTimeZone),
+});
+
+function isKnownTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export type UpdateTenantField = "name" | "slug" | "timezone";
+
+export type UpdateTenantState = {
+  error: string | null;
+  field: UpdateTenantField | null;
+  values: Record<string, string>;
+  success: boolean;
+};
+
+const UPDATE_TENANT_FIELD_ERRORS: Record<UpdateTenantField, string> = {
+  name: "nameRequired",
+  slug: "slugInvalid",
+  timezone: "timezoneInvalid",
+};
+
+export async function updateTenantAction(
+  _prevState: UpdateTenantState,
+  formData: FormData,
+): Promise<UpdateTenantState> {
+  const ctx = await requireSuperadminContext();
+  const values = Object.fromEntries(
+    [...formData.entries()].filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
+
+  const parsed = updateTenantSchema.safeParse({
+    tenantId: formData.get("tenantId"),
+    name: formData.get("name"),
+    slug: formData.get("slug"),
+    locale: formData.get("locale"),
+    timezone: formData.get("timezone"),
+  });
+
+  if (!parsed.success) {
+    const field = parsed.error.issues[0]?.path[0];
+    if (typeof field === "string" && field in UPDATE_TENANT_FIELD_ERRORS) {
+      const key = field as UpdateTenantField;
+      return { error: UPDATE_TENANT_FIELD_ERRORS[key], field: key, values, success: false };
+    }
+    return { error: "unknown", field: null, values, success: false };
+  }
+
+  try {
+    const updated = await updateTenant(ctx, parsed.data.tenantId, {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      locale: parsed.data.locale,
+      timezone: parsed.data.timezone,
+    });
+    if (!updated) return { error: "unknown", field: null, values, success: false };
+  } catch (err) {
+    if (err instanceof TenantUpdateError && err.code === "slugTaken") {
+      return { error: "slugTaken", field: "slug", values, success: false };
+    }
+    throw err;
+  }
+
+  revalidatePath(`/tenants/${parsed.data.tenantId}`);
+  revalidatePath("/tenants", "layout");
+  return { error: null, field: null, values: {}, success: true };
+}
 
 // --- Member profile edit (PLAN.md §3.1: adding/removing/editing a person on
 // a business's roster is a superadmin action, since `users` is a platform

@@ -1,5 +1,6 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import { pool } from "@/db/client";
+import { storage } from "@/lib/storage";
 import type { SuperadminContext } from "./context";
 import { writeAuditLog } from "./audit";
 import { getTenant } from "./tenants";
@@ -24,6 +25,56 @@ import { getTenant } from "./tenants";
 
 /** Tables this module handles by hand rather than by the tenant_id sweep. */
 const HANDLED_BY_HAND = new Set(["users", "tenants"]);
+
+/**
+ * Every kind of file a business can own in storage, one prefix segment per
+ * kind. Every writer builds its key as `<kind>/<tenantId>/...`
+ * (storeDocumentPdf in modules/renderable-document/delivery.ts, and
+ * whatsapp-media's own key in modules/whatsapp/webhook.ts) — never
+ * `tenants/<id>/...` — so there is no single prefix that covers a business's
+ * files, only one prefix per kind.
+ *
+ * Unlike tenantScopedTables() above, storage has no information_schema to
+ * introspect this list from, so it is kept in sync by hand: a new document
+ * kind (a new call to storeDocumentPdf or storage.put) needs its prefix
+ * added here too, or its files outlive the business that owned them.
+ */
+const STORAGE_KINDS = [
+  "quotes",
+  "documents",
+  "receipts",
+  "contracts",
+  "contracts-signed",
+  "whatsapp-media",
+  "memory-imports",
+];
+
+export type StorageCleanupResult = { deleted: number; failed: number };
+
+/**
+ * Deletes every stored file under the given businesses. Best-effort and
+ * never throws: called only after the row deletion has already committed, so
+ * a storage outage must not look like — or cause — the deletion failing.
+ * Callers log the counts in their audit entry rather than surfacing them to
+ * the actor, since there is nothing left to retry from the console.
+ */
+export async function purgeTenantStorage(tenantIds: string[]): Promise<StorageCleanupResult> {
+  let deleted = 0;
+  let failed = 0;
+  for (const tenantId of tenantIds) {
+    for (const kind of STORAGE_KINDS) {
+      try {
+        const result = await storage.deletePrefix(`${kind}/${tenantId}/`);
+        deleted += result.deleted;
+        failed += result.failed;
+      } catch (err) {
+        failed += 1;
+        console.error(`tenancy/purge: storage cleanup failed for ${kind}/${tenantId}/`, err);
+      }
+    }
+  }
+  return { deleted, failed };
+}
 
 async function select<T>(conn: PoolConnection, sql: string, params: unknown[] = []) {
   const [result] = await conn.query<RowDataPacket[]>(sql, params);
@@ -138,7 +189,10 @@ function safeJson(value: string): unknown {
 /**
  * The console's "Eliminar empresa": one business, in one transaction, with a
  * platform-level audit entry (tenant_id NULL — the business's own audit rows
- * go with it, so the record of the deletion has to live outside it).
+ * go with it, so the record of the deletion has to live outside it). Once
+ * that transaction commits, the business's uploaded files are swept from
+ * storage too (best-effort — see purgeTenantStorage) and the counts land in
+ * that same audit entry's payload.
  */
 export async function deleteTenant(ctx: SuperadminContext, tenantId: string): Promise<boolean> {
   const tenant = await getTenant(tenantId);
@@ -158,6 +212,12 @@ export async function deleteTenant(ctx: SuperadminContext, tenantId: string): Pr
     conn.release();
   }
 
+  // Storage is cleaned up after the commit, deliberately outside the
+  // transaction above: an object store has no rollback to join, and a
+  // failure here must delete nothing it already deleted, not undo rows that
+  // are already gone.
+  const files = await purgeTenantStorage([tenantId]);
+
   await writeAuditLog({
     tenantId: null,
     actorUserId: ctx.userId,
@@ -169,6 +229,7 @@ export async function deleteTenant(ctx: SuperadminContext, tenantId: string): Pr
       name: tenant.name,
       slug: tenant.slug,
       rows: Object.fromEntries(counts.map((c) => [c.table, c.rows])),
+      files,
     },
   });
   return true;
@@ -252,8 +313,12 @@ export async function planServerPurge(keepEmails: string[]): Promise<ServerPurge
  * Deletes every business in the plan, every user not kept (with their
  * sessions and logins) and all Claude Ops history, in one transaction. Ops
  * tokens stay, allowlists emptied, so the re-provisioning run can use one.
+ * Once that commits, every business's uploaded files (quote/document/contract
+ * PDFs, WhatsApp media, memory-import PDFs) are swept from storage too —
+ * best-effort, see purgeTenantStorage — and the counts are returned for the
+ * caller to report.
  */
-export async function executeServerPurge(plan: ServerPurgePlan): Promise<void> {
+export async function executeServerPurge(plan: ServerPurgePlan): Promise<StorageCleanupResult> {
   const keptIds = plan.keptUsers.map((u) => u.id);
   const actor = plan.keptUsers.find((u) => u.isSuperadmin);
   if (!actor) throw new ServerPurgeError("No superadmin would survive this");
@@ -281,6 +346,10 @@ export async function executeServerPurge(plan: ServerPurgePlan): Promise<void> {
     conn.release();
   }
 
+  // Same rule as deleteTenant: after the commit, best-effort, never able to
+  // fail or roll back a wipe that has already happened.
+  const files = await purgeTenantStorage(plan.tenants.map((t) => t.id));
+
   await writeAuditLog({
     tenantId: null,
     actorUserId: actor.id,
@@ -291,6 +360,8 @@ export async function executeServerPurge(plan: ServerPurgePlan): Promise<void> {
       via: "script:purge-tenants",
       tenants: plan.tenants.length,
       users: plan.deletedUsers.length,
+      files,
     },
   });
+  return files;
 }

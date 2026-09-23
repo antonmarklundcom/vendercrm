@@ -2281,7 +2281,8 @@
       "superadmin": "Superadministrador",
       "audit": "Auditoría",
       "users": "Usuarios",
-      "overview": "Panel"
+      "overview": "Panel",
+      "sites": "Sitios"
     },
     "ops": {
       "title": "Claude Ops",
@@ -2373,6 +2374,31 @@
       },
       "common": {
         "cancel": "Cancelar"
+      },
+      "provision": {
+        "title": "Provisionar dominios",
+        "intro": "Pegá una lista de dominios (uno por línea, con el nombre del negocio después de una coma si querés). Cada uno recibe su empresa, sitio, pipeline, clave API y un lead de prueba, igual que con el script. Los sitios quedan inactivos hasta que los apruebes.",
+        "submit": "Provisionar",
+        "help": "Se saltean los dominios que ya tienen un sitio en el CRM.",
+        "errors": {
+          "empty": "No encontramos ningún dominio en la lista.",
+          "tooMany": "Son demasiados de una vez: pegá hasta 200.",
+          "unknown": "No se pudo preparar el lote. Intentá de nuevo."
+        },
+        "invalid": "No son dominios: {lines}",
+        "existing": "Ya tienen sitio, se saltearon: {domains}",
+        "progress": "{done} de {total} listos{failed, plural, =0 {} one { · # con error} other { · # con error}}",
+        "rowPending": "En espera",
+        "rowRunning": "Creando…",
+        "rowDone": "Listo, con clave",
+        "rowDoneNoKey": "Listo (la clave se emitió en un intento anterior: generá una nueva desde la empresa)",
+        "rowFailed": "Falló en «{step}»: {reason}",
+        "retryFailed": "Reintentar los que fallaron",
+        "keysWarning": "{count, plural, one {Descargá la clave ahora: no se vuelve a mostrar.} other {Descargá las # claves ahora: no se vuelven a mostrar.}}",
+        "downloadEnv": "Variables de entorno (.txt)",
+        "approveAll": "Aprobar y activar todos",
+        "approveHelp": "Activa todos los sitios que esperan tu aprobación y borra sus leads de prueba.",
+        "networkError": "se cortó la conexión"
       }
     },
     "tenantUsers": {
@@ -2443,7 +2469,8 @@
         "nameRequired": "Poné un nombre para la empresa.",
         "slugInvalid": "El slug va en minúsculas, sin espacios ni acentos (ej: mi-empresa).",
         "slugTaken": "Ya existe una empresa con ese slug.",
-        "unknown": "No se pudo crear la empresa. Intentá de nuevo."
+        "unknown": "No se pudo crear la empresa. Intentá de nuevo.",
+        "timezoneInvalid": "Esa zona horaria no existe. Usá el formato Región/Ciudad, por ejemplo America/Asuncion."
       },
       "slugPlaceholder": "Se genera del nombre; podés cambiarlo",
       "configureWithAi": "Configurar con IA",
@@ -2470,7 +2497,29 @@
           "confirmMismatch": "El texto no coincide con el slug de la empresa.",
           "unknown": "No se pudo eliminar la empresa. Intentá de nuevo."
         }
-      }
+      },
+      "edit": "Editar",
+      "editTitle": "Editar empresa",
+      "locale": "Idioma",
+      "timezone": "Zona horaria",
+      "enter": "Entrar",
+      "enterDisabled": "Esta empresa no tiene un administrador activo",
+      "exportCsv": "Exportar CSV",
+      "selectAllVisible": "Seleccionar todas las visibles",
+      "createdColumn": "Creada",
+      "pageRange": "{from}–{to} de {total}",
+      "prevPage": "Anterior",
+      "nextPage": "Siguiente",
+      "selectedCount": "{count, plural, one {# empresa seleccionada} other {# empresas seleccionadas}}",
+      "bulkGrantAccess": "Dar acceso a…",
+      "bulkGrantAccessIntro": "{count, plural, one {Se suma a la empresa seleccionada.} other {Se suma a las # empresas seleccionadas.}}",
+      "bulkSuspended": "{count, plural, one {# empresa suspendida} other {# empresas suspendidas}}",
+      "bulkActivated": "{count, plural, one {# empresa activada} other {# empresas activadas}}",
+      "bulkGranted": "{added, plural, one {# acceso otorgado} other {# accesos otorgados}}{skipped, plural, =0 {} other {, # ya era miembro}}",
+      "bulkDeleted": "{count, plural, one {# empresa eliminada} other {# empresas eliminadas}}",
+      "bulkDeleteBody": "{count, plural, one {Se elimina para siempre la empresa seleccionada y todo lo suyo.} other {Se eliminan para siempre las # empresas seleccionadas y todo lo suyo.}} No se puede deshacer.",
+      "bulkDeleteConfirmLabel": "Escribí «{expected}» para confirmar",
+      "slugChangeHelp": "Cambiar el slug mueve los links públicos de reservas (/b/slug/…): actualizalos donde estén publicados."
     },
     "subscriptions": {
       "title": "Suscripción",
@@ -2700,6 +2749,69 @@
         "noPipeline": "La empresa no tiene pipeline: creá uno antes, o los leads no tienen a dónde ir.",
         "tooManyKeys": "Ya tiene 2 claves activas: revocá una antes de crear otra.",
         "unknown": "No se pudo completar. Intentá de nuevo."
+      },
+      "test": {
+        "send": "Probar",
+        "help": "Manda un lead de prueba al CRM de este sitio para ver que llegue al pipeline correcto. No prueba el formulario de la web.",
+        "ok": "Llegó: se creó el contacto.",
+        "okWithDeal": "Llegó: se crearon el contacto y el negocio.",
+        "retire": "Borrar lead de prueba",
+        "retired": "Lead de prueba borrado.",
+        "errors": {
+          "testRejected": "El CRM rechazó el lead de prueba: revisá la configuración del sitio.",
+          "unknown": "No se pudo enviar. Intentá de nuevo."
+        }
+      },
+      "settings": {
+        "open": "Configurar",
+        "title": "Configuración del sitio",
+        "name": "Nombre",
+        "domain": "Dominio",
+        "stage": "Los leads entran en",
+        "owner": "Responsable",
+        "whatsapp": "Número de WhatsApp",
+        "keep": "Sin cambios",
+        "errors": {
+          "invalid": "Revisá los datos: algo no pertenece a esta empresa.",
+          "unknown": "No se pudo guardar. Intentá de nuevo."
+        }
+      }
+    },
+    "platformSites": {
+      "title": "Sitios",
+      "intro": "Todos los sitios web de todas las empresas: cuáles fallan, cuáles dejaron de recibir leads y cuáles no tienen clave. Seleccioná varios para generarles claves de una vez.",
+      "emptyTitle": "Todavía no hay sitios",
+      "emptyBody": "Provisioná dominios desde Claude Ops o agregá un sitio desde la página de una empresa.",
+      "emptyAction": "Ir a Claude Ops",
+      "search": "Buscar",
+      "searchPlaceholder": "Dominio o empresa",
+      "filter": "Filtro",
+      "filters": {
+        "all": "Todos",
+        "failing": "Con errores",
+        "quiet": "Sin leads hace {days}+ días",
+        "inactive": "Inactivos",
+        "noKey": "Sin clave"
+      },
+      "issued": "{count, plural, one {Se generó # clave. Descargala ahora: no se vuelve a mostrar.} other {Se generaron # claves. Descargalas ahora: no se vuelven a mostrar.}}",
+      "downloadEnv": "Variables de entorno (.txt)",
+      "refused": "Sin clave nueva (ya tienen 2 activas; marcá «Reemplazar»): {domains}{more, plural, =0 {} other { y # más}}",
+      "selected": "{count, plural, one {# sitio seleccionado} other {# sitios seleccionados}}",
+      "replace": "Reemplazar (revoca las claves actuales: esos sitios dejan de mandar leads hasta que pongas la nueva)",
+      "issueKeys": "{count, plural, one {Generar clave} other {Generar # claves}}",
+      "noMatches": "Ningún sitio coincide.",
+      "selectAll": "Seleccionar todos los visibles",
+      "site": "Sitio",
+      "business": "Empresa",
+      "health": "Estado",
+      "lastLead": "Último lead",
+      "keys": "Claves",
+      "inactive": "inactivo",
+      "never": "Nunca",
+      "healthValues": {
+        "ok": "Funcionando",
+        "failing": "Con errores",
+        "idle": "Sin actividad"
       }
     }
   },

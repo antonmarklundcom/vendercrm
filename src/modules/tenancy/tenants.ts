@@ -47,6 +47,73 @@ export async function createTenant(
   return getTenant(id);
 }
 
+export type UpdateTenantInput = {
+  name: string;
+  slug: string;
+  locale: string;
+  timezone: string;
+};
+
+/** Thrown by `updateTenant` when the new slug collides with another business. */
+export class TenantUpdateError extends Error {
+  constructor(readonly code: "slugTaken") {
+    super(code);
+  }
+}
+
+/** The console's "Editar empresa": name, slug, locale and timezone, with an
+ * audit entry of exactly the fields that changed (not the whole row — the
+ * unchanged ones are noise). */
+export async function updateTenant(
+  ctx: SuperadminContext,
+  tenantId: string,
+  input: UpdateTenantInput,
+) {
+  const current = await getTenant(tenantId);
+  if (!current) return null;
+
+  if (input.slug !== current.slug) {
+    const existing = await getTenantBySlug(input.slug);
+    if (existing && existing.id !== tenantId) {
+      throw new TenantUpdateError("slugTaken");
+    }
+  }
+
+  const changed: Record<string, string> = {};
+  const patch: Partial<typeof tenants.$inferInsert> = {};
+  if (input.name !== current.name) {
+    patch.name = input.name;
+    changed.name = input.name;
+  }
+  if (input.slug !== current.slug) {
+    patch.slug = input.slug;
+    changed.slug = input.slug;
+  }
+  if (input.locale !== current.locale) {
+    patch.locale = input.locale;
+    changed.locale = input.locale;
+  }
+  if (input.timezone !== current.timezone) {
+    patch.timezone = input.timezone;
+    changed.timezone = input.timezone;
+  }
+
+  if (Object.keys(patch).length === 0) return current;
+
+  await db.update(tenants).set(patch).where(eq(tenants.id, tenantId));
+
+  await writeAuditLog({
+    tenantId,
+    actorUserId: ctx.userId,
+    action: "tenant.updated",
+    entity: "tenant",
+    entityId: tenantId,
+    payload: changed,
+  });
+
+  return getTenant(tenantId);
+}
+
 export async function listTenants() {
   return db.select().from(tenants).orderBy(tenants.createdAt);
 }
