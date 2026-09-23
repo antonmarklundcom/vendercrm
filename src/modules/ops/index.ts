@@ -88,3 +88,12 @@ export {
   type TenantStepResult,
   type TestLeadStepResult,
 } from "./provision";
+
+export {
+  CONSOLE_TOKEN_LABEL,
+  provisionConsoleRow,
+  startConsoleBatch,
+  type ConsoleBatch,
+  type ConsoleRowResult,
+} from "./console-provision";
+export { displayNameFor, parseDomainList, type DomainEntry, type ParsedDomainList } from "./domain-list";

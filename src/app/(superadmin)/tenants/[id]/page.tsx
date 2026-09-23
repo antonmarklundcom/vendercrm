@@ -23,7 +23,8 @@ import { configureWithAiAction, impersonateAction } from "./actions";
 import { MemberEditDialog, type MemberEditLabels } from "./MemberEditDialog";
 import { ResetPasswordButton, type ResetPasswordLabels } from "./ResetPasswordButton";
 import { WhatsappSection } from "./WhatsappSection";
-import { SitesSection, type ConsoleSite } from "./SitesSection";
+import { SitesSection, type ConsoleSite, type SiteOptions } from "./SitesSection";
+import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { DangerZone } from "./DangerZone";
 import { EditTenantDialog, type EditTenantLabels } from "./EditTenantDialog";
 import { activateTenantAction, suspendTenantAction } from "../actions";
@@ -69,7 +70,11 @@ export default async function TenantDetailPage({
         id: site.id,
         slug: site.slug,
         domain: site.domain,
+        name: site.name,
         isActive: site.isActive,
+        defaultStageId: site.defaultStageId,
+        defaultOwnerUserId: site.defaultOwnerUserId,
+        waAccountId: site.waAccountId,
         health: siteHealthStatus(health),
         lastSuccessAt: health?.lastSuccessAt?.toISOString() ?? null,
         keys: keys.map((key) => ({
@@ -82,6 +87,28 @@ export default async function TenantDetailPage({
       };
     }),
   );
+
+  // What a site's leads can be routed to, for its settings dialog. A stage
+  // names its pipeline, so one list of "Pipeline › Stage" covers both.
+  const pipelines = tenantCtx ? await listPipelines(tenantCtx) : [];
+  const stageOptions = (
+    await Promise.all(
+      pipelines.map(async (pipeline) =>
+        (await listStagesForPipeline(tenantCtx!, pipeline.id)).map((stage) => ({
+          id: stage.id,
+          label: `${pipeline.name} › ${stage.name}`,
+        })),
+      ),
+    )
+  ).flat();
+  const siteOptions: SiteOptions = {
+    stages: stageOptions,
+    owners: users.map((user) => ({ id: user.id, label: user.name || user.email })),
+    waAccounts: waAccounts.map((account) => ({
+      id: account.id,
+      label: account.displayNumber || account.phoneNumberId,
+    })),
+  };
 
   const t = await getTranslations("superadmin.tenants");
   const ts = await getTranslations("superadmin.subscriptions");
@@ -235,6 +262,7 @@ export default async function TenantDetailPage({
       <SitesSection
         tenantId={tenant.id}
         sites={consoleSites}
+        options={siteOptions}
         appUrl={env.APP_URL}
         now={new Date().toISOString()}
       />
