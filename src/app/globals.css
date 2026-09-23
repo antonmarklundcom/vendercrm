@@ -322,7 +322,11 @@
   line-height: 1.15;
   margin-bottom: var(--mk-s-3);
 }
-.mk p {
+/* Zero specificity for the same reason as the link rule below: as `.mk p`
+   (0,1,1) this outranked every single-class paragraph component, so
+   `.mk-statement` rendered in muted grey and `.mk-eyebrow`, `.mk-meta` and
+   `.mk-articles__cta` lost their own colour and spacing. */
+:where(.mk) p {
   max-width: var(--mk-measure);
   color: var(--mk-ink-70);
   margin: 0 0 var(--mk-s-4);
@@ -361,6 +365,7 @@
 }
 
 .mk-statement {
+  color: var(--mk-ink);
   font-family: var(--mk-font-display);
   font-size: clamp(var(--mk-t-5), 9vw, var(--mk-t-6));
   line-height: 0.95;
@@ -385,12 +390,23 @@
   padding-inline: var(--mk-gutter);
   width: 100%;
 }
+/* Measured at 1366px the old clamp(64px, 9vw, 128px) left ~250px of dead air
+   between consecutive sections and an 11,400px-tall home page on a phone.
+   Air is the track, but it has to separate sections, not strand them. */
 .mk-section {
-  padding-block: clamp(var(--mk-s-16), 9vw, var(--mk-s-32));
+  padding-block: clamp(var(--mk-s-12), 6.5vw, var(--mk-s-24));
   position: relative;
 }
 .mk-section--tight {
   padding-block: clamp(var(--mk-s-12), 6vw, var(--mk-s-16));
+}
+/* A page header followed directly by its own body (articles): the pair is one
+   unit, so the gap between them is a paragraph break, not a section break. */
+.mk-section--lead-in {
+  padding-bottom: var(--mk-s-8);
+}
+.mk-section--flush-top {
+  padding-top: 0;
 }
 .mk-section--ink {
   background: var(--mk-ink);
@@ -813,14 +829,38 @@
   color: var(--mk-on-ink-70);
 }
 
-/* ---- the page's one intentional overlap: a raised panel crossing into the
-   dark band below it. No image slot needed, which matters while the imagery
-   step is still pending. ---- */
+/* ---- the page's one intentional overlap: the closing band's raised panel
+   rising across the band's top edge (cta-band.tsx). No image slot needed,
+   which matters while the imagery step is still pending. ---- */
 .mk-overlap {
   position: relative;
   z-index: 1;
-  margin-bottom: calc(var(--mk-s-16) * -1);
-  top: var(--mk-s-8);
+}
+@media (min-width: 1024px) {
+  .mk-closing .mk-split {
+    align-items: start;
+  }
+  .mk-closing .mk-overlap {
+    /* Rises 48px above the band: the section's own top padding plus s-12,
+       which lands inside the previous section's (equal) bottom padding. */
+    margin-top: calc(clamp(var(--mk-s-12), 6.5vw, var(--mk-s-24)) * -1 - var(--mk-s-12));
+  }
+}
+/* A light card on the ink field: its text goes back to ink, and the list
+   marks back to the base accent (the on-ink tint is for dark grounds). */
+.mk-section--ink .mk-card--raised {
+  color: var(--mk-ink);
+}
+.mk-section--ink .mk-card--raised h3 {
+  color: var(--mk-ink);
+}
+.mk-section--ink .mk-card--raised .mk-list li::before {
+  background: var(--mk-accent);
+}
+/* One class deeper than `.mk-section--ink .mk-list li`, which is
+   declared later in the file. */
+.mk-section--ink .mk-card--raised .mk-list li {
+  color: var(--mk-ink-70);
 }
 
 /* Panel headings sit inside a card, so they are a step down from the section
@@ -946,6 +986,27 @@
   gap: var(--mk-s-3);
   margin-top: var(--mk-s-8);
 }
+/* On a phone two content-width buttons of different lengths read as
+   misaligned, worst of all under the centred hero. Full width, stacked. */
+@media (max-width: 480px) {
+  .mk-cta-pair > .mk-btn {
+    flex: 1 1 100%;
+  }
+}
+.mk-hero-cine__content .mk-cta-pair {
+  justify-content: center;
+}
+/* On dark fields the ink WhatsApp button is ink on ink: in the closing band
+   and the footer it read as bare text with a green dot. It takes the ghost
+   edge there so it is one recognisable button everywhere. The footer rule
+   also has to outrank `.mk-footer a`. */
+.mk-section--ink .mk-btn--wa,
+.mk-footer .mk-btn--wa {
+  background: transparent;
+  color: var(--mk-base);
+  border: 1px solid color-mix(in srgb, var(--mk-base) 30%, transparent);
+  text-decoration: none;
+}
 
 /* ---- header / footer ---- */
 .mk-header {
@@ -994,6 +1055,116 @@
 .mk-wordmark span {
   color: var(--mk-accent);
 }
+.mk-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-s-4);
+}
+/* Compact variant of the primary button: the header is 72px, and at full
+   size the button would outweigh the wordmark. Hidden on the narrowest
+   phones, where the menu panel carries the same CTA. */
+.mk-header__cta {
+  min-height: 40px;
+  padding-inline: var(--mk-s-4);
+  font-size: var(--mk-t--1);
+}
+@media (max-width: 479px) {
+  .mk-header__cta {
+    display: none;
+  }
+}
+
+/* ---- mobile menu (<768px, where .mk-nav is hidden) ---- */
+.mk-menu {
+  position: relative;
+}
+@media (min-width: 768px) {
+  .mk-menu {
+    display: none;
+  }
+}
+.mk-menu__toggle {
+  list-style: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--mk-r-sm);
+  border: 1px solid var(--mk-hairline-strong);
+  cursor: pointer;
+}
+.mk-menu__toggle::-webkit-details-marker {
+  display: none;
+}
+.mk-menu__bars,
+.mk-menu__bars::before,
+.mk-menu__bars::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--mk-ink);
+  transition: transform var(--mk-dur-fast) var(--mk-ease-io);
+}
+.mk-menu__bars {
+  position: relative;
+}
+.mk-menu__bars::before,
+.mk-menu__bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+.mk-menu__bars::before {
+  top: -6px;
+}
+.mk-menu__bars::after {
+  top: 6px;
+}
+.mk-menu[open] .mk-menu__bars {
+  background: transparent;
+}
+.mk-menu[open] .mk-menu__bars::before {
+  transform: translateY(6px) rotate(45deg);
+}
+.mk-menu[open] .mk-menu__bars::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+/* z-index above the floating WhatsApp triggers (30) so the open panel is
+   never covered by them. */
+.mk-menu__panel {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: var(--mk-s-4) var(--mk-gutter) var(--mk-s-6);
+  background: var(--mk-base);
+  border-bottom: 1px solid var(--mk-hairline-strong);
+  box-shadow: var(--mk-shadow-2);
+}
+.mk-menu__panel ul {
+  list-style: none;
+  margin: 0 0 var(--mk-s-4);
+  padding: 0;
+}
+.mk-menu__panel li + li {
+  border-top: 1px solid var(--mk-hairline);
+}
+.mk-menu__panel li a {
+  display: block;
+  padding-block: var(--mk-s-3);
+  font-family: var(--mk-font-display);
+  font-size: var(--mk-t-1);
+  text-decoration: none;
+}
+.mk-menu__panel li a[aria-current="page"] {
+  color: var(--mk-accent);
+}
+.mk-menu__panel .mk-btn {
+  width: 100%;
+}
+
 /* Quiet ghost text link, never a CTA button (locked decision). */
 .mk-login {
   font-size: var(--mk-t--1);
@@ -1260,6 +1431,34 @@
   background: var(--mk-surface);
   padding: var(--mk-s-3) var(--mk-s-4);
   border-radius: var(--mk-r-sm);
+}
+
+/* ---- sibling links (vertical pages' "otros rubros"): a wrapping row of
+   text links with the accent arrow, deliberately lighter than any button. */
+.mk-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mk-s-3) var(--mk-s-8);
+}
+.mk-link-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mk-s-2);
+  min-height: 44px;
+  text-decoration: underline;
+  text-decoration-color: var(--mk-hairline-strong);
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color var(--mk-dur-fast) var(--mk-ease-io);
+}
+.mk-link-list a::after {
+  content: "→";
+  color: var(--mk-accent);
+}
+.mk-link-list a:hover {
+  text-decoration-color: currentColor;
 }
 
 /* ---- content hub: article index rows and article body (§7, phase M2) ---- */

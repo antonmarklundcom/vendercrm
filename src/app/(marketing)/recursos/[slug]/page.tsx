@@ -134,7 +134,10 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
         }}
       />
 
-      <section className="mk-section" aria-labelledby="mk-article-title">
+      {/* Header and body share one reading column (both offset): the body used
+          to start at the page gutter while the title sat indented above it,
+          which read as a layout mistake rather than a pattern. */}
+      <section className="mk-section mk-section--lead-in" aria-labelledby="mk-article-title">
         <div className="mk-wrap mk-offset">
           <Eyebrow>{article.eyebrow}</Eyebrow>
           <h1 id="mk-article-title">{article.title}</h1>
@@ -146,8 +149,8 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
         </div>
       </section>
 
-      <section className="mk-section mk-section--tight" aria-label={article.title}>
-        <div className="mk-wrap">
+      <section className="mk-section mk-section--tight mk-section--flush-top" aria-label={article.title}>
+        <div className="mk-wrap mk-offset">
           <article className="mk-article">
             {article.body.map((block, index) => (
               <Block key={index} block={block} />

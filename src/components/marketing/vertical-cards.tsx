@@ -4,6 +4,19 @@ import { Eyebrow, Lead } from "./primitives";
 export type VerticalItem = { name: string; body: string; href?: string };
 
 /**
+ * Which cards span two of the three desktop columns, so the grid always ends
+ * on a full row. The lead card carries the stagger; when that alone would
+ * leave a hole (4, 7… items — every sector page has 4, which left an empty
+ * cell bottom-right) the last card spans too. At a multiple of three nothing
+ * spans and the stagger comes from the ink variant alone.
+ */
+function spansTwo(index: number, count: number): boolean {
+  if (count < 4 || count % 3 === 0) return false;
+  if (index === 0) return true;
+  return count % 3 === 1 && index === count - 1;
+}
+
+/**
  * P3 staggered-weight grid. The first card spans two columns and uses the
  * ink variant while the rest are hairline cards — this is the direct antidote
  * to a row of identical white boxes, and it also puts the primary vertical
@@ -35,12 +48,8 @@ export function VerticalCards({
           {items.map((item, index) => {
             const className =
               index === 0
-                ? // The lead card spans two columns only when the row below
-                  // it would be filled anyway. At exactly three items the
-                  // span leaves two thirds of the second row empty, so the
-                  // stagger comes from the ink variant alone.
-                  `mk-card mk-card--ink mk-grain${items.length > 3 ? " mk-span-2" : ""}`
-                : "mk-card mk-card--hair";
+                ? `mk-card mk-card--ink mk-grain${spansTwo(index, items.length) ? " mk-span-2" : ""}`
+                : `mk-card mk-card--hair${spansTwo(index, items.length) ? " mk-span-2" : ""}`;
 
             const content = (
               <>

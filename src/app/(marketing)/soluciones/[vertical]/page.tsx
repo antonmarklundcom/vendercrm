@@ -185,13 +185,15 @@ export default async function VerticalPage({ params }: { params: Promise<Params>
         <p id="mk-other-verticals" style={{ marginBottom: "1rem" }}>
           {tAll("common.otherLead")}
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+        {/* Plain links, not buttons: seven bordered boxes here read as seven
+            calls to action and competed with the page's real one. */}
+        <ul className="mk-link-list">
           {others.map((slug) => (
-            <Link key={slug} href={`/soluciones/${slug}`} className="mk-btn mk-btn--ghost">
-              {tAll(`${slug}.name`)}
-            </Link>
+            <li key={slug}>
+              <Link href={`/soluciones/${slug}`}>{tAll(`${slug}.name`)}</Link>
+            </li>
           ))}
-        </div>
+        </ul>
       </Section>
 
       <CtaBand

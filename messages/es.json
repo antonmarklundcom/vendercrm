@@ -2593,7 +2593,8 @@
       "contacto": "Contacto",
       "login": "Ingresar",
       "skipToContent": "Ir al contenido",
-      "menu": "Menú"
+      "menu": "Menú",
+      "cta": "Diagnóstico gratis"
     },
     "cta": {
       "primary": "Pedí tu diagnóstico gratis",
