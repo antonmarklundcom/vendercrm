@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { preprocessAmount } from "@/lib/money";
 import { revalidatePath } from "next/cache";
 import { requireTenantAdmin } from "@/modules/tenancy/context";
 import { createProduct, updateProduct } from "@/modules/quotes/products";
@@ -28,7 +29,7 @@ const createProductSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().or(z.literal("")),
   // Guaraníes are whole units (§2.3) — no decimals to parse.
-  unitPrice: z.coerce.number().int().min(0),
+  unitPrice: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)),
 });
 
 export async function createProductAction(

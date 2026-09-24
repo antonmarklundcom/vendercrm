@@ -32,7 +32,7 @@ import {
   type ContactSearchParams,
 } from "./query";
 import { formatDate } from "@/lib/i18n/format";
-import { DEFAULT_COUNTRY, waMeHref } from "@/lib/phone";
+import { DEFAULT_COUNTRY, telHref, waMeHref } from "@/lib/phone";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import { getLocale } from "next-intl/server";
@@ -433,6 +433,7 @@ export default async function ContactsPage({
                 createdAtLabel: formatDate(contact.createdAt, locale),
                 hasOpenDeal: openDeals.has(contact.id),
                 whatsappHref: waMeHref(contact.phone, defaultCountry),
+                telHref: telHref(contact.phone, defaultCountry),
               }))}
               nameHeader={<SortHeader field="name" label={t("name")} />}
               phoneHeader={<SortHeader field="phone" label={t("phone")} />}
@@ -450,6 +451,7 @@ export default async function ContactsPage({
                 owner: t("owner"),
                 created: t("created"),
                 openDealBadge: t("openDealBadge"),
+                call: t("actions.call"),
                 // Raw (not t()): the client component does its own
                 // "{count}" substitution as selection changes, so this must
                 // stay an unformatted template — t() would eagerly demand a

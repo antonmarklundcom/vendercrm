@@ -812,7 +812,11 @@
       "customFilterOperator": "Condition",
       "customFilterEquals": "Equals",
       "customFilterContains": "Contains",
-      "customFilterValue": "Value"
+      "customFilterValue": "Value",
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "call": "Call"
+      }
     },
     "companies": {
       "title": "Companies",
@@ -1801,7 +1805,13 @@
         "submissions": "captured leads"
       },
       "expectedCloseAt": "Expected close",
-      "save": "Save"
+      "save": "Save",
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "call": "Call"
+      },
+      "stageTitle": "Stage",
+      "moveStage": "Move"
     },
     "stages": {
       "title": "Stages",

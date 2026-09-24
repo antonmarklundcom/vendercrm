@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { WhatsAppLink } from "@/components/whatsapp-link";
 import { getTenant } from "@/modules/tenancy/tenants";
 import { DEFAULT_COUNTRY } from "@/lib/phone";
+import { ContactActions } from "@/components/contact-actions";
 import type { TenantSettings } from "@/modules/tenancy/settings";
 import { cn } from "@/lib/utils";
 import { TaskList, type TaskListLabels } from "@/components/task-list";
@@ -230,6 +231,11 @@ export default async function ContactDetailPage({
           {contact.email ? ` · ${contact.email}` : ""}
           {contact.source ? ` · ${contact.source}` : ""}
         </p>
+        <ContactActions
+          phone={contact.phone}
+          country={defaultCountry}
+          labels={{ whatsapp: t("actions.whatsapp"), call: t("actions.call") }}
+        />
         {contact.companyId && (
           <p className="text-sm text-muted-foreground">
             <Link

@@ -200,6 +200,7 @@ export default async function AppLayout({
           groups={visibleGroups}
           appName={tc("appName")}
           menuLabel={tc("menu")}
+          searchLabel={tSearch("placeholder")}
           header={
             <>
               <NotificationBell

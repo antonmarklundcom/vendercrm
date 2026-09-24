@@ -60,3 +60,16 @@ export function waMeHref(
   const query = text ? `?text=${encodeURIComponent(text)}` : "";
   return `https://wa.me/${digits}${query}`;
 }
+
+/** `tel:` link for a stored number, or null when it cannot be dialed. Same
+ * normalisation and length floor as `waMeHref`, so a number shows both
+ * buttons or neither. */
+export function telHref(
+  raw: string | null | undefined,
+  country: CountryCode = DEFAULT_COUNTRY,
+): string | null {
+  if (!raw) return null;
+  const digits = normalizePhone(raw, country).replace(/\D/g, "");
+  if (digits.length < 8) return null;
+  return `tel:+${digits}`;
+}

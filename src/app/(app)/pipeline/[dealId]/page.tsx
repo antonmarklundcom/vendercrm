@@ -6,6 +6,7 @@ import { getDeal } from "@/modules/crm/deals";
 import { getPipeline, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { getContact } from "@/modules/crm/contacts";
 import { WhatsAppLink } from "@/components/whatsapp-link";
+import { ContactActions } from "@/components/contact-actions";
 import { DEFAULT_COUNTRY } from "@/lib/phone";
 import { getTenant } from "@/modules/tenancy/tenants";
 import type { TenantSettings } from "@/modules/tenancy/settings";
@@ -19,7 +20,12 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { formatDateTime, formatMoney } from "@/lib/i18n/format";
 import { CloseDealForms, type CloseLabels } from "./CloseDealForms";
-import { assignDealAction, reopenDealAction, updateExpectedCloseAtAction } from "./actions";
+import {
+  assignDealAction,
+  changeStageAction,
+  reopenDealAction,
+  updateExpectedCloseAtAction,
+} from "./actions";
 import { deleteDealAction } from "../actions";
 import { findDealDeleteBlockers, type DealBlocker } from "@/modules/crm/deletion";
 import { Select, Input } from "@/components/ui/form-fields";
@@ -126,6 +132,12 @@ export default async function DealPage({
         }
       />
 
+      <ContactActions
+        phone={contact?.phone}
+        country={defaultCountry}
+        labels={{ whatsapp: t("actions.whatsapp"), call: t("actions.call") }}
+      />
+
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Fact label={t("value")} value={formatMoney(deal.value, deal.currency, locale)} />
         <Fact label={t("stage")} value={stage?.name ?? "—"} />
@@ -213,7 +225,21 @@ export default async function DealPage({
         </section>
       ) : (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">{t("closeTitle")}</h2>
+          <h2 className="text-lg font-semibold">{t("stageTitle")}</h2>
+          <form action={changeStageAction} className="flex flex-wrap items-center gap-2">
+            <input type="hidden" name="dealId" value={deal.id} />
+            <Select name="toStageId" defaultValue={deal.stageId} aria-label={t("stage")}>
+              {openStages.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </Select>
+            <Button type="submit" size="sm" variant="outline">
+              {t("moveStage")}
+            </Button>
+          </form>
+          <h2 className="mt-2 text-lg font-semibold">{t("closeTitle")}</h2>
           <CloseDealForms dealId={deal.id} labels={closeLabels} />
         </section>
       )}

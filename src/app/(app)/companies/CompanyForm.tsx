@@ -48,7 +48,7 @@ export function CompanyForm({
       </label>
       <label className="flex flex-col gap-1 text-sm">
         {labels.phone}
-        <Input name="phone" maxLength={20} defaultValue={defaults?.phone} />
+        <Input name="phone" type="tel" inputMode="tel" maxLength={20} defaultValue={defaults?.phone} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         {labels.email}
