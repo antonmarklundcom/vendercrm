@@ -2642,8 +2642,12 @@
         "superadminTarget": "A superadmin is not added to a business — they already reach it through \"view as\"",
         "alreadyMember": "Already in that business",
         "notFound": "That access no longer exists",
-        "lastAdmin": "They are that business’s only active admin"
-      }
+        "lastAdmin": "They are that business’s only active admin",
+        "createFailed": "Could not create the business"
+      },
+      "newBusiness": "New business",
+      "newBusinessName": "Business name",
+      "createBusiness": "Create and connect as admin"
     },
     "overview": {
       "title": "Platform overview",

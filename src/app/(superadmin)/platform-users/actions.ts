@@ -2,7 +2,10 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { requireSuperadminContext } from "@/modules/tenancy/context";
+import { requireSuperadminContext, buildSystemTenantContext } from "@/modules/tenancy/context";
+import { createTenant, getTenantBySlug } from "@/modules/tenancy/tenants";
+import { seedDefaultPipeline } from "@/modules/crm/pipelines";
+import { uniqueSlug } from "@/lib/slug";
 import { writeAuditLog } from "@/modules/tenancy/audit";
 import { getUserByEmail, getUserById, mergeUsers, UserMergeError } from "@/modules/tenancy/users";
 import { addMembership, removeMembership, MembershipError } from "@/modules/tenancy/memberships";
@@ -68,6 +71,61 @@ export async function connectUserToTenantAction(
 
   revalidatePath("/platform-users");
   revalidatePath(`/tenants/${parsed.data.tenantId}`);
+  return { error: null, ok: true };
+}
+
+// "Empresa nueva": one person running several businesses gets another one
+// from their own row, as its admin, in one step — instead of creating the
+// business on /tenants and then coming back here to connect them. Same writes
+// as those two steps (createTenant, the default pipeline, addMembership), so
+// the result is indistinguishable from doing it the long way.
+
+const createForUserSchema = z.object({
+  userId: z.string().min(1).max(26),
+  name: z.string().trim().min(1).max(200),
+});
+
+export async function createTenantForUserAction(
+  _prevState: MembershipActionState,
+  formData: FormData,
+): Promise<MembershipActionState> {
+  const superadmin = await requireSuperadminContext();
+  const parsed = createForUserSchema.safeParse({
+    userId: formData.get("userId"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) return { error: "invalid", ok: false };
+
+  const user = await getUserById(parsed.data.userId);
+  if (!user) return { error: "userNotFound", ok: false };
+  // Checked before the business exists, so a refusal leaves nothing behind.
+  if (user.isSuperadmin) return { error: "superadminTarget", ok: false };
+
+  const isTaken = async (candidate: string) => (await getTenantBySlug(candidate)) !== null;
+  let tenant;
+  try {
+    const slug = await uniqueSlug(parsed.data.name, isTaken);
+    tenant = await createTenant(superadmin, { name: parsed.data.name, slug });
+  } catch {
+    return { error: "createFailed", ok: false };
+  }
+  if (!tenant) return { error: "createFailed", ok: false };
+
+  const tenantCtx = await buildSystemTenantContext(tenant.id);
+  if (tenantCtx) await seedDefaultPipeline(tenantCtx);
+
+  await addMembership({ userId: user.id, tenantId: tenant.id, role: "admin" });
+  await writeAuditLog({
+    tenantId: tenant.id,
+    actorUserId: superadmin.userId,
+    action: "membership.added",
+    entity: "user",
+    entityId: user.id,
+    payload: { role: "admin", via: "users-console-new-business" },
+  });
+
+  revalidatePath("/platform-users");
+  revalidatePath("/tenants");
   return { error: null, ok: true };
 }
 

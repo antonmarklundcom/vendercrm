@@ -2642,8 +2642,12 @@
         "superadminTarget": "Un superadmin no se suma a una empresa: ya entra con \"ver como\"",
         "alreadyMember": "Ya entra a esa empresa",
         "notFound": "Ese acceso ya no existe",
-        "lastAdmin": "Es el único administrador activo de esa empresa"
-      }
+        "lastAdmin": "Es el único administrador activo de esa empresa",
+        "createFailed": "No se pudo crear la empresa"
+      },
+      "newBusiness": "Empresa nueva",
+      "newBusinessName": "Nombre de la empresa",
+      "createBusiness": "Crear y conectar como admin"
     },
     "overview": {
       "title": "Panel de la plataforma",

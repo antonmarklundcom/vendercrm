@@ -35,6 +35,21 @@ vi.mock("@/modules/tenancy/memberships", async (importOriginal) => ({
 vi.mock("@/modules/tenancy/users", () => ({
   getUserById: vi.fn(async (id: string) => ({ id, isSuperadmin: false })),
 }));
+const tenants = {
+  createTenant: vi.fn(async (_ctx: unknown, input: { name: string; slug: string }) => ({
+    id: "tenant-new",
+    ...input,
+  })),
+  getTenantBySlug: vi.fn(async () => null),
+};
+vi.mock("@/modules/tenancy/tenants", () => tenants);
+vi.mock("@/modules/tenancy/context", async (importOriginal) => ({
+  // requireSuperadminContext stays real — it is the guard under test.
+  ...(await importOriginal<typeof import("@/modules/tenancy/context")>()),
+  buildSystemTenantContext: vi.fn(async () => null),
+}));
+vi.mock("@/modules/crm/pipelines", () => ({ seedDefaultPipeline: vi.fn(async () => undefined) }));
+
 vi.mock("@/modules/tenancy/audit", () => ({ writeAuditLog: vi.fn(async () => undefined) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
@@ -106,5 +121,30 @@ describe("the platform users console", () => {
         form({ userId: "user-2", tenantId: "tenant-9" }),
       ),
     ).toEqual({ error: "lastAdmin", ok: false });
+  });
+
+  it("refuses to create a business for a user when the caller is only a tenant admin", async () => {
+    await expect(
+      actions.createTenantForUserAction(empty, form({ userId: "user-2", name: "Otra empresa" })),
+    ).rejects.toThrow();
+    expect(tenants.createTenant).not.toHaveBeenCalled();
+    expect(memberships.addMembership).not.toHaveBeenCalled();
+  });
+
+  it("creates the business and connects the user as its admin for a superadmin", async () => {
+    isSuperadmin = true;
+
+    expect(
+      await actions.createTenantForUserAction(empty, form({ userId: "user-2", name: "Otra empresa" })),
+    ).toEqual({ error: null, ok: true });
+    expect(tenants.createTenant).toHaveBeenCalledWith(expect.anything(), {
+      name: "Otra empresa",
+      slug: "otra-empresa",
+    });
+    expect(memberships.addMembership).toHaveBeenCalledWith({
+      userId: "user-2",
+      tenantId: "tenant-new",
+      role: "admin",
+    });
   });
 });
