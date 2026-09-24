@@ -4,8 +4,12 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/form-fields";
-import { connectUserToTenantAction, disconnectUserFromTenantAction } from "./actions";
+import { Input, Select } from "@/components/ui/form-fields";
+import {
+  connectUserToTenantAction,
+  createTenantForUserAction,
+  disconnectUserFromTenantAction,
+} from "./actions";
 import type { MembershipActionState } from "./actions";
 
 // Lives here, not in actions.ts: a "use server" module may only export async
@@ -46,10 +50,14 @@ export function UserMemberships({
     disconnectUserFromTenantAction,
     EMPTY_MEMBERSHIP_STATE,
   );
+  const [createState, create, creating] = useActionState(
+    createTenantForUserAction,
+    EMPTY_MEMBERSHIP_STATE,
+  );
 
   const joined = new Set(memberships.map((membership) => membership.tenantId));
   const available = tenants.filter((tenant) => !joined.has(tenant.id));
-  const error = connectState.error ?? disconnectState.error;
+  const error = connectState.error ?? disconnectState.error ?? createState.error;
 
   return (
     <div className="flex flex-col gap-2">
@@ -106,6 +114,24 @@ export function UserMemberships({
           </Button>
         </form>
       )}
+
+      <details className="text-sm">
+        <summary className="cursor-pointer text-muted-foreground">{t("newBusiness")}</summary>
+        <form action={create} className="mt-2 flex flex-wrap items-center gap-2">
+          <input type="hidden" name="userId" value={userId} />
+          <Input
+            name="name"
+            required
+            maxLength={200}
+            placeholder={t("newBusinessName")}
+            aria-label={t("newBusinessName")}
+            className="py-1 text-sm"
+          />
+          <Button type="submit" size="sm" variant="outline" disabled={creating}>
+            {t("createBusiness")}
+          </Button>
+        </form>
+      </details>
 
       {error && (
         <p role="alert" className="text-sm text-destructive">

@@ -2642,8 +2642,12 @@
         "superadminTarget": "En superadmin läggs inte till i ett företag — den når det redan via \"visa som\"",
         "alreadyMember": "Är redan med i det företaget",
         "notFound": "Den åtkomsten finns inte längre",
-        "lastAdmin": "Personen är företagets enda aktiva administratör"
-      }
+        "lastAdmin": "Personen är företagets enda aktiva administratör",
+        "createFailed": "Kunde inte skapa företaget"
+      },
+      "newBusiness": "Nytt företag",
+      "newBusinessName": "Företagets namn",
+      "createBusiness": "Skapa och koppla på som admin"
     },
     "overview": {
       "title": "Plattformsöversikt",
