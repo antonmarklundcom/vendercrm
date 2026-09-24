@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { preprocessAmount } from "@/lib/money";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantContext, requireTenantAdmin } from "@/modules/tenancy/context";
@@ -29,7 +30,7 @@ import { getTenant } from "@/modules/tenancy/tenants";
 const lineSchema = z.object({
   description: z.string().min(1).max(500),
   qty: z.coerce.number().int().min(1),
-  unitPrice: z.coerce.number().int().min(0),
+  unitPrice: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)),
   productId: z.string().optional(),
 });
 
@@ -52,7 +53,7 @@ function parseLines(formData: FormData) {
 
 const createDocumentSchema = z.object({
   contactId: z.string().min(1),
-  discount: z.coerce.number().int().min(0).optional(),
+  discount: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)).optional(),
   dueAt: z.string().optional(),
   notes: z.string().max(5000).optional(),
   items: z.array(lineSchema).min(1),
@@ -124,7 +125,7 @@ export async function createDocumentAction(
 
 const updateDocumentSchema = z.object({
   documentId: z.string().min(1),
-  discount: z.coerce.number().int().min(0).optional(),
+  discount: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)).optional(),
   dueAt: z.string().optional(),
   notes: z.string().max(5000).optional(),
   items: z.array(lineSchema).min(1),
@@ -267,7 +268,7 @@ export async function sendDocumentByEmailAction(formData: FormData) {
 
 const recordPaymentSchema = z.object({
   documentId: z.string().min(1),
-  amount: z.coerce.number().int().min(1),
+  amount: z.preprocess(preprocessAmount, z.coerce.number().int().min(1)),
   method: z.enum(["transfer", "cash", "card", "check", "other"]).optional(),
   reference: z.string().max(200).optional(),
   paidAt: z.string().optional(),

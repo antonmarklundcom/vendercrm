@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { preprocessAmount } from "@/lib/money";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantContext } from "@/modules/tenancy/context";
@@ -15,14 +16,14 @@ import { getTranslator } from "@/lib/i18n/translator";
 const lineSchema = z.object({
   description: z.string().min(1).max(500),
   qty: z.coerce.number().int().min(1),
-  unitPrice: z.coerce.number().int().min(0),
+  unitPrice: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)),
   productId: z.string().optional(),
 });
 
 const createQuoteSchema = z.object({
   contactId: z.string().min(1),
   dealId: z.string().optional(),
-  discount: z.coerce.number().int().min(0).optional(),
+  discount: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)).optional(),
   validUntil: z.string().optional(),
   notes: z.string().max(5000).optional(),
   items: z.array(lineSchema).min(1),

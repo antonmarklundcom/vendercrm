@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePhone, waMeHref } from "./phone";
+import { normalizePhone, telHref, waMeHref } from "./phone";
 
 describe("normalizePhone", () => {
   it("passes through numbers that already carry a +", () => {
@@ -59,5 +59,16 @@ describe("waMeHref", () => {
     expect(waMeHref(null)).toBeNull();
     expect(waMeHref("")).toBeNull();
     expect(waMeHref("123")).toBeNull();
+  });
+});
+
+describe("telHref", () => {
+  it("dials a local Paraguayan number in international form", () => {
+    expect(telHref("0981 123456")).toBe("tel:+595981123456");
+  });
+
+  it("returns null for nothing or something too short to dial", () => {
+    expect(telHref(null)).toBeNull();
+    expect(telHref("123")).toBeNull();
   });
 });

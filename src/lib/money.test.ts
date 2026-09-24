@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeLineTotals, parseMinorUnits, previewTotals } from "./money";
+import { computeLineTotals, parseMinorUnits, previewTotals, normalizeAmountInput } from "./money";
 
 // The builders post raw strings and the server recomputes from them (§2.3:
 // guaraníes are integer minor units). These guard the one property that
@@ -56,5 +56,24 @@ describe("previewTotals", () => {
 
   it("clamps an over-large discount instead of going negative", () => {
     expect(previewTotals([line({ qty: "1", unitPrice: "1000" })], "5000")!.total).toBe(0);
+  });
+});
+
+describe("normalizeAmountInput", () => {
+  it("reads amounts the way they are written in Paraguay", () => {
+    expect(normalizeAmountInput("1.500.000")).toBe("1500000");
+    expect(normalizeAmountInput("Gs. 1.500.000")).toBe("1500000");
+    expect(normalizeAmountInput("₲ 250 000")).toBe("250000");
+    expect(normalizeAmountInput("PYG 12.500")).toBe("12500");
+    expect(normalizeAmountInput(" 350000 ")).toBe("350000");
+  });
+
+  it("leaves a real fraction alone so it is still rejected", () => {
+    expect(normalizeAmountInput("1.5")).toBe("1.5");
+    expect(parseMinorUnits("1.5")).toBeNull();
+  });
+
+  it("feeds parseMinorUnits, so the builders' previews agree with the server", () => {
+    expect(parseMinorUnits("1.500.000")).toBe(1_500_000);
   });
 });

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Phone, Trash2 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ export type ContactRow = {
    * (plan-booking.md §6.2). Null when the stored number is not dialable.
    */
   whatsappHref: string | null;
+  telHref: string | null;
 };
 
 export type StageOption = { id: string; pipelineId: string; label: string };
@@ -46,6 +47,7 @@ export type ContactsTableLabels = {
   owner: string;
   created: string;
   openDealBadge: string;
+  call: string;
   selectedCount: string;
   addTag: string;
   chooseTag: string;
@@ -329,6 +331,17 @@ export function ContactsTable({
                     </a>
                   ) : (
                     row.phone
+                  )}
+                  {row.telHref && (
+                    <a
+                      href={row.telHref}
+                      title={labels.call}
+                      aria-label={labels.call}
+                      className="ml-2 inline-flex align-middle text-muted-foreground hover:text-foreground"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <Phone className="size-4" aria-hidden />
+                    </a>
                   )}
                 </td>
                 <td className="py-2">{row.email}</td>

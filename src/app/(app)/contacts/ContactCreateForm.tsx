@@ -63,6 +63,9 @@ export function ContactCreateForm() {
         {t("phone")}
         <Input
           name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           defaultValue={state.values.phone ?? ""}
         />
         <FieldError field="phone" />

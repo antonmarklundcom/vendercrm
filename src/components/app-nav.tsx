@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  Search,
   CalendarDays,
   CalendarClock,
   ChartNoAxesColumn,
@@ -33,6 +34,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
+import { OPEN_SEARCH_EVENT } from "@/components/command-palette-event";
 
 // Tenant app navigation. Client-side only because active-route highlighting
 // needs the current pathname; every label arrives pre-translated from the
@@ -212,6 +214,7 @@ export function AppNav({
   footer,
   mobileHeader,
   menuLabel,
+  searchLabel,
 }: {
   groups: NavGroup[];
   appName: string;
@@ -226,6 +229,9 @@ export function AppNav({
   mobileHeader?: React.ReactNode;
   /** Accessible name of the mobile menu button. */
   menuLabel: string;
+  /** Accessible name of the mobile search button, which opens the same
+   * palette as ⌘K — a phone has no keyboard shortcut to reach it with. */
+  searchLabel?: string;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -252,24 +258,36 @@ export function AppNav({
           instead of a 23-item strip scrolling sideways above every page. */}
       <div className="flex flex-col border-b bg-card md:hidden">
         {mobileHeader}
-        <button
-          type="button"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-expanded={mobileOpen}
-          aria-controls="app-mobile-nav"
-          aria-label={menuLabel}
-          className="flex items-center gap-2 border-t px-4 py-2.5 text-left text-sm font-medium"
-        >
-          <Menu className="size-4 text-muted-foreground" aria-hidden="true" />
-          <span className="truncate">{current?.label ?? appName}</span>
-          <ChevronDown
-            className={cn(
-              "ml-auto size-4 text-muted-foreground transition-transform",
-              mobileOpen && "rotate-180",
-            )}
-            aria-hidden="true"
-          />
-        </button>
+        <div className="flex items-stretch border-t">
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-expanded={mobileOpen}
+            aria-controls="app-mobile-nav"
+            aria-label={menuLabel}
+            className="flex min-w-0 flex-1 items-center gap-2 px-4 py-2.5 text-left text-sm font-medium"
+          >
+            <Menu className="size-4 text-muted-foreground" aria-hidden="true" />
+            <span className="truncate">{current?.label ?? appName}</span>
+            <ChevronDown
+              className={cn(
+                "ml-auto size-4 text-muted-foreground transition-transform",
+                mobileOpen && "rotate-180",
+              )}
+              aria-hidden="true"
+            />
+          </button>
+          {searchLabel && (
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}
+              aria-label={searchLabel}
+              className="flex items-center border-l px-4 text-muted-foreground"
+            >
+              <Search className="size-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
         {mobileOpen && (
           <div id="app-mobile-nav" className="flex flex-col gap-3 border-t px-3 pb-4">
             {header && <div className="-mx-3">{header}</div>}

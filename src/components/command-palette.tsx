@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { SearchHit } from "@/modules/crm/search";
+import { OPEN_SEARCH_EVENT } from "@/components/command-palette-event";
 
 // ⌘K / Ctrl+K palette (PLAN.md §13 H8). The exit criterion is "any contact
 // in ≤3 keystrokes + Enter", which is why the first result is selected as
@@ -36,8 +37,15 @@ export function CommandPalette({
       }
       if (event.key === "Escape") setOpen(false);
     }
+    function onOpenRequest() {
+      setOpen(true);
+    }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener(OPEN_SEARCH_EVENT, onOpenRequest);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener(OPEN_SEARCH_EVENT, onOpenRequest);
+    };
   }, []);
 
   useEffect(() => {

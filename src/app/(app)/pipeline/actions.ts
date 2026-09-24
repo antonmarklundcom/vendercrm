@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { preprocessAmount } from "@/lib/money";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireTenantContext, requireTenantAdmin } from "@/modules/tenancy/context";
@@ -64,7 +65,7 @@ const createDealSchema = z.object({
   title: z.string().min(1).max(200),
   // Guaraníes are integer minor units (§2.3) — a "1.5" typed into the value
   // box is a user mistake with a message, not a server crash.
-  value: z.coerce.number().int().min(0).optional(),
+  value: z.preprocess(preprocessAmount, z.coerce.number().int().min(0)).optional(),
 });
 
 export async function createDealAction(

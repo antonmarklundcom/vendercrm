@@ -38,6 +38,28 @@ export type RawLineInput = {
 };
 
 /**
+ * Accepts amounts the way people in Paraguay write them: "1.500.000",
+ * "Gs. 1.500.000", "₲ 250 000". A dot is a thousands separator there, not a
+ * decimal point, so dots are dropped only when they sit in thousands
+ * positions — "1.5" is left alone and still fails as a fraction. Anything it
+ * doesn't recognise comes back unchanged for the caller to reject.
+ */
+export function normalizeAmountInput(raw: string): string {
+  const stripped = raw
+    .trim()
+    .replace(/^(gs\.?|₲|pyg)\s*/i, "")
+    .replace(/\s+/g, "");
+  if (/^\d{1,3}(\.\d{3})+$/.test(stripped)) return stripped.replace(/\./g, "");
+  return stripped;
+}
+
+/** The string half of an amount field: normalised, otherwise untouched, so
+ * zod's own coercion and messages still decide what is valid. */
+export function preprocessAmount(value: unknown): unknown {
+  return typeof value === "string" ? normalizeAmountInput(value) : value;
+}
+
+/**
  * Parses one raw form value the way the server's zod schema will
  * (`z.coerce.number().int()`), and returns null for anything it would
  * reject — a decimal like `150000.5`, a sign, a stray letter. Amounts are
@@ -46,7 +68,7 @@ export type RawLineInput = {
  * server would never store.
  */
 export function parseMinorUnits(raw: string): number | null {
-  const value = Number(raw);
+  const value = Number(normalizeAmountInput(raw));
   return Number.isSafeInteger(value) ? value : null;
 }
 

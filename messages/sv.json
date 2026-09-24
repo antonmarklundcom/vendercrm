@@ -812,7 +812,11 @@
       "customFilterOperator": "Villkor",
       "customFilterEquals": "Är lika med",
       "customFilterContains": "Innehåller",
-      "customFilterValue": "Värde"
+      "customFilterValue": "Värde",
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "call": "Ring"
+      }
     },
     "companies": {
       "title": "Företag",
@@ -1801,7 +1805,13 @@
         "submissions": "inkomna leads"
       },
       "expectedCloseAt": "Förväntat avslut",
-      "save": "Spara"
+      "save": "Spara",
+      "actions": {
+        "whatsapp": "WhatsApp",
+        "call": "Ring"
+      },
+      "stageTitle": "Steg",
+      "moveStage": "Flytta"
     },
     "stages": {
       "title": "Steg",

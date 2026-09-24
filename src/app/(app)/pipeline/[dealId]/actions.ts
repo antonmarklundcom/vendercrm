@@ -3,7 +3,14 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { DealCloseError, assignDeal, closeDeal, reopenDeal, updateDeal } from "@/modules/crm/deals";
+import {
+  DealCloseError,
+  assignDeal,
+  closeDeal,
+  moveDeal,
+  reopenDeal,
+  updateDeal,
+} from "@/modules/crm/deals";
 
 // Deal detail actions (PLAN.md §13 H8). Working a deal is the agent's daily
 // job, so these stay agent-accessible — §3.2 reserves *pipeline
@@ -59,6 +66,27 @@ export async function reopenDealAction(formData: FormData) {
   if (!parsed.success) return;
 
   await reopenDeal(ctx, parsed.data.dealId, parsed.data.toStageId);
+  revalidatePath(`/pipeline/${parsed.data.dealId}`);
+  revalidatePath("/pipeline");
+}
+
+// Moving an open deal to another open stage without dragging — on a phone
+// the board's long-press drag is the hard way to do the most common thing.
+// Won and lost stay on the close forms, which ask for the reason.
+const changeStageSchema = z.object({
+  dealId: z.string().min(1).max(26),
+  toStageId: z.string().min(1).max(26),
+});
+
+export async function changeStageAction(formData: FormData) {
+  const ctx = await requireTenantContext();
+  const parsed = changeStageSchema.safeParse({
+    dealId: formData.get("dealId"),
+    toStageId: formData.get("toStageId"),
+  });
+  if (!parsed.success) return;
+
+  await moveDeal(ctx, parsed.data.dealId, { toStageId: parsed.data.toStageId, toPosition: 0 });
   revalidatePath(`/pipeline/${parsed.data.dealId}`);
   revalidatePath("/pipeline");
 }
