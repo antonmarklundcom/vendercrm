@@ -4,6 +4,9 @@ import { getActiveTenantUser } from "@/modules/tenancy/users";
 import { isKindMuted } from "./prefs";
 import { deliverToTargets, isPushConfigured } from "./push";
 import { applyOutcomes, listSubscriptionsForUser, toTargets } from "./subscriptions";
+import { formatTelegramText, isTelegramConfigured, sendTelegramMessage } from "./telegram";
+import { unlinkTelegramChat } from "./telegram-links";
+import { env } from "@/lib/config/env";
 import { PUSH_JOB_TYPE, type PushJob } from "./queue";
 import { registerNotificationHooks } from "./hooks";
 
@@ -27,7 +30,9 @@ registerHandler(PUSH_JOB_TYPE, async (payload, tenantId) => {
  * `notifications` row behind the push is already in their bell.
  */
 export async function sendPush(tenantId: string, job: PushJob): Promise<void> {
-  if (!isPushConfigured()) return;
+  const push = isPushConfigured();
+  const telegram = isTelegramConfigured();
+  if (!push && !telegram) return;
 
   const ctx = await buildSystemTenantContext(tenantId);
   if (!ctx) return;
@@ -41,6 +46,19 @@ export async function sendPush(tenantId: string, job: PushJob): Promise<void> {
   if (!user || user.banned) return;
   if (isKindMuted(user.pushPrefs, job.kind)) return;
 
+  // Telegram first and independent of push: a person with no browser
+  // registered still gets the alert on Telegram. A blocked bot unlinks the
+  // chat; any other failure throws so the job's one retry covers a blip.
+  if (telegram && user.telegramChatId) {
+    const result = await sendTelegramMessage(
+      user.telegramChatId,
+      formatTelegramText(job.payload, env.APP_URL),
+    );
+    if (result === "blocked") await unlinkTelegramChat(user.telegramChatId);
+    if (result === "failed") throw new Error("telegram sendMessage failed");
+  }
+
+  if (!push) return;
   const rows = await listSubscriptionsForUser(ctx, job.userId);
   if (rows.length === 0) return;
 

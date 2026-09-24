@@ -121,6 +121,22 @@ const envSchema = z
       .string()
       .regex(/^(mailto:|https:\/\/)/, "WEB_PUSH_SUBJECT must be a mailto: or https:// URL")
       .optional(),
+    // Telegram alerts (a free second channel next to web push). One bot for
+    // the whole platform, created with @BotFather. Optional by the same rule
+    // as web push: unset hides the "Conectar Telegram" control and the
+    // webhook answers 404. The username is the bot's @handle without the @,
+    // used for the t.me deep link; the webhook secret is any random string,
+    // echoed back by Telegram in a header so the webhook can prove the call
+    // came from Telegram.
+    TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
+    TELEGRAM_BOT_USERNAME: z
+      .string()
+      .regex(/^[A-Za-z0-9_]{5,64}$/, "TELEGRAM_BOT_USERNAME is the bot's handle without @")
+      .optional(),
+    TELEGRAM_WEBHOOK_SECRET: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{16,256}$/, "TELEGRAM_WEBHOOK_SECRET must be 16+ chars of A-Z a-z 0-9 _ -")
+      .optional(),
     AI_DRIVER: z.enum(["none", "openai", "gemini"]).default("none"),
     OPENAI_API_KEY: z.string().min(1).optional(),
     GEMINI_API_KEY: z.string().min(1).optional(),

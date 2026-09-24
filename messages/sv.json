@@ -1348,7 +1348,15 @@
         "fromLocalPartSave": "Spara"
       },
       "coachPhoneTitle": "Ditt nummer för assistenten",
-      "coachPhoneIntro": "Din personliga telefon. Skicka ett röstmeddelande till ditt WhatsApp Business-nummer och fråga vad du har idag, så svarar den med dina öppna punkter. Lämna tomt för att stänga av."
+      "coachPhoneIntro": "Din personliga telefon. Skicka ett röstmeddelande till ditt WhatsApp Business-nummer och fråga vad du har idag, så svarar den med dina öppna punkter. Lämna tomt för att stänga av.",
+      "telegram": {
+        "title": "Aviseringar via Telegram",
+        "intro": "Gratis. Få samma aviseringar som i mobilen i Telegram: nya meddelanden, tilldelningar och uppgifter som förfaller. Fungerar även utan CRM-appen installerad.",
+        "connect": "Anslut Telegram",
+        "steps": "Telegram öppnas: tryck på ”Starta” så är det klart. Har du inte Telegram, installera det gratis först.",
+        "linked": "Ansluten. Aviseringar kommer till din Telegram.",
+        "disconnect": "Koppla från"
+      }
     },
     "automations": {
       "title": "Automationer",

@@ -2,6 +2,7 @@ import { enqueue } from "@/lib/queue";
 import type { PushPayload } from "./push";
 import type { PushNotificationKind } from "./prefs";
 import { isPushConfigured } from "./push";
+import { isTelegramConfigured } from "./telegram";
 
 // Enqueueing a push (PLAN.md §15.5 J2, §15.8 P2). Split from ./jobs.ts, which
 // registers the handler, so nothing on a request path has to import the
@@ -35,7 +36,9 @@ export async function enqueuePush(
   kind: PushNotificationKind,
   payload: PushPayload,
 ): Promise<void> {
-  if (!isPushConfigured()) return;
+  // The same job carries the Telegram copy of the alert (jobs.ts), so it is
+  // queued when either channel exists.
+  if (!isPushConfigured() && !isTelegramConfigured()) return;
 
   const job: PushJob = { userId, kind, payload };
   // Two attempts, not the default five: a push is worth one retry past a

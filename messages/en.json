@@ -1348,7 +1348,15 @@
         "fromLocalPartSave": "Save"
       },
       "coachPhoneTitle": "Your number for the assistant",
-      "coachPhoneIntro": "Your personal phone. Send a voice note to your WhatsApp Business number asking what you have today and it answers with your pending list. Leave it empty to turn it off."
+      "coachPhoneIntro": "Your personal phone. Send a voice note to your WhatsApp Business number asking what you have today and it answers with your pending list. Leave it empty to turn it off.",
+      "telegram": {
+        "title": "Telegram alerts",
+        "intro": "Free. Get the same alerts as on your phone in Telegram: new messages, assignments and tasks coming due. Works even without the CRM app installed.",
+        "connect": "Connect Telegram",
+        "steps": "Telegram opens: tap “Start” and you’re done. If you don’t have Telegram, install it for free first.",
+        "linked": "Connected. Alerts arrive in your Telegram.",
+        "disconnect": "Disconnect"
+      }
     },
     "automations": {
       "title": "Automations",

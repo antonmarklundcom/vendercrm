@@ -14,6 +14,8 @@ import { pushPublicKey } from "@/modules/notifications/push";
 import { PUSH_KINDS, isKindMuted, type PushKind } from "@/modules/notifications/prefs";
 import { countSubscriptionsForUser } from "@/modules/notifications/subscriptions";
 import { setPushPrefsAction } from "./actions";
+import { connectTelegramAction, disconnectTelegramAction } from "./actions";
+import { isTelegramConfigured } from "@/modules/notifications/telegram";
 import { TaskReminderToggle } from "./TaskReminderToggle";
 import { EmailDomainSection } from "./EmailDomainSection";
 import { listAuditLogForTenant } from "@/modules/tenancy/audit";
@@ -48,7 +50,12 @@ export default async function SettingsPage() {
   // the language and theme controls below. `null` from pushPublicKey means the
   // platform has no VAPID keys, and the whole section disappears rather than
   // offering a switch that cannot work.
-  const pushSection = await renderPushSection(ctx, t);
+  const pushSection = (
+    <>
+      {await renderTelegramSection(ctx, t)}
+      {await renderPushSection(ctx, t)}
+    </>
+  );
 
   // Language is the one setting that isn't tenant configuration: it's the
   // user's own, so an agent gets this page for that alone rather than the
@@ -351,6 +358,43 @@ async function renderPushSection(
           note: t("push.kindsNote"),
         }}
       />
+    </section>
+  );
+}
+
+/**
+ * Telegram alerts: the free channel. One button that opens the platform bot
+ * with a one-time token; pressing Start there links this person's chat. The
+ * same muted kinds as push apply (they are one set of preferences about
+ * alerts, not two).
+ */
+async function renderTelegramSection(
+  ctx: import("@/modules/tenancy/context").TenantContext,
+  t: Awaited<ReturnType<typeof getTranslations<"app.settings">>>,
+) {
+  if (!isTelegramConfigured()) return null;
+  const user = await getUserById(ctx.userId);
+  const linked = Boolean(user?.telegramChatId);
+
+  return (
+    <section>
+      <h2 className="mb-2 text-lg font-semibold">{t("telegram.title")}</h2>
+      <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("telegram.intro")}</p>
+      {linked ? (
+        <form action={disconnectTelegramAction} className="flex flex-wrap items-center gap-3">
+          <span className="text-sm">{t("telegram.linked")}</span>
+          <Button type="submit" variant="outline" size="sm">
+            {t("telegram.disconnect")}
+          </Button>
+        </form>
+      ) : (
+        <form action={connectTelegramAction} className="flex flex-col gap-2">
+          <Button type="submit" size="sm" className="self-start">
+            {t("telegram.connect")}
+          </Button>
+          <p className="max-w-2xl text-xs text-muted-foreground">{t("telegram.steps")}</p>
+        </form>
+      )}
     </section>
   );
 }
