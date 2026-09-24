@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { monthlyPrice } from "./platform-stats";
+import { monthlyPrice, parseOverviewWindow } from "./platform-stats";
 
 // Plans are prepaid for 3, 6 or 12 months (schema/tenancy.ts); the overview
 // page's "expected monthly revenue" number depends entirely on this
@@ -24,5 +24,18 @@ describe("monthlyPrice", () => {
 
   it("does not round on its own — callers round the summed total, not each plan", () => {
     expect(monthlyPrice(100_000, 3)).toBeCloseTo(33_333.33, 2);
+  });
+});
+
+describe("parseOverviewWindow", () => {
+  it("accepts the offered windows", () => {
+    expect(parseOverviewWindow("7")).toBe(7);
+    expect(parseOverviewWindow("90")).toBe(90);
+  });
+
+  it("falls back to 30 days for anything else", () => {
+    expect(parseOverviewWindow(undefined)).toBe(30);
+    expect(parseOverviewWindow("365")).toBe(30);
+    expect(parseOverviewWindow("abc")).toBe(30);
   });
 });

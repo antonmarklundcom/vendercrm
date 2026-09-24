@@ -2687,8 +2687,15 @@
         "leads": "Leads",
         "contacts": "Contactos",
         "messages": "Mensajes",
-        "lastMessage": "Último mensaje"
-      }
+        "lastMessage": "Último mensaje",
+        "dealsWon": "Ganados",
+        "wonValue": "Vendido (Gs.)",
+        "previous": "antes: {count}"
+      },
+      "periodLabel": "Período",
+      "periodDays": "{days} días",
+      "sourcesTitle": "De dónde vienen los leads, últimos {days} días",
+      "noSite": "Formularios y reservas del CRM"
     },
     "tenantWhatsapp": {
       "title": "WhatsApp",

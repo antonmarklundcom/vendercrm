@@ -1,4 +1,4 @@
-import { and, count, eq, gte, isNotNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNotNull, lt, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   contacts,
@@ -7,6 +7,7 @@ import {
   messages,
   plans,
   quotes,
+  sites,
   stages,
   subscriptions,
   tenantMemberships,
@@ -71,6 +72,14 @@ export type TenantActivityRow = {
   contacts: number;
   leads: number;
   messages: number;
+  /** Deals closed into a won stage inside the window. */
+  dealsWon: number;
+  /** Sum of those won deals' values, guaraníes only — adding USD to PYG
+   * without a rate would be a wrong number, not an approximate one. */
+  wonValue: number;
+  /** Leads in the window of the same length right before this one, so the
+   * table can say whether a business is getting more or fewer. */
+  leadsPrevious: number;
   /** Null when the tenant has never had a message — a real state, not a zero. */
   lastMessageAt: Date | null;
 };
@@ -197,7 +206,16 @@ export async function getPlatformActivity(window: PlatformWindow): Promise<Platf
  * churn conversation, not a statistic.
  */
 export async function listTenantActivity(window: PlatformWindow): Promise<TenantActivityRow[]> {
-  const [tenantRows, contactRows, leadRows, messageRows, lastMessageRows] = await Promise.all([
+  const previousSince = new Date(window.since.getTime() - window.days * 24 * 60 * 60 * 1000);
+  const [
+    tenantRows,
+    contactRows,
+    leadRows,
+    messageRows,
+    lastMessageRows,
+    wonRows,
+    previousLeadRows,
+  ] = await Promise.all([
     db.select({ id: tenants.id, name: tenants.name, status: tenants.status }).from(tenants),
     db
       .select({ tenantId: contacts.tenantId, value: count() })
@@ -218,6 +236,28 @@ export async function listTenantActivity(window: PlatformWindow): Promise<Tenant
       .select({ tenantId: messages.tenantId, value: sql<string>`max(${messages.createdAt})` })
       .from(messages)
       .groupBy(messages.tenantId),
+    db
+      .select({
+        tenantId: deals.tenantId,
+        value: count(),
+        amount: sql<string>`coalesce(sum(case when ${deals.currency} = 'PYG' then ${deals.value} else 0 end), 0)`,
+      })
+      .from(deals)
+      .innerJoin(stages, eq(stages.id, deals.stageId))
+      .where(
+        and(isNotNull(deals.closedAt), gte(deals.closedAt, window.since), eq(stages.isWon, true)),
+      )
+      .groupBy(deals.tenantId),
+    db
+      .select({ tenantId: leadSubmissions.tenantId, value: count() })
+      .from(leadSubmissions)
+      .where(
+        and(
+          gte(leadSubmissions.createdAt, previousSince),
+          lt(leadSubmissions.createdAt, window.since),
+        ),
+      )
+      .groupBy(leadSubmissions.tenantId),
   ]);
 
   const byTenant = <T extends { tenantId: string; value: unknown }>(rows: T[]) =>
@@ -227,6 +267,8 @@ export async function listTenantActivity(window: PlatformWindow): Promise<Tenant
   const leadsBy = byTenant(leadRows);
   const messagesBy = byTenant(messageRows);
   const lastMessageBy = byTenant(lastMessageRows);
+  const wonBy = new Map(wonRows.map((row) => [row.tenantId, row]));
+  const previousLeadsBy = byTenant(previousLeadRows);
 
   return tenantRows
     .map((tenant) => {
@@ -238,6 +280,9 @@ export async function listTenantActivity(window: PlatformWindow): Promise<Tenant
         contacts: Number(contactsBy.get(tenant.id) ?? 0),
         leads: Number(leadsBy.get(tenant.id) ?? 0),
         messages: Number(messagesBy.get(tenant.id) ?? 0),
+        dealsWon: Number(wonBy.get(tenant.id)?.value ?? 0),
+        wonValue: Number(wonBy.get(tenant.id)?.amount ?? 0),
+        leadsPrevious: Number(previousLeadsBy.get(tenant.id) ?? 0),
         lastMessageAt: last ? new Date(last as string) : null,
       };
     })
@@ -320,4 +365,49 @@ export async function listExpiringSubscriptions(days = 30): Promise<ExpiringSubs
   return rows
     .map((row) => ({ ...row, expiresAt: new Date(row.expiresAt) }))
     .sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime());
+}
+
+export type LeadSourceRow = {
+  siteId: string | null;
+  siteName: string | null;
+  tenantId: string;
+  tenantName: string;
+  leads: number;
+};
+
+/**
+ * Where the platform's leads come from: lead submissions in the window grouped
+ * by site, busiest first. A submission with no site (the CRM's own public
+ * forms and booking pages) groups under its business with a null site.
+ */
+export async function listTopLeadSources(
+  window: PlatformWindow,
+  limit = 10,
+): Promise<LeadSourceRow[]> {
+  const leads = count();
+  const rows = await db
+    .select({
+      siteId: leadSubmissions.siteId,
+      siteName: sites.name,
+      tenantId: leadSubmissions.tenantId,
+      tenantName: tenants.name,
+      leads,
+    })
+    .from(leadSubmissions)
+    .innerJoin(tenants, eq(tenants.id, leadSubmissions.tenantId))
+    .leftJoin(sites, eq(sites.id, leadSubmissions.siteId))
+    .where(gte(leadSubmissions.createdAt, window.since))
+    .groupBy(leadSubmissions.tenantId, leadSubmissions.siteId, tenants.name, sites.name)
+    .orderBy(desc(leads))
+    .limit(limit);
+
+  return rows.map((row) => ({ ...row, leads: Number(row.leads) }));
+}
+
+/** The windows the overview offers; anything else in the URL falls back to 30. */
+export const OVERVIEW_WINDOWS = [7, 30, 90] as const;
+
+export function parseOverviewWindow(raw: string | undefined): number {
+  const days = Number(raw);
+  return (OVERVIEW_WINDOWS as readonly number[]).includes(days) ? days : 30;
 }

@@ -2687,8 +2687,15 @@
         "leads": "Leads",
         "contacts": "Contacts",
         "messages": "Messages",
-        "lastMessage": "Last message"
-      }
+        "lastMessage": "Last message",
+        "dealsWon": "Won",
+        "wonValue": "Sold (PYG)",
+        "previous": "before: {count}"
+      },
+      "periodLabel": "Period",
+      "periodDays": "{days} days",
+      "sourcesTitle": "Where leads come from, last {days} days",
+      "noSite": "CRM forms and bookings"
     },
     "tenantWhatsapp": {
       "title": "WhatsApp",
