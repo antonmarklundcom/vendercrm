@@ -295,6 +295,13 @@
       "when": 1788831292667,
       "tag": "0041_add_claude_ops",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1790283130974,
+      "tag": "0042_add_user_telegram",
+      "breakpoints": true
     }
   ]
 }

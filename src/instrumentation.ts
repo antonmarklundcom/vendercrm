@@ -11,6 +11,12 @@ export async function register() {
 
     const { startWorker } = await import("@/worker");
     startWorker();
+
+    // Points the Telegram bot at this deployment (no-op when unconfigured),
+    // so turning the feature on is three env vars and a restart.
+    const { registerTelegramWebhook } = await import("@/modules/notifications/telegram");
+    const { env } = await import("@/lib/config/env");
+    void registerTelegramWebhook(env.APP_URL);
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {

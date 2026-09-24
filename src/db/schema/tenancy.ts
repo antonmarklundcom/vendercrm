@@ -108,6 +108,13 @@ export const users = mysqlTable(
     // `notifications` row: the bell keeps showing what the phone stayed
     // quiet about (modules/notifications/prefs.ts).
     pushPrefs: json("push_prefs"),
+    // Telegram alerts (free for everyone, unlike WhatsApp templates). The
+    // chat id is set when the person taps "Conectar Telegram" and presses
+    // Start in the platform's bot; the one-time link token and its expiry
+    // exist only between those two taps (modules/notifications/telegram-links.ts).
+    telegramChatId: varchar("telegram_chat_id", { length: 32 }),
+    telegramLinkToken: varchar("telegram_link_token", { length: 64 }),
+    telegramLinkExpiresAt: datetime("telegram_link_expires_at"),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -118,6 +125,7 @@ export const users = mysqlTable(
   (table) => [
     uniqueIndex("users_email_idx").on(table.email),
     index("users_tenant_id_idx").on(table.tenantId),
+    uniqueIndex("users_telegram_link_token_idx").on(table.telegramLinkToken),
   ],
 );
 

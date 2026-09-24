@@ -67,6 +67,14 @@ vi.mock("./subscriptions", () => ({
     })),
 }));
 
+const unlinkTelegramChat = vi.fn();
+vi.mock("./telegram-links", () => ({
+  unlinkTelegramChat: (...args: unknown[]) => unlinkTelegramChat(...args),
+}));
+
+const fetchMock = vi.fn();
+vi.stubGlobal("fetch", (...args: unknown[]) => fetchMock(...args));
+
 const row = {
   id: "sub-1",
   endpoint: "https://push.example/sub-1",
@@ -93,7 +101,23 @@ beforeEach(() => {
     .mockResolvedValue({ id: "user-1", banned: false, pushPrefs: null });
   listSubscriptionsForUser.mockReset().mockResolvedValue([row]);
   applyOutcomes.mockReset().mockResolvedValue(undefined);
+  Object.assign(envValues, {
+    TELEGRAM_BOT_TOKEN: undefined,
+    TELEGRAM_BOT_USERNAME: undefined,
+    TELEGRAM_WEBHOOK_SECRET: undefined,
+    APP_URL: "https://crm.example.com",
+  });
+  fetchMock.mockReset().mockResolvedValue(new Response("{}", { status: 200 }));
+  unlinkTelegramChat.mockReset().mockResolvedValue(undefined);
 });
+
+function enableTelegram() {
+  Object.assign(envValues, {
+    TELEGRAM_BOT_TOKEN: "123:abc",
+    TELEGRAM_BOT_USERNAME: "clientes_bot",
+    TELEGRAM_WEBHOOK_SECRET: "a-long-random-secret",
+  });
+}
 
 describe("sendPush", () => {
   it("delivers a queued push to the user's browser", async () => {
@@ -179,5 +203,73 @@ describe("sendPush", () => {
 
     await expect(sendPush("tenant-1", job)).resolves.toBeUndefined();
     expect(sendNotification).not.toHaveBeenCalled();
+  });
+
+  it("also sends the alert to a linked Telegram chat", async () => {
+    enableTelegram();
+    getActiveTenantUser.mockResolvedValue({
+      id: "user-1",
+      banned: false,
+      pushPrefs: null,
+      telegramChatId: "555",
+    });
+    const { sendPush } = await import("./jobs");
+
+    await sendPush("tenant-1", job);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.telegram.org/bot123:abc/sendMessage");
+    const body = JSON.parse(init.body as string);
+    expect(body.chat_id).toBe("555");
+    expect(body.text).toContain("<b>Te asignaron</b>");
+    expect(body.text).toContain("https://crm.example.com/inbox/c1");
+    // Push still goes out too.
+    expect(sendNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends Telegram even when web push is not configured", async () => {
+    enableTelegram();
+    envValues.WEB_PUSH_PRIVATE_KEY = undefined;
+    getActiveTenantUser.mockResolvedValue({
+      id: "user-1",
+      banned: false,
+      pushPrefs: null,
+      telegramChatId: "555",
+    });
+    const { sendPush } = await import("./jobs");
+
+    await sendPush("tenant-1", job);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(sendNotification).not.toHaveBeenCalled();
+  });
+
+  it("unlinks a chat that blocked the bot", async () => {
+    enableTelegram();
+    fetchMock.mockResolvedValue(new Response("{}", { status: 403 }));
+    getActiveTenantUser.mockResolvedValue({
+      id: "user-1",
+      banned: false,
+      pushPrefs: null,
+      telegramChatId: "555",
+    });
+    const { sendPush } = await import("./jobs");
+
+    await sendPush("tenant-1", job);
+    expect(unlinkTelegramChat).toHaveBeenCalledWith("555");
+  });
+
+  it("respects a muted kind on Telegram too", async () => {
+    enableTelegram();
+    getActiveTenantUser.mockResolvedValue({
+      id: "user-1",
+      banned: false,
+      pushPrefs: { assignment: false },
+      telegramChatId: "555",
+    });
+    const { sendPush } = await import("./jobs");
+
+    await sendPush("tenant-1", job);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

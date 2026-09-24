@@ -24,6 +24,12 @@ import {
 import { COUNTRY_CODES } from "@/lib/phone";
 import { getUserById, setUserPushPrefs, setUserTaskReminders } from "@/modules/tenancy/users";
 import { PUSH_KINDS, applyPushPrefs } from "@/modules/notifications/prefs";
+import { isTelegramConfigured, telegramDeepLink } from "@/modules/notifications/telegram";
+import {
+  createTelegramLinkToken,
+  unlinkTelegramForUser,
+} from "@/modules/notifications/telegram-links";
+import { env } from "@/lib/config/env";
 import {
   createTenantEmailDomain,
   refreshTenantEmailDomain,
@@ -327,6 +333,22 @@ export async function setPushPrefsAction(formData: FormData) {
 
   const user = await getUserById(ctx.userId);
   await setUserPushPrefs(ctx.userId, applyPushPrefs(user?.pushPrefs, enabled));
+  revalidatePath("/settings");
+}
+
+// Telegram alerts. Personal, like push: any member links their own chat, and
+// only their own — the token is minted for the signed-in user.
+
+export async function connectTelegramAction(): Promise<void> {
+  const ctx = await requireTenantContext();
+  if (!isTelegramConfigured() || !env.TELEGRAM_BOT_USERNAME) redirect("/settings");
+  const token = await createTelegramLinkToken(ctx.userId);
+  redirect(telegramDeepLink(env.TELEGRAM_BOT_USERNAME, token));
+}
+
+export async function disconnectTelegramAction(): Promise<void> {
+  const ctx = await requireTenantContext();
+  await unlinkTelegramForUser(ctx.userId);
   revalidatePath("/settings");
 }
 

@@ -959,7 +959,15 @@
         "fromLocalPartSave": "Guardar"
       },
       "coachPhoneTitle": "Tu número para el asistente",
-      "coachPhoneIntro": "Tu celular personal. Mandá un audio a tu número de WhatsApp Business preguntando qué tenés hoy y te responde con la lista de pendientes. Dejalo vacío para desactivarlo."
+      "coachPhoneIntro": "Tu celular personal. Mandá un audio a tu número de WhatsApp Business preguntando qué tenés hoy y te responde con la lista de pendientes. Dejalo vacío para desactivarlo.",
+      "telegram": {
+        "title": "Avisos por Telegram",
+        "intro": "Gratis. Recibí en Telegram los mismos avisos que en el celular: mensajes nuevos, asignaciones y tareas que vencen. Sirve aunque no tengas la app del CRM instalada.",
+        "connect": "Conectar Telegram",
+        "steps": "Se abre Telegram: tocá «Iniciar» y listo. Si no tenés Telegram, descargalo gratis primero.",
+        "linked": "Conectado. Los avisos llegan a tu Telegram.",
+        "disconnect": "Desconectar"
+      }
     },
     "whatsapp": {
       "title": "WhatsApp",
