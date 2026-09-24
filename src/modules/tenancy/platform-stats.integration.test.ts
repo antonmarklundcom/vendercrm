@@ -72,6 +72,14 @@ describe.skipIf(!hasDb)("platform stats (MySQL integration)", () => {
     // state the page renders differently from a zero.
     expect(mine!.messages).toBe(0);
     expect(mine!.lastMessageAt).toBeNull();
+    expect(mine!.dealsWon).toBe(0);
+    expect(mine!.wonValue).toBe(0);
+    expect(mine!.leadsPrevious).toBe(0);
+
+    // No lead submissions for this business, so it has no source row — the
+    // query itself still has to run on MySQL (grouping + ordering by count).
+    const sources = await stats.listTopLeadSources(window);
+    expect(sources.some((row) => row.tenantId === tenantId)).toBe(false);
   });
 
   it("excludes it from a window that closed before it existed", async () => {

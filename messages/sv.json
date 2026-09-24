@@ -2687,8 +2687,15 @@
         "leads": "Leads",
         "contacts": "Kontakter",
         "messages": "Meddelanden",
-        "lastMessage": "Senaste meddelande"
-      }
+        "lastMessage": "Senaste meddelande",
+        "dealsWon": "Vunna",
+        "wonValue": "Sålt (PYG)",
+        "previous": "före: {count}"
+      },
+      "periodLabel": "Period",
+      "periodDays": "{days} dagar",
+      "sourcesTitle": "Var leads kommer ifrån, senaste {days} dagarna",
+      "noSite": "CRM:ets formulär och bokningar"
     },
     "tenantWhatsapp": {
       "title": "WhatsApp",

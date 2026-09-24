@@ -8,6 +8,9 @@ import {
   getPlatformTotals,
   listExpiringSubscriptions,
   listTenantActivity,
+  listTopLeadSources,
+  OVERVIEW_WINDOWS,
+  parseOverviewWindow,
   windowOf,
 } from "@/modules/tenancy/platform-stats";
 import { Card } from "@/components/ui/card";
@@ -23,23 +26,28 @@ import { formatDate, formatMoney, formatNumber } from "@/lib/i18n/format";
 // Defense in depth (§3.3): the layout redirects a non-superadmin, but a
 // layout is not an authorization boundary — this page re-checks for itself.
 
-const WINDOW_DAYS = 30;
 /** No message for this long, on a business that has sent one before, is the
  * churn conversation worth having early. */
 const QUIET_DAYS = 14;
 
-export default async function PlatformOverviewPage() {
+export default async function PlatformOverviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ days?: string }>;
+}) {
   await requireSuperadminContext();
+  const WINDOW_DAYS = parseOverviewWindow((await searchParams).days);
   const t = await getTranslations("superadmin.overview");
   const locale = await getLocale();
 
   const window = windowOf(WINDOW_DAYS);
-  const [totals, activity, tenantActivity, expiring, revenue] = await Promise.all([
+  const [totals, activity, tenantActivity, expiring, revenue, leadSources] = await Promise.all([
     getPlatformTotals(),
     getPlatformActivity(window),
     listTenantActivity(window),
     listExpiringSubscriptions(30),
     getMonthlyRevenue(),
+    listTopLeadSources(window),
   ]);
 
   const n = (value: number) => formatNumber(value, locale);
@@ -84,6 +92,23 @@ export default async function PlatformOverviewPage() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title={t("title")} description={t("intro", { days: WINDOW_DAYS })} />
+
+      <nav aria-label={t("periodLabel")} className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">{t("periodLabel")}</span>
+        {OVERVIEW_WINDOWS.map((days) => (
+          <Link
+            key={days}
+            href={days === 30 ? "/overview" : `/overview?days=${days}`}
+            aria-current={days === WINDOW_DAYS ? "page" : undefined}
+            className={cn(
+              "rounded-full border px-3 py-1",
+              days === WINDOW_DAYS ? "bg-foreground text-background" : "hover:bg-muted",
+            )}
+          >
+            {t("periodDays", { days })}
+          </Link>
+        ))}
+      </nav>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat) => (
@@ -170,6 +195,30 @@ export default async function PlatformOverviewPage() {
         </section>
       )}
 
+      {leadSources.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">{t("sourcesTitle", { days: WINDOW_DAYS })}</h2>
+          <Card>
+            <ul className="flex flex-col gap-1 text-sm">
+              {leadSources.map((row) => (
+                <li key={`${row.tenantId}-${row.siteId ?? "none"}`} className="flex justify-between gap-3">
+                  <span>
+                    {row.siteName ?? t("noSite")}
+                    <Link
+                      href={`/tenants/${row.tenantId}`}
+                      className="ml-2 text-xs text-muted-foreground underline underline-offset-4"
+                    >
+                      {row.tenantName}
+                    </Link>
+                  </span>
+                  <span className="tabular-nums">{n(row.leads)}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </section>
+      )}
+
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">{t("byTenantTitle", { days: WINDOW_DAYS })}</h2>
         <div className="overflow-x-auto">
@@ -180,6 +229,8 @@ export default async function PlatformOverviewPage() {
                 <th className="py-2 font-medium">{t("table.status")}</th>
                 <th className="px-3 py-2 text-right font-medium">{t("table.leads")}</th>
                 <th className="px-3 py-2 text-right font-medium">{t("table.contacts")}</th>
+                <th className="px-3 py-2 text-right font-medium">{t("table.dealsWon")}</th>
+                <th className="px-3 py-2 text-right font-medium">{t("table.wonValue")}</th>
                 <th className="px-3 py-2 text-right font-medium">{t("table.messages")}</th>
                 <th className="py-2 font-medium">{t("table.lastMessage")}</th>
               </tr>
@@ -193,8 +244,22 @@ export default async function PlatformOverviewPage() {
                     </Link>
                   </td>
                   <td className="py-2 text-muted-foreground">{row.status}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{n(row.leads)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">
+                    {n(row.leads)}
+                    <span
+                      className={cn(
+                        "block text-[11px]",
+                        row.leads < row.leadsPrevious ? "text-destructive" : "text-muted-foreground",
+                      )}
+                    >
+                      {t("table.previous", { count: row.leadsPrevious })}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-right tabular-nums">{n(row.contacts)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{n(row.dealsWon)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+                    {row.wonValue > 0 ? formatMoney(row.wonValue, "PYG", locale) : "—"}
+                  </td>
                   <td className="px-3 py-2 text-right tabular-nums">{n(row.messages)}</td>
                   <td className="py-2 text-xs text-muted-foreground">
                     {row.lastMessageAt ? formatDate(row.lastMessageAt, locale) : "—"}
