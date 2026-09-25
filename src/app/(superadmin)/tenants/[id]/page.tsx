@@ -29,6 +29,8 @@ import { WhatsappSection } from "./WhatsappSection";
 import { SitesSection, type ConsoleSite, type SiteOptions } from "./SitesSection";
 import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { DangerZone } from "./DangerZone";
+import { MailboxSection } from "./MailboxSection";
+import { isMailboxConfigured } from "@/modules/tenancy/mailbox";
 import { EditTenantDialog, type EditTenantLabels } from "./EditTenantDialog";
 import { activateTenantAction, suspendTenantAction } from "../actions";
 import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n/locales";
@@ -399,6 +401,13 @@ export default async function TenantDetailPage({
           qualityRating: account.qualityRating,
           connectedVia: account.connectedVia,
         }))}
+      />
+
+      <MailboxSection
+        tenantId={tenant.id}
+        enabled={tenant.mailboxEnabled}
+        suspendedAt={tenant.outboundSuspendedAt}
+        platformConfigured={isMailboxConfigured()}
       />
 
       <section>

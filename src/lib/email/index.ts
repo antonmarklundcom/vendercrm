@@ -1,9 +1,9 @@
-import { Resend } from "resend";
 import { env } from "@/lib/config/env";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { logEmail } from "@/modules/tenancy/email-log";
 import { checkPlanLimit } from "@/modules/tenancy/limits";
 import { senderFor } from "./sender";
+import { platformProvider } from "./providers";
 
 // Transactional email (PLAN.md §10 1M, extended by §15.1/§15.8 P4 for
 // per-tenant sending identity). Optional by design, the same pattern
@@ -42,8 +42,6 @@ export type SendEmailInput = {
   kind?: "transactional" | "automated";
 };
 
-const client = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
-
 /**
  * Never throws — a failed or unconfigured send must not break the flow that
  * triggered it (accepting an invite still has to work; a request to reset a
@@ -73,7 +71,10 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   }
   from = from || env.RESEND_FROM_EMAIL;
 
-  if (!client || !from) {
+  // Resend unless EMAIL_PROVIDER says otherwise (PLAN-EMAIL.md E1) —
+  // lib/email/providers owns that choice and its fallback.
+  const provider = platformProvider();
+  if (!provider || !from) {
     console.warn(
       `[email] RESEND_API_KEY/RESEND_FROM_EMAIL not set — skipping send to ${input.to}: ${input.subject}`,
     );
@@ -84,16 +85,15 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   }
 
   try {
-    const result = await client.emails.send({
+    const result = await provider.send({
       from,
       to: input.to,
       subject: input.subject,
       html: input.html,
       replyTo,
-      attachments: input.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
+      attachments: input.attachments,
     });
-    if (result.error) {
-      console.error("[email] Resend rejected the send:", result.error);
+    if (!result.ok) {
       if (input.ctx) {
         await logEmail(input.ctx, { to: input.to, subject: input.subject, kind, status: "failed" });
       }
@@ -105,7 +105,7 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
         subject: input.subject,
         kind,
         status: "sent",
-        providerId: result.data?.id,
+        providerId: result.providerId,
       });
     }
     return true;

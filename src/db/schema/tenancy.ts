@@ -40,6 +40,14 @@ export const tenants = mysqlTable(
     // settings because the settings page has to render the feed URL; this
     // column exists only to find the row.
     contactsFeedTokenHash: char("contacts_feed_token_hash", { length: 64 }),
+    // Per-domain mailbox (PLAN-EMAIL.md §3). Off for every tenant until a
+    // superadmin switches it on — and even then the Inbox only appears once
+    // the platform's Cloudflare env vars are set (modules/tenancy/mailbox.ts).
+    mailboxEnabled: boolean("mailbox_enabled").notNull().default(false),
+    // Set by the E5 bounce circuit breaker (or by hand) to stop mailbox
+    // replies for one tenant without touching anyone else's sending; cleared
+    // from the superadmin tenant page. NULL = not suspended.
+    outboundSuspendedAt: datetime("outbound_suspended_at"),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

@@ -1,0 +1,109 @@
+import type { EmailProvider, ProviderMessage, ProviderResult } from "./types";
+
+// Cloudflare Email Sending over REST (PLAN-EMAIL.md E1). Public beta: every
+// detail of the wire format lives in this file and nowhere else. Checked
+// against the Cloudflare docs source (cloudflare-docs, email-service/api/
+// send-emails/rest-api.mdx and examples/email-sending/recipients.mdx) on
+// 2026-09-25:
+//
+//   POST https://api.cloudflare.com/client/v4/accounts/{account_id}/email/sending/send
+//   Authorization: Bearer <token>
+//   { to, from: string | { address, name }, subject, html, text?,
+//     reply_to?, attachments?: [{ content (base64), filename, type, disposition }] }
+//   → { success, errors: [{ code, message }], result: { delivered, permanent_bounces, queued } }
+//
+// The REST response carries no message id (only the Workers binding returns
+// one), so `providerId` stays undefined for this provider.
+
+const API_BASE = "https://api.cloudflare.com/client/v4";
+
+type Address = string | { address: string; name: string };
+
+/** `"Name" <a@b>` → `{ address, name }`; a bare address stays a string. */
+export function toCloudflareAddress(mailbox: string): Address {
+  const match = mailbox.trim().match(/^(.*?)\s*<([^<>\s]+)>$/);
+  if (!match) return mailbox.trim();
+  let name = match[1].trim();
+  if (name.startsWith('"') && name.endsWith('"') && name.length >= 2) {
+    name = name.slice(1, -1).replace(/\\(.)/g, "$1");
+  }
+  return name ? { address: match[2], name } : match[2];
+}
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  pdf: "application/pdf",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  txt: "text/plain",
+  csv: "text/csv",
+  ics: "text/calendar",
+};
+
+function mimeFor(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  return MIME_BY_EXTENSION[ext] ?? "application/octet-stream";
+}
+
+export function buildCloudflarePayload(message: ProviderMessage) {
+  return {
+    to: message.to,
+    from: toCloudflareAddress(message.from),
+    subject: message.subject,
+    html: message.html,
+    ...(message.replyTo ? { reply_to: toCloudflareAddress(message.replyTo) } : {}),
+    ...(message.attachments?.length
+      ? {
+          attachments: message.attachments.map((a) => ({
+            content: a.content.toString("base64"),
+            filename: a.filename,
+            type: mimeFor(a.filename),
+            disposition: "attachment",
+          })),
+        }
+      : {}),
+  };
+}
+
+type CloudflareResponse = {
+  success?: boolean;
+  errors?: Array<{ code?: number; message?: string }>;
+  result?: { delivered?: string[]; permanent_bounces?: string[]; queued?: string[] } | null;
+};
+
+export function createCloudflareProvider(config: {
+  accountId: string;
+  apiToken: string;
+  fetchImpl?: typeof fetch;
+}): EmailProvider {
+  const fetchImpl = config.fetchImpl ?? fetch;
+  const url = `${API_BASE}/accounts/${encodeURIComponent(config.accountId)}/email/sending/send`;
+  return {
+    name: "cloudflare",
+    async send(message: ProviderMessage): Promise<ProviderResult> {
+      const response = await fetchImpl(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.apiToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(buildCloudflarePayload(message)),
+      });
+      const body = (await response.json().catch(() => null)) as CloudflareResponse | null;
+      if (!response.ok || !body?.success) {
+        // Codes and machine messages only — never the request body.
+        console.error(
+          `[email] Cloudflare rejected the send (HTTP ${response.status}):`,
+          body?.errors?.map((e) => `${e.code}:${e.message}`).join(", ") ?? "no body",
+        );
+        return { ok: false };
+      }
+      const bounced = body.result?.permanent_bounces ?? [];
+      if (bounced.length > 0) {
+        console.error("[email] Cloudflare reported a permanent bounce for the recipient");
+        return { ok: false };
+      }
+      return { ok: true };
+    },
+  };
+}
