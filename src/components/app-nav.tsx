@@ -17,6 +17,7 @@ import {
   FileText,
   Globe,
   LayoutDashboard,
+  LayoutGrid,
   Landmark,
   MessagesSquare,
   MessageCircle,
@@ -45,6 +46,7 @@ import { OPEN_SEARCH_EVENT } from "@/components/command-palette-event";
  * passes a key and this map resolves it here. */
 const ICONS = {
   dashboard: LayoutDashboard,
+  businesses: LayoutGrid,
   contacts: Users,
   companies: Building2,
   contracts: FileSignature,

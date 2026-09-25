@@ -100,7 +100,8 @@
       "reports": "Informes",
       "booking": "Reservas",
       "chat": "Chat web",
-      "onboarding": "Rubro"
+      "onboarding": "Rubro",
+      "businesses": "Todos mis negocios"
     },
     "memory": {
       "title": "Memoria del negocio",
@@ -2288,6 +2289,68 @@
       "keyTaken": "Ya existe un campo con esa clave.",
       "adminOnly": "Esta sección es solo para administradores.",
       "empty": "Todavía no hay campos personalizados."
+    },
+    "businesses": {
+      "title": "Todos mis negocios",
+      "intro": "{count} negocios en una pantalla: cuál te necesita primero y quién espera respuesta. Leads de los últimos {days} días.",
+      "emptyTitle": "Sin negocios",
+      "emptyBody": "Todavía no tenés acceso a ningún negocio.",
+      "summary": {
+        "unread": "Conversaciones sin leer",
+        "leads": "Leads ({days} días)",
+        "overdue": "Tareas vencidas",
+        "attention": "Negocios con pendientes"
+      },
+      "businessesTitle": "Negocios",
+      "search": "Buscar negocio…",
+      "sortLabel": "Ordenar:",
+      "sort": {
+        "priority": "Prioridad",
+        "name": "Nombre",
+        "leads": "Más leads",
+        "recent": "Último mensaje"
+      },
+      "noMatch": "Ningún negocio coincide con la búsqueda.",
+      "allCalm": "Todo al día: ningún negocio tiene mensajes sin leer, tareas vencidas ni leads nuevos.",
+      "current": "actual",
+      "metrics": {
+        "unread": "Sin leer",
+        "leads": "Leads {days}d",
+        "deals": "Negocios abiertos",
+        "overdue": "Vencidas"
+      },
+      "unassigned": "{count, plural, one {# conversación sin asignar} other {# conversaciones sin asignar}}",
+      "waError": "WhatsApp con error",
+      "access": {
+        "grace": "Plan vencido",
+        "locked": "Bloqueado"
+      },
+      "lastMessage": "Último mensaje {when}",
+      "neverMessaged": "Sin mensajes todavía",
+      "lastLead": "último lead {when}",
+      "actions": {
+        "open": "Abrir",
+        "inbox": "Mensajes",
+        "pipeline": "Pipeline"
+      },
+      "trendUp": "Más que los {previous} del período anterior",
+      "trendDown": "Menos que los {previous} del período anterior",
+      "quietTitle": "{count, plural, one {# negocio sin novedades} other {# negocios sin novedades}}",
+      "messagesTitle": "Mensajes de todos tus negocios",
+      "messagesUnread": "Sin leer",
+      "messagesAll": "Todos",
+      "messagesEmptyUnread": "No hay mensajes sin leer en ningún negocio.",
+      "messagesEmptyAll": "Todavía no hay conversaciones.",
+      "unknownContact": "Visitante",
+      "you": "Vos",
+      "webchat": "Chat web",
+      "media": {
+        "image": "📷 Imagen",
+        "audio": "🎤 Audio",
+        "video": "🎬 Video",
+        "document": "📄 Documento",
+        "other": "Mensaje"
+      }
     }
   },
   "superadmin": {

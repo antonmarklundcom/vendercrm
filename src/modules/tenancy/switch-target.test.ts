@@ -79,3 +79,10 @@ describe("resolveSwitchTarget", () => {
     expect(resolveSwitchTarget("/contactsomething", "admin")).toBe(SWITCH_FALLBACK);
   });
 });
+
+describe("resolveSwitchTarget — all-businesses overview", () => {
+  it("keeps you on /businesses, which is cross-business already", () => {
+    expect(resolveSwitchTarget("/businesses", "agent")).toBe("/businesses");
+    expect(resolveSwitchTarget("/businesses?sort=name", "admin")).toBe("/businesses");
+  });
+});

@@ -89,6 +89,11 @@ export default async function AppLayout({
     {
       label: null,
       items: [
+        // Only for someone who works in more than one business: the view
+        // across all of them (modules/tenancy/portfolio.ts).
+        ...(memberships.length > 1
+          ? [{ href: "/businesses", label: t("businesses"), icon: "businesses" as const }]
+          : []),
         { href: "/dashboard", label: t("dashboard"), icon: "dashboard" },
         { href: "/inbox", label: t("inbox"), icon: "inbox" },
         // A surface of its own rather than a tab inside /inbox: the WhatsApp

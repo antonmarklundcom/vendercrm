@@ -100,7 +100,8 @@
       "reports": "Rapporter",
       "booking": "Bokningar",
       "chat": "Webbchatt",
-      "onboarding": "Bransch"
+      "onboarding": "Bransch",
+      "businesses": "Alla mina företag"
     },
     "memory": {
       "title": "Företagets minne",
@@ -2288,6 +2289,68 @@
       "keyTaken": "Ett fält med den nyckeln finns redan.",
       "adminOnly": "Den här sektionen är endast för administratörer.",
       "empty": "Inga anpassade fält än."
+    },
+    "businesses": {
+      "title": "Alla mina företag",
+      "intro": "{count} företag på en skärm: vilket som behöver dig först och vem som väntar på svar. Leads från de senaste {days} dagarna.",
+      "emptyTitle": "Inga företag",
+      "emptyBody": "Du har inte tillgång till något företag än.",
+      "summary": {
+        "unread": "Olästa konversationer",
+        "leads": "Leads ({days} dagar)",
+        "overdue": "Försenade uppgifter",
+        "attention": "Företag att åtgärda"
+      },
+      "businessesTitle": "Företag",
+      "search": "Sök företag…",
+      "sortLabel": "Sortera:",
+      "sort": {
+        "priority": "Prioritet",
+        "name": "Namn",
+        "leads": "Flest leads",
+        "recent": "Senaste meddelande"
+      },
+      "noMatch": "Inget företag matchar sökningen.",
+      "allCalm": "Allt i ordning: inga olästa meddelanden, försenade uppgifter eller nya leads.",
+      "current": "aktivt",
+      "metrics": {
+        "unread": "Olästa",
+        "leads": "Leads {days}d",
+        "deals": "Öppna affärer",
+        "overdue": "Försenade"
+      },
+      "unassigned": "{count, plural, one {# otilldelad konversation} other {# otilldelade konversationer}}",
+      "waError": "WhatsApp-fel",
+      "access": {
+        "grace": "Planen har gått ut",
+        "locked": "Låst"
+      },
+      "lastMessage": "Senaste meddelande {when}",
+      "neverMessaged": "Inga meddelanden än",
+      "lastLead": "senaste lead {when}",
+      "actions": {
+        "open": "Öppna",
+        "inbox": "Meddelanden",
+        "pipeline": "Pipeline"
+      },
+      "trendUp": "Fler än {previous} föregående period",
+      "trendDown": "Färre än {previous} föregående period",
+      "quietTitle": "{count, plural, one {# företag utan nyheter} other {# företag utan nyheter}}",
+      "messagesTitle": "Meddelanden från alla dina företag",
+      "messagesUnread": "Olästa",
+      "messagesAll": "Alla",
+      "messagesEmptyUnread": "Inga olästa meddelanden i något företag.",
+      "messagesEmptyAll": "Inga konversationer än.",
+      "unknownContact": "Besökare",
+      "you": "Du",
+      "webchat": "Webbchatt",
+      "media": {
+        "image": "📷 Bild",
+        "audio": "🎤 Ljud",
+        "video": "🎬 Video",
+        "document": "📄 Dokument",
+        "other": "Meddelande"
+      }
     }
   },
   "superadmin": {

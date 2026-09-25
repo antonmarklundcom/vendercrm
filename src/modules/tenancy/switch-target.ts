@@ -39,6 +39,8 @@ const SECTIONS = [
   "/users",
   "/settings",
   "/dashboard",
+  // Cross-business already, so switching from it keeps you on it.
+  "/businesses",
 ];
 
 export const SWITCH_FALLBACK = "/dashboard";

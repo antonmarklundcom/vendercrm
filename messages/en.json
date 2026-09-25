@@ -100,7 +100,8 @@
       "reports": "Reports",
       "booking": "Bookings",
       "chat": "Web chat",
-      "onboarding": "Industry"
+      "onboarding": "Industry",
+      "businesses": "All my businesses"
     },
     "memory": {
       "title": "Business memory",
@@ -2288,6 +2289,68 @@
       "keyTaken": "A field with that key already exists.",
       "adminOnly": "This section is admin-only.",
       "empty": "No custom fields yet."
+    },
+    "businesses": {
+      "title": "All my businesses",
+      "intro": "{count} businesses on one screen: which one needs you first and who is waiting for an answer. Leads from the last {days} days.",
+      "emptyTitle": "No businesses",
+      "emptyBody": "You don't have access to any business yet.",
+      "summary": {
+        "unread": "Unread conversations",
+        "leads": "Leads ({days} days)",
+        "overdue": "Overdue tasks",
+        "attention": "Businesses needing attention"
+      },
+      "businessesTitle": "Businesses",
+      "search": "Search business…",
+      "sortLabel": "Sort:",
+      "sort": {
+        "priority": "Priority",
+        "name": "Name",
+        "leads": "Most leads",
+        "recent": "Latest message"
+      },
+      "noMatch": "No business matches the search.",
+      "allCalm": "All caught up: no business has unread messages, overdue tasks or new leads.",
+      "current": "current",
+      "metrics": {
+        "unread": "Unread",
+        "leads": "Leads {days}d",
+        "deals": "Open deals",
+        "overdue": "Overdue"
+      },
+      "unassigned": "{count, plural, one {# unassigned conversation} other {# unassigned conversations}}",
+      "waError": "WhatsApp error",
+      "access": {
+        "grace": "Plan expired",
+        "locked": "Locked"
+      },
+      "lastMessage": "Last message {when}",
+      "neverMessaged": "No messages yet",
+      "lastLead": "last lead {when}",
+      "actions": {
+        "open": "Open",
+        "inbox": "Messages",
+        "pipeline": "Pipeline"
+      },
+      "trendUp": "More than the {previous} of the previous period",
+      "trendDown": "Fewer than the {previous} of the previous period",
+      "quietTitle": "{count, plural, one {# business with nothing new} other {# businesses with nothing new}}",
+      "messagesTitle": "Messages from all your businesses",
+      "messagesUnread": "Unread",
+      "messagesAll": "All",
+      "messagesEmptyUnread": "No unread messages in any business.",
+      "messagesEmptyAll": "No conversations yet.",
+      "unknownContact": "Visitor",
+      "you": "You",
+      "webchat": "Web chat",
+      "media": {
+        "image": "📷 Image",
+        "audio": "🎤 Audio",
+        "video": "🎬 Video",
+        "document": "📄 Document",
+        "other": "Message"
+      }
     }
   },
   "superadmin": {

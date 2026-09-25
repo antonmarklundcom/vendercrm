@@ -118,6 +118,7 @@ export function isPublicPath(pathname: string, host?: string | null): boolean {
 // were shared from).
 export const APP_PATH_PREFIXES = [
   "/dashboard",
+  "/businesses",
   "/pipeline",
   "/contacts",
   "/inbox",
