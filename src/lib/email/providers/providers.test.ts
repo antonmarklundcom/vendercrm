@@ -104,6 +104,22 @@ describe("Cloudflare provider", () => {
     });
   });
 
+  it("adds text, cc and threading headers when given", () => {
+    const payload = buildCloudflarePayload({
+      ...message,
+      attachments: undefined,
+      text: "Hola",
+      cc: ["b@example.com"],
+      headers: { "In-Reply-To": "<m1@x>", References: "<m0@x> <m1@x>" },
+    });
+    expect(payload).toMatchObject({
+      text: "Hola",
+      cc: ["b@example.com"],
+      headers: { "In-Reply-To": "<m1@x>", References: "<m0@x> <m1@x>" },
+    });
+    expect(payload).not.toHaveProperty("attachments");
+  });
+
   it("posts to the account's send endpoint with a bearer token", async () => {
     const fetchImpl = vi.fn(async () =>
       Response.json({

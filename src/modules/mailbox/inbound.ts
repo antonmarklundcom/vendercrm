@@ -4,6 +4,7 @@ import { isMailboxConfigured } from "@/modules/tenancy/mailbox";
 import { domainOf } from "./headers";
 import { ingestInboundEmail } from "./ingest";
 import { resolveRecipient } from "./mailboxes";
+import { pushInboundEmail } from "./notify";
 import { inboundPayloadSchema } from "./payload";
 import { SIGNATURE_HEADER, TIMESTAMP_HEADER, verifyInboundSignature } from "./signature";
 
@@ -66,5 +67,13 @@ export async function handleInboundEmail(
   }
 
   const result = await ingestInboundEmail(ctx, resolved.mailbox, payload);
+  if (result.status === "stored") {
+    await pushInboundEmail(ctx, {
+      threadId: result.threadId,
+      fromName: payload.from.name ?? null,
+      fromAddress: payload.from.address,
+      subject: payload.subject,
+    });
+  }
   return { status: 200, body: { status: result.status } };
 }

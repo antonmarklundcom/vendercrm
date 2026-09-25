@@ -10,6 +10,11 @@ export type ProviderMessage = {
   html: string;
   replyTo?: string;
   attachments?: Array<{ filename: string; content: Buffer }>;
+  /** Plain-text alternative. Mailbox replies send both parts. */
+  text?: string;
+  cc?: string[];
+  /** Extra headers — threading (`In-Reply-To`, `References`) and `X-` only. */
+  headers?: Record<string, string>;
 };
 
 /**

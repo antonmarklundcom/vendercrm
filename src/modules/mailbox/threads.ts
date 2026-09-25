@@ -1,5 +1,5 @@
 import { and, desc, eq, gte, inArray, lt, type SQL } from "drizzle-orm";
-import { contacts, emailAttachments, emailMessages, emailThreads } from "@/db/schema";
+import { contacts, deals, emailAttachments, emailMessages, emailThreads } from "@/db/schema";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 
@@ -86,6 +86,10 @@ export async function linkThread(
   if (link.contactId) {
     const [contact] = await tenantDb(ctx).select(contacts, eq(contacts.id, link.contactId));
     if (!contact) throw new Error("contact_not_found");
+  }
+  if (link.dealId) {
+    const [deal] = await tenantDb(ctx).select(deals, eq(deals.id, link.dealId));
+    if (!deal) throw new Error("deal_not_found");
   }
   await tenantDb(ctx)
     .update(emailThreads)

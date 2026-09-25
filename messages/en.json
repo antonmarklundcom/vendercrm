@@ -100,7 +100,8 @@
       "reports": "Reports",
       "booking": "Bookings",
       "chat": "Web chat",
-      "onboarding": "Industry"
+      "onboarding": "Industry",
+      "email": "Email"
     },
     "memory": {
       "title": "Business memory",
@@ -2288,6 +2289,63 @@
       "keyTaken": "A field with that key already exists.",
       "adminOnly": "This section is admin-only.",
       "empty": "No custom fields yet."
+    },
+    "email": {
+      "title": "Email",
+      "intro": "Mail sent to your business's addresses. Reply from here.",
+      "filter": {
+        "open": "Open",
+        "closed": "Closed",
+        "all": "All"
+      },
+      "allMailboxes": "All",
+      "emptyTitle": "No email yet",
+      "emptyBody": "When someone writes to {address}, it shows up here.",
+      "noMailbox": "No addresses are set up for this business yet.",
+      "unread": "Unread",
+      "noSubject": "(no subject)",
+      "linkedContact": "Contact",
+      "closed": "Closed",
+      "back": "Back to email",
+      "markUnread": "Mark as unread",
+      "close": "Close",
+      "reopen": "Reopen",
+      "contact": "Contact",
+      "noDeal": "No deal",
+      "linkDeal": "Link",
+      "openDeal": "Open deal",
+      "noContact": "This sender is not a contact yet. Add their phone to create one (or link an existing one).",
+      "createContact": "Create contact",
+      "contactName": "Name",
+      "contactPhone": "Phone",
+      "imagesBlocked": "Remote images are blocked so the sender can't tell you opened this.",
+      "showImages": "Show images",
+      "replyTo": "Replying to",
+      "cc": "Cc (optional)",
+      "ccHelp": "Up to {max} addresses, comma-separated",
+      "body": "Message",
+      "send": "Send",
+      "sent": "Sent.",
+      "status": {
+        "queued": "Sending",
+        "failed": "Not sent",
+        "bounced": "Bounced",
+        "received": "Received",
+        "sent": "Sent"
+      },
+      "errors": {
+        "empty": "Write a message.",
+        "not_found": "Conversation not found.",
+        "unavailable": "Email is not enabled for this business.",
+        "mailbox_inactive": "This address is deactivated.",
+        "suspended": "Sending is suspended for this business. Contact support.",
+        "invalid_recipient": "Check the addresses: one is not valid.",
+        "too_many_recipients": "At most {max} recipients per email.",
+        "daily_limit": "Today's email limit is reached. Try tomorrow.",
+        "send_failed": "Could not send. Try again in a moment.",
+        "invalidPhone": "Enter a valid phone number.",
+        "unknown": "Something went wrong. Try again."
+      }
     }
   },
   "superadmin": {
