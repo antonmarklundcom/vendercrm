@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Separate Cloudflare Worker with its own package.json and tsconfig.
+    "workers/**",
   ]),
   {
     // Raw DB access is confined to src/db, src/worker, and the tenancy
@@ -125,6 +127,13 @@ const eslintConfig = defineConfig([
       // (site, pipeline, tags, contact, deal) is written through the ordinary
       // module services and tenantDb once the tenant is known.
       "src/modules/ops/**/*.{ts,tsx}",
+      // Same rationale as whatsapp and sites: the inbound email webhook only
+      // has a recipient address and must find which tenant owns it before
+      // any TenantContext exists (PLAN-EMAIL.md E2) — and adding an address
+      // has to check no *other* tenant owns that domain. Those two reads in
+      // modules/mailbox/mailboxes.ts are the only raw-db use; threads,
+      // messages and attachments all go through tenantDb.
+      "src/modules/mailbox/**/*.{ts,tsx}",
     ],
     rules: {
       "no-restricted-imports": "off",

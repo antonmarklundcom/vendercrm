@@ -18,3 +18,4 @@ export * from "./email";
 export * from "./contracts";
 export * from "./coach";
 export * from "./ops";
+export * from "./mailbox";

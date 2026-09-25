@@ -16,14 +16,21 @@ import { writeAuditLog } from "./audit";
 // reads go by id and writes require a SuperadminContext.
 
 type MailboxEnv = {
+  STORAGE_DRIVER?: "local" | "s3";
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_EMAIL_API_TOKEN?: string;
   EMAIL_INBOUND_SECRET?: string;
 };
 
-/** Platform layer: everything the mailbox needs to receive and reply. */
+/**
+ * Platform layer: everything the mailbox needs to receive and reply. The
+ * Worker stores raw mail and attachments in R2 and the app reads them back
+ * through its own storage driver, so the app must be on the S3 driver
+ * pointed at that same bucket (PLAN-EMAIL.md E2).
+ */
 export function isMailboxConfigured(config: MailboxEnv = env): boolean {
   return !!(
+    config.STORAGE_DRIVER === "s3" &&
     config.CLOUDFLARE_ACCOUNT_ID &&
     config.CLOUDFLARE_EMAIL_API_TOKEN &&
     config.EMAIL_INBOUND_SECRET

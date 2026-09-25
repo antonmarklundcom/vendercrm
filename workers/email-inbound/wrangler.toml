@@ -1,0 +1,18 @@
+# Cloudflare Email Worker for VenderCRM mailboxes (PLAN-EMAIL.md E2).
+# Deploy: npm install && npx wrangler deploy
+# Secret: npx wrangler secret put EMAIL_INBOUND_SECRET  (same value as the app)
+name = "vendercrm-email-inbound"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# Retry queue for deliveries the app did not accept (see src/index.ts).
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Must be the same bucket the app reads with STORAGE_DRIVER=s3 / S3_BUCKET.
+[[r2_buckets]]
+binding = "MAIL_BUCKET"
+bucket_name = "vendercrm-storage"
+
+[vars]
+INBOUND_URL = "https://crm.example.com/api/v1/email/inbound"

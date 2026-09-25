@@ -31,6 +31,7 @@ import { listPipelines, listStagesForPipeline } from "@/modules/crm/pipelines";
 import { DangerZone } from "./DangerZone";
 import { MailboxSection } from "./MailboxSection";
 import { isMailboxConfigured } from "@/modules/tenancy/mailbox";
+import { listMailboxes } from "@/modules/mailbox/mailboxes";
 import { EditTenantDialog, type EditTenantLabels } from "./EditTenantDialog";
 import { activateTenantAction, suspendTenantAction } from "../actions";
 import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n/locales";
@@ -68,6 +69,7 @@ export default async function TenantDetailPage({
         listSiteHealth(tenantCtx),
       ])
     : [[], [], []];
+  const mailboxRows = tenantCtx ? await listMailboxes(tenantCtx) : [];
   const healthBySite = new Map(healthRows.map((row) => [row.siteId, row]));
   const consoleSites: ConsoleSite[] = await Promise.all(
     siteRows.map(async (site) => {
@@ -408,6 +410,13 @@ export default async function TenantDetailPage({
         enabled={tenant.mailboxEnabled}
         suspendedAt={tenant.outboundSuspendedAt}
         platformConfigured={isMailboxConfigured()}
+        mailboxes={mailboxRows.map((mailbox) => ({
+          id: mailbox.id,
+          address: mailbox.address,
+          displayName: mailbox.displayName,
+          isCatchAll: mailbox.isCatchAll,
+          isActive: mailbox.isActive,
+        }))}
       />
 
       <section>

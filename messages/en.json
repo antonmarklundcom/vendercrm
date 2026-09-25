@@ -2547,7 +2547,24 @@
         "disable": "Turn mailbox off",
         "platformNotConfigured": "No effect yet: the Cloudflare variables are not set on the server.",
         "suspendedSince": "Sending suspended since {date}",
-        "clearSuspension": "Clear suspension"
+        "clearSuspension": "Clear suspension",
+        "addresses": "Addresses",
+        "noAddresses": "No addresses yet. Add one on the domain you moved to Cloudflare.",
+        "address": "Address",
+        "addressPlaceholder": "contact@domain.com",
+        "displayName": "Display name",
+        "catchAll": "Receives the whole domain",
+        "catchAllHelp": "Also receives mail sent to any other address at this domain.",
+        "addAddress": "Add address",
+        "addressAdded": "Added:",
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "errors": {
+          "invalid_address": "That address is not valid.",
+          "address_taken": "That address is already in use.",
+          "domain_taken": "That domain already belongs to another business.",
+          "unknown": "Could not save. Try again."
+        }
       }
     },
     "subscriptions": {

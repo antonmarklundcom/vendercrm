@@ -17,6 +17,8 @@ vi.mock("@/lib/config/env", () => ({
   env: { RESEND_API_KEY: "re_test", RESEND_FROM_EMAIL: "no-reply@vendercrm.test" },
 }));
 
+vi.mock("@/lib/storage", () => ({ storage: {} }));
+
 vi.mock("@/db/client", () => ({
   db: new Proxy(
     {},
@@ -31,6 +33,7 @@ vi.mock("@/db/client", () => ({
 const { sendEmail } = await import("./index");
 const { platformProvider, mailboxProvider } = await import("./providers");
 const { isMailboxAvailable, isMailboxConfigured } = await import("@/modules/tenancy/mailbox");
+const { handleInboundEmail } = await import("@/modules/mailbox/inbound");
 
 describe("mailbox work defaults off", () => {
   it("keeps Resend as the platform provider and has no mailbox provider", () => {
@@ -69,5 +72,10 @@ describe("mailbox work defaults off", () => {
   it("hides the mailbox for every tenant", async () => {
     expect(isMailboxConfigured()).toBe(false);
     await expect(isMailboxAvailable({ tenantId: "any" })).resolves.toBe(false);
+  });
+
+  it("answers 404 on the inbound webhook, even to a well-formed request", async () => {
+    const result = await handleInboundEmail("{}", new Headers({ "x-vendercrm-signature": "a".repeat(64) }));
+    expect(result.status).toBe(404);
   });
 });

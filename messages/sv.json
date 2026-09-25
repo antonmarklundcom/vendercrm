@@ -2547,7 +2547,24 @@
         "disable": "Slå av e-postlådan",
         "platformNotConfigured": "Ingen effekt än: Cloudflare-variablerna saknas på servern.",
         "suspendedSince": "Utskick pausade sedan {date}",
-        "clearSuspension": "Ta bort pausen"
+        "clearSuspension": "Ta bort pausen",
+        "addresses": "Adresser",
+        "noAddresses": "Inga adresser än. Lägg till en på domänen du flyttat till Cloudflare.",
+        "address": "Adress",
+        "addressPlaceholder": "kontakt@doman.se",
+        "displayName": "Visningsnamn",
+        "catchAll": "Tar emot hela domänen",
+        "catchAllHelp": "Tar även emot e-post till alla andra adresser på domänen.",
+        "addAddress": "Lägg till adress",
+        "addressAdded": "Tillagd:",
+        "deactivate": "Inaktivera",
+        "activate": "Aktivera",
+        "errors": {
+          "invalid_address": "Adressen är inte giltig.",
+          "address_taken": "Adressen används redan.",
+          "domain_taken": "Domänen tillhör redan ett annat företag.",
+          "unknown": "Kunde inte spara. Försök igen."
+        }
       }
     },
     "subscriptions": {

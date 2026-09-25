@@ -2547,7 +2547,24 @@
         "disable": "Desactivar casilla",
         "platformNotConfigured": "Sin efecto todavía: faltan las variables de Cloudflare en el servidor.",
         "suspendedSince": "Envío suspendido desde {date}",
-        "clearSuspension": "Quitar suspensión"
+        "clearSuspension": "Quitar suspensión",
+        "addresses": "Direcciones",
+        "noAddresses": "Todavía no hay direcciones. Agregá la del dominio que ya pasaste a Cloudflare.",
+        "address": "Dirección",
+        "addressPlaceholder": "contacto@dominio.com.py",
+        "displayName": "Nombre visible",
+        "catchAll": "Recibe todo el dominio",
+        "catchAllHelp": "También recibe correo enviado a cualquier otra dirección de este dominio.",
+        "addAddress": "Agregar dirección",
+        "addressAdded": "Agregada:",
+        "deactivate": "Desactivar",
+        "activate": "Activar",
+        "errors": {
+          "invalid_address": "Esa dirección no es válida.",
+          "address_taken": "Esa dirección ya está en uso.",
+          "domain_taken": "Ese dominio ya pertenece a otro negocio.",
+          "unknown": "No se pudo guardar. Probá de nuevo."
+        }
       }
     },
     "subscriptions": {
