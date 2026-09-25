@@ -86,7 +86,10 @@ Two layers, both default **off**, so deploying the code changes nothing:
 
 1. **Env vars (global, platform level)** — follows the repo's existing "optional
    config = feature degrades" pattern:
-   - `EMAIL_PROVIDER` = `resend` (default) | `cloudflare`.
+   - `EMAIL_PROVIDER` = `resend` (default) | `cloudflare` — for platform/transactional mail
+     (password reset, invites, notifications). Stays `resend` until Anton swaps it.
+   - Mailbox replies (E4) always go via Cloudflare, independent of `EMAIL_PROVIDER`,
+     so the inbox can run on Cloudflare while password recovery stays on Resend.
    - `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_EMAIL_API_TOKEN` — outbound via REST.
    - `EMAIL_INBOUND_SECRET` — HMAC secret shared with the Worker. Unset → the
      inbound webhook returns 404 and the Inbox feature is hidden everywhere.
