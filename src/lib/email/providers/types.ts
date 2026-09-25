@@ -22,7 +22,11 @@ export type ProviderMessage = {
  * the provider, without the body). A thrown error is a transport failure —
  * `sendEmail()` catches and logs those itself, exactly as before providers.
  */
-export type ProviderResult = { ok: true; providerId?: string } | { ok: false };
+export type ProviderResult =
+  | { ok: true; providerId?: string }
+  /** `bounced`: the provider answered synchronously that the recipient
+   *  permanently bounced (Cloudflare's `permanent_bounces`). */
+  | { ok: false; bounced?: boolean };
 
 export interface EmailProvider {
   readonly name: "resend" | "cloudflare";

@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
-import { tenants } from "@/db/schema";
+import { auditLog, tenants, users } from "@/db/schema";
 import { env } from "@/lib/config/env";
 import type { SuperadminContext, TenantContext } from "./context";
 import { writeAuditLog } from "./audit";
@@ -88,4 +88,57 @@ export async function clearOutboundSuspension(
     entityId: tenantId,
     payload: { suspendedAt: row.outboundSuspendedAt.toISOString() },
   });
+}
+
+/**
+ * The circuit breaker's switch (PLAN-EMAIL.md E5): stops mailbox replies for
+ * one business. Only the first call sets the timestamp and writes the audit
+ * row, so a burst of bounce events suspends once. Returns whether this call
+ * was the one that suspended.
+ */
+export async function suspendOutbound(
+  tenantId: string,
+  reason: string,
+  detail: Record<string, unknown> = {},
+  now: Date = new Date(),
+): Promise<boolean> {
+  const [result] = await db
+    .update(tenants)
+    .set({ outboundSuspendedAt: now })
+    .where(and(eq(tenants.id, tenantId), isNull(tenants.outboundSuspendedAt)));
+  if (!result || result.affectedRows === 0) return false;
+  await writeAuditLog({
+    tenantId,
+    actorUserId: "system",
+    action: "mailbox.outbound_suspended",
+    entity: "tenant",
+    entityId: tenantId,
+    payload: { reason, ...detail },
+  });
+  return true;
+}
+
+/** Where a suspension alert goes: every platform superadmin's login email. */
+export async function listSuperadminEmails(): Promise<string[]> {
+  const rows = await db
+    .select({ email: users.email })
+    .from(users)
+    .where(and(eq(users.isSuperadmin, true), eq(users.banned, false)));
+  return rows.map((row) => row.email);
+}
+
+/**
+ * When a superadmin last lifted this business's suspension (from the audit
+ * trail, so no extra column). The breaker only counts sends after it: the
+ * operator has looked at the old bounces, and they must not re-trip the
+ * breaker on the very next one.
+ */
+export async function lastSuspensionClearedAt(tenantId: string): Promise<Date | null> {
+  const [row] = await db
+    .select({ at: auditLog.createdAt })
+    .from(auditLog)
+    .where(and(eq(auditLog.tenantId, tenantId), eq(auditLog.action, "mailbox.suspension_cleared")))
+    .orderBy(desc(auditLog.createdAt))
+    .limit(1);
+  return row?.at ?? null;
 }

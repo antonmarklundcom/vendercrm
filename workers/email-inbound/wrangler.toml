@@ -14,5 +14,14 @@ crons = ["*/5 * * * *"]
 binding = "MAIL_BUCKET"
 bucket_name = "vendercrm-storage"
 
+# Email Sending events (bounces, complaints) for the circuit breaker. Create
+# the queue, then an event subscription on each sending domain that
+# publishes to it (PLAN-EMAIL.md E5, docs/log/e5.md).
+[[queues.consumers]]
+queue = "vendercrm-email-events"
+max_batch_size = 50
+max_batch_timeout = 30
+
 [vars]
 INBOUND_URL = "https://crm.example.com/api/v1/email/inbound"
+EVENTS_URL = "https://crm.example.com/api/v1/email/events"

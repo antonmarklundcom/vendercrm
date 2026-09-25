@@ -124,7 +124,7 @@ export const emailMessages = mysqlTable(
     rawKey: varchar("raw_key", { length: 500 }),
     status: varchar("status", {
       length: 10,
-      enum: ["received", "queued", "sent", "failed", "bounced"],
+      enum: ["received", "queued", "sent", "failed", "bounced", "complained"],
     }).notNull(),
     sentByUserId: char("sent_by_user_id", { length: 26 }),
     /** Date header for inbound, send time for outbound. */

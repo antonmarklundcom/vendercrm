@@ -9,6 +9,7 @@ import { getTenant } from "@/modules/tenancy/tenants";
 import { replySubject } from "./headers";
 import { getMailbox } from "./mailboxes";
 import { getThread, listThreadMessages } from "./threads";
+import { evaluateBreaker } from "./breaker";
 
 // Replying from the Inbox (PLAN-EMAIL.md E4). Always through the mailbox
 // provider (Cloudflare), never through EMAIL_PROVIDER — the Inbox can run on
@@ -37,6 +38,7 @@ export type ReplyError =
   | "empty"
   | "invalid_recipient"
   | "too_many_recipients"
+  | "daily_limit"
   | "send_failed";
 
 export type ReplyResult = { ok: true; emailMessageId: string } | { ok: false; error: ReplyError };
@@ -147,6 +149,7 @@ export async function sendThreadReply(
   });
 
   let sent = false;
+  let bounced = false;
   try {
     const result = await provider.send({
       from,
@@ -162,14 +165,16 @@ export async function sendThreadReply(
       },
     });
     sent = result.ok;
+    bounced = !result.ok && result.bounced === true;
   } catch (err) {
     console.error("[mailbox] reply send failed:", err instanceof Error ? err.message : "unknown");
   }
 
   await tenantDb(ctx)
     .update(emailMessages)
-    .set({ status: sent ? "sent" : "failed" })
+    .set({ status: sent ? "sent" : bounced ? "bounced" : "failed" })
     .where(eq(emailMessages.id, id));
+  if (bounced) await evaluateBreaker(ctx, now);
   if (sent) {
     await tenantDb(ctx)
       .update(emailThreads)

@@ -2,6 +2,8 @@ import PostalMime from "postal-mime";
 import {
   buildPayload,
   classifyResponse,
+  toDeliveryEvent,
+  type CloudflareSendingEvent,
   nextAttemptDelayMs,
   RETRY_GIVE_UP_MS,
   type InboundPayload,
@@ -25,6 +27,8 @@ export interface Env {
   MAIL_BUCKET: R2Bucket;
   /** e.g. https://crm.example.com/api/v1/email/inbound */
   INBOUND_URL: string;
+  /** e.g. https://crm.example.com/api/v1/email/events */
+  EVENTS_URL: string;
   EMAIL_INBOUND_SECRET: string;
 }
 
@@ -33,12 +37,12 @@ type PendingMarker = { base: string; attempts: number; firstAt: number; nextAt: 
 const PENDING = "email-inbound-pending/";
 const FAILED = "email-inbound-failed/";
 
-async function post(env: Env, payload: InboundPayload): Promise<number> {
+async function post(env: Env, payload: unknown, url: string = env.INBOUND_URL): Promise<number> {
   const body = JSON.stringify(payload);
   const timestamp = String(Math.floor(Date.now() / 1000));
   const signature = await signInbound(env.EMAIL_INBOUND_SECRET, timestamp, body);
   try {
-    const response = await fetch(env.INBOUND_URL, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -126,6 +130,24 @@ export default {
     }
   },
 
+  // Email Sending events (PLAN-EMAIL.md E5): the queue the account's event
+  // subscription publishes to. Bounces and complaints go to the app's
+  // breaker; everything else is acknowledged and dropped. A failed POST
+  // retries the whole batch (the app is idempotent per send).
+  async queue(batch: MessageBatch<CloudflareSendingEvent>, env: Env) {
+    const events = batch.messages
+      .map((message) => toDeliveryEvent(message.body))
+      .filter((event): event is NonNullable<typeof event> => event !== null);
+    if (events.length > 0) {
+      const status = await post(env, { version: 1, events }, env.EVENTS_URL);
+      if (classifyResponse(status) === "retry") {
+        batch.retryAll();
+        return;
+      }
+    }
+    batch.ackAll();
+  },
+
   async scheduled(_event: ScheduledController, env: Env) {
     const listed = await env.MAIL_BUCKET.list({ prefix: PENDING, limit: 200 });
     const now = Date.now();
@@ -146,7 +168,7 @@ export default {
       }
     }
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<Env, CloudflareSendingEvent>;
 
 async function schedule(env: Env, base: string, attempts: number, firstAt: number, key?: string) {
   const marker: PendingMarker = {

@@ -132,3 +132,43 @@ export const RETRY_GIVE_UP_MS = 72 * 3600 * 1000;
 export function nextAttemptDelayMs(attempts: number): number {
   return Math.min(5 * 60_000 * 2 ** Math.max(0, attempts - 1), 6 * 3600_000);
 }
+
+/** The compact event the app's /api/v1/email/events accepts. */
+export type DeliveryEvent = {
+  type: "bounced" | "complained";
+  sender: string;
+  recipient: string;
+  subject: string | null;
+  at: string | null;
+};
+
+/** The parts of a Cloudflare Email Sending event this Worker reads
+ *  (Queues event subscription, eventSchemaVersion 1). */
+export type CloudflareSendingEvent = {
+  type?: string;
+  payload?: { sender?: string; recipient?: string; subject?: string };
+  metadata?: { eventTimestamp?: string };
+};
+
+/**
+ * `cf.email.sending.message.bounced` → bounced (permanent, or temporary with
+ * retries exhausted), `…message.complained` → complained. Every other event
+ * (delivered, deferred, failed, rejected) is not a breaker signal → null.
+ */
+export function toDeliveryEvent(event: CloudflareSendingEvent): DeliveryEvent | null {
+  const type = event.type?.endsWith(".message.bounced")
+    ? "bounced"
+    : event.type?.endsWith(".message.complained")
+      ? "complained"
+      : null;
+  const sender = event.payload?.sender?.trim().toLowerCase();
+  const recipient = event.payload?.recipient?.trim().toLowerCase();
+  if (!type || !sender || !recipient || !EMAIL.test(sender) || !EMAIL.test(recipient)) return null;
+  return {
+    type,
+    sender,
+    recipient,
+    subject: event.payload?.subject?.slice(0, 2000) ?? null,
+    at: event.metadata?.eventTimestamp ?? null,
+  };
+}

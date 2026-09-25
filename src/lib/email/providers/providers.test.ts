@@ -159,7 +159,7 @@ describe("Cloudflare provider", () => {
     error.mockRestore();
   });
 
-  it("treats a permanent bounce as a failed send", async () => {
+  it("treats a permanent bounce as a failed, bounced send", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const fetchImpl = vi.fn(async () =>
       Response.json({
@@ -170,7 +170,7 @@ describe("Cloudflare provider", () => {
       }),
     );
     const provider = createCloudflareProvider({ accountId: "a", apiToken: "t", fetchImpl });
-    await expect(provider.send(message)).resolves.toEqual({ ok: false });
+    await expect(provider.send(message)).resolves.toEqual({ ok: false, bounced: true });
     error.mockRestore();
   });
 });

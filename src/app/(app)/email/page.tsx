@@ -93,6 +93,12 @@ export default async function EmailInboxPage({
         </div>
       </PageHeader>
 
+      {tenant?.outboundSuspendedAt && (
+        <p role="status" className="rounded-md bg-destructive-surface px-3 py-2 text-sm text-destructive">
+          {t("suspendedBanner")}
+        </p>
+      )}
+
       {threads.length === 0 ? (
         <EmptyState
           icon={Mail}
