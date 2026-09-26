@@ -2345,7 +2345,8 @@
         "send_failed": "No se pudo enviar. Probá de nuevo en un momento.",
         "invalidPhone": "Ingresá un teléfono válido.",
         "unknown": "Algo salió mal. Probá de nuevo."
-      }
+      },
+      "suspendedBanner": "El envío de correo está pausado para este negocio porque varios correos rebotaron o fueron marcados como spam. Podés leer, pero no responder, hasta que el soporte lo reactive."
     }
   },
   "superadmin": {
@@ -2622,7 +2623,9 @@
           "address_taken": "Esa dirección ya está en uso.",
           "domain_taken": "Ese dominio ya pertenece a otro negocio.",
           "unknown": "No se pudo guardar. Probá de nuevo."
-        }
+        },
+        "sentLast24h": "Enviados en las últimas 24 h: {sent} de {cap}",
+        "warmingUp": "en período de calentamiento (primeros 14 días)"
       }
     },
     "subscriptions": {

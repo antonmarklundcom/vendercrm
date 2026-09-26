@@ -2345,7 +2345,8 @@
         "send_failed": "Kunde inte skicka. Försök igen om en stund.",
         "invalidPhone": "Ange ett giltigt telefonnummer.",
         "unknown": "Något gick fel. Försök igen."
-      }
+      },
+      "suspendedBanner": "Utskick är pausade för företaget eftersom flera mejl studsade eller markerades som skräppost. Du kan läsa men inte svara tills support aktiverar det igen."
     }
   },
   "superadmin": {
@@ -2622,7 +2623,9 @@
           "address_taken": "Adressen används redan.",
           "domain_taken": "Domänen tillhör redan ett annat företag.",
           "unknown": "Kunde inte spara. Försök igen."
-        }
+        },
+        "sentLast24h": "Skickade senaste 24 h: {sent} av {cap}",
+        "warmingUp": "uppvärmning (första 14 dagarna)"
       }
     },
     "subscriptions": {

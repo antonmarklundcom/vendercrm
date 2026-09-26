@@ -2345,7 +2345,8 @@
         "send_failed": "Could not send. Try again in a moment.",
         "invalidPhone": "Enter a valid phone number.",
         "unknown": "Something went wrong. Try again."
-      }
+      },
+      "suspendedBanner": "Sending is paused for this business because several emails bounced or were marked as spam. You can read but not reply until support re-enables it."
     }
   },
   "superadmin": {
@@ -2622,7 +2623,9 @@
           "address_taken": "That address is already in use.",
           "domain_taken": "That domain already belongs to another business.",
           "unknown": "Could not save. Try again."
-        }
+        },
+        "sentLast24h": "Sent in the last 24 h: {sent} of {cap}",
+        "warmingUp": "warming up (first 14 days)"
       }
     },
     "subscriptions": {

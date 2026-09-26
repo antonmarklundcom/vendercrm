@@ -108,7 +108,7 @@ export function createCloudflareProvider(config: {
       const bounced = body.result?.permanent_bounces ?? [];
       if (bounced.length > 0) {
         console.error("[email] Cloudflare reported a permanent bounce for the recipient");
-        return { ok: false };
+        return { ok: false, bounced: true };
       }
       return { ok: true };
     },

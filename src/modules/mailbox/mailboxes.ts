@@ -113,3 +113,14 @@ export async function resolveRecipient(recipient: string): Promise<ResolvedRecip
   if (!match || !match.mailboxEnabled) return null;
   return { tenantId: match.mailbox.tenantId, mailbox: match.mailbox };
 }
+
+/** Outbound correlation (E5 delivery events): the mailbox that sent from this
+ *  address, active or not, whichever business owns it. */
+export async function findMailboxByAddress(address: string): Promise<MailboxRow | null> {
+  const [row] = await db
+    .select()
+    .from(mailboxes)
+    .where(eq(mailboxes.address, address.trim().toLowerCase()))
+    .limit(1);
+  return row ?? null;
+}

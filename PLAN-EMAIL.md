@@ -1,6 +1,6 @@
 # PLAN-EMAIL — Per-domain mailboxes in VenderCRM via Cloudflare Email Service
 
-Status: planned, not built. Written 2026-09-25. Build prompt: `prompts/opus-e1-cloudflare-mailbox.md`.
+Status: E1–E5 built (docs/log/e1.md, e2.md, e4.md, e5.md), off by default. Go-live checklist: docs/log/e5.md. Written 2026-09-25. Build prompt: `prompts/opus-e1-cloudflare-mailbox.md`.
 
 Goal: every tenant domain (e.g. `contacto@clientdomain.com.py`) gets its own
 inbox inside VenderCRM. Inbound mail is received by Cloudflare, parsed by a

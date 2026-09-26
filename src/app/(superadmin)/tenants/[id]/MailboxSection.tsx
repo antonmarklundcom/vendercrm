@@ -24,12 +24,14 @@ export async function MailboxSection({
   suspendedAt,
   platformConfigured,
   mailboxes,
+  sendStats,
 }: {
   tenantId: string;
   enabled: boolean;
   suspendedAt: Date | null;
   platformConfigured: boolean;
   mailboxes: ConsoleMailbox[];
+  sendStats: { sentLast24h: number; cap: number; warmingUp: boolean } | null;
 }) {
   const t = await getTranslations("superadmin.tenants.mailbox");
   const locale = await getLocale();
@@ -60,6 +62,12 @@ export async function MailboxSection({
           <span className="text-muted-foreground">{t("platformNotConfigured")}</span>
         )}
       </div>
+      {sendStats && (
+        <p className="text-sm text-muted-foreground">
+          {t("sentLast24h", { sent: sendStats.sentLast24h, cap: sendStats.cap })}
+          {sendStats.warmingUp && ` · ${t("warmingUp")}`}
+        </p>
+      )}
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">{t("addresses")}</h3>
         {mailboxes.length === 0 ? (
