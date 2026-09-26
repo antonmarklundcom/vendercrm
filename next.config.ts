@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
   // more server components/actions that import it transitively).
   serverExternalPackages: ["mysql2", "better-auth", "@aws-sdk/client-s3"],
   experimental: {
+    // Next sizes the image optimizer's sharp thread pool from the host CPU count;
+    // on Hostinger shared hosting every thread counts against the account's 200 Max Processes, so pin it to 1.
+    imgOptConcurrency: 1,
     // Next defaults its build workers to `os.cpus().length - 1`, which on
     // Hostinger's shared box is the physical core count of the host, not
     // this account's share. Each worker is a Node process with ~11 threads,
