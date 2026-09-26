@@ -44,8 +44,10 @@ export function sanitizeEmailHtml(html: string): string {
         "font-style": [ALLOWED_STYLES],
         "font-size": [ALLOWED_STYLES],
         "text-decoration": [ALLOWED_STYLES],
-        padding: [ALLOWED_STYLES],
-        margin: [ALLOWED_STYLES],
+        // No negative values: a negative margin could pull the message over
+        // the page around it.
+        padding: [/^[\d.\s%a-z]*$/],
+        margin: [/^[\d.\s%a-z]*$/],
         border: [ALLOWED_STYLES],
         width: [ALLOWED_STYLES],
       },

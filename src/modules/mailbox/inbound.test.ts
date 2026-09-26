@@ -21,6 +21,7 @@ const buildSystemTenantContext = vi.fn();
 
 vi.mock("./mailboxes", () => ({ resolveRecipient: (...a: unknown[]) => resolveRecipient(...a) }));
 vi.mock("./ingest", () => ({ ingestInboundEmail: (...a: unknown[]) => ingestInboundEmail(...a) }));
+vi.mock("./notify", () => ({ pushInboundEmail: vi.fn() }));
 vi.mock("@/modules/tenancy/context", () => ({
   buildSystemTenantContext: (...a: unknown[]) => buildSystemTenantContext(...a),
 }));

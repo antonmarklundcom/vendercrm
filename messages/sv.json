@@ -100,7 +100,8 @@
       "reports": "Rapporter",
       "booking": "Bokningar",
       "chat": "Webbchatt",
-      "onboarding": "Bransch"
+      "onboarding": "Bransch",
+      "email": "E-post"
     },
     "memory": {
       "title": "Företagets minne",
@@ -2288,6 +2289,63 @@
       "keyTaken": "Ett fält med den nyckeln finns redan.",
       "adminOnly": "Den här sektionen är endast för administratörer.",
       "empty": "Inga anpassade fält än."
+    },
+    "email": {
+      "title": "E-post",
+      "intro": "E-post till företagets adresser. Svara härifrån.",
+      "filter": {
+        "open": "Öppna",
+        "closed": "Stängda",
+        "all": "Alla"
+      },
+      "allMailboxes": "Alla",
+      "emptyTitle": "Ingen e-post än",
+      "emptyBody": "När någon skriver till {address} syns det här.",
+      "noMailbox": "Inga adresser är inställda för företaget än.",
+      "unread": "Oläst",
+      "noSubject": "(inget ämne)",
+      "linkedContact": "Kontakt",
+      "closed": "Stängd",
+      "back": "Tillbaka till e-post",
+      "markUnread": "Markera som oläst",
+      "close": "Stäng",
+      "reopen": "Öppna igen",
+      "contact": "Kontakt",
+      "noDeal": "Ingen affär",
+      "linkDeal": "Koppla",
+      "openDeal": "Öppna affär",
+      "noContact": "Avsändaren är inte en kontakt än. Lägg till telefonnummer för att skapa (eller koppla) en.",
+      "createContact": "Skapa kontakt",
+      "contactName": "Namn",
+      "contactPhone": "Telefon",
+      "imagesBlocked": "Externa bilder är blockerade så att avsändaren inte ser att du öppnat mejlet.",
+      "showImages": "Visa bilder",
+      "replyTo": "Svar till",
+      "cc": "Kopia (valfritt)",
+      "ccHelp": "Upp till {max} adresser, kommaseparerade",
+      "body": "Meddelande",
+      "send": "Skicka",
+      "sent": "Skickat.",
+      "status": {
+        "queued": "Skickas",
+        "failed": "Inte skickat",
+        "bounced": "Studsade",
+        "received": "Mottaget",
+        "sent": "Skickat"
+      },
+      "errors": {
+        "empty": "Skriv ett meddelande.",
+        "not_found": "Konversationen hittades inte.",
+        "unavailable": "E-post är inte aktiverat för företaget.",
+        "mailbox_inactive": "Adressen är inaktiverad.",
+        "suspended": "Utskick är pausade för företaget. Kontakta support.",
+        "invalid_recipient": "Kontrollera adresserna: någon är ogiltig.",
+        "too_many_recipients": "Högst {max} mottagare per mejl.",
+        "daily_limit": "Dagens gräns för e-post är nådd. Försök i morgon.",
+        "send_failed": "Kunde inte skicka. Försök igen om en stund.",
+        "invalidPhone": "Ange ett giltigt telefonnummer.",
+        "unknown": "Något gick fel. Försök igen."
+      }
     }
   },
   "superadmin": {

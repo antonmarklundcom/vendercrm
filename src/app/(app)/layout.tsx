@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isMailboxAvailable } from "@/modules/tenancy/mailbox";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getTenantContext } from "@/modules/tenancy/context";
 import { getUserById } from "@/modules/tenancy/users";
@@ -66,12 +67,13 @@ export default async function AppLayout({
   const resolvedTheme = await resolveTheme();
   const toggleTheme: "light" | "dark" = resolvedTheme === "dark" ? "dark" : "light";
 
-  const [user, tenant, memberships] = await Promise.all([
+  const [user, tenant, memberships, mailboxOn] = await Promise.all([
     getUserById(ctx.userId),
     getTenant(ctx.tenantId),
     // Every business this person may act in (PLAN.md §3.1). Almost always one
     // row, in which case the switcher renders nothing.
     listMembershipsForUser(ctx.userId),
+    isMailboxAvailable(ctx),
   ]);
 
   const businesses: SwitchableBusiness[] = memberships.map(({ membership, tenant: t }) => ({
@@ -95,6 +97,9 @@ export default async function AppLayout({
         // inbox has its own assignment and 24h-window rules, and a unified
         // inbox is a decision that deserves to be made on purpose.
         { href: "/chat", label: t("chat"), icon: "chat" },
+        // Per-domain mailbox (PLAN-EMAIL.md E4): only where the platform is
+        // configured and this business has it switched on.
+        ...(mailboxOn ? [{ href: "/email", label: t("email"), icon: "email" as const }] : []),
         { href: "/pipeline", label: t("pipeline"), icon: "pipeline" },
         { href: "/contacts", label: t("contacts"), icon: "contacts" },
         { href: "/calendar", label: t("calendar"), icon: "calendar" },
