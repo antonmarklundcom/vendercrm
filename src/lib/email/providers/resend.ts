@@ -15,6 +15,10 @@ export function createResendProvider(apiKey: string): EmailProvider {
         html: message.html,
         replyTo: message.replyTo,
         attachments: message.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
+        // Only when set, so the platform sends keep the exact call they had.
+        ...(message.text !== undefined ? { text: message.text } : {}),
+        ...(message.cc?.length ? { cc: message.cc } : {}),
+        ...(message.headers ? { headers: message.headers } : {}),
       });
       if (result.error) {
         console.error("[email] Resend rejected the send:", result.error);

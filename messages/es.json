@@ -100,7 +100,8 @@
       "reports": "Informes",
       "booking": "Reservas",
       "chat": "Chat web",
-      "onboarding": "Rubro"
+      "onboarding": "Rubro",
+      "email": "Correo"
     },
     "memory": {
       "title": "Memoria del negocio",
@@ -2288,6 +2289,63 @@
       "keyTaken": "Ya existe un campo con esa clave.",
       "adminOnly": "Esta sección es solo para administradores.",
       "empty": "Todavía no hay campos personalizados."
+    },
+    "email": {
+      "title": "Correo",
+      "intro": "Los correos que llegan a las direcciones de tu negocio. Respondé desde acá.",
+      "filter": {
+        "open": "Abiertos",
+        "closed": "Cerrados",
+        "all": "Todos"
+      },
+      "allMailboxes": "Todas",
+      "emptyTitle": "Todavía no hay correos",
+      "emptyBody": "Cuando alguien escriba a {address}, aparece acá.",
+      "noMailbox": "Todavía no hay direcciones configuradas para este negocio.",
+      "unread": "No leído",
+      "noSubject": "(sin asunto)",
+      "linkedContact": "Contacto",
+      "closed": "Cerrado",
+      "back": "Volver al correo",
+      "markUnread": "Marcar como no leído",
+      "close": "Cerrar",
+      "reopen": "Reabrir",
+      "contact": "Contacto",
+      "noDeal": "Sin negocio",
+      "linkDeal": "Vincular",
+      "openDeal": "Abrir negocio",
+      "noContact": "Este remitente no es un contacto todavía. Agregá su teléfono para crearlo (o vincularlo si ya existe).",
+      "createContact": "Crear contacto",
+      "contactName": "Nombre",
+      "contactPhone": "Teléfono",
+      "imagesBlocked": "Las imágenes remotas están bloqueadas para que el remitente no sepa que abriste el correo.",
+      "showImages": "Mostrar imágenes",
+      "replyTo": "Respuesta a",
+      "cc": "Copia (opcional)",
+      "ccHelp": "Hasta {max} direcciones, separadas por coma",
+      "body": "Mensaje",
+      "send": "Enviar",
+      "sent": "Enviado.",
+      "status": {
+        "queued": "Enviando",
+        "failed": "No se envió",
+        "bounced": "Rebotó",
+        "received": "Recibido",
+        "sent": "Enviado"
+      },
+      "errors": {
+        "empty": "Escribí un mensaje.",
+        "not_found": "No se encontró la conversación.",
+        "unavailable": "El correo no está activado para este negocio.",
+        "mailbox_inactive": "Esta dirección está desactivada.",
+        "suspended": "El envío de correo está suspendido para este negocio. Contactá al soporte.",
+        "invalid_recipient": "Revisá las direcciones: alguna no es válida.",
+        "too_many_recipients": "Máximo {max} destinatarios por correo.",
+        "daily_limit": "Se alcanzó el límite de correos de hoy. Probá mañana.",
+        "send_failed": "No se pudo enviar. Probá de nuevo en un momento.",
+        "invalidPhone": "Ingresá un teléfono válido.",
+        "unknown": "Algo salió mal. Probá de nuevo."
+      }
     }
   },
   "superadmin": {
@@ -2547,7 +2605,24 @@
         "disable": "Desactivar casilla",
         "platformNotConfigured": "Sin efecto todavía: faltan las variables de Cloudflare en el servidor.",
         "suspendedSince": "Envío suspendido desde {date}",
-        "clearSuspension": "Quitar suspensión"
+        "clearSuspension": "Quitar suspensión",
+        "addresses": "Direcciones",
+        "noAddresses": "Todavía no hay direcciones. Agregá la del dominio que ya pasaste a Cloudflare.",
+        "address": "Dirección",
+        "addressPlaceholder": "contacto@dominio.com.py",
+        "displayName": "Nombre visible",
+        "catchAll": "Recibe todo el dominio",
+        "catchAllHelp": "También recibe correo enviado a cualquier otra dirección de este dominio.",
+        "addAddress": "Agregar dirección",
+        "addressAdded": "Agregada:",
+        "deactivate": "Desactivar",
+        "activate": "Activar",
+        "errors": {
+          "invalid_address": "Esa dirección no es válida.",
+          "address_taken": "Esa dirección ya está en uso.",
+          "domain_taken": "Ese dominio ya pertenece a otro negocio.",
+          "unknown": "No se pudo guardar. Probá de nuevo."
+        }
       }
     },
     "subscriptions": {

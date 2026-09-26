@@ -14,6 +14,7 @@ afterAll(async () => {
 
 describe.skipIf(!hasDb)("mailbox switch (MySQL integration)", () => {
   const configured = {
+    STORAGE_DRIVER: "s3" as const,
     CLOUDFLARE_ACCOUNT_ID: "acc",
     CLOUDFLARE_EMAIL_API_TOKEN: "tok",
     EMAIL_INBOUND_SECRET: "secret",

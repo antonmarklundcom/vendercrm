@@ -40,6 +40,7 @@ const HANDLED_BY_HAND = new Set(["users", "tenants"]);
  * added here too, or its files outlive the business that owned them.
  */
 const STORAGE_KINDS = [
+  "email",
   "quotes",
   "documents",
   "receipts",

@@ -1,0 +1,19 @@
+{
+  "name": "vendercrm-email-inbound",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cloudflare Email Worker: receives mail for tenant domains and hands it to VenderCRM (PLAN-EMAIL.md E2).",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "postal-mime": "^2.7.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260923.1",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.0.0"
+  }
+}
