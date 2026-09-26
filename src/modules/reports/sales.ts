@@ -287,25 +287,44 @@ export function previousWindow(window: ReportWindow): ReportWindow {
   return { from: new Date(window.from.getTime() - spanMs), to: window.from, days: window.days };
 }
 
+/** The two reads every window shares: all of the tenant's deals and stages,
+ *  unwindowed. */
+export type ReportBase = {
+  deals: (typeof deals.$inferSelect)[];
+  stages: (typeof stages.$inferSelect)[];
+};
+
+export async function loadReportBase(ctx: TenantContext): Promise<ReportBase> {
+  const db = tenantDb(ctx);
+  const [dealRows, stageRows] = await Promise.all([db.select(deals), db.select(stages)]);
+  return { deals: dealRows, stages: stageRows };
+}
+
+/**
+ * `base` lets a caller building two windows (current + previous) read deals
+ * and stages once and hand the same promise to both calls; without it this
+ * loads its own.
+ */
 export async function getSalesReport(
   ctx: TenantContext,
   window: ReportWindow,
   filters: ReportFilters = {},
+  base?: Promise<ReportBase>,
 ): Promise<SalesReport> {
   const db = tenantDb(ctx);
 
-  const [leadRows, contactRows, allDealRows, stageRows, messageRows, taskRows] = await Promise.all([
-    db.select(leadSubmissions, inWindow(leadSubmissions.createdAt, window)),
-    db.select(contacts, inWindow(contacts.createdAt, window)),
-    // Deals are read on *creation* in the window and again on closure below —
-    // a deal opened in March and won in April belongs to March's "opened" and
-    // April's "won", which is the only reading that makes a monthly series
-    // add up.
-    db.select(deals),
-    db.select(stages),
-    db.select(messages, inWindow(messages.createdAt, window)),
-    db.select(tasks, inWindow(tasks.dueAt, window)),
-  ]);
+  const [leadRows, contactRows, { deals: allDealRows, stages: stageRows }, messageRows, taskRows] =
+    await Promise.all([
+      db.select(leadSubmissions, inWindow(leadSubmissions.createdAt, window)),
+      db.select(contacts, inWindow(contacts.createdAt, window)),
+      // Deals are read on *creation* in the window and again on closure below —
+      // a deal opened in March and won in April belongs to March's "opened" and
+      // April's "won", which is the only reading that makes a monthly series
+      // add up. So they are not narrowed here, and neither are stages.
+      base ?? loadReportBase(ctx),
+      db.select(messages, inWindow(messages.createdAt, window)),
+      db.select(tasks, inWindow(tasks.dueAt, window)),
+    ]);
 
   // Both filters narrow the same one array; everything below reads only
   // `dealRows`, so a pipeline or agent filter reaches every table (funnel,

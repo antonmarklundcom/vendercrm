@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { requireTenantContext } from "@/modules/tenancy/context";
-import { getSalesReport, previousWindow } from "@/modules/reports/sales";
+import { getSalesReport, loadReportBase, previousWindow } from "@/modules/reports/sales";
 import { withComparison } from "@/modules/reports/compare";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { listPipelines } from "@/modules/crm/pipelines";
@@ -66,9 +66,11 @@ export default async function ReportsPage({
   const filters = parseReportFilters(params);
   const previous = previousWindow(window);
 
+  // Deals and stages are unwindowed, so both windows share one read of them.
+  const base = loadReportBase(ctx);
   const [report, previousReport, users, pipelines, sites] = await Promise.all([
-    getSalesReport(ctx, window, filters),
-    getSalesReport(ctx, previous, filters),
+    getSalesReport(ctx, window, filters, base),
+    getSalesReport(ctx, previous, filters, base),
     listTenantUsers(ctx),
     listPipelines(ctx),
     listSites(ctx),

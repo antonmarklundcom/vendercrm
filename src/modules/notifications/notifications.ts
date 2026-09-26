@@ -86,12 +86,12 @@ export async function listNotifications(
     .limit(limit);
 }
 
+/** The bell's badge — a SQL `COUNT(*)`, not a read of every unread row. */
 export async function countUnread(ctx: TenantContext, userId: string): Promise<number> {
-  const rows = await tenantDb(ctx).select(
+  return tenantDb(ctx).count(
     notifications,
     and(eq(notifications.userId, userId), isNull(notifications.readAt)) as SQL,
   );
-  return rows.length;
 }
 
 /**

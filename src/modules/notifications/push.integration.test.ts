@@ -175,12 +175,63 @@ describe.skipIf(!hasDb)("web push (MySQL integration)", () => {
       expect((await rowsFor(ctx, userId)).map((r) => r.endpoint)).not.toContain(mine);
     });
 
+    it("drops a removed member's browsers in that business only", async () => {
+      const { removeMembership } = await import("@/modules/tenancy/memberships");
+      const leaverId = newId();
+      await db.insert(schema.users).values({
+        id: leaverId,
+        tenantId: ctx.tenantId,
+        email: `push-${leaverId}@example.com`,
+        name: "Se va",
+        role: "agent",
+      });
+      await db.insert(schema.tenantMemberships).values([
+        { id: newId(), tenantId: ctx.tenantId, userId: leaverId, role: "agent" },
+        { id: newId(), tenantId: otherCtx.tenantId, userId: leaverId, role: "agent" },
+      ]);
+      await subs.saveSubscription(ctx, leaverId, subscription(endpointFor(`leaver-${newId()}`)));
+      const elsewhere = endpointFor(`leaver-other-${newId()}`);
+      await subs.saveSubscription(otherCtx, leaverId, subscription(elsewhere));
+      const colleagues = await rowsFor(ctx, userId);
+
+      await removeMembership(ctx.tenantId, leaverId);
+
+      expect(await rowsFor(ctx, leaverId)).toEqual([]);
+      expect((await rowsFor(otherCtx, leaverId)).map((r) => r.endpoint)).toEqual([elsewhere]);
+      expect(await rowsFor(ctx, userId)).toHaveLength(colleagues.length);
+    });
+
     it("does not hand one tenant another tenant's subscriptions", async () => {
       const endpoint = endpointFor(`isolated-${newId()}`);
       await subs.saveSubscription(ctx, userId, subscription(endpoint));
 
       // Same user id, wrong tenant context: nothing comes back.
       expect(await rowsFor(otherCtx, userId)).toEqual([]);
+    });
+  });
+
+  describe("unread count", () => {
+    it("counts only this user's unread rows, in this business", async () => {
+      const { countUnread } = await import("./notifications");
+      const readerId = newId();
+      const row = (tenantId: string, forUserId: string, readAt: Date | null) => ({
+        id: newId(),
+        tenantId,
+        userId: forUserId,
+        title: "Aviso",
+        readAt,
+      });
+      await db.insert(schema.notifications).values([
+        row(ctx.tenantId, readerId, null),
+        row(ctx.tenantId, readerId, null),
+        row(ctx.tenantId, readerId, new Date()),
+        row(ctx.tenantId, colleagueId, null),
+        row(otherCtx.tenantId, readerId, null),
+      ]);
+
+      expect(await countUnread(ctx, readerId)).toBe(2);
+      expect(await countUnread(otherCtx, readerId)).toBe(1);
+      expect(await countUnread(ctx, newId())).toBe(0);
     });
   });
 

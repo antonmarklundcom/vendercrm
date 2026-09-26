@@ -11,13 +11,6 @@ phase touches that file next.
 - **`notify_user`'s notification always links to `/contacts/<id>`** (P1),
   never a deal- or document-specific URL, even when the automation step that
   created it fired from one of those.
-- **The notifications bell's unread count is computed in Node**, not with a
-  SQL `COUNT(*)` (P1) — reads all of a user's recent rows to count them.
-  Fine at the bell's current scale (ten rows).
-- **A user removed from a tenant keeps their `push_subscriptions` rows**
-  (P2). Nothing is delivered to them — the active-membership check refuses
-  the send before it reaches their device — so this is dead weight, not a
-  leak.
 - **Web-chat conversations in `/inbox` have no filter or search of their
   own** (P3) — `?filter=` and `?q=` apply only to WhatsApp rows; only
   `/chat`'s own status filter narrows the web-chat ones.
@@ -27,9 +20,6 @@ phase touches that file next.
 - **Deleting a custom field definition leaves its values in
   `contacts.custom`** (P5) — dead JSON keys, harmless since nothing reads a
   key with no definition, but no cleanup pass exists.
-- **`renderContactCustomVars` (custom-field template variables) is not
-  wired into the automation template engine** (P5) — `{{contacto.custom.*}}`
-  resolves in code but no flow action can reference it yet.
 - **`expireQuotes` and `coach.morning`'s digest check each walk every tenant
   on the platform per run** (P6, P7) — correct and fine at current scale;
   would want a per-tenant cursor or batching if the tenant count grows by
@@ -55,8 +45,6 @@ phase touches that file next.
   hour** (P14), same posture and scaling caveat as `sendMorningDigests`.
 - **No campaigns table in `/reports` yet** (P15) — resolved automatically
   once P10 (lane 1) merges and adds the fourth table.
-- **`getSalesReport` runs twice per page load** (P15, current + previous
-  window) — fine at today's per-tenant data volume.
 - **The response-time distribution and stage funnel in `/reports` have no
   comparison column** (P15) — only the keyed tables (sources, sites) do.
 - **The `/contacts` duplicates panel re-scans every contact on every page
