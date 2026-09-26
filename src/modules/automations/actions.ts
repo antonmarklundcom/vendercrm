@@ -12,6 +12,7 @@ import {
 } from "@/modules/crm/contacts";
 import { listDealsForContact, moveDeal, assignDeal } from "@/modules/crm/deals";
 import { createActivity } from "@/modules/crm/activities";
+import { renderContactCustomVars } from "@/modules/crm/custom-fields";
 import { getPrimaryAccount } from "@/modules/whatsapp/accounts";
 import { getOrCreateConversation } from "@/modules/whatsapp/inbox";
 import { sendText, sendTemplate } from "@/modules/whatsapp/send";
@@ -423,15 +424,19 @@ async function stampAutomationRun(ctx: TenantContext, messageId: string, runId: 
     .where(eq(messages.id, messageId));
 }
 
-/** Minimal {{contact.name}} / {{contact.phone}} substitution (§7.1). */
+/** {{contact.name}} / {{contact.phone}} substitution (§7.1), plus the
+ *  custom-field `{{contacto.custom.<key>}}` variables (§15.8 P5). Custom
+ *  values go in last so a value that happens to contain `{{contact.name}}`
+ *  is printed as written, not expanded. */
 export function renderTemplateVars(
   text: string,
-  contact: { name: string; phone: string } | null,
+  contact: { name: string; phone: string; custom?: unknown } | null,
 ): string {
   if (!contact) return text;
-  return text
+  const rendered = text
     .replaceAll("{{contact.name}}", contact.name)
     .replaceAll("{{contact.phone}}", contact.phone);
+  return renderContactCustomVars(rendered, contact.custom as Record<string, unknown> | null);
 }
 
 /**

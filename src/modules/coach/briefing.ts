@@ -8,7 +8,7 @@ import { getTenant } from "@/modules/tenancy/tenants";
 import { getAiConfig } from "@/modules/ai/config";
 import { countRepliesTodayForTenant, recordReply } from "@/modules/ai/replies";
 import { getProfile } from "@/modules/memory/profile";
-import { getSalesReport, type ReportWindow } from "@/modules/reports/sales";
+import { getSalesReport, loadReportBase, type ReportWindow } from "@/modules/reports/sales";
 import { buildHoy } from "./hoy";
 import type { HoyItemKind } from "./rank";
 import {
@@ -51,9 +51,10 @@ export async function buildBriefingInput(
   const tenant = await getTenant(ctx.tenantId);
   const timeZone = tenant?.timezone || DEFAULT_TIMEZONE;
 
+  const base = loadReportBase(ctx);
   const [thisWeek, lastWeek, hoyItems, profile] = await Promise.all([
-    getSalesReport(ctx, windowFor(weekStart, timeZone, 0)),
-    getSalesReport(ctx, windowFor(weekStart, timeZone, -1)),
+    getSalesReport(ctx, windowFor(weekStart, timeZone, 0), {}, base),
+    getSalesReport(ctx, windowFor(weekStart, timeZone, -1), {}, base),
     buildHoy(ctx, startOfDay(weekStart, timeZone)),
     getProfile(ctx),
   ]);

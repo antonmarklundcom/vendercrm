@@ -1,6 +1,6 @@
 import { and, count, eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
-import { tenantMemberships, tenants, users } from "@/db/schema";
+import { pushSubscriptions, tenantMemberships, tenants, users } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext, TenantRole } from "./context";
 
@@ -242,6 +242,13 @@ export async function removeMembership(
   }
 
   await db.delete(tenantMemberships).where(eq(tenantMemberships.id, membership.id));
+
+  // Their browsers in this business go with the grant. Nothing would reach
+  // them anyway (the send re-checks membership), but the rows are dead
+  // weight. Other businesses they still belong to keep theirs.
+  await db
+    .delete(pushSubscriptions)
+    .where(and(eq(pushSubscriptions.tenantId, tenantId), eq(pushSubscriptions.userId, userId)));
 
   // Their active pointer may have just become a business they cannot enter.
   await repairActiveTenant(userId);

@@ -125,4 +125,19 @@ describe.skipIf(!hasDb)("sales report (MySQL integration)", () => {
     expect(report.funnel.dealsWon).toBe(0);
     expect(report.byMonth).toEqual([]);
   });
+
+  it("gives the same answer from a shared deals/stages read as from its own", async () => {
+    const current = window();
+    const previous = reports.previousWindow(current);
+    const base = reports.loadReportBase(ctx);
+
+    const [sharedCurrent, sharedPrevious] = await Promise.all([
+      reports.getSalesReport(ctx, current, {}, base),
+      reports.getSalesReport(ctx, previous, {}, base),
+    ]);
+
+    expect(sharedCurrent).toEqual(await reports.getSalesReport(ctx, current));
+    expect(sharedPrevious).toEqual(await reports.getSalesReport(ctx, previous));
+    expect(sharedCurrent.funnel.dealsWon).toBe(1);
+  });
 });

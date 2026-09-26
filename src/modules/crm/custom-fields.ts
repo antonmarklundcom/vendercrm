@@ -121,11 +121,9 @@ export function coerceCustomFieldValue(
 }
 
 /**
- * `{{contacto.custom.<key>}}` substitution (§15.8 P5) — the resolver the
- * automation template engine can register, kept here since P5 does not own
- * modules/automations. `renderTemplateVars` (automations/actions.ts) handles
- * `{{contact.name}}`/`{{contact.phone}}` today; this is the equivalent for
- * custom fields, exposed for whichever call site wires it in.
+ * `{{contacto.custom.<key>}}` substitution (§15.8 P5). Automation flow
+ * messages get it through `renderTemplateVars` (automations/actions.ts).
+ * An unset or unknown key renders as empty.
  */
 export function renderContactCustomVars(
   text: string,
