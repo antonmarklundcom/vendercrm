@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import { getTranslations } from "next-intl/server";
 import { MarketingHeader } from "@/components/marketing/header";
@@ -15,11 +15,19 @@ import { contact, siteConfig } from "@/lib/site-config";
 //
 // Two typefaces total: Newsreader for display, and the Geist Sans already
 // loaded by the root layout for text. Both via next/font, so no layout shift.
+// Both self-hosted from src/app/fonts/. The Newsreader file is Google's
+// variable font pinned at opsz 16 — what Google Fonts serves — with the latin
+// and latin-ext ranges in one file, since next/font/local has no unicode-range.
+// Declared as two discrete faces (400, 500), not a "400 500" range, exactly as
+// Google declared them: the headings ask for weight 450, which the browser
+// snaps to the 500 face; a range would render a true 450 and look lighter.
 
-const newsreader = Newsreader({
+const newsreader = localFont({
+  src: [
+    { path: "../fonts/Newsreader-latin-ext.woff2", weight: "400" },
+    { path: "../fonts/Newsreader-latin-ext.woff2", weight: "500" },
+  ],
   variable: "--font-newsreader",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
   display: "swap",
 });
 
