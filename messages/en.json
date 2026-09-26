@@ -2537,7 +2537,18 @@
       "bulkDeleted": "{count, plural, one {# business deleted} other {# businesses deleted}}",
       "bulkDeleteBody": "{count, plural, one {This permanently deletes the selected business and everything in it.} other {This permanently deletes the # selected businesses and everything in them.}} This cannot be undone.",
       "bulkDeleteConfirmLabel": "Type “{expected}” to confirm",
-      "slugChangeHelp": "Changing the slug moves the public booking links (/b/slug/…): update them wherever they are published."
+      "slugChangeHelp": "Changing the slug moves the public booking links (/b/slug/…): update them wherever they are published.",
+      "mailbox": {
+        "title": "Mailbox",
+        "intro": "The business's own inbox for its domain (Cloudflare). Off by default; switch it on for a test business first.",
+        "enabled": "On",
+        "disabled": "Off",
+        "enable": "Turn mailbox on",
+        "disable": "Turn mailbox off",
+        "platformNotConfigured": "No effect yet: the Cloudflare variables are not set on the server.",
+        "suspendedSince": "Sending suspended since {date}",
+        "clearSuspension": "Clear suspension"
+      }
     },
     "subscriptions": {
       "title": "Subscription",

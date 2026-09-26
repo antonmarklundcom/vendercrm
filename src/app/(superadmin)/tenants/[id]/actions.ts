@@ -19,6 +19,7 @@ import {
 import { updateTenant, TenantUpdateError } from "@/modules/tenancy/tenants";
 import { addMembership, MembershipError } from "@/modules/tenancy/memberships";
 import { writeAuditLog } from "@/modules/tenancy/audit";
+import { clearOutboundSuspension, setMailboxEnabled } from "@/modules/tenancy/mailbox";
 import { startImpersonation } from "@/modules/auth/impersonation";
 import { redirect } from "next/navigation";
 import { env } from "@/lib/config/env";
@@ -710,4 +711,32 @@ export async function completeTenantEmbeddedSignupAction(
 export async function getEmbeddedSignupConfigAction() {
   await requireSuperadminContext();
   return embeddedSignupClientConfig();
+}
+
+// --- Per-domain mailbox switch (PLAN-EMAIL.md §3, E1). Both writes are
+// audited inside modules/tenancy/mailbox.ts. No form state: the only input is
+// the rendered tenant id, same as suspend/activate.
+
+const mailboxToggleSchema = z.object({
+  tenantId: z.string().min(1).max(26),
+  enabled: z.enum(["true", "false"]),
+});
+
+export async function setTenantMailboxAction(formData: FormData) {
+  const superadmin = await requireSuperadminContext();
+  const parsed = mailboxToggleSchema.safeParse({
+    tenantId: formData.get("tenantId"),
+    enabled: formData.get("enabled"),
+  });
+  if (!parsed.success) return;
+  await setMailboxEnabled(superadmin, parsed.data.tenantId, parsed.data.enabled === "true");
+  revalidatePath(`/tenants/${parsed.data.tenantId}`);
+}
+
+export async function clearTenantOutboundSuspensionAction(formData: FormData) {
+  const superadmin = await requireSuperadminContext();
+  const parsed = z.string().min(1).max(26).safeParse(formData.get("tenantId"));
+  if (!parsed.success) return;
+  await clearOutboundSuspension(superadmin, parsed.data);
+  revalidatePath(`/tenants/${parsed.data}`);
 }

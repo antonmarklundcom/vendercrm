@@ -2537,7 +2537,18 @@
       "bulkDeleted": "{count, plural, one {# empresa eliminada} other {# empresas eliminadas}}",
       "bulkDeleteBody": "{count, plural, one {Se elimina para siempre la empresa seleccionada y todo lo suyo.} other {Se eliminan para siempre las # empresas seleccionadas y todo lo suyo.}} No se puede deshacer.",
       "bulkDeleteConfirmLabel": "Escribí «{expected}» para confirmar",
-      "slugChangeHelp": "Cambiar el slug mueve los links públicos de reservas (/b/slug/…): actualizalos donde estén publicados."
+      "slugChangeHelp": "Cambiar el slug mueve los links públicos de reservas (/b/slug/…): actualizalos donde estén publicados.",
+      "mailbox": {
+        "title": "Casilla de correo",
+        "intro": "Bandeja de entrada propia para el dominio del negocio (Cloudflare). Apagada por defecto; encendela primero en un negocio de prueba.",
+        "enabled": "Activada",
+        "disabled": "Desactivada",
+        "enable": "Activar casilla",
+        "disable": "Desactivar casilla",
+        "platformNotConfigured": "Sin efecto todavía: faltan las variables de Cloudflare en el servidor.",
+        "suspendedSince": "Envío suspendido desde {date}",
+        "clearSuspension": "Quitar suspensión"
+      }
     },
     "subscriptions": {
       "title": "Suscripción",

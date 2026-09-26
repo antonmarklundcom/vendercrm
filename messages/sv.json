@@ -2537,7 +2537,18 @@
       "bulkDeleted": "{count, plural, one {# företag borttaget} other {# företag borttagna}}",
       "bulkDeleteBody": "{count, plural, one {Detta tar bort det valda företaget och allt i det permanent.} other {Detta tar bort de # valda företagen och allt i dem permanent.}} Går inte att ångra.",
       "bulkDeleteConfirmLabel": "Skriv “{expected}” för att bekräfta",
-      "slugChangeHelp": "Att ändra slug flyttar de publika bokningslänkarna (/b/slug/…): uppdatera dem där de är publicerade."
+      "slugChangeHelp": "Att ändra slug flyttar de publika bokningslänkarna (/b/slug/…): uppdatera dem där de är publicerade.",
+      "mailbox": {
+        "title": "E-postlåda",
+        "intro": "Företagets egen inkorg för sin domän (Cloudflare). Av som standard; slå på den för ett testföretag först.",
+        "enabled": "På",
+        "disabled": "Av",
+        "enable": "Slå på e-postlådan",
+        "disable": "Slå av e-postlådan",
+        "platformNotConfigured": "Ingen effekt än: Cloudflare-variablerna saknas på servern.",
+        "suspendedSince": "Utskick pausade sedan {date}",
+        "clearSuspension": "Ta bort pausen"
+      }
     },
     "subscriptions": {
       "title": "Prenumeration",

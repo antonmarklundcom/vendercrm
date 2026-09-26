@@ -93,6 +93,24 @@ const envSchema = z
      * different address until this is set.
      */
     EMAIL_DEFAULT_DOMAIN: z.string().min(1).optional(),
+    /**
+     * Which provider carries platform/transactional mail (PLAN-EMAIL.md §3).
+     * `resend` is the default and the only behaviour before this existed.
+     * `cloudflare` without CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_EMAIL_API_TOKEN
+     * falls back to Resend with a warning (lib/email/providers) rather than
+     * failing boot. Mailbox replies (E4) always use Cloudflare regardless.
+     */
+    EMAIL_PROVIDER: z.enum(["resend", "cloudflare"]).default("resend"),
+    /** Cloudflare Email Sending over REST — both optional; unset means the
+     *  Cloudflare provider and the per-tenant mailbox are unavailable. */
+    CLOUDFLARE_ACCOUNT_ID: z.string().min(1).optional(),
+    CLOUDFLARE_EMAIL_API_TOKEN: z.string().min(1).optional(),
+    /**
+     * HMAC secret shared with the email-inbound Worker (PLAN-EMAIL.md E2).
+     * Unset means the inbound webhook answers 404 and the Inbox is hidden
+     * for every tenant, whatever `tenants.mailbox_enabled` says.
+     */
+    EMAIL_INBOUND_SECRET: z.string().min(1).optional(),
     // AI auto-reply (PLAN.md §10 1O). Provider-neutral by the same shape as
     // STORAGE_DRIVER: one env picks the driver, the driver's own key is
     // required only when it's the selected one. `none` is the default and
