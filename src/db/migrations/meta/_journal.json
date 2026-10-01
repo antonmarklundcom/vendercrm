@@ -323,6 +323,13 @@
       "when": 1790871560959,
       "tag": "0045_add_lead_submission_snapshot",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "5",
+      "when": 1790872498846,
+      "tag": "0046_add_platform_crm_indexes",
+      "breakpoints": true
     }
   ]
 }
