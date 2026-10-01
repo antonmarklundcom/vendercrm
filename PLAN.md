@@ -3722,6 +3722,39 @@ contact timeline, including fields a site adds later, with no code change.
 **(2)** The owner (superadmin) wants leads, deals and contacts from **all
 accounts in one list** instead of switching business by business.
 
+### Owner decisions (2026-10-01)
+
+The five open questions in 19.7 are answered; the sections below already
+reflect them.
+
+1. **Superadmin.** Only the owner is `is_superadmin`, so the cross-account
+   view needs **no extra permission flag**. "Abrir en la cuenta" tries a direct
+   switch when the superadmin has a live membership in that account and
+   otherwise falls back to the audited "ver como" (19.4). No open question left.
+2. **Ingest tolerance, improved (L2).** Leads with an invalid e-mail or
+   over-long text are accepted, not 422'd. The raw value is kept, the
+   submission records which fields were repaired in a `needs_review` list
+   (e.g. `email_invalid`, `message_truncated`), a small **"Revisar"** badge
+   shows on the deal-page card and in the cross-account view, and the
+   untruncated original is stored in `payload` where size allows (capped at
+   20,000 characters per value). `phone` and `idempotency_key` stay strict.
+3. **Field labels, no AI in the CRM.** Labels are deterministic: a built-in
+   es/en/sv common-key dictionary, then the humanized key
+   (`tipo_de_propiedad` -> "Tipo de propiedad"). The owner can override labels
+   per site (stored on the site record's settings, key -> label, edited in the
+   Sitios settings screen) and mark fields **"show prominently"** so they
+   render large at the top of the card (e.g. finalidad, ciudad, message).
+   Unknown new keys appear automatically with the auto label until renamed.
+   An optional "suggest labels with AI" button is a possible later extra and
+   is **out of scope** now.
+4. **Date filter.** Presets 1, 7, 30, 90 and 180 days plus a custom range,
+   default 30 days; the presets live in one constant so they are trivial to
+   change.
+5. **CSV export is in, as a later phase (C3).** Superadmin-only, honors the
+   active filters, row-capped, every export audited, no data outside the
+   current filter. It was originally deferred only because bulk export of
+   personal data deserves an audit trail and a cap, not because it is hard.
+
 ### 19.1 What exists today (verified by reading the code, 2026-10-01)
 
 **Capture side — the data is already stored, nothing is lost after parsing:**
@@ -3795,7 +3828,7 @@ synchronous function so it can be tested without a database or a browser:
 
 - New `src/modules/leads/view.ts`:
   `buildLeadSubmissionView(submission, ctxInfo) → LeadSubmissionView` where
-  `LeadSubmissionView = { id, receivedAt, origin: {kind: "site"|"form"|"booking"|"chat", name, domain}, contact: {name, email, phone, fromContact: boolean}, message: string|null, rows: Array<{key, label, value: FieldValue}>, attribution: {source, utm..., gclid, fbclid, pageUrl, referrer}, dealId }`.
+  `LeadSubmissionView = { id, receivedAt, needsReview: string[], origin: {kind: "site"|"form"|"booking"|"chat", name, domain}, contact: {name, email, phone, fromContact: boolean}, message: string|null, rows: Array<{key, label, value: FieldValue, prominent: boolean}>, attribution: {source, utm..., gclid, fbclid, pageUrl, referrer}, dealId }`.
   `rows` is built from **every key of `payload`**, in insertion order, minus
   keys already shown in a dedicated slot (`name`, `phone`, `email`, `message`
   for hosted forms whose payload contains them) and minus a small deny-list of
@@ -3826,8 +3859,31 @@ code to *appear*:
    "Sentence case" (`tipo_de_propiedad` → "Tipo de propiedad").
 4. The raw key is always available as the row's `title` attribute so the owner
    can tell which key a site sent.
-   *(Per-site label overrides in `sites.settings.fieldLabels` are deferred — the
-   three rules above cover the tasacion form fully; see 19.7 Q4.)*
+
+There is **no AI call anywhere in this path**; labels are fully deterministic.
+Owner decision 2026-10-01 adds an editable layer on top of rules 1-3, resolved
+in this order: **per-site override -> hosted-form label -> dictionary ->
+humanizer**:
+
+- **Per-site overrides** live on the site record's settings,
+  `sites.settings.fieldLabels = { [key]: displayLabel }` (a JSON column that
+  already exists; no migration). Lookup is on the exact key first, then the
+  lower-cased key. Labels are plain text, max 80 characters, trimmed.
+- **Prominence:** `sites.settings.fieldDisplay = { [key]: { prominent: boolean } }`.
+  Prominent fields render first, in a larger type size, in a block at the top of
+  the card (above the regular rows); everything else stays in the normal grid.
+  `message` is addressable as a key here too.
+- **Editor:** a "Campos del formulario" panel in the Sitios settings screen
+  lists the keys seen in that site's recent submissions (distinct payload keys,
+  bounded sample) with, per key: the current label (auto label as placeholder),
+  an editable label input and a "Destacar" toggle. Saving writes the two
+  settings objects through the existing site-settings action (admin-only,
+  tenant-scoped, audited like other site setting changes).
+- **Unknown new keys** appear automatically with the auto label until the owner
+  renames them; no setup is required for a field to show.
+- *Out of scope for now:* an optional "suggest labels with AI" button in that
+  panel. It would be an explicit, owner-triggered action in a later phase; the
+  CRM makes no AI call for labels today.
 
 **Rendering and safety.**
 
@@ -3854,7 +3910,10 @@ code to *appear*:
 controls), because it is what a rep reads before calling:
 
 - Primary: the submissions whose `deal_id` = this deal (normally one), newest
-  first, fully expanded: received at · origin (site name + domain, or form /
+  first, fully expanded: a small **"Revisar"** badge when `needsReview` is
+  non-empty (tooltip lists what was repaired, e.g. invalid e-mail kept as
+  typed, message truncated) · prominent fields (large, top of the card) ·
+  received at · origin (site name + domain, or form /
   booking name) · name · phone · e-mail (with "(del contacto)" when falling
   back) · **message** · every `fields` row · attribution block (source,
   utm_source/medium/campaign/term/content, gclid, fbclid, page URL, referrer).
@@ -3890,6 +3949,10 @@ present, enforces it): `title` ("Datos del formulario"), `empty`, `otherSubmissi
 
 **Tests (L1):**
 
+0. Label resolution (pure, in `view.test.ts`): dictionary key in es/en/sv,
+   humanized unknown key, hosted-form label wins over the dictionary, and a
+   per-site override wins over everything; fields marked prominent sort first
+   and carry `prominent: true`.
 1. `src/modules/leads/view.test.ts` (pure): every key of a payload produces a
    row — including a randomly named key generated in the test
    (`campo_${random}`) — and the row count equals payload keys minus the
@@ -3932,19 +3995,30 @@ Proposed guard (L2), all inside `src/modules/sites/ingest.ts`:
    customer data).
 2. Caps instead of rejection for non-identity fields: `fields` max 100 keys,
    key ≤ 100 chars, each string value ≤ 5000 chars, serialized `fields`
-   ≤ 64 KB — **truncate with a trailing "…[truncado]"** and record the fact
-   in `fields._truncated: [keys]`; only a payload over a hard 256 KB body
-   limit is a 413/422.
+   ≤ 64 KB — **truncate with a trailing "…[truncado]"**, record the key in
+   `needs_review` (e.g. `field_truncated:<key>`) and keep the untruncated
+   original in `payload` under `_original` (see item 3b); only a payload over a
+   hard 256 KB body limit is a 413/422.
 3. `message`, `utm_*`, `gclid`, `fbclid`, `page_url`, `referrer`: truncate to
-   the column/zod max instead of 422.
+   the column/zod max instead of 422, and add `message_truncated` /
+   `utm_truncated` / `page_url_truncated` to `needs_review`.
+3b. **The original value is never lost.** Whenever a value is truncated, the
+   full original goes to `payload._original[<key>]`, capped at a sane limit of
+   **20,000 characters** per value and 64 KB for `_original` as a whole
+   ("where size allows"); past the cap the original is cut and `_original_cut`
+   lists the key. `_original` is a transport/metadata key: the view shows it
+   only through the "Revisar" detail, never as a regular row.
 4. `email` that fails `.email()`: the lead is **accepted**, the contact's
-   e-mail is not set, and the raw value is kept in `fields.email_invalido` so
-   the rep still sees what the visitor typed.
+   e-mail is not set, the raw value is kept on the submission
+   (`submitted_email` holds it as typed, trimmed to the column length, and
+   `payload.email_invalido` keeps the full text) and `email_invalid` is added
+   to `needs_review`, so the rep still sees what the visitor typed.
 5. `phone` and `idempotency_key` stay strict — identity and dedupe.
 6. Per-submission snapshot: additive migration on `lead_submissions` —
    `submitted_name varchar(200)`, `submitted_email varchar(320)`,
-   `submitted_phone varchar(30)` (normalized), `source varchar(100)`, all
-   nullable — written by `recordLeadSubmission` on every path. The view
+   `submitted_phone varchar(30)` (normalized), `source varchar(100)`, and
+   `needs_review` (JSON array of repair codes such as `email_invalid`,
+   `message_truncated`; null when nothing was repaired), all nullable — written by `recordLeadSubmission` on every path. The view
    prefers these and falls back to the contact (19.1). The `form_submission`
    activity payload gains `submissionId`.
 7. Docs: `docs/` lead-ingest contract and the `vendercrm-lead-capture` skill
@@ -3952,9 +4026,12 @@ Proposed guard (L2), all inside `src/modules/sites/ingest.ts`:
    and folded, but `fields` is the contract".
 
 Tests (L2): `ingest.test.ts` — a top-level `finalidad` lands in `payload`;
-`api_key` at the top level does not; a 6000-char message is accepted and
-truncated; `juan@gmail` is accepted, contact e-mail null,
-`fields.email_invalido` set; 120 keys → 100 kept + `_truncated`; existing
+`api_key` at the top level does not; a 6000-char message is accepted,
+truncated, `needs_review` contains `message_truncated` and the full original is
+in `payload._original`; a 30,000-char message keeps 20,000 characters of
+original; `juan@gmail` is accepted, contact e-mail null, raw value kept,
+`needs_review` contains `email_invalid`; 120 keys → 100 kept + review entry;
+a clean lead has `needs_review` null; existing
 422s for missing phone / short idempotency key unchanged. Health
 (`site_ingest_health`) still records only codes, never payloads.
 
@@ -4008,7 +4085,8 @@ read — exactly the capability this view must not have. Instead, following
 
 **Columns.**
 
-- Leads: received at · account · site (domain) / form · name · phone ·
+- Leads: received at · **"Revisar" badge when `needs_review` is set** ·
+  account · site (domain) / form · name · phone ·
   e-mail · message (first 120 chars) · first two `fields` values (generic,
   e.g. "finalidad: Venta · ciudad: Asunción") · utm_source / campaign · deal
   stage (status chip open/won/lost) · open →.
@@ -4023,8 +4101,13 @@ values ignored, never echoed into SQL):
 
 - Account: multi-select of tenant ids, validated against `SELECT id FROM
   tenants` (an unknown id is dropped, not an error).
-- Date range: presets 7/30/90 days (reuse `OVERVIEW_WINDOWS`) + custom
-  from/to; applies to `lead_submissions.created_at` / `deals.created_at` /
+- Date range: presets **1, 7, 30, 90 and 180 days** + custom from/to, default
+  **30 days**. The presets are one exported constant,
+  `PLATFORM_CRM_DATE_PRESETS = [1, 7, 30, 90, 180]` with
+  `PLATFORM_CRM_DEFAULT_DAYS = 30` (in `platform-crm.ts`, shared with the page
+  and the C3 export), so changing them is a one-line edit; a `days` value not
+  in the constant is ignored and the default applies. A custom range is capped
+  at 366 days. Applies to `lead_submissions.created_at` / `deals.created_at` /
   `contacts.created_at`.
 - Status: open / won / lost (from `stages.is_won` / `is_lost` — stage *names*
   differ per account). A specific stage/pipeline filter is offered only when
@@ -4051,8 +4134,10 @@ detail page posts `openInAccountAction(tenantId, dealId)`
    `getDeal(ctx, dealId)` *after* the switch, then `redirect('/pipeline/' +
    dealId)`. This is a **separate** action from the business switcher —
    `resolveSwitchTarget` keeps dropping ids, and its tests stay as they are.
-3. If there is no membership: show "Ver como administrador" which goes
-   through the existing audited impersonation flow; nothing new is granted.
+3. If there is no membership: fall back to "Ver como administrador", which
+   goes through the existing audited impersonation flow; nothing new is
+   granted. (Owner confirmed 2026-10-01: only the owner is superadmin, so this
+   direct-switch-else-"ver como" rule is final and needs no extra flag.)
 4. Audit `platform.deal.opened_in_account` with `{tenantId, dealId, via:
    "membership"|"impersonation"}`.
 
@@ -4089,11 +4174,12 @@ by action, so the owner can see who looked at what.
 - **Bulk PII in one screen.** Today a superadmin can already see any account
   by impersonating, but one at a time and audited per session; this view
   makes all of it one page. Mitigations: superadmin-only, read-only, audited
-  per view, no CSV export in this phase (export is the obvious exfiltration
-  path — deferred, and if added later it gets its own audit action and a
-  row cap). If more than one person holds `is_superadmin`, see 19.7 Q2.
+  per view, and no export in C1/C2 (export is the obvious exfiltration path;
+  it arrives in C3 with its own audit action and a row cap). Only the owner
+  holds `is_superadmin`, so no additional per-user flag is added; if that ever
+  changes, revisit before granting the role.
 - **Query cost** grows with the platform: always date-bounded (default 30
-  days), paginated, indexed; no unbounded "all time" default.
+  days, widest preset 180, custom range capped at 366), paginated, indexed; no unbounded "all time" default.
 - **Tenant status:** suspended/locked tenants' data is still listed (it is the
   owner's platform), with the account's status chip shown; the link-through
   then lands in a read-only tenant exactly as today.
@@ -4104,18 +4190,22 @@ by action, so the owner can see who looked at what.
 
 | Phase | Model | Prompt | Owns | Depends on |
 |---|---|---|---|---|
-| L1 lead data card + timeline | Sonnet | `prompts/l1-lead-data-card.md` (write at kickoff from §19.2) | `src/modules/leads/view.ts` (new), `src/modules/leads/view.test.ts` (new), read functions in `src/modules/leads/submissions.ts`, `src/components/leads/**` (new), `src/app/(app)/pipeline/[dealId]/page.tsx`, `src/modules/crm/timeline.ts`, `src/app/(app)/contacts/[id]/page.tsx`, `messages/{es,en,sv}.json` (`app.leadData`), integration test | — |
-| L2 ingest guard + submission snapshot | Opus | `prompts/l2-ingest-guard.md` | `src/modules/sites/ingest.ts`, `src/modules/sites/ingest.test.ts`, `src/db/schema/sites.ts` (4 additive columns) + one migration, write path in `src/modules/leads/submissions.ts`, view fallback in `view.ts`, ingest contract docs | L1 |
+| L1 lead data card + timeline | Sonnet | `prompts/l1-lead-data-card.md` (write at kickoff from §19.2) | `src/modules/leads/view.ts` (new), `src/modules/leads/view.test.ts` (new), read functions in `src/modules/leads/submissions.ts`, `src/components/leads/**` (new, incl. prominent-field block and "Revisar" badge), label resolution (dictionary, humanizer, read of `sites.settings.fieldLabels`/`fieldDisplay`), `src/app/(app)/pipeline/[dealId]/page.tsx`, `src/modules/crm/timeline.ts`, `src/app/(app)/contacts/[id]/page.tsx`, `messages/{es,en,sv}.json` (`app.leadData`), integration test | — |
+| L2 ingest guard + submission snapshot | Opus | `prompts/l2-ingest-guard.md` | `src/modules/sites/ingest.ts`, `src/modules/sites/ingest.test.ts`, `src/db/schema/sites.ts` (5 additive columns incl. `needs_review`) + one migration, `needs_review` repair codes and `payload._original` storage, write path in `src/modules/leads/submissions.ts`, view fallback in `view.ts`, ingest contract docs | L1 |
 | C1 privileged reader + guards | Opus | `prompts/c1-platform-crm-reader.md` | `src/modules/tenancy/platform-crm.ts` (new) + tests, `openInAccountAction` in `src/app/(superadmin)/platform-leads/actions.ts`, index migration, audit actions | L1 (reuses the view-model) |
-| C2 cross-account pages | Sonnet | `prompts/c2-platform-leads-page.md` | `src/app/(superadmin)/platform-leads/**` (pages, filters, tables, detail), nav item in `src/app/(superadmin)/layout.tsx`, `messages/*.json` (`superadmin.platformLeads`, `superadmin.nav.leads`) | C1 |
+| C2 cross-account pages | Sonnet | `prompts/c2-platform-leads-page.md` | `src/app/(superadmin)/platform-leads/**` (pages, filters incl. date presets, tables with "Revisar" badge, detail), nav item in `src/app/(superadmin)/layout.tsx`, `messages/*.json` (`superadmin.platformLeads`, `superadmin.nav.leads`) | C1 |
+| L3 field-label editor | Sonnet | `prompts/l3-field-label-editor.md` | "Campos del formulario" panel in the Sitios settings screen, the site-settings action for `fieldLabels` / `fieldDisplay` (validation, audit), `messages/*.json` (`app.leadData.labelEditor`), tests | L1 |
+| C3 audited CSV export | Opus | `prompts/c3-platform-crm-export.md` | export route/action under `src/app/(superadmin)/platform-leads/`, `exportPlatformLeads` in `src/modules/tenancy/platform-crm.ts`, audit action `platform.crm.exported`, tests | C1, C2 |
 
 L1 ships alone and fixes the owner's immediate problem for every historic
-lead. L2 and C1 can run in parallel after L1 (disjoint files except the
+lead. L3 (label editor) can run any time after L1, in parallel with the
+rest; C3 is the last phase. L2 and C1 can run in parallel after L1 (disjoint files except the
 read/write halves of `submissions.ts` — L2 owns the write path, C1 does not
 touch it). The stronger tier (Model column) is assigned to L2 (public,
 key-authenticated ingest contract; credential deny-list; behavior change from
-422 to accept-and-truncate) and C1 (the only new cross-tenant read path and
-the security boundary C2 builds on); L1 and C2 are well-specified UI/read work.
+422 to accept-and-repair), C1 (the only new cross-tenant read path and
+the security boundary C2 builds on) and C3 (bulk export of personal data);
+L1, L3 and C2 are well-specified UI/read work.
 Model tiers per §17.8; no other tier is spawned for these phases.
 
 **Acceptance criteria**
@@ -4123,26 +4213,50 @@ Model tiers per §17.8; no other tier is spawned for these phases.
 - **L1:** a deal opened by the tasacion form shows "Datos del formulario"
   with name, phone, e-mail, mensaje, finalidad, ciudad, origin site/domain,
   page URL, referrer and every UTM value present in the submission; a
-  submission with an extra unknown field shows it as a row with a humanized
-  label, with no code change; two submissions from one contact show newest
+  submission with an extra unknown field shows it as a row with an automatic
+  (dictionary or humanized) label, with no code change and no AI call;
+  per-site label overrides and "prominent" flags set in `sites.settings` are
+  honored by the card (prominent fields render large at the top); two submissions from one contact show newest
   first, the other collapsed; the contact timeline's lead entry shows the
   same card and the duplicate empty "Formulario" activity is gone; all three
   locales have the keys; the card test fails if any submitted value is
   missing from the HTML; isolation test green.
 - **L2:** a top-level `finalidad` sent outside `fields` appears on the card;
-  a bad e-mail, an oversized message or UTM no longer lose the lead (the
-  card shows the truncation / invalid-email marker); credential-shaped keys
+  a bad e-mail, an oversized message or UTM no longer lose the lead: it is
+  accepted, `needs_review` lists what was repaired (`email_invalid`,
+  `message_truncated`, ...), the deal card shows a "Revisar" badge, the raw
+  e-mail and the untruncated original (up to 20,000 characters) are still
+  visible/stored, and a clean lead shows no badge; `phone` and
+  `idempotency_key` still 422 when invalid; credential-shaped keys
   never land in `payload`; a returning contact's second submission shows the
   name/e-mail it was sent with.
 - **C1:** reader returns leads/deals from all accounts with correct account
   labels, date-bounded and paginated; mismatched (tenantId, dealId) returns
   null; every call audits once; non-superadmins refused; no writes in the
   reader; existing isolation suites unchanged and green.
+- **L3:** in Sitios settings the owner sees the keys a site has sent, renames
+  one ("tipo_de_propiedad" -> "Tipo de inmueble") and toggles "Destacar" on
+  finalidad, ciudad and message; saving updates every card for that site
+  (old and new leads) without code or deploy; a key never configured still
+  shows with its auto label; non-admins cannot save; labels over 80
+  characters or with HTML render as plain text.
 - **C2:** `/platform-leads` lists leads and deals across accounts with the
-  filters in 19.4, 50 per page, works at phone width; a row opens the
+  filters in 19.4 (date presets 1/7/30/90/180 days + custom range, default 30
+  days, presets from one constant), a "Revisar" badge on repaired leads, 50 per
+  page, works at phone width; a row opens the
   read-only detail with the full form data; "Abrir en la cuenta" lands on
-  `/pipeline/{dealId}` inside the right account (membership) or offers "ver
+  `/pipeline/{dealId}` inside the right account (membership) or falls back to the audited "ver
   como" (no membership); `/audit` shows the views.
+- **C3:** a "Exportar CSV" button on `/platform-leads` is visible and usable
+  only for the superadmin (a tenant admin or anonymous caller is refused);
+  the file contains exactly the rows matching the active filters (account,
+  date range, status, source, search), never more, up to a cap of 5,000 rows
+  (`PLATFORM_CRM_EXPORT_MAX_ROWS`; over the cap the export is refused with a
+  message asking to narrow the filters, never silently cut); every export
+  writes one `platform.crm.exported` audit row with who, the filters and the
+  row count (no row data); cells starting with `=`, `+`, `-`, `@` are
+  neutralized against spreadsheet formula injection; UTF-8 with BOM so
+  accents open correctly.
 
 **Manual verification checklist (owner, production, after each deploy)**
 
@@ -4167,30 +4281,34 @@ Model tiers per §17.8; no other tier is spawned for these phases.
    `/audit` shows `platform.crm.viewed` and `platform.deal.viewed`.
 8. Log in as a tenant admin and request `/platform-leads` directly: redirected
    to login / refused.
+8b. (L2) Post a lead with `email: "x@x"` and a 6000-character message: the
+   deal shows the "Revisar" badge, the raw e-mail and the message; the same
+   lead appears with the badge in `/platform-leads`.
+8c. (L3) In Sitios settings rename `ciudad` to "Ciudad del inmueble" and mark
+   finalidad / ciudad / mensaje "Destacar": the deal card shows them large at
+   the top with the new label.
+8d. (C3) Filter `/platform-leads` to one account and 7 days, export CSV:
+   only those rows are in the file, and `/audit` shows one
+   `platform.crm.exported` row with the filters and row count.
 9. Delete the test contacts/deals afterwards through the normal deletion flow.
 
 ### 19.6 Explicitly not in this plan
 
-- CSV/Excel export from the cross-account view (19.4 Risks).
+- Excel (.xlsx) export, and any CSV export beyond the audited, capped,
+  filter-bound one in C3.
 - Editing anything from the console view (stage moves, assignment) — use the
   account itself.
-- A per-site field-label editor UI (19.2 labels, rule 4 note).
+- A "suggest labels with AI" button for field labels (possible later extra;
+  the CRM makes no AI call for labels).
 - Mapping arbitrary `fields` into `contacts.custom` for API leads (hosted
   forms already can via `mapTo`); a later phase if the owner wants to filter
   by finalidad/ciudad inside an account.
 
 ### 19.7 Open questions for the owner
 
-1. Is your superadmin login the **same user** as the shared operator
-   (`OPS_SHARED_ADMIN_EMAIL`) that holds an admin membership in each account?
-   If yes, "Abrir en la cuenta" is a one-click switch; if not, it goes through
-   "ver como" (impersonation) instead.
-2. Does anyone besides you hold `is_superadmin`? If yes, should the
-   cross-account view need an extra per-user flag rather than superadmin alone?
-3. OK to **accept** leads with an invalid e-mail or over-long message/UTM
-   (keeping the raw value, truncating) instead of rejecting them with 422?
-   (Recommended — a rejected lead is a lost customer.)
-4. Are auto-generated labels ("Tipo de propiedad" from `tipo_de_propiedad`)
-   good enough, or do you want to name fields per site?
-5. Should the cross-account view default to the last 30 days, and do you
-   want CSV export later (it would be audited and capped)?
+None. All five were answered on 2026-10-01 (see "Owner decisions
+(2026-10-01)" at the top of this section): only the owner is superadmin (no
+extra flag; direct switch else "ver como"); invalid e-mail / over-long text is
+accepted with a `needs_review` flag and the original kept; labels are
+deterministic with owner-editable per-site overrides and a "prominent" toggle;
+date presets 1/7/30/90/180 days + custom, default 30; CSV export is phase C3.
