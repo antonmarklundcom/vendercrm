@@ -2417,7 +2417,8 @@
       "audit": "Audit log",
       "users": "Users",
       "overview": "Overview",
-      "sites": "Sites"
+      "sites": "Sites",
+      "leads": "Leads"
     },
     "ops": {
       "title": "Claude Ops",
@@ -3019,6 +3020,111 @@
         "ok": "Working",
         "failing": "Failing",
         "idle": "No activity"
+      }
+    },
+    "platformLeads": {
+      "title": "Leads and deals across accounts",
+      "intro": "Every lead, deal and contact of every business in one list. Read-only: to act on a deal, open it in its account.",
+      "tabs": {
+        "leads": "Leads",
+        "deals": "Deals",
+        "contacts": "Contacts"
+      },
+      "filters": {
+        "account": "Accounts",
+        "accountHint": "Hold Ctrl or ⌘ to pick several. Empty means all.",
+        "period": "Period",
+        "days": "{days, plural, one {Last day} other {Last # days}}",
+        "from": "From",
+        "to": "To",
+        "customHint": "A custom range (both dates) replaces the period.",
+        "status": "Status",
+        "anyStatus": "Any",
+        "open": "Open",
+        "won": "Won",
+        "lost": "Lost",
+        "source": "Source",
+        "anySource": "Any source",
+        "form": "Hosted form",
+        "booking": "Booking",
+        "chat": "Chat",
+        "utm": "UTM source",
+        "search": "Search",
+        "searchPlaceholder": "Name, phone or e-mail (3+ characters)",
+        "apply": "Apply",
+        "clear": "Clear filters"
+      },
+      "columns": {
+        "received": "Received",
+        "account": "Account",
+        "origin": "Site / form",
+        "name": "Name",
+        "phone": "Phone",
+        "email": "E-mail",
+        "message": "Message",
+        "fields": "Fields",
+        "utm": "UTM",
+        "stage": "Stage",
+        "open": "Open",
+        "created": "Created",
+        "title": "Deal",
+        "contact": "Contact",
+        "pipeline": "Pipeline",
+        "status": "Status",
+        "value": "Value",
+        "owner": "Owner",
+        "source": "Source",
+        "lastStageChange": "Last stage change",
+        "firstSite": "First site",
+        "openDeals": "Open deals"
+      },
+      "review": "Review",
+      "reviewTitle": "Repaired on arrival: {codes}",
+      "accountStatus": {
+        "active": "Active",
+        "trial": "Trial",
+        "suspended": "Suspended"
+      },
+      "dealStatus": {
+        "open": "Open",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "origin": {
+        "form": "Form",
+        "booking": "Booking",
+        "chat": "Chat"
+      },
+      "results": "{total, plural, one {# result} other {# results}}",
+      "pageOf": "Page {page} of {pages}",
+      "prev": "Previous",
+      "next": "Next",
+      "emptyTitle": "Nothing matches",
+      "emptyBody": "No records in this period with these filters. Widen the period or clear a filter.",
+      "openRow": "Open →",
+      "unassigned": "—",
+      "detail": {
+        "back": "Back to the list",
+        "openInAccount": "Open in the account",
+        "openInAccountHint": "Takes you into the business to act on this deal (audited).",
+        "openError": "Could not open the account: it has no active administrator to view as, or the session could not be switched.",
+        "readOnly": "Read-only view across accounts.",
+        "facts": {
+          "account": "Account",
+          "contact": "Contact",
+          "phone": "Phone",
+          "email": "E-mail",
+          "pipeline": "Pipeline",
+          "stage": "Stage",
+          "status": "Status",
+          "value": "Value",
+          "owner": "Owner",
+          "created": "Created",
+          "closed": "Closed",
+          "lastStageChange": "Last stage change"
+        },
+        "leads": "Form data",
+        "noLeads": "This deal did not come from a form."
       }
     }
   },

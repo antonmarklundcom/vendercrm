@@ -2417,7 +2417,8 @@
       "audit": "Granskningslogg",
       "users": "Användare",
       "overview": "Översikt",
-      "sites": "Sajter"
+      "sites": "Sajter",
+      "leads": "Leads"
     },
     "ops": {
       "title": "Claude Ops",
@@ -3019,6 +3020,111 @@
         "ok": "Fungerar",
         "failing": "Fel",
         "idle": "Ingen aktivitet"
+      }
+    },
+    "platformLeads": {
+      "title": "Leads och affärer över alla konton",
+      "intro": "Alla leads, affärer och kontakter från alla företag i en lista. Skrivskyddad: för att agera på en affär öppnar du den i sitt konto.",
+      "tabs": {
+        "leads": "Leads",
+        "deals": "Affärer",
+        "contacts": "Kontakter"
+      },
+      "filters": {
+        "account": "Konton",
+        "accountHint": "Håll Ctrl eller ⌘ för att välja flera. Tomt betyder alla.",
+        "period": "Period",
+        "days": "{days, plural, one {Senaste dygnet} other {Senaste # dagarna}}",
+        "from": "Från",
+        "to": "Till",
+        "customHint": "Ett eget intervall (båda datumen) ersätter perioden.",
+        "status": "Status",
+        "anyStatus": "Alla",
+        "open": "Öppen",
+        "won": "Vunnen",
+        "lost": "Förlorad",
+        "source": "Källa",
+        "anySource": "Alla källor",
+        "form": "Hostat formulär",
+        "booking": "Bokning",
+        "chat": "Chatt",
+        "utm": "UTM-källa",
+        "search": "Sök",
+        "searchPlaceholder": "Namn, telefon eller e-post (minst 3 tecken)",
+        "apply": "Använd",
+        "clear": "Rensa filter"
+      },
+      "columns": {
+        "received": "Mottagen",
+        "account": "Konto",
+        "origin": "Webbplats / formulär",
+        "name": "Namn",
+        "phone": "Telefon",
+        "email": "E-post",
+        "message": "Meddelande",
+        "fields": "Fält",
+        "utm": "UTM",
+        "stage": "Steg",
+        "open": "Öppna",
+        "created": "Skapad",
+        "title": "Affär",
+        "contact": "Kontakt",
+        "pipeline": "Pipeline",
+        "status": "Status",
+        "value": "Värde",
+        "owner": "Ansvarig",
+        "source": "Källa",
+        "lastStageChange": "Senaste stegbyte",
+        "firstSite": "Första webbplats",
+        "openDeals": "Öppna affärer"
+      },
+      "review": "Granska",
+      "reviewTitle": "Rättat vid mottagandet: {codes}",
+      "accountStatus": {
+        "active": "Aktivt",
+        "trial": "Provperiod",
+        "suspended": "Avstängt"
+      },
+      "dealStatus": {
+        "open": "Öppen",
+        "won": "Vunnen",
+        "lost": "Förlorad"
+      },
+      "origin": {
+        "form": "Formulär",
+        "booking": "Bokning",
+        "chat": "Chatt"
+      },
+      "results": "{total, plural, one {# resultat} other {# resultat}}",
+      "pageOf": "Sida {page} av {pages}",
+      "prev": "Föregående",
+      "next": "Nästa",
+      "emptyTitle": "Inget matchar",
+      "emptyBody": "Inga poster i den här perioden med dessa filter. Utöka perioden eller ta bort ett filter.",
+      "openRow": "Öppna →",
+      "unassigned": "—",
+      "detail": {
+        "back": "Tillbaka till listan",
+        "openInAccount": "Öppna i kontot",
+        "openInAccountHint": "Tar dig in i företaget för att agera på den här affären (loggas).",
+        "openError": "Kontot kunde inte öppnas: det saknar aktiv administratör att visa som, eller så gick det inte att byta session.",
+        "readOnly": "Skrivskyddad vy över alla konton.",
+        "facts": {
+          "account": "Konto",
+          "contact": "Kontakt",
+          "phone": "Telefon",
+          "email": "E-post",
+          "pipeline": "Pipeline",
+          "stage": "Steg",
+          "status": "Status",
+          "value": "Värde",
+          "owner": "Ansvarig",
+          "created": "Skapad",
+          "closed": "Stängd",
+          "lastStageChange": "Senaste stegbyte"
+        },
+        "leads": "Formulärdata",
+        "noLeads": "Den här affären kom inte från ett formulär."
       }
     }
   },
