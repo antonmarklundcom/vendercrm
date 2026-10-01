@@ -21,7 +21,7 @@ describe("platform-crm.ts has no write path", () => {
       .filter(([, value]) => typeof value === "function")
       .map(([name]) => name);
     for (const name of functions) {
-      expect(name).toMatch(/^(list|get|count|resolve|clamp|preview)/);
+      expect(name).toMatch(/^(list|get|count|export|resolve|clamp|preview)/);
     }
   });
 });

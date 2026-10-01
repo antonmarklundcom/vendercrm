@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox } from "lucide-react";
+import { Download, Inbox } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireSuperadminContext } from "@/modules/tenancy/context";
 import { listTenants } from "@/modules/tenancy/tenants";
@@ -10,6 +10,7 @@ import {
   listPlatformLeads,
   PLATFORM_CRM_DATE_PRESETS,
   PLATFORM_CRM_DEFAULT_DAYS,
+  PLATFORM_CRM_EXPORT_MAX_ROWS,
   type PlatformCrmPage,
 } from "@/modules/tenancy/platform-crm";
 import { EmptyState } from "@/components/empty-state";
@@ -19,6 +20,7 @@ import { Input, Select } from "@/components/ui/form-fields";
 import { cn } from "@/lib/utils";
 import {
   parsePlatformLeadsParams,
+  platformLeadsExportHref,
   platformLeadsHref,
   PLATFORM_LEADS_VIEWS,
   type ParsedPlatformLeadsParams,
@@ -37,7 +39,8 @@ import {
 // Defense in depth (§3.3): the layout redirects a non-superadmin, but a layout
 // is not an authorization boundary — this page checks for itself, before
 // anything is read. It calls exactly one reader per render, so one view is
-// one `platform.crm.viewed` audit row.
+// one `platform.crm.viewed` audit row. The "Exportar CSV" link goes to
+// ./export/route.ts, which checks again for itself and audits its own row.
 export default async function PlatformLeadsPage({
   searchParams,
 }: {
@@ -199,7 +202,30 @@ export default async function PlatformLeadsPage({
         </div>
       </form>
 
-      <p className="text-sm text-muted-foreground">{t("results", { total: result.total })}</p>
+      {parsed.exportError === "too_many_rows" && (
+        <p role="alert" className="rounded-md border border-destructive px-3 py-2 text-sm text-destructive">
+          {t("export.tooManyRows", { max: PLATFORM_CRM_EXPORT_MAX_ROWS })}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{t("results", { total: result.total })}</p>
+        {/* Leads only: deals/contacts export is out of scope (§19.6). A plain
+            <a>, not <Link>: it is a file download, not a page to prefetch. */}
+        {parsed.view === "leads" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              {t("export.hint", { max: PLATFORM_CRM_EXPORT_MAX_ROWS })}
+            </span>
+            <Button asChild variant="outline" size="sm">
+              <a href={platformLeadsExportHref(parsed)}>
+                <Download className="size-4" aria-hidden="true" />
+                {t("export.button")}
+              </a>
+            </Button>
+          </div>
+        )}
+      </div>
 
       {result.rows.length === 0 ? (
         <EmptyState icon={Inbox} title={t("emptyTitle")} description={t("emptyBody")} />

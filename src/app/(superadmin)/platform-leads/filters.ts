@@ -13,6 +13,8 @@ import {
 
 export const PLATFORM_LEADS_VIEWS = ["leads", "deals", "contacts"] as const;
 export type PlatformLeadsView = (typeof PLATFORM_LEADS_VIEWS)[number];
+/** Why the export sent the superadmin back instead of a file. */
+export type PlatformLeadsExportError = "too_many_rows";
 
 type RawParams = Record<string, string | string[] | undefined>;
 
@@ -44,6 +46,8 @@ function parseDay(value: string | undefined, endOfDay: boolean): Date | undefine
 export type ParsedPlatformLeadsParams = {
   view: PlatformLeadsView;
   page: number;
+  /** Set when the CSV export was refused and redirected back here. */
+  exportError: PlatformLeadsExportError | null;
   /** What goes to the reader. */
   filters: PlatformCrmFilters;
   /** The accepted raw values, for form defaults and links (never the rejected ones). */
@@ -99,9 +103,12 @@ export function parsePlatformLeadsParams(params: RawParams): ParsedPlatformLeads
   const pageNumber = rawPage && /^\d{1,4}$/.test(rawPage) ? Number(rawPage) : 1;
   const page = Math.min(Math.max(pageNumber, 1), PLATFORM_CRM_MAX_PAGE);
 
+  const exportError = first(params.exportError) === "too_many_rows" ? "too_many_rows" : null;
+
   return {
     view,
     page,
+    exportError,
     filters: {
       tenantIds: tenantIds.length ? tenantIds : undefined,
       days: days ?? undefined,
@@ -125,15 +132,9 @@ export function parsePlatformLeadsParams(params: RawParams): ParsedPlatformLeads
   };
 }
 
-/** A link to the same view with these overrides, keeping only accepted filters. */
-export function platformLeadsHref(
-  parsed: ParsedPlatformLeadsParams,
-  overrides: { view?: PlatformLeadsView; page?: number } = {},
-): string {
-  const { values } = parsed;
+/** The accepted filters as query parameters (never the rejected values). */
+function filterSearch(values: ParsedPlatformLeadsParams["values"]): URLSearchParams {
   const search = new URLSearchParams();
-  const view = overrides.view ?? parsed.view;
-  if (view !== "leads") search.set("view", view);
   for (const id of values.tenantIds) search.append("tenant", id);
   if (values.from && values.to) {
     search.set("from", values.from);
@@ -145,8 +146,32 @@ export function platformLeadsHref(
   if (values.source) search.set("source", values.source);
   if (values.utmSource) search.set("utm", values.utmSource);
   if (values.q) search.set("q", values.q);
+  return search;
+}
+
+/** A link to the same view with these overrides, keeping only accepted filters. */
+export function platformLeadsHref(
+  parsed: ParsedPlatformLeadsParams,
+  overrides: { view?: PlatformLeadsView; page?: number; exportError?: PlatformLeadsExportError } = {},
+): string {
+  const view = overrides.view ?? parsed.view;
+  const filters = filterSearch(parsed.values);
+  const search = new URLSearchParams();
+  if (view !== "leads") search.set("view", view);
+  for (const [key, value] of filters) search.append(key, value);
   const page = overrides.page ?? parsed.page;
   if (page > 1) search.set("page", String(page));
+  if (overrides.exportError) search.set("exportError", overrides.exportError);
   const query = search.toString();
   return query ? `/platform-leads?${query}` : "/platform-leads";
+}
+
+/**
+ * The CSV export of the leads view with the same accepted filters (§19.5
+ * C3). No view and no page: an export is the whole filtered set, and the
+ * route ignores both anyway.
+ */
+export function platformLeadsExportHref(parsed: ParsedPlatformLeadsParams): string {
+  const query = filterSearch(parsed.values).toString();
+  return query ? `/platform-leads/export?${query}` : "/platform-leads/export";
 }

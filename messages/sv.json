@@ -3125,6 +3125,11 @@
         },
         "leads": "Formulärdata",
         "noLeads": "Den här affären kom inte från ett formulär."
+      },
+      "export": {
+        "button": "Exportera CSV",
+        "hint": "Upp till {max, number} rader, med de aktiva filtren. Loggas i granskningsloggen.",
+        "tooManyRows": "Exporten överskrider gränsen på {max, number} rader, så ingen fil skapades. Begränsa filtren (konto, period, status eller källa) och exportera igen."
       }
     }
   },

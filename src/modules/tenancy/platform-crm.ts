@@ -60,6 +60,12 @@ export const PLATFORM_CRM_PAGE_SIZE = 50;
 export const PLATFORM_CRM_MAX_PAGE = 200;
 /** Search needs this many characters; shorter is ignored, not an error. */
 export const PLATFORM_CRM_MIN_SEARCH = 3;
+/**
+ * The most lead rows one CSV export may hold (owner decision 5, §19.5 C3).
+ * Over it the export is refused, never cut: a file that silently stops at
+ * row 5,000 reads as "that is all of them".
+ */
+export const PLATFORM_CRM_EXPORT_MAX_ROWS = 5000;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MESSAGE_PREVIEW = 120;
@@ -199,6 +205,20 @@ async function assertSuperadmin(sa: SuperadminContext): Promise<void> {
   if (!row) throw new Error("Superadmin required");
 }
 
+/** The applied filters as the audit payload records them (views and exports alike). */
+function auditFilters(filters: ResolvedPlatformCrmFilters) {
+  return {
+    tenantIds: filters.tenantIds,
+    since: filters.since.toISOString(),
+    until: filters.until.toISOString(),
+    days: filters.days,
+    status: filters.status,
+    source: filters.source,
+    utmSource: filters.utmSource,
+    q: filters.q,
+  };
+}
+
 async function auditView(
   sa: SuperadminContext,
   entity: "leads" | "deals" | "contacts",
@@ -214,16 +234,7 @@ async function auditView(
     entity,
     entityId: entity,
     payload: {
-      filters: {
-        tenantIds: filters.tenantIds,
-        since: filters.since.toISOString(),
-        until: filters.until.toISOString(),
-        days: filters.days,
-        status: filters.status,
-        source: filters.source,
-        utmSource: filters.utmSource,
-        q: filters.q,
-      },
+      filters: auditFilters(filters),
       page,
       rowCount,
       total,
@@ -301,10 +312,23 @@ const PREVIEW_SKIP = new Set([
 
 /** The first two customer fields of a payload as plain text, for the list column. */
 export function previewLeadFields(payload: unknown): Array<{ key: string; value: string }> {
+  return leadFields(payload, 2, FIELD_PREVIEW);
+}
+
+/**
+ * The customer fields of a payload as plain text, in payload order: the
+ * repair metadata, the dedicated slots (name, phone, e-mail, message) and the
+ * anti-spam keys are not fields.
+ */
+function leadFields(
+  payload: unknown,
+  limit: number = Number.POSITIVE_INFINITY,
+  maxChars: number = Number.POSITIVE_INFINITY,
+): Array<{ key: string; value: string }> {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
-  const preview: Array<{ key: string; value: string }> = [];
+  const entries: Array<{ key: string; value: string }> = [];
   for (const [key, raw] of Object.entries(payload as Record<string, unknown>)) {
-    if (preview.length === 2) break;
+    if (entries.length === limit) break;
     if (ORIGINAL_KEYS.has(key) || PREVIEW_SKIP.has(key)) continue;
     const value = toFieldValue(raw);
     const text =
@@ -316,9 +340,9 @@ export function previewLeadFields(payload: unknown): Array<{ key: string; value:
             ? String(value.value)
             : null;
     if (text === null) continue;
-    preview.push({ key, value: text.slice(0, FIELD_PREVIEW) });
+    entries.push({ key, value: text.slice(0, maxChars) });
   }
-  return preview;
+  return entries;
 }
 
 export type PlatformLeadRow = {
@@ -333,8 +357,9 @@ export type PlatformLeadRow = {
   name: string | null;
   phone: string | null;
   email: string | null;
-  /** First 120 characters. */
+  /** First 120 characters in the list; the full text in an export. */
   message: string | null;
+  /** The first two (80 characters each) in the list; every field, whole, in an export. */
   fields: Array<{ key: string; value: string }>;
   utmSource: string | null;
   utmCampaign: string | null;
@@ -362,6 +387,121 @@ function leadConditions(filters: ResolvedPlatformCrmFilters): SQL {
   return and(...where)!;
 }
 
+// lead_submissions ⋈ tenants ⋈ contacts ⟕ sites ⟕ forms ⟕ booking_types ⟕
+// deals ⟕ stages, every tenant-owned join on tenant_id as well as the id. One
+// builder for the list and the export, so the two can never join differently;
+// only the message column differs (the list's preview, the export's full text).
+function selectLeadRows(message: SQL<string | null>) {
+  return db
+    .select({
+      submission: {
+        id: leadSubmissions.id,
+        tenantId: leadSubmissions.tenantId,
+        createdAt: leadSubmissions.createdAt,
+        needsReview: leadSubmissions.needsReview,
+        siteId: leadSubmissions.siteId,
+        formId: leadSubmissions.formId,
+        bookingTypeId: leadSubmissions.bookingTypeId,
+        contactId: leadSubmissions.contactId,
+        dealId: leadSubmissions.dealId,
+        payload: leadSubmissions.payload,
+        submittedName: leadSubmissions.submittedName,
+        submittedEmail: leadSubmissions.submittedEmail,
+        submittedPhone: leadSubmissions.submittedPhone,
+        message,
+        utmSource: leadUtmSource,
+        utmCampaign: leadUtmCampaign,
+        channel: leadChannel,
+      },
+      tenant: { name: tenants.name, status: tenants.status },
+      contact: { name: contacts.name, phone: contacts.phone, email: contacts.email },
+      site: { name: sites.name, domain: sites.domain },
+      formName: forms.name,
+      bookingTypeName: bookingTypes.name,
+      stage: { name: stages.name, isWon: stages.isWon, isLost: stages.isLost },
+    })
+    .from(leadSubmissions)
+    .innerJoin(tenants, eq(tenants.id, leadSubmissions.tenantId))
+    .innerJoin(
+      contacts,
+      and(eq(contacts.tenantId, leadSubmissions.tenantId), eq(contacts.id, leadSubmissions.contactId)),
+    )
+    .leftJoin(
+      sites,
+      and(eq(sites.tenantId, leadSubmissions.tenantId), eq(sites.id, leadSubmissions.siteId)),
+    )
+    .leftJoin(
+      forms,
+      and(eq(forms.tenantId, leadSubmissions.tenantId), eq(forms.id, leadSubmissions.formId)),
+    )
+    .leftJoin(
+      bookingTypes,
+      and(
+        eq(bookingTypes.tenantId, leadSubmissions.tenantId),
+        eq(bookingTypes.id, leadSubmissions.bookingTypeId),
+      ),
+    )
+    .leftJoin(
+      deals,
+      and(eq(deals.tenantId, leadSubmissions.tenantId), eq(deals.id, leadSubmissions.dealId)),
+    )
+    .leftJoin(stages, and(eq(stages.tenantId, deals.tenantId), eq(stages.id, deals.stageId)));
+}
+
+function countLeadRows(where: SQL) {
+  return db
+    .select({ value: count() })
+    .from(leadSubmissions)
+    .innerJoin(
+      contacts,
+      and(eq(contacts.tenantId, leadSubmissions.tenantId), eq(contacts.id, leadSubmissions.contactId)),
+    )
+    .leftJoin(
+      deals,
+      and(eq(deals.tenantId, leadSubmissions.tenantId), eq(deals.id, leadSubmissions.dealId)),
+    )
+    .leftJoin(stages, and(eq(stages.tenantId, deals.tenantId), eq(stages.id, deals.stageId)))
+    .where(where);
+}
+
+type SelectedLeadRow = Awaited<ReturnType<ReturnType<typeof selectLeadRows>["where"]>>[number];
+
+function toLeadRow(
+  row: SelectedLeadRow,
+  fields: Array<{ key: string; value: string }>,
+): PlatformLeadRow {
+  const s = row.submission;
+  const origin: LeadOrigin = s.formId
+    ? { kind: "form", name: row.formName ?? null, domain: null }
+    : s.bookingTypeId
+      ? { kind: "booking", name: row.bookingTypeName ?? null, domain: null }
+      : {
+          kind: s.channel === "chat" ? "chat" : "site",
+          name: row.site?.name ?? null,
+          domain: row.site?.domain ?? null,
+        };
+  return {
+    id: s.id,
+    tenantId: s.tenantId,
+    tenantName: row.tenant.name,
+    tenantStatus: row.tenant.status,
+    receivedAt: s.createdAt,
+    needsReview: Array.isArray(s.needsReview) ? s.needsReview : [],
+    origin,
+    contactId: s.contactId,
+    name: s.submittedName ?? row.contact.name,
+    phone: s.submittedPhone ?? row.contact.phone,
+    email: s.submittedEmail ?? row.contact.email,
+    message: s.message,
+    fields,
+    utmSource: s.utmSource,
+    utmCampaign: s.utmCampaign,
+    dealId: s.dealId,
+    dealStatus: statusOf(row.stage),
+    stageName: row.stage?.name ?? null,
+  };
+}
+
 export async function listPlatformLeads(
   sa: SuperadminContext,
   filters: PlatformCrmFilters = {},
@@ -373,117 +513,16 @@ export async function listPlatformLeads(
   const currentPage = clampPlatformCrmPage(page);
   const where = leadConditions(resolved);
 
-  // lead_submissions ⋈ tenants ⋈ contacts ⟕ sites ⟕ forms ⟕ booking_types ⟕
-  // deals ⟕ stages, every tenant-owned join on tenant_id as well as the id.
-  const base = () =>
-    db
-      .select({
-        submission: {
-          id: leadSubmissions.id,
-          tenantId: leadSubmissions.tenantId,
-          createdAt: leadSubmissions.createdAt,
-          needsReview: leadSubmissions.needsReview,
-          siteId: leadSubmissions.siteId,
-          formId: leadSubmissions.formId,
-          bookingTypeId: leadSubmissions.bookingTypeId,
-          contactId: leadSubmissions.contactId,
-          dealId: leadSubmissions.dealId,
-          payload: leadSubmissions.payload,
-          submittedName: leadSubmissions.submittedName,
-          submittedEmail: leadSubmissions.submittedEmail,
-          submittedPhone: leadSubmissions.submittedPhone,
-          message: sql<string | null>`left(${leadSubmissions.notes}, ${MESSAGE_PREVIEW})`,
-          utmSource: leadUtmSource,
-          utmCampaign: leadUtmCampaign,
-          channel: leadChannel,
-        },
-        tenant: { name: tenants.name, status: tenants.status },
-        contact: { name: contacts.name, phone: contacts.phone, email: contacts.email },
-        site: { name: sites.name, domain: sites.domain },
-        formName: forms.name,
-        bookingTypeName: bookingTypes.name,
-        stage: { name: stages.name, isWon: stages.isWon, isLost: stages.isLost },
-      })
-      .from(leadSubmissions)
-      .innerJoin(tenants, eq(tenants.id, leadSubmissions.tenantId))
-      .innerJoin(
-        contacts,
-        and(eq(contacts.tenantId, leadSubmissions.tenantId), eq(contacts.id, leadSubmissions.contactId)),
-      )
-      .leftJoin(
-        sites,
-        and(eq(sites.tenantId, leadSubmissions.tenantId), eq(sites.id, leadSubmissions.siteId)),
-      )
-      .leftJoin(
-        forms,
-        and(eq(forms.tenantId, leadSubmissions.tenantId), eq(forms.id, leadSubmissions.formId)),
-      )
-      .leftJoin(
-        bookingTypes,
-        and(
-          eq(bookingTypes.tenantId, leadSubmissions.tenantId),
-          eq(bookingTypes.id, leadSubmissions.bookingTypeId),
-        ),
-      )
-      .leftJoin(
-        deals,
-        and(eq(deals.tenantId, leadSubmissions.tenantId), eq(deals.id, leadSubmissions.dealId)),
-      )
-      .leftJoin(stages, and(eq(stages.tenantId, deals.tenantId), eq(stages.id, deals.stageId)));
-
   const [rows, [{ value: total }]] = await Promise.all([
-    base()
+    selectLeadRows(sql<string | null>`left(${leadSubmissions.notes}, ${MESSAGE_PREVIEW})`)
       .where(where)
       .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id))
       .limit(PLATFORM_CRM_PAGE_SIZE)
       .offset((currentPage - 1) * PLATFORM_CRM_PAGE_SIZE),
-    db
-      .select({ value: count() })
-      .from(leadSubmissions)
-      .innerJoin(
-        contacts,
-        and(eq(contacts.tenantId, leadSubmissions.tenantId), eq(contacts.id, leadSubmissions.contactId)),
-      )
-      .leftJoin(
-        deals,
-        and(eq(deals.tenantId, leadSubmissions.tenantId), eq(deals.id, leadSubmissions.dealId)),
-      )
-      .leftJoin(stages, and(eq(stages.tenantId, deals.tenantId), eq(stages.id, deals.stageId)))
-      .where(where),
+    countLeadRows(where),
   ]);
 
-  const result: PlatformLeadRow[] = rows.map((row) => {
-    const s = row.submission;
-    const origin: LeadOrigin = s.formId
-      ? { kind: "form", name: row.formName ?? null, domain: null }
-      : s.bookingTypeId
-        ? { kind: "booking", name: row.bookingTypeName ?? null, domain: null }
-        : {
-            kind: s.channel === "chat" ? "chat" : "site",
-            name: row.site?.name ?? null,
-            domain: row.site?.domain ?? null,
-          };
-    return {
-      id: s.id,
-      tenantId: s.tenantId,
-      tenantName: row.tenant.name,
-      tenantStatus: row.tenant.status,
-      receivedAt: s.createdAt,
-      needsReview: Array.isArray(s.needsReview) ? s.needsReview : [],
-      origin,
-      contactId: s.contactId,
-      name: s.submittedName ?? row.contact.name,
-      phone: s.submittedPhone ?? row.contact.phone,
-      email: s.submittedEmail ?? row.contact.email,
-      message: s.message,
-      fields: previewLeadFields(s.payload),
-      utmSource: s.utmSource,
-      utmCampaign: s.utmCampaign,
-      dealId: s.dealId,
-      dealStatus: statusOf(row.stage),
-      stageName: row.stage?.name ?? null,
-    };
-  });
+  const result = rows.map((row) => toLeadRow(row, previewLeadFields(row.submission.payload)));
 
   await auditView(sa, "leads", resolved, currentPage, result.length, Number(total));
   return {
@@ -493,6 +532,77 @@ export async function listPlatformLeads(
     pageSize: PLATFORM_CRM_PAGE_SIZE,
     filters: resolved,
   };
+}
+
+/** A lead row as exported: the full message and every customer field, not the list's previews. */
+export type PlatformLeadExportRow = PlatformLeadRow;
+
+export type PlatformLeadExport =
+  | { ok: true; rows: PlatformLeadExportRow[]; filters: ResolvedPlatformCrmFilters }
+  | {
+      ok: false;
+      reason: "too_many_rows";
+      /** How many rows matched (at least max + 1). */
+      total: number;
+      max: number;
+      filters: ResolvedPlatformCrmFilters;
+    };
+
+/**
+ * Every lead matching the filters, for the CSV export (§19.5 C3): the same
+ * filters, joins and order as `listPlatformLeads`, without the page — but
+ * never more than PLATFORM_CRM_EXPORT_MAX_ROWS. Over the cap the export is
+ * refused whole (`too_many_rows`), never truncated, and no row is read.
+ *
+ * One `platform.crm.exported` audit row per call, refused or not: who, the
+ * applied filters and how many rows left (0 when refused) — never the rows.
+ */
+export async function exportPlatformLeads(
+  sa: SuperadminContext,
+  filters: PlatformCrmFilters = {},
+  now: Date = new Date(),
+): Promise<PlatformLeadExport> {
+  await assertSuperadmin(sa);
+  const resolved = await resolveFilters(filters, now);
+  const where = leadConditions(resolved);
+  const max = PLATFORM_CRM_EXPORT_MAX_ROWS;
+
+  // Count first, so an over-cap request reads no personal data at all.
+  const [{ value: counted }] = await countLeadRows(where);
+  let refusedTotal = Number(counted) > max ? Number(counted) : null;
+
+  let rows: PlatformLeadExportRow[] = [];
+  if (refusedTotal === null) {
+    // max + 1: a row that arrived after the count still trips the refusal
+    // instead of pushing an older row silently out of the file.
+    const selected = await selectLeadRows(sql<string | null>`${leadSubmissions.notes}`)
+      .where(where)
+      .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id))
+      .limit(max + 1);
+    if (selected.length > max) {
+      refusedTotal = selected.length;
+    } else {
+      rows = selected.map((row) => toLeadRow(row, leadFields(row.submission.payload)));
+    }
+  }
+
+  await writeAuditLog({
+    tenantId: resolved.tenantIds.length === 1 ? resolved.tenantIds[0] : null,
+    actorUserId: sa.userId,
+    action: "platform.crm.exported",
+    entity: "leads",
+    entityId: "leads",
+    payload: {
+      filters: auditFilters(resolved),
+      rowCount: rows.length,
+      ...(refusedTotal !== null ? { refused: "too_many_rows", total: refusedTotal } : {}),
+    },
+  });
+
+  if (refusedTotal !== null) {
+    return { ok: false, reason: "too_many_rows", total: refusedTotal, max, filters: resolved };
+  }
+  return { ok: true, rows, filters: resolved };
 }
 
 // ---------------------------------------------------------------------------

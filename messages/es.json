@@ -3125,6 +3125,11 @@
         },
         "leads": "Datos del formulario",
         "noLeads": "Este negocio no vino de un formulario."
+      },
+      "export": {
+        "button": "Exportar CSV",
+        "hint": "Hasta {max, number} filas, con los filtros activos. Queda registrado en la auditoría.",
+        "tooManyRows": "La exportación supera las {max, number} filas permitidas y no se generó ningún archivo. Acotá los filtros (cuenta, período, estado u origen) y volvé a exportar."
       }
     }
   },
