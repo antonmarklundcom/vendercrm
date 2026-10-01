@@ -95,6 +95,28 @@ describe("locale key parity", () => {
   }
 });
 
+// ICU placeholders (`{name}`) are arguments the code passes in: a locale that
+// renames or drops one renders blank or throws at runtime. Compared per key as
+// a set of argument names against es, the reference.
+describe("locale ICU placeholder parity", () => {
+  const argsOf = (value: string) =>
+    new Set([...value.matchAll(/\{\s*([A-Za-z_]\w*)\s*[,}]/g)].map((match) => match[1]!));
+  const reference = new Map(entries);
+
+  for (const [locale, tree] of Object.entries(LOCALES)) {
+    it(`${locale} uses the same placeholders as es.json for every key`, () => {
+      const mismatches = flatten(tree).flatMap(([key, value]) => {
+        const base = reference.get(key);
+        if (base === undefined) return [];
+        const expected = [...argsOf(base)].sort().join(",");
+        const actual = [...argsOf(value)].sort().join(",");
+        return expected === actual ? [] : [`${key}: es {${expected}} vs ${locale} {${actual}}`];
+      });
+      expect(mismatches).toEqual([]);
+    });
+  }
+});
+
 // Shape guard for the webhook connection guide (PLAN.md §5.2.5). /sites reads
 // `hookGuide.platforms` whole with t.raw() and hands it straight to the client
 // component, so this array is a contract, not just copy: an entry missing an

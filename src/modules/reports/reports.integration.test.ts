@@ -98,7 +98,8 @@ describe.skipIf(!hasDb)("reports v2 (MySQL)", () => {
     expect(exportReport.stageConversion).toEqual(pageReport.stageConversion);
 
     const csv = reportTableToCsv("agents", exportReport);
-    const csvRows = csv.split("\r\n").slice(1); // drop the header row
+    // Drop the header row and the empty piece after the final CRLF.
+    const csvRows = csv.split("\r\n").slice(1, -1);
     expect(csvRows).toHaveLength(pageReport.byAgent.length);
     expect(csv).toContain(String(pageReport.byAgent[0]!.wonValue));
   });
