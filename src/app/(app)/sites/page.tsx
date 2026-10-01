@@ -18,6 +18,9 @@ import { PageHeader } from "@/components/page-header";
 import { SiteGuide, type GuideLabels } from "./SiteGuide";
 import { NewSiteForm, SiteKeysPanel, type ApiKeyRow, type KeyLabels } from "./SiteKeyForms";
 import { SiteTurnstileForm } from "./SiteTurnstileForm";
+import { SiteFieldLabelsForm, type FieldLabelsPanelLabels } from "./SiteFieldLabelsForm";
+import { getSiteFieldRows } from "@/modules/sites/field-labels";
+import { MAX_FIELD_LABEL_LENGTH, resolveFieldLabel } from "@/modules/leads/view";
 import { SiteHookForm, type HookPanelProps } from "./SiteHookForm";
 import { SiteHookGuide, type HookGuideLabels } from "./SiteHookGuide";
 import { SiteDiagnostics } from "./SiteDiagnostics";
@@ -148,6 +151,42 @@ export default async function SitesPage() {
     // string it will call .map() on. See hook-guide-labels.ts.
     platforms: hookGuidePlatforms(th.raw("platforms")),
   };
+
+  // "Campos del formulario" (§19.2, L3): the keys each site has really sent.
+  const tf = await getTranslations("app.leadData.labelEditor");
+  const tfn = await getTranslations("app.leadData");
+  const fieldNames = tfn.raw("fieldNames") as Record<string, string>;
+  const fieldLabelsPanel: FieldLabelsPanelLabels = {
+    title: tf("title"),
+    intro: tf("intro"),
+    empty: tf("empty"),
+    key: tf("key"),
+    label: tf("label"),
+    prominent: tf("prominent"),
+    save: tf("save"),
+    saved: tf("saved"),
+    messageKey: tf("messageKey"),
+    errors: Object.fromEntries(
+      (["unknown", "labelTooLong", "keyInvalid", "keyUnknown", "tooMany", "siteNotFound"] as const).map(
+        (code) => [code, tf(`errors.${code}`)],
+      ),
+    ),
+  };
+  const fieldRowsBySite = new Map(
+    await Promise.all(
+      sites.map(async (site) => {
+        const rows = (await getSiteFieldRows(ctx, site.id)) ?? [];
+        return [
+          site.id,
+          rows.map((row) => ({
+            ...row,
+            autoLabel:
+              row.key === "message" ? tfn("message") : resolveFieldLabel(row.key, { fieldNames }),
+          })),
+        ] as const;
+      }),
+    ),
+  );
 
   const leadsBySite = new Map(stats.bySite.map((bucket) => [bucket.key, bucket.count]));
 
@@ -313,6 +352,13 @@ export default async function SitesPage() {
               />
 
               <SiteHookForm {...hookPanels.get(site.id)!} />
+
+              <SiteFieldLabelsForm
+                siteId={site.id}
+                rows={fieldRowsBySite.get(site.id) ?? []}
+                labels={fieldLabelsPanel}
+                maxLength={MAX_FIELD_LABEL_LENGTH}
+              />
 
               <SiteTurnstileForm
                 siteId={site.id}

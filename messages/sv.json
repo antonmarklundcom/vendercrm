@@ -1870,6 +1870,25 @@
         "nombre": "Namn",
         "mensaje": "Meddelande",
         "comentario": "Kommentar"
+      },
+      "labelEditor": {
+        "title": "Formulärfält",
+        "intro": "Namnge fälten den här webbplatsen skickar och markera vilka som ska lyftas fram: de visas stora överst i varje affärs formulärdata, även för äldre leads.",
+        "empty": "Webbplatsen har inte skickat några fält ännu.",
+        "key": "Fält",
+        "label": "Visningsnamn",
+        "prominent": "Lyft fram",
+        "save": "Spara fält",
+        "saved": "Klart, fälten sparades.",
+        "messageKey": "formulärets meddelande",
+        "errors": {
+          "unknown": "Det gick inte att spara. Försök igen.",
+          "labelTooLong": "Varje namn får vara högst 80 tecken.",
+          "keyInvalid": "Ett fält har ett ogiltigt namn.",
+          "keyUnknown": "Ett fält har aldrig skickats av webbplatsen.",
+          "tooMany": "För många fält.",
+          "siteNotFound": "Webbplatsen hittades inte."
+        }
       }
     },
     "stages": {

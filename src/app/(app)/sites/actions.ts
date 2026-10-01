@@ -12,6 +12,7 @@ import {
   setSiteHookMapping,
   clearHookCaptures,
 } from "@/modules/sites/hooks";
+import { saveSiteFieldSettings, type FieldLabelError } from "@/modules/sites/field-labels";
 import { getStage } from "@/modules/crm/pipelines";
 import { checkPlanLimit } from "@/modules/tenancy/limits";
 
@@ -315,6 +316,38 @@ export async function saveHookMappingAction(
     email: mappingPath(formData, "email"),
     message: mappingPath(formData, "message"),
   });
+  revalidatePath("/sites");
+  return { error: null, saved: true };
+}
+
+// Field-label editor (PLAN.md §19.2, L3). The form posts parallel `key` /
+// `label` lists plus one `prominent` value per ticked key. Tenant identity
+// comes from the session only; the site id is looked up tenant-scoped, so a
+// foreign id is indistinguishable from a missing one.
+export type FieldLabelsFormState = { error: FieldLabelError | null; saved: boolean };
+
+export async function saveSiteFieldLabelsAction(
+  _prev: FieldLabelsFormState,
+  formData: FormData,
+): Promise<FieldLabelsFormState> {
+  const ctx = await requireTenantAdmin();
+  const siteId = z.string().min(1).safeParse(formData.get("siteId"));
+  const keys = formData.getAll("key").filter((v): v is string => typeof v === "string");
+  const labels = formData.getAll("label").filter((v): v is string => typeof v === "string");
+  const prominent = new Set(
+    formData.getAll("prominent").filter((v): v is string => typeof v === "string"),
+  );
+  if (!siteId.success || keys.length !== labels.length) {
+    return { error: "unknown", saved: false };
+  }
+
+  const result = await saveSiteFieldSettings(
+    ctx,
+    siteId.data,
+    keys.map((key, i) => ({ key, label: labels[i], prominent: prominent.has(key) })),
+  );
+  if (!result.ok) return { error: result.error, saved: false };
+
   revalidatePath("/sites");
   return { error: null, saved: true };
 }

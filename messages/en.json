@@ -1870,6 +1870,25 @@
         "nombre": "Name",
         "mensaje": "Message",
         "comentario": "Comment"
+      },
+      "labelEditor": {
+        "title": "Form fields",
+        "intro": "Name the fields this site sends and mark which ones to highlight: they show large at the top of each deal's form data, old leads included.",
+        "empty": "This site has not sent any fields yet.",
+        "key": "Field",
+        "label": "Display name",
+        "prominent": "Highlight",
+        "save": "Save fields",
+        "saved": "Done, the fields were saved.",
+        "messageKey": "form message",
+        "errors": {
+          "unknown": "Could not save. Try again.",
+          "labelTooLong": "Each name can be up to 80 characters.",
+          "keyInvalid": "A field has an invalid name.",
+          "keyUnknown": "A field was never sent by this site.",
+          "tooMany": "Too many fields.",
+          "siteNotFound": "Site not found."
+        }
       }
     },
     "stages": {
