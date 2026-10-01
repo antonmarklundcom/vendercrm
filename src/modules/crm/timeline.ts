@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { documents, leadSubmissions, quotes } from "@/db/schema";
+import { documents, quotes } from "@/db/schema";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
 import {
@@ -7,6 +7,12 @@ import {
   listMessagesForConversation,
 } from "@/modules/whatsapp/inbox";
 import { listNotesForContact } from "@/modules/whatsapp/notes";
+import {
+  buildLeadSubmissionViews,
+  listLeadSubmissionsForContact,
+} from "@/modules/leads/submissions";
+import type { LeadSubmissionView } from "@/modules/leads/view";
+import { getContact } from "./contacts";
 import { listActivitiesForContact, type ActivityType } from "./activities";
 
 // Unified contact timeline (PLAN.md §5: "activities + WhatsApp messages +
@@ -59,9 +65,7 @@ export type TimelineEntry =
       kind: "lead";
       id: string;
       at: Date;
-      siteId: string | null;
-      campaign?: string;
-      pageUrl: string | null;
+      view: LeadSubmissionView;
     }
   | {
       // An inbox internal note (§15.8 P3) — never sent, distinct from the
@@ -72,8 +76,6 @@ export type TimelineEntry =
       body: string;
       authorUserId: string;
     };
-
-type Utm = { campaign?: string };
 
 /**
  * Everything that ever happened with this contact, newest first.
@@ -86,16 +88,20 @@ type Utm = { campaign?: string };
 export async function getContactTimeline(
   ctx: TenantContext,
   contactId: string,
+  /** The i18n dictionary of common form keys; without it labels are humanized. */
+  fieldNames: Record<string, string> = {},
 ): Promise<TimelineEntry[]> {
-  const [activities, conversations, contactQuotes, contactDocuments, leads, notes] =
+  const [activities, conversations, contactQuotes, contactDocuments, leadRows, notes, contact] =
     await Promise.all([
       listActivitiesForContact(ctx, contactId),
       listConversationsForContact(ctx, contactId),
       tenantDb(ctx).select(quotes, eq(quotes.contactId, contactId)),
       tenantDb(ctx).select(documents, eq(documents.contactId, contactId)),
-      tenantDb(ctx).select(leadSubmissions, eq(leadSubmissions.contactId, contactId)),
+      listLeadSubmissionsForContact(ctx, contactId),
       listNotesForContact(ctx, contactId),
+      getContact(ctx, contactId),
     ]);
+  const leads = await buildLeadSubmissionViews(ctx, leadRows, contact, fieldNames);
 
   const messages = (
     await Promise.all(
@@ -106,15 +112,20 @@ export async function getContactTimeline(
   ).flat();
 
   const entries: TimelineEntry[] = [
-    ...activities.map(
-      (activity): TimelineEntry => ({
-        kind: "activity",
-        id: activity.id,
-        at: activity.createdAt,
-        activityType: activity.type as ActivityType,
-        text: (activity.payload as { text?: string })?.text,
-      }),
-    ),
+    // Every form_submission activity has a lead_submissions twin (§19.1), and
+    // the activity copy carries no text — it would only repeat the lead entry
+    // below as an empty "Formulario" row.
+    ...activities
+      .filter((activity) => activity.type !== "form_submission")
+      .map(
+        (activity): TimelineEntry => ({
+          kind: "activity",
+          id: activity.id,
+          at: activity.createdAt,
+          activityType: activity.type as ActivityType,
+          text: (activity.payload as { text?: string })?.text,
+        }),
+      ),
     ...messages.map(
       (message): TimelineEntry => ({
         kind: "message",
@@ -153,13 +164,11 @@ export async function getContactTimeline(
       }),
     ),
     ...leads.map(
-      (lead): TimelineEntry => ({
+      (view): TimelineEntry => ({
         kind: "lead",
-        id: lead.id,
-        at: lead.createdAt,
-        siteId: lead.siteId,
-        campaign: (lead.utm as Utm | null)?.campaign,
-        pageUrl: lead.pageUrl,
+        id: view.id,
+        at: view.receivedAt,
+        view,
       }),
     ),
     ...notes.map(

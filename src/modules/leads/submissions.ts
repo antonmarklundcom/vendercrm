@@ -1,5 +1,5 @@
-import { and, eq } from "drizzle-orm";
-import { contacts, leadSubmissions } from "@/db/schema";
+import { and, desc, eq, inArray } from "drizzle-orm";
+import { bookingTypes, contacts, forms, leadSubmissions, sites } from "@/db/schema";
 import { newId } from "@/lib/ids";
 import type { TenantContext } from "@/modules/tenancy/context";
 import { tenantDb } from "@/modules/tenancy/db";
@@ -12,6 +12,12 @@ import {
 import { createDeal } from "@/modules/crm/deals";
 import { createActivity } from "@/modules/crm/activities";
 import { leadEvents } from "./events";
+import {
+  buildLeadSubmissionView,
+  type LeadFieldSiteSettings,
+  type LeadOrigin,
+  type LeadSubmissionView,
+} from "./view";
 
 // The single place an inbound lead becomes CRM data (PLAN.md §5.1), shared
 // by both entry paths: the hosted form pages and the public ingest API.
@@ -261,4 +267,90 @@ export async function finalizeLeadSubmission(
   });
 
   return dealId;
+}
+
+export type LeadSubmissionRow = typeof leadSubmissions.$inferSelect;
+
+// Reads for the lead card (PLAN.md §19.2). Newest first; the tenant predicate
+// comes from `tenantDb`, so another business's deal or contact id yields [].
+
+export function listLeadSubmissionsForContact(
+  ctx: TenantContext,
+  contactId: string,
+): Promise<LeadSubmissionRow[]> {
+  return tenantDb(ctx)
+    .select(leadSubmissions, eq(leadSubmissions.contactId, contactId))
+    .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id));
+}
+
+export function listLeadSubmissionsForDeal(
+  ctx: TenantContext,
+  dealId: string,
+): Promise<LeadSubmissionRow[]> {
+  return tenantDb(ctx)
+    .select(leadSubmissions, eq(leadSubmissions.dealId, dealId))
+    .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id));
+}
+
+const distinct = (ids: Array<string | null>) => [
+  ...new Set(ids.filter((id): id is string => !!id)),
+];
+
+/**
+ * Turns submission rows into card view-models, in the same order. Where each
+ * one came from (site, hosted form, booking type) is resolved in one batched
+ * read per kind, not per row.
+ */
+export async function buildLeadSubmissionViews(
+  ctx: TenantContext,
+  rows: LeadSubmissionRow[],
+  contact: { name: string; email: string | null; phone: string } | null,
+  fieldNames: Record<string, string> = {},
+): Promise<LeadSubmissionView[]> {
+  if (rows.length === 0) return [];
+
+  const siteIds = distinct(rows.map((row) => row.siteId));
+  const formIds = distinct(rows.map((row) => row.formId));
+  const bookingTypeIds = distinct(rows.map((row) => row.bookingTypeId));
+
+  const [siteRows, formRows, bookingRows] = await Promise.all([
+    siteIds.length ? tenantDb(ctx).select(sites, inArray(sites.id, siteIds)) : [],
+    formIds.length ? tenantDb(ctx).select(forms, inArray(forms.id, formIds)) : [],
+    bookingTypeIds.length
+      ? tenantDb(ctx).select(bookingTypes, inArray(bookingTypes.id, bookingTypeIds))
+      : [],
+  ]);
+  const siteById = new Map(siteRows.map((row) => [row.id, row]));
+  const formById = new Map(formRows.map((row) => [row.id, row]));
+  const bookingById = new Map(bookingRows.map((row) => [row.id, row]));
+
+  return rows.map((row) => {
+    const site = row.siteId ? siteById.get(row.siteId) : undefined;
+    const form = row.formId ? formById.get(row.formId) : undefined;
+    const booking = row.bookingTypeId ? bookingById.get(row.bookingTypeId) : undefined;
+
+    const payload = (row.payload ?? {}) as Record<string, unknown>;
+    const origin: LeadOrigin = form
+      ? { kind: "form", name: form.name, domain: null }
+      : booking
+        ? { kind: "booking", name: booking.name, domain: null }
+        : {
+            kind: payload.channel === "chat" ? "chat" : "site",
+            name: site?.name ?? null,
+            domain: site?.domain ?? null,
+          };
+
+    const formLabels: Record<string, string> = {};
+    for (const field of (form?.fields ?? []) as Array<{ key?: string; label?: string }>) {
+      if (field.key && field.label) formLabels[field.key] = field.label;
+    }
+
+    return buildLeadSubmissionView(row, {
+      origin,
+      contact,
+      formLabels,
+      siteSettings: (site?.settings ?? {}) as LeadFieldSiteSettings,
+      fieldNames,
+    });
+  });
 }

@@ -21,6 +21,10 @@ import {
   isWithinFreeFormWindow,
 } from "@/modules/whatsapp/inbox";
 import { listApprovedTemplates } from "@/modules/whatsapp/templates";
+import {
+  LeadSubmissionCard,
+  buildLeadCardLabels,
+} from "@/components/leads/lead-submission-card";
 import { Button } from "@/components/ui/button";
 import { WhatsAppLink } from "@/components/whatsapp-link";
 import { getTenant } from "@/modules/tenancy/tenants";
@@ -88,6 +92,7 @@ export default async function ContactDetailPage({
   const tc = await getTranslations("app.contracts");
   const ti = await getTranslations("app.inbox");
   const tcal = await getTranslations("app.calendar");
+  const tl = await getTranslations("app.leadData");
 
   const contact = await getContact(ctx, id);
   if (!contact) notFound();
@@ -116,7 +121,7 @@ export default async function ContactDetailPage({
     allContacts,
   ] =
     await Promise.all([
-      getContactTimeline(ctx, id),
+      getContactTimeline(ctx, id, tl.raw("fieldNames") as Record<string, string>),
       listDealsForContact(ctx, id),
       listTagsForContact(ctx, id),
       listTags(ctx),
@@ -180,6 +185,10 @@ export default async function ContactDetailPage({
     overdue: t("tasks.overdue"),
   };
 
+  const leadLabels = buildLeadCardLabels((key) => tl(key as "title"));
+  // Timeline is newest first, so the first lead is the latest submission.
+  const newestLead = timeline.find((entry) => entry.kind === "lead");
+
   const redirectPath = `/contacts/${id}`;
   const openTasks = tasks.filter((task) => !task.completedAt);
   const doneTasks = tasks.filter((task) => task.completedAt);
@@ -211,8 +220,12 @@ export default async function ContactDetailPage({
         };
       case "lead":
         return {
-          title: t("timelineLead"),
-          detail: entry.campaign ?? entry.pageUrl ?? undefined,
+          title:
+            entry.view.origin.name || entry.view.origin.domain
+              ? t("timelineLeadFrom", {
+                  origin: entry.view.origin.name ?? entry.view.origin.domain ?? "",
+                })
+              : t("timelineLead"),
         };
       case "conversationNote":
         return {
@@ -436,6 +449,26 @@ export default async function ContactDetailPage({
           <ul className="flex flex-col gap-2 text-sm">
             {timeline.map((entry) => {
               const { title, detail } = describe(entry);
+              if (entry.kind === "lead") {
+                return (
+                  <li key={`${entry.kind}-${entry.id}`} className="min-w-0">
+                    <details
+                      open={entry.id === newestLead?.id}
+                      className="min-w-0 rounded-md border px-3 py-2"
+                    >
+                      <summary className="flex cursor-pointer flex-wrap items-baseline justify-between gap-2">
+                        <span className="font-medium">{title}</span>
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {formatDateTime(entry.at, locale)}
+                        </span>
+                      </summary>
+                      <div className="mt-2">
+                        <LeadSubmissionCard view={entry.view} labels={leadLabels} locale={locale} />
+                      </div>
+                    </details>
+                  </li>
+                );
+              }
               return (
                 <li key={`${entry.kind}-${entry.id}`} className="rounded-md border px-3 py-2">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -484,6 +517,13 @@ export default async function ContactDetailPage({
 
       {tab === "datos" && (
         <div className="flex flex-col gap-8">
+          {newestLead?.kind === "lead" && (
+            <section className="min-w-0">
+              <h2 className="mb-3 text-lg font-semibold">{tl("title")}</h2>
+              <LeadSubmissionCard view={newestLead.view} labels={leadLabels} locale={locale} />
+            </section>
+          )}
+
           {deals.length > 0 && (
             <section>
               <h2 className="mb-3 text-lg font-semibold">{t("dealsTitle")}</h2>

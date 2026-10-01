@@ -16,6 +16,16 @@ import { listQuotesForContact } from "@/modules/quotes/quotes";
 import { listDocumentsForContact } from "@/modules/documents/documents";
 import { listContractsForContact } from "@/modules/contracts/contracts";
 import { listTenantUsers } from "@/modules/tenancy/users";
+import {
+  buildLeadSubmissionViews,
+  listLeadSubmissionsForContact,
+  listLeadSubmissionsForDeal,
+} from "@/modules/leads/submissions";
+import {
+  LeadSubmissionCard,
+  LeadSubmissionDisclosure,
+  buildLeadCardLabels,
+} from "@/components/leads/lead-submission-card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { formatDateTime, formatMoney } from "@/lib/i18n/format";
@@ -46,6 +56,7 @@ export default async function DealPage({
   const t = await getTranslations("app.deal");
   const tp = await getTranslations("app.pipeline");
   const tc = await getTranslations("app.contracts");
+  const tl = await getTranslations("app.leadData");
   const locale = await getLocale();
 
   const deal = await getDeal(ctx, dealId);
@@ -65,6 +76,8 @@ export default async function DealPage({
     documents,
     contracts,
     activities,
+    dealSubmissions,
+    contactSubmissions,
     deleteBlockers,
   ] =
     await Promise.all([
@@ -77,6 +90,8 @@ export default async function DealPage({
       listDocumentsForContact(ctx, deal.contactId),
       listContractsForContact(ctx, deal.contactId),
       listActivitiesForContact(ctx, deal.contactId),
+      listLeadSubmissionsForDeal(ctx, deal.id),
+      listLeadSubmissionsForContact(ctx, deal.contactId),
       // Only an admin can delete, so only an admin pays for the scan.
       ctx.role === "admin"
         ? findDealDeleteBlockers(ctx, dealId)
@@ -101,6 +116,18 @@ export default async function DealPage({
         to: payload.toStageId ? (stageById.get(payload.toStageId)?.name ?? null) : null,
       };
     });
+
+  // The submission that opened this deal, then the contact's other enquiries.
+  const dealSubmissionIds = new Set(dealSubmissions.map((row) => row.id));
+  const leadViews = await buildLeadSubmissionViews(
+    ctx,
+    [...dealSubmissions, ...contactSubmissions.filter((row) => !dealSubmissionIds.has(row.id))],
+    contact,
+    tl.raw("fieldNames") as Record<string, string>,
+  );
+  const primaryLeads = leadViews.slice(0, dealSubmissions.length);
+  const otherLeads = leadViews.slice(dealSubmissions.length);
+  const leadLabels = buildLeadCardLabels((key) => tl(key as "title"));
 
   const dealTasks = tasks.filter((task) => task.dealId === deal.id);
 
@@ -187,6 +214,33 @@ export default async function DealPage({
             }
           />
         ) : null}
+      </section>
+
+      <section className="flex min-w-0 flex-col gap-3">
+        <h2 className="text-lg font-semibold">{tl("title")}</h2>
+        {primaryLeads.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{tl("empty")}</p>
+        ) : (
+          primaryLeads.map((view) => (
+            <LeadSubmissionCard key={view.id} view={view} labels={leadLabels} locale={locale} />
+          ))
+        )}
+        {otherLeads.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <h3 className="text-sm font-medium">
+              {tl("otherSubmissions", { count: otherLeads.length })}
+            </h3>
+            {otherLeads.map((view) => (
+              <LeadSubmissionDisclosure
+                key={view.id}
+                view={view}
+                labels={leadLabels}
+                locale={locale}
+                linkDeal
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {closed ? (
