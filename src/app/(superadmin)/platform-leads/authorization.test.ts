@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Every platform-leads page and the "Abrir en la cuenta" action read or move
@@ -51,6 +52,7 @@ const reader = {
   listPlatformDeals: vi.fn(async () => emptyPage),
   listPlatformContacts: vi.fn(async () => emptyPage),
   getPlatformDeal: vi.fn(async () => null),
+  exportPlatformLeads: vi.fn(async () => ({ ok: true, rows: [], filters: {} })),
 };
 vi.mock("@/modules/tenancy/platform-crm", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/modules/tenancy/platform-crm")>()),
@@ -150,6 +152,34 @@ describe("platform-leads for the superadmin", () => {
     expect(filters).toMatchObject({ days: 7, status: "won", utmSource: "google", q: "maría" });
     expect(filters.source).toBeUndefined();
     expect(page).toBe(2);
+  });
+
+  it("offers \"Exportar CSV\" on the leads tab only, carrying the accepted filters", async () => {
+    const leads = renderToStaticMarkup(
+      (await listPage(search({ tenant: TENANT, days: "7", status: "nope", q: "ana", page: "3" }))) as never,
+    );
+    expect(leads).toContain(`href="/platform-leads/export?tenant=${TENANT}&amp;days=7&amp;q=ana"`);
+    expect(leads).toContain("export.button");
+    for (const view of ["deals", "contacts"]) {
+      const html = renderToStaticMarkup((await listPage(search({ view }))) as never);
+      expect(html).not.toContain("/platform-leads/export");
+      expect(html).not.toContain("export.button");
+    }
+    // Rendering the page never runs the export itself.
+    expect(reader.exportPlatformLeads).not.toHaveBeenCalled();
+  });
+
+  it("shows the over-cap banner only for the export's own error flag", async () => {
+    const refused = renderToStaticMarkup(
+      (await listPage(search({ exportError: "too_many_rows" }))) as never,
+    );
+    expect(refused).toContain("export.tooManyRows");
+    expect(refused).toContain('role="alert"');
+    for (const exportError of ["<script>alert(1)</script>", "other", ""]) {
+      const html = renderToStaticMarkup((await listPage(search({ exportError }))) as never);
+      expect(html).not.toContain("export.tooManyRows");
+      expect(html).not.toContain("<script>alert(1)</script>");
+    }
   });
 
   it("the detail page is notFound() when the reader returns null", async () => {

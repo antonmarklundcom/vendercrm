@@ -4,7 +4,7 @@ import {
   PLATFORM_CRM_MAX_PAGE,
   resolvePlatformCrmRange,
 } from "@/modules/tenancy/platform-crm";
-import { parsePlatformLeadsParams, platformLeadsHref } from "./filters";
+import { parsePlatformLeadsParams, platformLeadsExportHref, platformLeadsHref } from "./filters";
 
 // The constants live in the reader, which imports the db client; nothing here
 // reads the database.
@@ -135,5 +135,39 @@ describe("platformLeadsHref", () => {
   it("keeps a custom range instead of the preset", () => {
     const parsed = parsePlatformLeadsParams({ days: "7", from: "2026-09-01", to: "2026-09-15" });
     expect(platformLeadsHref(parsed)).toBe("/platform-leads?from=2026-09-01&to=2026-09-15");
+  });
+});
+
+describe("export links", () => {
+  it("points the export at the same accepted filters, without view or page", () => {
+    const parsed = parsePlatformLeadsParams({
+      view: "deals",
+      tenant: [ID_A, "junk", ID_B],
+      from: "2026-09-01",
+      to: "2026-09-15",
+      days: "7",
+      source: "chat",
+      utm: " google ",
+      q: "ana",
+      page: "9",
+      limit: "100000",
+    });
+    expect(platformLeadsExportHref(parsed)).toBe(
+      `/platform-leads/export?tenant=${ID_A}&tenant=${ID_B}&from=2026-09-01&to=2026-09-15&source=chat&utm=google&q=ana`,
+    );
+    expect(platformLeadsExportHref(parsePlatformLeadsParams({}))).toBe("/platform-leads/export");
+  });
+
+  it("accepts only the known export error flag and carries it on request", () => {
+    expect(parsePlatformLeadsParams({ exportError: "too_many_rows" }).exportError).toBe("too_many_rows");
+    for (const bad of ["x", "<b>", undefined]) {
+      expect(parsePlatformLeadsParams({ exportError: bad }).exportError).toBeNull();
+    }
+    const parsed = parsePlatformLeadsParams({ tenant: ID_A, exportError: "too_many_rows", page: "2" });
+    // Pagination and tab links drop the flag; only the export's redirect sets it.
+    expect(platformLeadsHref(parsed)).toBe(`/platform-leads?tenant=${ID_A}&page=2`);
+    expect(platformLeadsHref(parsed, { page: 1, exportError: "too_many_rows" })).toBe(
+      `/platform-leads?tenant=${ID_A}&exportError=too_many_rows`,
+    );
   });
 });

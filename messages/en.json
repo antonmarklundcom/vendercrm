@@ -3125,6 +3125,11 @@
         },
         "leads": "Form data",
         "noLeads": "This deal did not come from a form."
+      },
+      "export": {
+        "button": "Export CSV",
+        "hint": "Up to {max, number} rows, with the active filters. Recorded in the audit log.",
+        "tooManyRows": "The export is over the {max, number}-row limit, so no file was created. Narrow the filters (account, period, status or source) and export again."
       }
     }
   },
