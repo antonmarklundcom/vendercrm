@@ -158,26 +158,33 @@ function dealHref(tenantId: string, dealId: string) {
   return `/platform-leads/${encodeURIComponent(tenantId)}/deals/${encodeURIComponent(dealId)}`;
 }
 
-function OpenLink({
-  tenantId,
-  dealId,
-  labels,
-}: {
-  tenantId: string;
-  dealId: string | null;
-  labels: PlatformLeadsLabels;
-}) {
-  if (!dealId) return <span className="text-muted-foreground">{EMPTY}</span>;
+function contactHref(tenantId: string, contactId: string) {
+  return `/platform-leads/${encodeURIComponent(tenantId)}/contacts/${encodeURIComponent(contactId)}`;
+}
+
+function OpenLink({ href, labels }: { href: string | null; labels: PlatformLeadsLabels }) {
+  if (!href) return <span className="text-muted-foreground">{EMPTY}</span>;
   return (
-    <Link href={dealHref(tenantId, dealId)} className="whitespace-nowrap underline underline-offset-4">
+    <Link href={href} className="whitespace-nowrap underline underline-offset-4">
       {labels.openRow}
     </Link>
   );
 }
 
-const TABLE = "w-full min-w-[56rem] text-left text-sm";
+// One markup, two layouts. Below `md` the table, its rows and its cells are
+// plain blocks, so each row reads as a stacked card (cells carry a
+// `data-label` that shows as a small prefix; the secondary ones are hidden).
+// From `md` up they are the table parts again and the table scrolls inside
+// its own container. The page itself never scrolls horizontally.
+const TABLE = "block w-full text-left text-sm md:table md:min-w-[56rem]";
+const THEAD = "hidden md:table-header-group";
+const TBODY = "block md:table-row-group";
+const TR = "block border-b py-3 last:border-b-0 md:table-row md:py-0";
 const TH = "py-2 pr-4 text-xs font-medium text-muted-foreground";
-const TD = "py-2.5 pr-4 align-top";
+const TD = "block py-1 md:table-cell md:py-2.5 md:pr-4 md:align-top";
+const TD_HIDDEN_ON_PHONE = "hidden md:table-cell md:py-2.5 md:pr-4 md:align-top";
+const TD_LABEL =
+  "before:mr-2 before:text-xs before:text-muted-foreground before:content-[attr(data-label)] md:before:content-none";
 
 /** The scroll container: the table scrolls inside it, never the page. */
 function Scroller({ children }: { children: React.ReactNode }) {
@@ -201,7 +208,7 @@ export function LeadsTable({
   return (
     <Scroller>
       <table className={TABLE}>
-        <thead>
+        <thead className={THEAD}>
           <tr className="border-b">
             {[c.received, c.account, c.origin, c.name, c.phone, c.email, c.message, c.fields, c.utm, c.stage, c.open].map(
               (heading) => (
@@ -212,7 +219,7 @@ export function LeadsTable({
             )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className={TBODY}>
           {rows.map((row) => {
             const originName = [row.origin.name, row.origin.domain].filter(Boolean).join(" · ");
             const origin =
@@ -220,7 +227,7 @@ export function LeadsTable({
                 ? originName
                 : [labels.origin[row.origin.kind], row.origin.name].filter(Boolean).join(": ");
             return (
-              <tr key={row.id} className="border-b last:border-b-0">
+              <tr key={row.id} className={TR}>
                 <td className={TD}>
                   <div className="flex flex-col items-start gap-1">
                     <span className="whitespace-nowrap text-xs text-muted-foreground">
@@ -232,24 +239,24 @@ export function LeadsTable({
                 <td className={TD}>
                   <AccountCell name={row.tenantName} status={row.tenantStatus} labels={labels} />
                 </td>
-                <td className={cn(TD, "break-words")}>{origin || <Muted>{EMPTY}</Muted>}</td>
-                <td className={cn(TD, "break-words")}>{row.name ?? <Muted>{EMPTY}</Muted>}</td>
-                <td className={cn(TD, "whitespace-nowrap")}>{row.phone ?? <Muted>{EMPTY}</Muted>}</td>
-                <td className={cn(TD, "break-all")}>{row.email ?? <Muted>{EMPTY}</Muted>}</td>
-                <td className={cn(TD, "max-w-xs whitespace-pre-line break-words")}>
+                <td data-label={c.origin} className={cn(TD, TD_LABEL, "break-words")}>{origin || <Muted>{EMPTY}</Muted>}</td>
+                <td data-label={c.name} className={cn(TD, TD_LABEL, "break-words")}>{row.name ?? <Muted>{EMPTY}</Muted>}</td>
+                <td data-label={c.phone} className={cn(TD, TD_LABEL, "whitespace-nowrap")}>{row.phone ?? <Muted>{EMPTY}</Muted>}</td>
+                <td data-label={c.email} className={cn(TD, TD_LABEL, "break-all")}>{row.email ?? <Muted>{EMPTY}</Muted>}</td>
+                <td data-label={c.message} className={cn(TD, TD_LABEL, "max-w-xs whitespace-pre-line break-words")}>
                   {row.message ?? <Muted>{EMPTY}</Muted>}
                 </td>
-                <td className={cn(TD, "max-w-xs break-words text-xs")}>
+                <td data-label={c.fields} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "max-w-xs break-words text-xs")}>
                   {row.fields.length ? (
                     row.fields.map((field) => `${field.key}: ${field.value}`).join(" · ")
                   ) : (
                     <Muted>{EMPTY}</Muted>
                   )}
                 </td>
-                <td className={cn(TD, "break-words text-xs")}>
+                <td data-label={c.utm} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words text-xs")}>
                   {[row.utmSource, row.utmCampaign].filter(Boolean).join(" / ") || <Muted>{EMPTY}</Muted>}
                 </td>
-                <td className={TD}>
+                <td data-label={c.stage} className={cn(TD, TD_LABEL)}>
                   {row.dealStatus ? (
                     <div className="flex flex-col items-start gap-1">
                       <StatusChip status={row.dealStatus} labels={labels} />
@@ -260,7 +267,7 @@ export function LeadsTable({
                   )}
                 </td>
                 <td className={TD}>
-                  <OpenLink tenantId={row.tenantId} dealId={row.dealId} labels={labels} />
+                  <OpenLink href={row.dealId ? dealHref(row.tenantId, row.dealId) : null} labels={labels} />
                 </td>
               </tr>
             );
@@ -283,8 +290,8 @@ export function DealsTable({
   const c = labels.columns;
   return (
     <Scroller>
-      <table className={cn(TABLE, "min-w-[64rem]")}>
-        <thead>
+      <table className={cn(TABLE, "md:min-w-[64rem]")}>
+        <thead className={THEAD}>
           <tr className="border-b">
             {[
               c.created,
@@ -307,9 +314,9 @@ export function DealsTable({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className={TBODY}>
           {rows.map((row) => (
-            <tr key={row.id} className="border-b last:border-b-0">
+            <tr key={row.id} className={TR}>
               <td className={cn(TD, "whitespace-nowrap text-xs text-muted-foreground")}>
                 {formatDateTime(row.createdAt, locale)}
               </td>
@@ -317,28 +324,28 @@ export function DealsTable({
                 <AccountCell name={row.tenantName} status={row.tenantStatus} labels={labels} />
               </td>
               <td className={cn(TD, "break-words")}>{row.title}</td>
-              <td className={cn(TD, "break-words")}>{row.contactName}</td>
-              <td className={cn(TD, "whitespace-nowrap")}>{row.contactPhone}</td>
-              <td className={cn(TD, "break-words")}>{row.pipelineName}</td>
-              <td className={cn(TD, "break-words")}>{row.stageName}</td>
+              <td data-label={c.contact} className={cn(TD, TD_LABEL, "break-words")}>{row.contactName}</td>
+              <td data-label={c.phone} className={cn(TD, TD_LABEL, "whitespace-nowrap")}>{row.contactPhone}</td>
+              <td data-label={c.pipeline} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words")}>{row.pipelineName}</td>
+              <td data-label={c.stage} className={cn(TD, TD_LABEL, "break-words")}>{row.stageName}</td>
               <td className={TD}>
                 <StatusChip status={row.status} labels={labels} />
               </td>
               {/* Per currency; never summed across rows. */}
-              <td className={cn(TD, "whitespace-nowrap tabular-nums")}>
+              <td data-label={c.value} className={cn(TD, TD_LABEL, "whitespace-nowrap tabular-nums")}>
                 {formatMoney(row.value, row.currency, locale)}
               </td>
-              <td className={cn(TD, "break-words")}>{row.ownerName ?? <Muted>{EMPTY}</Muted>}</td>
-              <td className={cn(TD, "break-words text-xs")}>
+              <td data-label={c.owner} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words")}>{row.ownerName ?? <Muted>{EMPTY}</Muted>}</td>
+              <td data-label={c.source} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words text-xs")}>
                 {[row.siteDomain ?? row.siteName, row.source].filter(Boolean).join(" · ") || (
                   <Muted>{EMPTY}</Muted>
                 )}
               </td>
-              <td className={cn(TD, "whitespace-nowrap text-xs text-muted-foreground")}>
+              <td data-label={c.lastStageChange} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "whitespace-nowrap text-xs text-muted-foreground")}>
                 {formatDateTime(row.stageEnteredAt, locale)}
               </td>
               <td className={TD}>
-                <OpenLink tenantId={row.tenantId} dealId={row.id} labels={labels} />
+                <OpenLink href={dealHref(row.tenantId, row.id)} labels={labels} />
               </td>
             </tr>
           ))}
@@ -348,8 +355,6 @@ export function DealsTable({
   );
 }
 
-// A contact has no read-only detail page in the console (the plan's detail
-// route is a deal), so its rows carry no "open" link.
 export function ContactsTable({
   rows,
   labels,
@@ -362,10 +367,10 @@ export function ContactsTable({
   const c = labels.columns;
   return (
     <Scroller>
-      <table className={cn(TABLE, "min-w-[48rem]")}>
-        <thead>
+      <table className={cn(TABLE, "md:min-w-[48rem]")}>
+        <thead className={THEAD}>
           <tr className="border-b">
-            {[c.created, c.account, c.name, c.phone, c.email, c.source, c.firstSite, c.openDeals].map(
+            {[c.created, c.account, c.name, c.phone, c.email, c.source, c.firstSite, c.openDeals, c.open].map(
               (heading) => (
                 <th key={heading} className={TH}>
                   {heading}
@@ -374,9 +379,9 @@ export function ContactsTable({
             )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className={TBODY}>
           {rows.map((row) => (
-            <tr key={row.id} className="border-b last:border-b-0">
+            <tr key={row.id} className={TR}>
               <td className={cn(TD, "whitespace-nowrap text-xs text-muted-foreground")}>
                 {formatDateTime(row.createdAt, locale)}
               </td>
@@ -384,13 +389,16 @@ export function ContactsTable({
                 <AccountCell name={row.tenantName} status={row.tenantStatus} labels={labels} />
               </td>
               <td className={cn(TD, "break-words")}>{row.name}</td>
-              <td className={cn(TD, "whitespace-nowrap")}>{row.phone}</td>
-              <td className={cn(TD, "break-all")}>{row.email ?? <Muted>{EMPTY}</Muted>}</td>
-              <td className={cn(TD, "break-words")}>{row.source ?? <Muted>{EMPTY}</Muted>}</td>
-              <td className={cn(TD, "break-words")}>
+              <td data-label={c.phone} className={cn(TD, TD_LABEL, "whitespace-nowrap")}>{row.phone}</td>
+              <td data-label={c.email} className={cn(TD, TD_LABEL, "break-all")}>{row.email ?? <Muted>{EMPTY}</Muted>}</td>
+              <td data-label={c.source} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words")}>{row.source ?? <Muted>{EMPTY}</Muted>}</td>
+              <td data-label={c.firstSite} className={cn(TD_HIDDEN_ON_PHONE, TD_LABEL, "break-words")}>
                 {row.firstSiteDomain ?? row.firstSiteName ?? <Muted>{EMPTY}</Muted>}
               </td>
-              <td className={cn(TD, "tabular-nums")}>{row.openDeals}</td>
+              <td data-label={c.openDeals} className={cn(TD, TD_LABEL, "tabular-nums")}>{row.openDeals}</td>
+              <td className={TD}>
+                <OpenLink href={contactHref(row.tenantId, row.id)} labels={labels} />
+              </td>
             </tr>
           ))}
         </tbody>

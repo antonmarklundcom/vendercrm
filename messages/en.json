@@ -3130,6 +3130,23 @@
         "button": "Export CSV",
         "hint": "Up to {max, number} rows, with the active filters. Recorded in the audit log.",
         "tooManyRows": "The export is over the {max, number}-row limit, so no file was created. Narrow the filters (account, period, status or source) and export again."
+      },
+      "contactDetail": {
+        "back": "Back to the list",
+        "readOnly": "Read-only view across accounts.",
+        "facts": {
+          "account": "Account",
+          "name": "Name",
+          "phone": "Phone",
+          "email": "E-mail",
+          "source": "Source",
+          "firstSite": "First site",
+          "created": "Created"
+        },
+        "deals": "Deals",
+        "noDeals": "This contact has no deals.",
+        "leads": "Form data",
+        "noLeads": "This contact did not come from a form."
       }
     }
   },

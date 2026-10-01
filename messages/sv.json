@@ -3130,6 +3130,23 @@
         "button": "Exportera CSV",
         "hint": "Upp till {max, number} rader, med de aktiva filtren. Loggas i granskningsloggen.",
         "tooManyRows": "Exporten överskrider gränsen på {max, number} rader, så ingen fil skapades. Begränsa filtren (konto, period, status eller källa) och exportera igen."
+      },
+      "contactDetail": {
+        "back": "Tillbaka till listan",
+        "readOnly": "Skrivskyddad vy över alla konton.",
+        "facts": {
+          "account": "Konto",
+          "name": "Namn",
+          "phone": "Telefon",
+          "email": "E-post",
+          "source": "Källa",
+          "firstSite": "Första sajt",
+          "created": "Skapad"
+        },
+        "deals": "Affärer",
+        "noDeals": "Den här kontakten har inga affärer.",
+        "leads": "Formulärdata",
+        "noLeads": "Den här kontakten kom inte via ett formulär."
       }
     }
   },

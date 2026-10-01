@@ -3130,6 +3130,23 @@
         "button": "Exportar CSV",
         "hint": "Hasta {max, number} filas, con los filtros activos. Queda registrado en la auditoría.",
         "tooManyRows": "La exportación supera las {max, number} filas permitidas y no se generó ningún archivo. Acotá los filtros (cuenta, período, estado u origen) y volvé a exportar."
+      },
+      "contactDetail": {
+        "back": "Volver a la lista",
+        "readOnly": "Vista de solo lectura entre cuentas.",
+        "facts": {
+          "account": "Cuenta",
+          "name": "Nombre",
+          "phone": "Teléfono",
+          "email": "E-mail",
+          "source": "Origen",
+          "firstSite": "Primer sitio",
+          "created": "Creado"
+        },
+        "deals": "Negocios",
+        "noDeals": "Este contacto no tiene negocios.",
+        "leads": "Datos del formulario",
+        "noLeads": "Este contacto no llegó por un formulario."
       }
     }
   },

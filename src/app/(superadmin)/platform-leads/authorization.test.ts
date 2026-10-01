@@ -52,6 +52,7 @@ const reader = {
   listPlatformDeals: vi.fn(async () => emptyPage),
   listPlatformContacts: vi.fn(async () => emptyPage),
   getPlatformDeal: vi.fn(async () => null),
+  getPlatformContact: vi.fn(async () => null),
   exportPlatformLeads: vi.fn(async () => ({ ok: true, rows: [], filters: {} })),
 };
 vi.mock("@/modules/tenancy/platform-crm", async (importOriginal) => ({
@@ -80,10 +81,12 @@ vi.mock("@/modules/tenancy/context", async (importOriginal) => ({
 
 const listPage = (await import("./page")).default;
 const detailPage = (await import("./[tenantId]/deals/[dealId]/page")).default;
+const contactPage = (await import("./[tenantId]/contacts/[contactId]/page")).default;
 const { openInAccountAction } = await import("./actions");
 
 const TENANT = "01HZZZZZZZZZZZZZZZZZZZZZZA";
 const DEAL = "01HZZZZZZZZZZZZZZZZZZZZZZD";
+const CONTACT = "01HZZZZZZZZZZZZZZZZZZZZZZC";
 const search = (params: Record<string, string> = {}) => ({ searchParams: Promise.resolve(params) });
 
 const entryPoints: Array<{ name: string; call: () => Promise<unknown> }> = [
@@ -97,6 +100,10 @@ const entryPoints: Array<{ name: string; call: () => Promise<unknown> }> = [
         params: Promise.resolve({ tenantId: TENANT, dealId: DEAL }),
         searchParams: Promise.resolve({}),
       }),
+  },
+  {
+    name: "/platform-leads/[tenantId]/contacts/[contactId]",
+    call: () => contactPage({ params: Promise.resolve({ tenantId: TENANT, contactId: CONTACT }) }),
   },
   { name: "openInAccountAction", call: () => openInAccountAction(TENANT, DEAL) },
 ];
@@ -190,5 +197,18 @@ describe("platform-leads for the superadmin", () => {
       }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
     expect(reader.getPlatformDeal).toHaveBeenCalledTimes(1);
+  });
+
+  it("the contact page is notFound() when the reader returns null", async () => {
+    await expect(
+      contactPage({ params: Promise.resolve({ tenantId: TENANT, contactId: CONTACT }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(reader.getPlatformContact).toHaveBeenCalledTimes(1);
+    expect(reader.getPlatformContact).toHaveBeenCalledWith(
+      { userId: "user-1", impersonatorUserId: null },
+      TENANT,
+      CONTACT,
+      {},
+    );
   });
 });

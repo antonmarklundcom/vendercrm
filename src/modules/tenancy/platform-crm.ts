@@ -947,50 +947,12 @@ async function readPlatformDeal(
     .limit(1);
   if (!row) return null;
 
-  const submissions = await db
-    .select({
-      submission: leadSubmissions,
-      site: { name: sites.name, domain: sites.domain, settings: sites.settings },
-      form: { name: forms.name, fields: forms.fields },
-      bookingTypeName: bookingTypes.name,
-    })
-    .from(leadSubmissions)
-    .leftJoin(sites, and(eq(sites.tenantId, leadSubmissions.tenantId), eq(sites.id, leadSubmissions.siteId)))
-    .leftJoin(forms, and(eq(forms.tenantId, leadSubmissions.tenantId), eq(forms.id, leadSubmissions.formId)))
-    .leftJoin(
-      bookingTypes,
-      and(
-        eq(bookingTypes.tenantId, leadSubmissions.tenantId),
-        eq(bookingTypes.id, leadSubmissions.bookingTypeId),
-      ),
-    )
-    .where(and(eq(leadSubmissions.tenantId, tenantId), eq(leadSubmissions.dealId, dealId)))
-    .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id));
-
-  const contact = { name: row.contact.name, email: row.contact.email, phone: row.contact.phone };
-  const leads = submissions.map(({ submission, site, form, bookingTypeName }) => {
-    const payload = (submission.payload ?? {}) as Record<string, unknown>;
-    const origin: LeadOrigin = submission.formId
-      ? { kind: "form", name: form?.name ?? null, domain: null }
-      : submission.bookingTypeId
-        ? { kind: "booking", name: bookingTypeName ?? null, domain: null }
-        : {
-            kind: payload.channel === "chat" ? "chat" : "site",
-            name: site?.name ?? null,
-            domain: site?.domain ?? null,
-          };
-    const formLabels: Record<string, string> = {};
-    for (const field of (form?.fields ?? []) as Array<{ key?: string; label?: string }>) {
-      if (field.key && field.label) formLabels[field.key] = field.label;
-    }
-    return buildLeadSubmissionView(submission, {
-      origin,
-      contact,
-      formLabels,
-      siteSettings: (site?.settings ?? {}) as LeadFieldSiteSettings,
-      fieldNames,
-    });
-  });
+  const { views: leads, submissions } = await readLeadViews(
+    tenantId,
+    eq(leadSubmissions.dealId, dealId),
+    { name: row.contact.name, email: row.contact.email, phone: row.contact.phone },
+    fieldNames,
+  );
 
   const first = submissions.at(-1);
   return {
@@ -1016,5 +978,188 @@ async function readPlatformDeal(
     stageEnteredAt: row.deal.stageEnteredAt,
     closedAt: row.deal.closedAt,
     leads,
+  };
+}
+
+type LeadViewRead = {
+  views: LeadSubmissionView[];
+  /** Newest first, as read; the last one is the first the visitor sent. */
+  submissions: Array<{
+    submission: typeof leadSubmissions.$inferSelect;
+    site: { name: string | null; domain: string | null; settings: unknown } | null;
+  }>;
+};
+
+/**
+ * The submissions of one account matching `scope` (a deal or a contact), as
+ * the tenant app's view-model. Every join matches `tenant_id` as well as the
+ * id. Shared by the deal and the contact detail so the two cannot drift.
+ */
+async function readLeadViews(
+  tenantId: string,
+  scope: SQL,
+  contact: { name: string; email: string | null; phone: string },
+  fieldNames: Record<string, string>,
+): Promise<LeadViewRead> {
+  const submissions = await db
+    .select({
+      submission: leadSubmissions,
+      site: { name: sites.name, domain: sites.domain, settings: sites.settings },
+      form: { name: forms.name, fields: forms.fields },
+      bookingTypeName: bookingTypes.name,
+    })
+    .from(leadSubmissions)
+    .leftJoin(sites, and(eq(sites.tenantId, leadSubmissions.tenantId), eq(sites.id, leadSubmissions.siteId)))
+    .leftJoin(forms, and(eq(forms.tenantId, leadSubmissions.tenantId), eq(forms.id, leadSubmissions.formId)))
+    .leftJoin(
+      bookingTypes,
+      and(
+        eq(bookingTypes.tenantId, leadSubmissions.tenantId),
+        eq(bookingTypes.id, leadSubmissions.bookingTypeId),
+      ),
+    )
+    .where(and(eq(leadSubmissions.tenantId, tenantId), scope))
+    .orderBy(desc(leadSubmissions.createdAt), desc(leadSubmissions.id));
+
+  const views = submissions.map(({ submission, site, form, bookingTypeName }) => {
+    const payload = (submission.payload ?? {}) as Record<string, unknown>;
+    const origin: LeadOrigin = submission.formId
+      ? { kind: "form", name: form?.name ?? null, domain: null }
+      : submission.bookingTypeId
+        ? { kind: "booking", name: bookingTypeName ?? null, domain: null }
+        : {
+            kind: payload.channel === "chat" ? "chat" : "site",
+            name: site?.name ?? null,
+            domain: site?.domain ?? null,
+          };
+    const formLabels: Record<string, string> = {};
+    for (const field of (form?.fields ?? []) as Array<{ key?: string; label?: string }>) {
+      if (field.key && field.label) formLabels[field.key] = field.label;
+    }
+    return buildLeadSubmissionView(submission, {
+      origin,
+      contact,
+      formLabels,
+      siteSettings: (site?.settings ?? {}) as LeadFieldSiteSettings,
+      fieldNames,
+    });
+  });
+  return { views, submissions };
+}
+
+// ---------------------------------------------------------------------------
+// One contact, read-only, with its deals and form data
+
+export type PlatformContactDealRow = {
+  id: string;
+  createdAt: Date;
+  title: string;
+  pipelineName: string;
+  stageName: string;
+  status: PlatformCrmStatus;
+  /** Per currency; never summed across currencies. */
+  value: number;
+  currency: string;
+};
+
+export type PlatformContactDetail = PlatformContactRow & {
+  deals: PlatformContactDealRow[];
+  /** The contact's submissions, newest first, as the same view-model the tenant app renders. */
+  leads: LeadSubmissionView[];
+};
+
+/**
+ * `WHERE contacts.tenant_id = ? AND contacts.id = ?` with every join
+ * tenant-matched, so a mismatched (tenantId, contactId) pair is null — never
+ * another account's row, and indistinguishable from an id that does not exist.
+ * One audit row per call, never the row data.
+ */
+export async function getPlatformContact(
+  sa: SuperadminContext,
+  tenantId: string,
+  contactId: string,
+  /** The i18n dictionary of common form keys (`app.leadData.fieldNames`). */
+  fieldNames: Record<string, string> = {},
+): Promise<PlatformContactDetail | null> {
+  await assertSuperadmin(sa);
+  const detail =
+    ID_PATTERN.test(tenantId) && ID_PATTERN.test(contactId)
+      ? await readPlatformContact(tenantId, contactId, fieldNames)
+      : null;
+
+  await writeAuditLog({
+    tenantId: detail ? tenantId : null,
+    actorUserId: sa.userId,
+    action: "platform.contact.viewed",
+    entity: "contact",
+    entityId: contactId.slice(0, 26),
+    payload: { found: !!detail },
+  });
+  return detail;
+}
+
+async function readPlatformContact(
+  tenantId: string,
+  contactId: string,
+  fieldNames: Record<string, string>,
+): Promise<PlatformContactDetail | null> {
+  const [row] = await db
+    .select({
+      contact: contacts,
+      tenant: { name: tenants.name, status: tenants.status },
+      site: { name: sites.name, domain: sites.domain },
+    })
+    .from(contacts)
+    .innerJoin(tenants, eq(tenants.id, contacts.tenantId))
+    .leftJoin(sites, and(eq(sites.tenantId, contacts.tenantId), eq(sites.id, contacts.firstSiteId)))
+    .where(and(eq(contacts.tenantId, tenantId), eq(contacts.id, contactId)))
+    .limit(1);
+  if (!row) return null;
+
+  const dealRows = await db
+    .select({
+      deal: deals,
+      stage: { name: stages.name, isWon: stages.isWon, isLost: stages.isLost },
+      pipelineName: pipelines.name,
+    })
+    .from(deals)
+    .innerJoin(stages, and(eq(stages.tenantId, deals.tenantId), eq(stages.id, deals.stageId)))
+    .innerJoin(pipelines, and(eq(pipelines.tenantId, deals.tenantId), eq(pipelines.id, deals.pipelineId)))
+    .where(and(eq(deals.tenantId, tenantId), eq(deals.contactId, contactId)))
+    .orderBy(desc(deals.createdAt), desc(deals.id));
+
+  const { views } = await readLeadViews(
+    tenantId,
+    eq(leadSubmissions.contactId, contactId),
+    { name: row.contact.name, email: row.contact.email, phone: row.contact.phone },
+    fieldNames,
+  );
+
+  const contactDeals: PlatformContactDealRow[] = dealRows.map((deal) => ({
+    id: deal.deal.id,
+    createdAt: deal.deal.createdAt,
+    title: deal.deal.title,
+    pipelineName: deal.pipelineName,
+    stageName: deal.stage.name,
+    status: statusOf(deal.stage) ?? "open",
+    value: deal.deal.value,
+    currency: deal.deal.currency,
+  }));
+
+  return {
+    id: row.contact.id,
+    tenantId: row.contact.tenantId,
+    tenantName: row.tenant.name,
+    tenantStatus: row.tenant.status,
+    createdAt: row.contact.createdAt,
+    name: row.contact.name,
+    phone: row.contact.phone,
+    email: row.contact.email,
+    source: row.contact.source,
+    firstSiteName: row.site?.name ?? null,
+    firstSiteDomain: row.site?.domain ?? null,
+    openDeals: contactDeals.filter((deal) => deal.status === "open").length,
+    deals: contactDeals,
+    leads: views,
   };
 }
