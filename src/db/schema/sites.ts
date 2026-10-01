@@ -231,6 +231,17 @@ export const leadSubmissions = mysqlTable(
     // form rows never collide with each other.
     idempotencyKey: varchar("idempotency_key", { length: 100 }),
     notes: text("notes"),
+    // What this submission itself was sent with (§19.3). The contact only
+    // learns name/e-mail when it is created, so a returning contact's later
+    // details live here and nowhere else. `submitted_email` is kept as typed,
+    // even when it failed validation and never reached the contact.
+    submittedName: varchar("submitted_name", { length: 200 }),
+    submittedEmail: varchar("submitted_email", { length: 320 }),
+    submittedPhone: varchar("submitted_phone", { length: 30 }),
+    source: varchar("source", { length: 100 }),
+    // Repair codes from the ingest guard (`email_invalid`,
+    // `message_truncated`, ...); null when nothing had to be repaired.
+    needsReview: json("needs_review").$type<string[]>(),
     createdAt: datetime("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),

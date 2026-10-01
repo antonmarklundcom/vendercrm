@@ -51,16 +51,21 @@ Headers: `Content-Type: application/json`, `X-Api-Key: <site key>`
 | `phone` | **yes** | 6–30 chars. Contact identity. Local Paraguayan input (`0981 123 456`) is normalized to `+595981123456` server-side |
 | `idempotency_key` | **yes** | 8–100 chars. Replaying it returns the original result instead of creating a duplicate |
 | `name` | no | ≤200 |
-| `email` | no | ≤320, must parse as an email if sent |
+| `email` | no | ≤320. An address that does not parse is still accepted: kept on the lead as typed, not set on the contact, flagged for review |
 | `message` | no | ≤5000 |
 | `source` | no | ≤100. Defaults to `site:<site-slug>` |
 | `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` | no | ≤200 each |
 | `gclid`, `fbclid` | no | ≤200 |
 | `page_url`, `referrer` | no | ≤2000 |
-| `fields` | no | Object. Anything else worth keeping on the timeline — `{"servicio": "ortodoncia", "presupuesto": "5-10M"}` |
+| `fields` | no | Object. Anything else worth keeping on the timeline — `{"servicio": "ortodoncia", "presupuesto": "5-10M"}`. Up to 100 keys, each string ≤5000 |
 
-Omit optional fields rather than sending `""` — an empty string fails
-validation on `email`.
+Only `phone` and `idempotency_key` are strict. An optional value over its
+limit no longer fails the lead: it is truncated, the original is kept on the
+submission, and the deal card shows a **Revisar** badge. Send custom fields
+inside `fields` — that is the contract. Unknown top-level keys are accepted
+and folded into `fields`, except credential-shaped names (`api_key`, `token`,
+`password`, `secret`, ...), which are never stored. A body over 256 KB is
+refused with `422`.
 
 **Never send pipeline, stage, owner or tag.** Routing lives on the site record
 inside the CRM, so the customer can re-route a site's leads without a code
@@ -182,8 +187,8 @@ Work down this list — it's ordered by how often each is the actual cause:
 2. `401` → key wrong, or `X-Api-Key` header not actually being sent. Confirm
    the env var is readable at runtime (`getenv` returning `false` is common on
    shared hosting).
-3. `422` → the body names the field. Usually `email: ""` sent instead of
-   omitted, or `idempotency_key` shorter than 8 characters.
+3. `422` → the body names the field. Usually a missing or malformed `phone`,
+   or `idempotency_key` shorter than 8 characters.
 4. `403` → the site is deactivated in **Sitios**, or the customer's
    subscription lapsed and the account is read-only.
 5. Nothing in the log at all → the form isn't reaching the handler. Check the

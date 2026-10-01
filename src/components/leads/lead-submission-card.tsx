@@ -223,6 +223,24 @@ export function LeadSubmissionCard({
         </p>
       )}
 
+      {view.originals.length > 0 && (
+        <details className="min-w-0 text-sm">
+          <summary className="cursor-pointer text-xs text-muted-foreground">
+            {labels.reviewHint}: {view.needsReview.join(", ")}
+          </summary>
+          <dl className="mt-2 flex min-w-0 flex-col gap-3">
+            {view.originals.map((original) => (
+              <Item key={original.key} label={original.label} title={original.key}>
+                <LongText
+                  text={original.cut ? `${original.text}…` : original.text}
+                  showAll={labels.showAll}
+                />
+              </Item>
+            ))}
+          </dl>
+        </details>
+      )}
+
       {(prominentRows.length > 0 || (view.messageProminent && view.message)) && (
         <dl className="flex min-w-0 flex-col gap-3">
           {prominentRows.map((row) => (

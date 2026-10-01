@@ -160,3 +160,59 @@ describe("buildLeadSubmissionView rows", () => {
     });
   });
 });
+
+describe("ingest snapshot and repairs (§19.3)", () => {
+  it("prefers what the submission was sent with over the contact's current values", () => {
+    const view = buildLeadSubmissionView(
+      submission(
+        {},
+        {
+          submittedName: "Segunda",
+          submittedEmail: "juan@gmail",
+          submittedPhone: "+595981999999",
+          source: "landing",
+        },
+      ),
+      baseContext,
+    );
+    expect(view.contact).toEqual({
+      name: "Segunda",
+      email: "juan@gmail",
+      phone: "+595981999999",
+      fromContact: false,
+    });
+    expect(view.attribution.source).toBe("landing");
+  });
+
+  it("falls back to the contact for a row from before the snapshot", () => {
+    const view = buildLeadSubmissionView(submission({}), baseContext);
+    expect(view.contact).toMatchObject({ name: "Ana", email: "ana@example.com", fromContact: true });
+    expect(view.attribution.source).toBeNull();
+  });
+
+  it("reads needs_review off the row and keeps _original out of the regular rows", () => {
+    const view = buildLeadSubmissionView(
+      submission(
+        {
+          finalidad: "Venta",
+          _original: { message: "m".repeat(6000), ciudad: "c".repeat(20_000) },
+          _original_cut: ["ciudad"],
+        },
+        { needsReview: ["message_truncated", "field_truncated:ciudad"] },
+      ),
+      baseContext,
+    );
+    expect(view.needsReview).toEqual(["message_truncated", "field_truncated:ciudad"]);
+    expect(view.rows.map((row) => row.key)).toEqual(["finalidad"]);
+    expect(view.originals).toEqual([
+      { key: "message", label: "Message", text: "m".repeat(6000), cut: false },
+      { key: "ciudad", label: "Ciudad", text: "c".repeat(20_000), cut: true },
+    ]);
+  });
+
+  it("has nothing to review on a clean row", () => {
+    const view = buildLeadSubmissionView(submission({ finalidad: "Venta" }, { needsReview: null }), baseContext);
+    expect(view.needsReview).toEqual([]);
+    expect(view.originals).toEqual([]);
+  });
+});

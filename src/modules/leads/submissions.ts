@@ -42,6 +42,11 @@ export type RecordLeadInput = {
   name?: string;
   phone: string;
   email?: string;
+  /**
+   * An e-mail the visitor typed that did not validate (§19.3 item 4). Kept on
+   * the submission as typed; never written to the contact.
+   */
+  invalidEmail?: string;
   message?: string;
   source?: string;
   utm?: LeadUtm;
@@ -64,6 +69,8 @@ export type RecordLeadInput = {
   deferOutcome?: boolean;
   /** Raw submitted fields, kept verbatim for the timeline. */
   payload?: Record<string, unknown>;
+  /** Repair codes from the ingest guard (§19.3); null/absent for a clean lead. */
+  needsReview?: string[] | null;
   /** Per-site/form routing defaults, resolved by the caller (never by the client). */
   defaults?: {
     pipelineId?: string | null;
@@ -81,6 +88,9 @@ export type RecordLeadResult = {
   /** True when an existing submission with the same idempotency key was returned. */
   duplicate: boolean;
 };
+
+const clip = (value: string | undefined, max: number) =>
+  value === undefined || value === "" ? null : value.slice(0, max);
 
 export async function recordLeadSubmission(
   ctx: TenantContext,
@@ -164,6 +174,14 @@ export async function recordLeadSubmission(
       userAgent: input.userAgent,
       idempotencyKey: input.idempotencyKey,
       notes: input.message,
+      // The per-submission snapshot (§19.3 item 6), on every entry path.
+      // Clipped to the columns so the snapshot can never be what fails a
+      // lead that would otherwise be stored.
+      submittedName: clip(input.name, 200),
+      submittedEmail: clip(input.email ?? input.invalidEmail, 320),
+      submittedPhone: clip(input.phone, 30),
+      source: clip(input.source, 100),
+      needsReview: input.needsReview?.length ? input.needsReview : null,
     });
 
   if (input.deferOutcome) {
@@ -177,6 +195,7 @@ export async function recordLeadSubmission(
     dealId: dealId ?? undefined,
     type: "form_submission",
     payload: {
+      submissionId,
       siteId: input.siteId,
       formId: input.formId,
       bookingTypeId: input.bookingTypeId,
@@ -247,6 +266,7 @@ export async function finalizeLeadSubmission(
     dealId: dealId ?? undefined,
     type: "form_submission",
     payload: {
+      submissionId,
       siteId: row.siteId,
       formId: row.formId,
       bookingTypeId: row.bookingTypeId,
