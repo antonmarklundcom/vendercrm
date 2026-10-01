@@ -271,6 +271,99 @@ describe.skipIf(!hasDb)("lead ingest + sites isolation", () => {
     expect(outcome).toMatchObject({ ok: false, status: 422 });
   });
 
+  // Accept-and-repair (PLAN.md §19.3): a bad optional value no longer costs
+  // the lead. The pure rules are in ingest-repair.test.ts; this is the row.
+  async function storedSubmission(submissionId: string) {
+    const [row] = await db
+      .select()
+      .from(schema.leadSubmissions)
+      .where(eq(schema.leadSubmissions.id, submissionId));
+    return row;
+  }
+
+  it("accepts the tasacion payload with a bad e-mail, a 6,000-char message, an extra and a secret key", async () => {
+    const message = "m".repeat(6000);
+    const outcome = await ingestLead(
+      keyA,
+      body({
+        name: "Juan Pérez",
+        email: "juan@gmail",
+        message,
+        utm_source: "google",
+        utm_campaign: "tasacion-asuncion",
+        page_url: "https://tasacion.com.py/tasar-casa",
+        prueba_extra: "valor de prueba",
+        api_key: "vc_live_must_not_be_stored",
+        client_secret: "must-not-be-stored",
+        fields: { finalidad: "Venta", ciudad: "Lambaré" },
+      }),
+    );
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    const [contact] = await db
+      .select()
+      .from(schema.contacts)
+      .where(eq(schema.contacts.id, outcome.result.contactId));
+    expect(contact.email).toBeNull();
+
+    const row = await storedSubmission(outcome.result.submissionId);
+    expect(row.submittedEmail).toBe("juan@gmail");
+    expect(row.submittedName).toBe("Juan Pérez");
+    expect(row.submittedPhone).toBe(contact.phone);
+    expect(row.source?.startsWith("site:")).toBe(true);
+    expect([...(row.needsReview ?? [])].sort()).toEqual(["email_invalid", "message_truncated"]);
+    expect(row.notes).toHaveLength(5000);
+
+    // MySQL reorders JSON object keys, so compare key sets, not order.
+    const payload = row.payload as Record<string, unknown>;
+    expect(Object.keys(payload).sort()).toEqual(["_original", "ciudad", "finalidad", "prueba_extra"]);
+    expect((payload._original as Record<string, string>).message).toBe(message);
+    expect(JSON.stringify(payload)).not.toContain("must-not-be-stored");
+  });
+
+  it("stores the snapshot on a clean lead and leaves needs_review null", async () => {
+    const outcome = await ingestLead(
+      keyA,
+      body({ name: "Cliente Limpio", email: "limpio@example.com", source: "landing" }),
+    );
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    const row = await storedSubmission(outcome.result.submissionId);
+    expect(row.needsReview).toBeNull();
+    expect(row.submittedName).toBe("Cliente Limpio");
+    expect(row.submittedEmail).toBe("limpio@example.com");
+    expect(row.source).toBe("landing");
+    expect(row.payload).toEqual({});
+  });
+
+  it("keeps a returning contact's second name and e-mail on its own submission", async () => {
+    const phone = `0981${Math.floor(100000 + Math.random() * 899999)}`;
+    const first = await ingestLead(keyA, body({ phone, name: "Primera", email: "primera@example.com" }));
+    const second = await ingestLead(keyA, body({ phone, name: "Segunda", email: "segunda@example.com" }));
+    expect(first.ok && second.ok).toBe(true);
+    if (!first.ok || !second.ok) return;
+    expect(second.result.contactId).toBe(first.result.contactId);
+
+    const [contact] = await db
+      .select()
+      .from(schema.contacts)
+      .where(eq(schema.contacts.id, first.result.contactId));
+    expect(contact.email).toBe("primera@example.com");
+
+    const row = await storedSubmission(second.result.submissionId);
+    expect(row.submittedName).toBe("Segunda");
+    expect(row.submittedEmail).toBe("segunda@example.com");
+  });
+
+  it("still refuses an invalid phone, a short idempotency key and an oversized body", async () => {
+    expect(await ingestLead(keyA, body({ phone: "1".repeat(31) }))).toMatchObject({ ok: false, status: 422 });
+    expect(await ingestLead(keyA, body({ idempotency_key: "short" }))).toMatchObject({ ok: false, status: 422 });
+    expect(
+      await ingestLead(keyA, body({ fields: { blob: "x".repeat(300 * 1024) } })),
+    ).toMatchObject({ ok: false, status: 422, error: "Payload too large" });
+  });
+
   // Per-site ingest health (PLAN.md §5.2) on the keyed lane. The failure it
   // is built for is exactly this one: the site's handler starts posting a
   // broken body, the CRM answers 422, and nothing in the pipeline says so.

@@ -37,12 +37,17 @@ export type LeadSubmissionView = {
     fromContact: boolean;
   };
   message: string | null;
+  /**
+   * Untruncated originals of values the ingest guard cut (§19.3 item 3b),
+   * from `payload._original`. Shown only in the "Revisar" detail, never as
+   * regular rows. `cut` marks an original that was itself over the cap.
+   */
+  originals: Array<{ key: string; label: string; text: string; cut: boolean }>;
   /** The message follows the same label/prominence settings as any field. */
   messageLabel: string | null;
   messageProminent: boolean;
   rows: LeadViewRow[];
   attribution: {
-    /** Not stored on the submission yet; null until the ingest snapshot lands. */
     source: string | null;
     utmSource: string | null;
     utmMedium: string | null;
@@ -67,6 +72,13 @@ export type LeadSubmissionSource = {
   pageUrl: string | null;
   referrer: string | null;
   dealId: string | null;
+  // The per-submission snapshot (§19.3). Optional and nullable: rows from
+  // before it existed have none, and the view falls back to the contact.
+  submittedName?: string | null;
+  submittedEmail?: string | null;
+  submittedPhone?: string | null;
+  source?: string | null;
+  needsReview?: unknown;
 };
 
 /** `sites.settings.fieldLabels` / `fieldDisplay` (§19.2) — owner-editable. */
@@ -90,6 +102,9 @@ export const MAX_FIELD_LABEL_LENGTH = 80;
 
 /** Never customer data, whatever a site or a form forwards. */
 const DENY_KEYS = new Set(["turnstile_token", "cf-turnstile-response", "_hp"]);
+/** The ingest guard's own metadata (§19.3), shown only in the review detail. */
+const ORIGINAL_KEY = "_original";
+const ORIGINAL_CUT_KEY = "_original_cut";
 
 const hasOwn = (record: object, key: string) =>
   Object.prototype.hasOwnProperty.call(record, key);
@@ -193,16 +208,19 @@ export function buildLeadSubmissionView(
   // Hosted forms keep name/phone/email (and the message) inside the payload;
   // a key that fills a dedicated slot is not repeated as a row. A value that
   // is not a usable string stays a row — nothing is hidden twice or for good.
-  const ownName = nonEmptyString(payload.name);
-  const ownPhone = nonEmptyString(payload.phone);
-  const ownEmail = nonEmptyString(payload.email);
+  // The submission's own snapshot wins; hosted-form payload keys come next.
+  const ownName = nonEmptyString(submission.submittedName) ?? nonEmptyString(payload.name);
+  const ownPhone = nonEmptyString(submission.submittedPhone) ?? nonEmptyString(payload.phone);
+  const ownEmail = nonEmptyString(submission.submittedEmail) ?? nonEmptyString(payload.email);
   const notes = nonEmptyString(submission.notes);
   const payloadMessage = nonEmptyString(payload.message);
   const message = notes ?? payloadMessage;
   const slotKeys = new Set<string>();
-  if (ownName) slotKeys.add("name");
-  if (ownPhone) slotKeys.add("phone");
-  if (ownEmail) slotKeys.add("email");
+  if (nonEmptyString(payload.name)) slotKeys.add("name");
+  if (nonEmptyString(payload.phone)) slotKeys.add("phone");
+  if (nonEmptyString(payload.email)) slotKeys.add("email");
+  slotKeys.add(ORIGINAL_KEY);
+  slotKeys.add(ORIGINAL_CUT_KEY);
   if (payloadMessage && (!notes || notes === payloadMessage)) slotKeys.add("message");
 
   const rows: LeadViewRow[] = Object.entries(payload)
@@ -223,10 +241,27 @@ export function buildLeadSubmissionView(
 
   const text = (value: unknown) => nonEmptyString(value);
 
+  const originalCut = Array.isArray(payload[ORIGINAL_CUT_KEY])
+    ? (payload[ORIGINAL_CUT_KEY] as unknown[]).filter((key) => typeof key === "string")
+    : [];
+  const originals = isRecord(payload[ORIGINAL_KEY])
+    ? Object.entries(payload[ORIGINAL_KEY])
+        .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+        .map(([key, value]) => ({
+          key,
+          label: resolveFieldLabel(key, labelSources),
+          text: value,
+          cut: originalCut.includes(key),
+        }))
+    : [];
+  const storedReview = Array.isArray(submission.needsReview)
+    ? submission.needsReview.filter((code): code is string => typeof code === "string")
+    : [];
+
   return {
     id: submission.id,
     receivedAt: submission.createdAt,
-    needsReview: context.needsReview ?? [],
+    needsReview: storedReview.length > 0 ? storedReview : (context.needsReview ?? []),
     origin: context.origin,
     contact: {
       name,
@@ -235,11 +270,12 @@ export function buildLeadSubmissionView(
       fromContact: !ownName || !ownPhone || !ownEmail,
     },
     message,
+    originals,
     messageLabel: cleanLabel(lookup(context.siteSettings?.fieldLabels, "message")),
     messageProminent: isProminent("message", context.siteSettings),
     rows: ordered,
     attribution: {
-      source: null,
+      source: text(submission.source),
       utmSource: text(utm.source),
       utmMedium: text(utm.medium),
       utmCampaign: text(utm.campaign),

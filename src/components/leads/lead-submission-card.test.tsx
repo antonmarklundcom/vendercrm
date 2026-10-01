@@ -150,6 +150,22 @@ describe("LeadSubmissionCard", () => {
     expect(flagged).toContain("email_invalid");
   });
 
+  it("shows a repaired lead's raw e-mail and its untruncated original, escaped", () => {
+    const original = `<b>mensaje completo</b> ${"m".repeat(700)}`;
+    const view = viewOf(TASACION.fields, {
+      submittedEmail: "juan@gmail",
+      needsReview: ["email_invalid", "message_truncated"],
+    });
+    const html = render({
+      ...view,
+      originals: [{ key: "message", label: "Message", text: original, cut: false }],
+    });
+    expect(html).toContain(labels.review);
+    expect(html).toContain("juan@gmail");
+    expect(html).toContain(escapeHtml(original));
+    expect(html).not.toContain("<b>mensaje completo</b>");
+  });
+
   it("never uses raw HTML injection", () => {
     const source = readFileSync(
       new URL("./lead-submission-card.tsx", import.meta.url),
