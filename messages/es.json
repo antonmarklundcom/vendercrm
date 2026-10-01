@@ -1870,6 +1870,25 @@
         "nombre": "Nombre",
         "mensaje": "Mensaje",
         "comentario": "Comentario"
+      },
+      "labelEditor": {
+        "title": "Campos del formulario",
+        "intro": "Poné nombre a los campos que envía este sitio y marcá cuáles destacar: se muestran grandes arriba en los datos de cada negocio, también en los anteriores.",
+        "empty": "Este sitio todavía no envió ningún campo.",
+        "key": "Campo",
+        "label": "Nombre a mostrar",
+        "prominent": "Destacar",
+        "save": "Guardar campos",
+        "saved": "Listo, los campos quedaron guardados.",
+        "messageKey": "mensaje del formulario",
+        "errors": {
+          "unknown": "No se pudo guardar. Intentá de nuevo.",
+          "labelTooLong": "Cada nombre puede tener hasta 80 caracteres.",
+          "keyInvalid": "Hay un campo con un nombre no válido.",
+          "keyUnknown": "Hay un campo que este sitio nunca envió.",
+          "tooMany": "Hay demasiados campos.",
+          "siteNotFound": "No se encontró el sitio."
+        }
       }
     },
     "stages": {

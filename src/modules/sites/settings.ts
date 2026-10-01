@@ -49,6 +49,10 @@ export type SiteSettings = {
     email?: string;
     message?: string;
   };
+  /** Owner-editable labels for the keys a site sends, key -> label (§19.2). */
+  fieldLabels?: Record<string, string>;
+  /** Fields shown large at the top of the lead card, key -> flags (§19.2). */
+  fieldDisplay?: Record<string, { prominent?: boolean }>;
 };
 
 export function siteSettings(site: { settings: unknown }): SiteSettings {
