@@ -126,7 +126,7 @@ describe("DealsTable / ContactsTable", () => {
     expect(out).toContain("/deals/01HZZZZZZZZZZZZZZZZZZZZZZD");
   });
 
-  it("renders a contact row without an open link", () => {
+  it("renders a contact row with an open link to its detail", () => {
     const contact: PlatformContactRow = {
       id: "c1",
       tenantId: "01HZZZZZZZZZZZZZZZZZZZZZZA",
@@ -145,11 +145,61 @@ describe("DealsTable / ContactsTable", () => {
     expect(out).toContain("María Benítez");
     expect(out).toContain("Prueba");
     expect(out).not.toContain("/deals/");
+    expect(out).toContain('href="/platform-leads/01HZZZZZZZZZZZZZZZZZZZZZZA/contacts/c1"');
+  });
+
+  it("escapes a contact's name and account", () => {
+    const out = renderToStaticMarkup(
+      createElement(ContactsTable, {
+        rows: [
+          {
+            id: "c1",
+            tenantId: "01HZZZZZZZZZZZZZZZZZZZZZZA",
+            tenantName: "<script>x</script>",
+            tenantStatus: "active",
+            createdAt: new Date("2026-09-30T15:00:00Z"),
+            name: "<img src=x onerror=alert(1)>",
+            phone: "1",
+            email: null,
+            source: null,
+            firstSiteName: null,
+            firstSiteDomain: null,
+            openDeals: 0,
+          },
+        ],
+        labels,
+        locale: "es",
+      }),
+    );
+    expect(out).not.toContain("<img src=x");
+    expect(out).not.toContain("<script>");
+  });
+});
+
+describe("phone layout (cards below md)", () => {
+  it("stacks every row as a card on phones and keeps the table from md up", () => {
+    const out = html([lead({ needsReview: ["email_invalid"] })]);
+    expect(out).toMatch(/<table class="block [^"]*md:table /);
+    expect(out).toContain('<thead class="hidden md:table-header-group">');
+    expect(out).toMatch(/<tr class="block [^"]*md:table-row /);
+    // The Revisar badge and the open link stay on the card.
+    expect(out).toContain(">Revisar<");
+    expect(out).toMatch(/<td class="block [^"]*md:table-cell[^"]*"><a [^>]*href="\/platform-leads\/[^"]*\/deals\//);
+    // Wide cells fall away on phones instead of scrolling the page.
+    expect(out).toContain("hidden md:table-cell");
+  });
+
+  it("has no fixed minimum width below md", () => {
+    for (const tag of [LeadsTable, DealsTable, ContactsTable]) {
+      const out = renderToStaticMarkup(createElement(tag as never, { rows: [], labels, locale: "es" } as never));
+      expect(out).not.toMatch(/[ "]min-w-\[/);
+      expect(out).toContain("md:min-w-[");
+    }
   });
 });
 
 describe("source hygiene", () => {
-  it.each(["platform-leads-tables.tsx", "page.tsx", "[tenantId]/deals/[dealId]/page.tsx"])(
+  it.each(["platform-leads-tables.tsx", "page.tsx", "[tenantId]/deals/[dealId]/page.tsx", "[tenantId]/contacts/[contactId]/page.tsx"])(
     "%s has no raw-HTML escape hatch",
     (file) => {
       const source = readFileSync(new URL(`./${file}`, import.meta.url), "utf8");

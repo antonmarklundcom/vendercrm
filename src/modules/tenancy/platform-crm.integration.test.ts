@@ -213,6 +213,72 @@ describe.skipIf(!hasDb)("platform CRM reader (MySQL integration)", () => {
     await db.delete(schema.deals).where(eq(schema.deals.id, forgedDealId));
   });
 
+  it("reads one contact with its deals and form data; a mismatched (account, contact) pair is null", async () => {
+    const detail = await reader.getPlatformContact(sa, tenantAId, leadA.contactId);
+    expect(detail).toMatchObject({
+      id: leadA.contactId,
+      tenantId: tenantAId,
+      tenantName: "Tasación A",
+      openDeals: 1,
+    });
+    expect(detail!.deals.map((deal) => deal.id)).toEqual([leadA.dealId]);
+    expect(detail!.leads).toHaveLength(1);
+    expect(detail!.leads[0].rows.map((row) => row.key).sort()).toEqual(["ciudad", "finalidad"]);
+
+    // A contact of A asked through B's id is the same null as an id that does not exist.
+    expect(await reader.getPlatformContact(sa, tenantBId, leadA.contactId)).toBeNull();
+    expect(await reader.getPlatformContact(sa, tenantAId, leadB.contactId)).toBeNull();
+    expect(await reader.getPlatformContact(sa, tenantAId, "0".repeat(26))).toBeNull();
+    expect(await reader.getPlatformContact(sa, "not-an-id", leadA.contactId)).toBeNull();
+  });
+
+  it("never joins another account's rows to a contact through a forged foreign key", async () => {
+    const { newId } = await import("@/lib/ids");
+    const forgedDealId = newId();
+    const forgedSubmissionId = newId();
+    const [deal] = await db.select().from(schema.deals).where(eq(schema.deals.id, leadB.dealId));
+    const [submission] = await db
+      .select()
+      .from(schema.leadSubmissions)
+      .where(eq(schema.leadSubmissions.id, leadB.submissionId));
+    // Rows of B (tenant_id = B) that point at A's contact.
+    await db.insert(schema.deals).values({ ...deal, id: forgedDealId, title: `${runTag} forged`, contactId: leadA.contactId });
+    await db.insert(schema.leadSubmissions).values({
+      ...submission,
+      id: forgedSubmissionId,
+      contactId: leadA.contactId,
+      idempotencyKey: `idem-${newId()}`,
+    });
+
+    const forA = await reader.getPlatformContact(sa, tenantAId, leadA.contactId);
+    expect(forA!.deals.map((d) => d.id)).toEqual([leadA.dealId]);
+    expect(forA!.leads.map((view) => view.id)).toEqual([leadA.submissionId]);
+    // Asked as B, the contact is not B's: nothing joins.
+    expect(await reader.getPlatformContact(sa, tenantBId, leadA.contactId)).toBeNull();
+
+    await db.delete(schema.leadSubmissions).where(eq(schema.leadSubmissions.id, forgedSubmissionId));
+    await db.delete(schema.deals).where(eq(schema.deals.id, forgedDealId));
+  });
+
+  it("writes exactly one audit row per contact view, with no row data", async () => {
+    const before = new Set((await auditRows("platform.contact.viewed")).map((row) => row.id));
+    await reader.getPlatformContact(sa, tenantAId, leadA.contactId);
+    const after = await auditRows("platform.contact.viewed");
+    const fresh = after.filter((row) => !before.has(row.id));
+    expect(fresh).toHaveLength(1);
+    expect(fresh[0]).toMatchObject({ tenantId: tenantAId, entity: "contact", entityId: leadA.contactId });
+    const stored = JSON.stringify(fresh[0].payload);
+    for (const rowData of ["juan@gmail", "Lambaré", "Quiero tasar", phoneA.slice(1), runTag]) {
+      expect(stored).not.toContain(rowData);
+    }
+
+    // A miss is also one row, attributed to no account.
+    await reader.getPlatformContact(sa, tenantBId, leadA.contactId);
+    const afterMiss = await auditRows("platform.contact.viewed");
+    expect(afterMiss).toHaveLength(after.length + 1);
+    expect(afterMiss.find((row) => !after.some((r) => r.id === row.id))!.tenantId).toBeNull();
+  });
+
   it("refuses a caller who is not a superadmin, before reading or auditing", async () => {
     const before = await db
       .select()
@@ -223,6 +289,9 @@ describe.skipIf(!hasDb)("platform CRM reader (MySQL integration)", () => {
     await expect(reader.listPlatformDeals(notSuperadmin, both())).rejects.toThrow("Superadmin required");
     await expect(reader.listPlatformContacts(notSuperadmin, both())).rejects.toThrow("Superadmin required");
     await expect(reader.getPlatformDeal(notSuperadmin, tenantAId, leadA.dealId)).rejects.toThrow(
+      "Superadmin required",
+    );
+    await expect(reader.getPlatformContact(notSuperadmin, tenantAId, leadA.contactId)).rejects.toThrow(
       "Superadmin required",
     );
     // A context whose user does not exist, and one claiming impersonation.
