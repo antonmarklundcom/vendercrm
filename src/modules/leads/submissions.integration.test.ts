@@ -84,8 +84,10 @@ describe.skipIf(!hasDb)("lead submissions reads (MySQL integration)", () => {
       { finalidad: "Finalidad" },
     );
     expect(view.origin).toMatchObject({ kind: "site", name: "Tasación", domain: "tasacion.com.py" });
-    expect(view.rows.map((row) => row.key)).toEqual(["finalidad", "ciudad", "campo_extra"]);
-    expect(view.rows[2].label).toBe("Campo extra");
+    // MySQL JSON columns do not keep key order (shorter keys come back first),
+    // so assert on the set of keys, not their position.
+    expect(view.rows.map((row) => row.key).sort()).toEqual(["campo_extra", "ciudad", "finalidad"]);
+    expect(view.rows.find((row) => row.key === "campo_extra")?.label).toBe("Campo extra");
     expect(view.attribution.utmCampaign).toBe("tasacion-asuncion");
   });
 
