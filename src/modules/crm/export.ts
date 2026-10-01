@@ -9,6 +9,7 @@ import { listCustomFieldDefinitions } from "./custom-fields";
 import { listTenantUsers } from "@/modules/tenancy/users";
 import { tenantDb } from "@/modules/tenancy/db";
 import { contactTags } from "@/db/schema";
+import { buildCsv, CSV_BOM } from "@/lib/csv";
 
 // Contact export (CSV). Two consumers, one row shape: the download button in
 // /contacts, and the tokened feed Google Sheets pulls with IMPORTDATA.
@@ -25,31 +26,17 @@ export const CONTACT_EXPORT_COLUMNS = [
 ] as const;
 
 /**
- * Neutralizes spreadsheet formula injection. A cell beginning with `=`, `+`,
- * `-` or `@` is executed as a formula by Sheets and Excel, which is both a
- * security problem (a contact named `=IMPORTXML(...)` exfiltrates data when
- * an admin opens the file) and, here, a correctness one: **every Paraguayan
- * phone is E.164**, so `+595981234567` would otherwise be evaluated as the
- * number 595981234567 and lose its formatting. The leading apostrophe is the
- * standard "treat as text" marker — Sheets hides it, Excel shows it.
+ * CSV body for the three export routes (contacts, products, reports), built
+ * with the shared lib/csv.ts builder so formula-injection neutralization
+ * (including E.164 phones, which would otherwise be evaluated as numbers),
+ * RFC 4180 quoting and CRLF rows are defined in one place.
+ *
+ * The shared builder prefixes a UTF-8 BOM; it is stripped here because each
+ * route adds the BOM itself (the contacts feed for Sheets' IMPORTDATA
+ * deliberately has none).
  */
-function neutralize(value: string): string {
-  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-}
-
-function escapeCell(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  const raw = value instanceof Date ? value.toISOString() : String(value);
-  const safe = neutralize(raw);
-  // Quote whenever the value could otherwise break the row apart.
-  return /[",\r\n]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
-}
-
-export function toCsv(headers: readonly string[], rows: readonly unknown[][]): string {
-  return [headers, ...rows]
-    .map((row) => row.map(escapeCell).join(","))
-    // CRLF per RFC 4180 — what Excel expects; Sheets accepts either.
-    .join("\r\n");
+export function toCsv(headers: readonly string[], rows: readonly (readonly unknown[])[]): string {
+  return buildCsv(headers, rows).slice(CSV_BOM.length);
 }
 
 /**
