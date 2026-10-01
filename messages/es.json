@@ -2417,7 +2417,8 @@
       "audit": "Auditoría",
       "users": "Usuarios",
       "overview": "Panel",
-      "sites": "Sitios"
+      "sites": "Sitios",
+      "leads": "Leads"
     },
     "ops": {
       "title": "Claude Ops",
@@ -3019,6 +3020,111 @@
         "ok": "Funcionando",
         "failing": "Con errores",
         "idle": "Sin actividad"
+      }
+    },
+    "platformLeads": {
+      "title": "Leads y negocios de todas las cuentas",
+      "intro": "Todos los leads, negocios y contactos de todas las empresas en una sola lista. Solo lectura: para actuar sobre un negocio, abrilo en su cuenta.",
+      "tabs": {
+        "leads": "Leads",
+        "deals": "Negocios",
+        "contacts": "Contactos"
+      },
+      "filters": {
+        "account": "Cuentas",
+        "accountHint": "Mantené Ctrl o ⌘ para elegir varias. Vacío significa todas.",
+        "period": "Período",
+        "days": "{days, plural, one {Último día} other {Últimos # días}}",
+        "from": "Desde",
+        "to": "Hasta",
+        "customHint": "Un rango personalizado (ambas fechas) reemplaza al período.",
+        "status": "Estado",
+        "anyStatus": "Cualquiera",
+        "open": "Abierto",
+        "won": "Ganado",
+        "lost": "Perdido",
+        "source": "Origen",
+        "anySource": "Cualquier origen",
+        "form": "Formulario alojado",
+        "booking": "Reserva",
+        "chat": "Chat",
+        "utm": "UTM source",
+        "search": "Buscar",
+        "searchPlaceholder": "Nombre, teléfono o e-mail (3+ caracteres)",
+        "apply": "Aplicar",
+        "clear": "Quitar filtros"
+      },
+      "columns": {
+        "received": "Recibido",
+        "account": "Cuenta",
+        "origin": "Sitio / formulario",
+        "name": "Nombre",
+        "phone": "Teléfono",
+        "email": "E-mail",
+        "message": "Mensaje",
+        "fields": "Campos",
+        "utm": "UTM",
+        "stage": "Etapa",
+        "open": "Abrir",
+        "created": "Creado",
+        "title": "Negocio",
+        "contact": "Contacto",
+        "pipeline": "Embudo",
+        "status": "Estado",
+        "value": "Valor",
+        "owner": "Responsable",
+        "source": "Origen",
+        "lastStageChange": "Último cambio de etapa",
+        "firstSite": "Primer sitio",
+        "openDeals": "Negocios abiertos"
+      },
+      "review": "Revisar",
+      "reviewTitle": "Reparado al recibirlo: {codes}",
+      "accountStatus": {
+        "active": "Activa",
+        "trial": "Prueba",
+        "suspended": "Suspendida"
+      },
+      "dealStatus": {
+        "open": "Abierto",
+        "won": "Ganado",
+        "lost": "Perdido"
+      },
+      "origin": {
+        "form": "Formulario",
+        "booking": "Reserva",
+        "chat": "Chat"
+      },
+      "results": "{total, plural, one {# resultado} other {# resultados}}",
+      "pageOf": "Página {page} de {pages}",
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "emptyTitle": "Nada coincide",
+      "emptyBody": "No hay registros en este período con estos filtros. Ampliá el período o quitá algún filtro.",
+      "openRow": "Abrir →",
+      "unassigned": "—",
+      "detail": {
+        "back": "Volver a la lista",
+        "openInAccount": "Abrir en la cuenta",
+        "openInAccountHint": "Te lleva a la empresa para actuar sobre este negocio (queda auditado).",
+        "openError": "No se pudo abrir la cuenta: no tiene un administrador activo para ver como, o no se pudo cambiar la sesión.",
+        "readOnly": "Vista de solo lectura entre cuentas.",
+        "facts": {
+          "account": "Cuenta",
+          "contact": "Contacto",
+          "phone": "Teléfono",
+          "email": "E-mail",
+          "pipeline": "Embudo",
+          "stage": "Etapa",
+          "status": "Estado",
+          "value": "Valor",
+          "owner": "Responsable",
+          "created": "Creado",
+          "closed": "Cerrado",
+          "lastStageChange": "Último cambio de etapa"
+        },
+        "leads": "Datos del formulario",
+        "noLeads": "Este negocio no vino de un formulario."
       }
     }
   },
