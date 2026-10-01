@@ -98,6 +98,8 @@ export const contacts = mysqlTable(
     uniqueIndex("contacts_tenant_phone_idx").on(table.tenantId, table.phone),
     index("contacts_tenant_owner_idx").on(table.tenantId, table.ownerUserId),
     index("contacts_tenant_company_idx").on(table.tenantId, table.companyId),
+    // Date-bounded cross-account listing (PLAN.md §19.4).
+    index("contacts_created_at_idx").on(table.createdAt),
   ],
 );
 
@@ -214,6 +216,8 @@ export const deals = mysqlTable(
     index("deals_tenant_stage_idx").on(table.tenantId, table.stageId),
     index("deals_tenant_contact_idx").on(table.tenantId, table.contactId),
     index("deals_tenant_assigned_idx").on(table.tenantId, table.assignedUserId),
+    // Date-bounded cross-account listing (PLAN.md §19.4).
+    index("deals_created_at_idx").on(table.createdAt),
   ],
 );
 

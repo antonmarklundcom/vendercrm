@@ -255,6 +255,8 @@ export const leadSubmissions = mysqlTable(
     index("lead_submissions_form_id_idx").on(table.formId),
     index("lead_submissions_booking_type_id_idx").on(table.bookingTypeId),
     index("lead_submissions_contact_id_idx").on(table.contactId),
+    // Date-bounded cross-account listing (PLAN.md §19.4).
+    index("lead_submissions_created_at_idx").on(table.createdAt),
     // The idempotency guard (§5.1) — a retried POST is a no-op rather than a
     // duplicate contact, same discipline as wa_message_id in §6.3.
     uniqueIndex("lead_submissions_idempotency_idx").on(
